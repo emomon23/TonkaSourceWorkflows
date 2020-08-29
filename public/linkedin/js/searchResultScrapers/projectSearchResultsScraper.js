@@ -11,7 +11,7 @@
    
     }
 
-    class SearchResultsScraper {
+    class ProjectSearchResultsScraper {
         constructor(){}
 
         scrapeResults = _scrapeResults;
@@ -19,6 +19,6 @@
         scrapeCandidate = _scrapeCandidate;
     }
 
-    window.__ts_projectSearchResultsScraper = new SearchResultsScraper();
+    window.__ts_projectSearchResultsScraper = new ProjectSearchResultsScraper();
 })();
 
