@@ -38,9 +38,10 @@ class SendLinkedInMessages {
     sendMessages = () => {
         const connectionMessage = $('#connectionMessage').val();
         const linkedInMessage = $('#linkedInMessage').val();
+        const subject = $('#txtSubject').val();
 
         const memberIds = this.selectedCandidates.map(c => c.memberId);
-        alisonHook.callBackToLinkedIn('sendMessageToCandidates', {connectionMessage, linkedInMessage, memberIds});
+        alisonHook.callBackToLinkedIn('sendMessageToCandidates', {connectionMessage, linkedInMessage, subject,  memberIds});
     }
 }
 

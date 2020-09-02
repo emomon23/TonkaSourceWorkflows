@@ -11,7 +11,7 @@
     }
 
     const _sendMessagesToLinkedInCandidates = (data) => {
-        const {memberIds} = data;
+        const {memberIds, subject} = data;
 
         let goToSleep = true;
 
@@ -27,7 +27,8 @@
                 const candidate = searchResultsScraper.scrapedCandidates[memberIds[i]].candidate;
 
                 const messageToSend = _getMessageToSend(candidate, data);
-                console.log(`sending ${candidate.fullName}, message: ${messageToSend}`);
+        
+                console.log(`sending ${candidate.fullName}, message: ${messageToSend}.  (subject: ${subject})`);
             }
         }
     }
