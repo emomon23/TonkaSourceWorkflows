@@ -34,7 +34,17 @@ class SendLinkedInMessages {
             this.removeCandidate(candidate);
         }
     }
+
+    sendMessages = () => {
+        const connectionMessage = $('#connectionMessage').val();
+        const linkedInMessage = $('#linkedInMessage').val();
+
+        const memberIds = this.selectedCandidates.map(c => c.memberId);
+        alisonHook.callBackToLinkedIn('sendMessageToCandidates', {connectionMessage, linkedInMessage, memberIds});
+    }
 }
 
-alisonHook.activeTemplate = new SendLinkedInMessages();
+const sendLinkedInMessages = new SendLinkedInMessages();
+alisonHook.activeTemplate = sendLinkedInMessages;
 
+$('#sendMessage').click(sendLinkedInMessages.sendMessages);

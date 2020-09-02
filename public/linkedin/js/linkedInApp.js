@@ -2,10 +2,6 @@
     //These are High Level 'Commands' that the app supports
     //that the alisonHook UI (or user) can call.
 
-    const _sendMessageToCandidates = (data) => {
-        console.log(data);
-    }
-
     const _changeBadgeColor = (memberId, color) => {
         try {     
             const query = `#search-result-${memberId} abbr`;
@@ -22,7 +18,7 @@
     }
 
     class LinkedInApp {
-        sendMessageToCandidates = _sendMessageToCandidates;
+        sendMessageToCandidates = linkedInMessageSender.sendMessagesToLinkedInCandidates;
         candidateUnselect = _candidateUnselect;
         changeBadgeColor = _changeBadgeColor;
         user = "";

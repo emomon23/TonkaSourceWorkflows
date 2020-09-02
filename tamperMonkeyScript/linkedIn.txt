@@ -1,23 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  try to take over the world!
-// @author       You
-// @domain       linkedin.com
-// @domain       www.linkedin.com
-// @include      http://linkedin.com/authwall*
-// @include      http://www.linkedin.com/authwall*
-// @include      https://linkedin.com/authwall*
-// @include      https://www.linkedin.com/authwall*
-// @include      http://linkedin.com/in/*
-// @include      http://www.linkedin.com/in/*
-// @include      https://linkedin.com/in/*
-// @include      https://www.linkedin.com/in/*
-// ==UserScript==
-// @name         LinkedIN Recruiter Parser
-// @namespace    http://tampermonkey.net/
-// @version      0.79
+// @version      0.80
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -32,6 +16,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/projectSearchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultScraperFactory.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSender.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
 // @grant        none
 
