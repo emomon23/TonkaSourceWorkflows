@@ -1,102 +1,97 @@
 (function() {
-    const _scrapeResults = async (confirmEach = false) => {
-        candidates = [];
-        var names = '';
-        var keepScraping = false;
-        var confirmed = true;
-
-        do {
-            tsCommon.log("scraping current page, stand by...");
-
-            const contactsOnThisPage = _scrapeCurrentPageCandidateResults(candidates);
-
-            if (confirmEach === true){
-                for (var i=0; i<candidates.length; i++){
-                    confirmed =  candidates[i].confirm();
-                    if (!confirmed){
-                        break;
-                    }
-                }
-
-                if (!confirmed){
-                    break;
-                }
-            }
-
-            tsCommon.log("current page scraped. " + contactsOnThisPage + " contacts on this single page: ");
-            if (contactsOnThisPage > 24) {
-                await tsCommon.randomSleep(5000, 20000);
-            }
-
-            keepScraping = linkedInCommon.advanceToNextLinkedInResultPage();
-            if (keepScraping){
-                //Wait for it to load
-                await tsCommon.sleep(5000);
-            }
-            else {
-                tsCommon.log("done scraping candidates from linked in." + candidates.length + " contacts scraped in all");
-            }
-        }
-        while(keepScraping)
-
-        return candidates;
-    }
-
-    const _scrapeCurrentPageCandidateResults = (candidates) => {
-        const liResultTags = $("li[class*='search-result']").toArray();
-        tsCommon.extendWebElements(liResultTags);
-
-        liResultTags.forEach((liTag) => {
-            const profileLink = liTag.mineElementWhereClassContains('profile-link');
-            const newContact = _scrapeCandidate(profileLink.text);
-            newContact.id = $(liTag).attr('id').replace('search-result-', '');
-
-            candidates.push(newContact);
-        });
-
-        return liResultTags.length;
-    }
-
-    const _scrapeCandidate = (fullName, confirmWhenDone = false) => {
-        const liTag = $("li[class*='search-result']:contains('" + fullName + "')")[0];
+    const _scrapeCandidateHtml = (candidate) => {
+        //Get data from HTML, not found in JSON.
+        const liTag = $(`#search-result-${candidate.memberId}`);
         tsCommon.extendWebElement(liTag);
 
         const profileLink = liTag.mineElementWhereClassContains('profile-link');
-        const newContact = linkedInContactFactory.newLinkedInContact(profileLink.text);
-
-        newContact.linkedInRecruiterUrl = $(profileLink).attr("href");
-
-        const locationTag = liTag.mineElementWhereClassContains("location");
-        newContact.setLocation($(locationTag).text());
+        candidate.linkedInRecruiterUrl = $(profileLink).attr("href");
 
         const imageTag = liTag.mineTag('img');
-        newContact.imageUrl = imageTag? $(imageTag).attr('src') : '';
+        candidate.imageUrl = imageTag? $(imageTag).attr('src') : '';
+ 
+        const cityState = candidate.location? candidate.location.split(',') : [""];
+        candidate.city = cityState[0];
+        candidate.state = cityState.length > 1? cityState[1].trim() : "";
 
-        const is1stDegree = liTag.containsText('is your connection');
-        const is2ndDegree = liTag.containsText('2nd degree connection');
-        newContact.networkConnection = is1stDegree? 1 : is2ndDegree? 2 : 3;
-
-        const olTag = liTag.mineTag("ol");
-        const firstPositionTag = olTag.mineTag("li");
-        const rawPosition = $(firstPositionTag).text();
-
-        newContact.setCurrentPosition(rawPosition);
-
-        if (confirmWhenDone){
-            newContact.confirm();
+        if (candidate.degree){
+            candidate.networkConnection = candidate.degree.replace('FIRST_DEGREE', '1').replace('SECOND_DEGREE', '2').replace('THIRD_DEGREE', 3);
+            if ('123'.indexOf(candidate.networkConnection) == -1){
+                candidate.networkConnection = '4';
+            }
         }
+    }
 
-        return newContact;
+    const _waitForResultsHTMLToRender = async (lastCandidate) => {
+        const lastCandidateId = `#search-result-${lastCandidate.memberId}`;
+        let liTag = $(lastCandidateId);
+        let count = 0;
+
+        while(count < 50 && (!liTag || !$(liTag).attr('id'))){
+            await tsCommon.sleep(100);
+            liTag = $(lastCandidateId);
+        }
+    }
+
+    const _interceptSearchResults = async (responseObj) => {
+        const interceptedResults = JSON.parse(responseObj.responseText);
+        const candidatesInResults = interceptedResults.result.searchResults;
+
+        if (candidatesInResults && candidatesInResults.length > 0){
+            await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length -1]);
+
+            candidatesInResults.forEach((candidate) => {
+                _scrapeCandidateHtml(candidate);
+                const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
+                if (existingCachedCandidate === undefined){
+                    searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate, isSelected:false};
+                }
+                else if (existingCachedCandidate.isSelected == true) {
+                    linkedInApp.changeBadgeColor(candidate.memberId, 'red');
+                }
+            });
+
+            $('.badges abbr').bind("click", function(e) {
+                const element = $(e.currentTarget);
+
+                const style = $(element).attr('style') || '';
+                const isRed = style.indexOf('red') > -1;
+                const changeColor = isRed? 'black' : 'red';
+
+                $(element).attr('style', 'color:' + changeColor);
+
+                const candidateMemberId = $('li').has(element).attr('id').replace('search-result-', '')
+                const container = searchResultsScraper.scrapedCandidates[candidateMemberId];
+                
+                if (container != undefined){
+                    const candidate = container.candidate;
+                    container.isSelected = !isRed;
+                    const {memberId, firstName, lastName, location, networkConnection, isJobSeeker} = candidate;
+                    linkedInCommon.callAlisonHookWindow('toggleCandidateSelection', {memberId, firstName, lastName, location, networkConnection, isJobSeeker, isSelected: !isRed});
+                }
+                else {
+                    console.log({msg: 'Unable to find candidate:', helper});
+                }
+
+            });
+        }
     }
 
     class SearchResultsScraper {
+        scrapedCandidates = {};
         constructor(){}
 
-        scrapeResults = _scrapeResults;
-        scrapeCurrentPageCandidateResults = _scrapeCurrentPageCandidateResults;
-        scrapeCandidate = _scrapeCandidate;
+        advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
+        
+        deselectCandidate = (memberId) => {
+            if (this.scrapedCandidates[memberId] != undefined){
+                this.scrapedCandidates[memberId].isSelected = false;
+            }
+        };
+
+        interceptSearchResults = _interceptSearchResults;
     }
 
-    window.__ts_searchResultScraper = new SearchResultsScraper();
+    window.searchResultsScraper = new SearchResultsScraper();
 })();
 

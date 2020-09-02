@@ -50,26 +50,42 @@
             return result;
         }
 
-           webElement.containsText = (searchForText) => {
-               const query = ":contains('" + searchForText + "')";
-               return $(webElement).find(query).length > 0;
-           }
+        webElement.containsTag = (tagName, attributeName, attributeContainsValue) => {
+            const query =`${tagName}[${attributeName}*="${attributeContainsValue}"]`;
+            return $(webElement).find(query).length > 0;
+        }
 
-           webElement.mineTags = (tagName) => {
-               const list = $(webElement).find(tagName);
-               var result = list && list.length > 0? list.toArray() : [];
+        webElement.containsText = (searchForText) => {
+            const query = ":contains('" + searchForText + "')";
+            return $(webElement).find(query).length > 0;
+        }
 
-               _extendWebElements(result);
+        webElement.mineTags = (tagName) => {
+            const list = $(webElement).find(tagName);
+            var result = list && list.length > 0? list.toArray() : [];
 
-               return result;
-           }
+            _extendWebElements(result);
 
-           webElement.mineTag = (tagName) => {
-               const list = webElement.mineTags(tagName);
-               const result = list && list.length > 0? list[0] : null;
+            return result;
+        }
 
-               return result;
-           }
+        webElement.mineTag = (tagName) => {
+            const list = webElement.mineTags(tagName);
+            const result = list && list.length > 0? list[0] : null;
+
+            return result;
+        }
+    }
+
+    const _jsonParse = (data) => {
+        if (data && (typeof data === 'string' || data instanceof String)){
+            try {
+                return JSON.parse(data);
+            }
+            catch {}
+        }
+      
+        return data;
     }
 
     const _setUpPostMessageListener = (container) => {
@@ -77,7 +93,7 @@
             var d = e.data;
     
             const action = d.action;
-            const data = JSON.parse(d.parameter || '{}');
+            const data = _jsonParse(d.parameter);
     
             const fncToCall =  container && container.length? `${container}.${action}` : `${action}`;
             const script = `if (${fncToCall}){ ${fncToCall}(data); }`
@@ -98,17 +114,35 @@
         });
     }
 
+    const _httpGetText = (url) => {
+        return new Promise((resolve, reject) => {
+            $.get(url, function(response) {
+                resolve(response);
+            });
+         });
+    }
+
+    const _httpGetTemplate = async (templateName) => {
+        const url = `https://tonkasourceworkflows.firebaseapp.com/linkedin/alisonHook/templates/${templateName}/${templateName}.html`;
+        const html = await _httpGetText(url);
+
+        return html;
+    }
+
     class TSCommon {
         constructor(){};
 
         log = _log;
         sleep = _sleep;
         httpGetJson = _httpGetJson;
+        httpGetText = _httpGetText;
+        httpGetTemplate = _httpGetTemplate;
         randomSleep = _randomSleep;
         extendWebElements = _extendWebElements;
         extendWebElement = _extendWebElement;
         setUpPostMessageListener = _setUpPostMessageListener;
         postMessageToWindow = _postMessageToWindow;
+        
     }
 
     window.tsCommon = new TSCommon();

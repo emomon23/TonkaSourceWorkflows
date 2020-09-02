@@ -40,29 +40,22 @@
     }
 
     const _scrapeCandidateResults = async() => {
-        const scraper = searchResultScraperFactory.getSearchResultScraper();
-        window.scrapedCandidates = await scraper.scrapeResults();
+        window.scrapedCandidates = await searchResultsScraper.scrapeResults();
+    }
 
-        $('.badges abbr').bind("click", function(e) {
-            const element = $(e.currentTarget);
+    const _changeBadgeColor = (memberId, color) => {
+        try {     
+            const query = `#search-result-${memberId} abbr`;
+            $($(query)[0]).attr('style', `color:${color}`)
+        }
+        catch {}
+    }
 
-            const style = $(element).attr('style') || '';
-            const isRed = style.indexOf('red') > -1;
-            const changeColor = isRed? 'black' : 'red';
-
-            $(element).attr('style', 'color:' + changeColor);
-
-            const helper = linkedInContactFactory.newLinkedInContact($(element).attr('title'));
-            const candidate = candidates.find(c => c.firstName == helper.firstName && c.lastName == helper.lastName);
-
-            if (candidate){
-                linkedInCommon.callAlisonHookWindow('toggleContactSelection', {candidate, isSelected: !isRed});
-            }
-            else {
-                console.log({msg: 'Unable to find candidate:', helper});
-            }
-
-        });
+    const _candidateUnselect = async(data) => {
+        data = typeof data === "string"? JSON.parse(data) : data;
+        const memberId = data.memberId;
+        _changeBadgeColor(memberId, 'black');
+        searchResultsScraper.deselectCandidate(memberId);
     }
 
     class LinkedInApp {
@@ -70,6 +63,9 @@
         candidatesMarshallToAlisonUIRequested = _candidatesMarshallToAlisonUIRequested;
         getCandidatePublicProfile = _getCandidatePublicProfile;
         scrapeCandidateResults = _scrapeCandidateResults;
+        candidateUnselect = _candidateUnselect;
+        changeBadgeColor = _changeBadgeColor;
+        user = "";
     }
 
     window.linkedInApp = new LinkedInApp();
@@ -80,10 +76,18 @@
 //should be routed to the linkedInApp object.
 tsCommon.setUpPostMessageListener('linkedInApp');
 
-window.launchTonkaSource = async () => {
+tsInterceptor.interceptResponse('get', '/api/smartsearch?', searchResultsScraper.interceptSearchResults);
+
+window.launchTonkaSource = async (who) => {
+    if (who == undefined){
+        console.log(`WARNING!! launchTonkaSource was called without a 'who' paramter.  I'd like to know if you are Mike or Joe!`);
+    }
+
     const url = 'https://tonkasourceworkflows.firebaseapp.com/linkedin/alisonHook/alisonHook.html';
     window.alisonHookWindow = window.open(url, "Linked In Hack", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=900,height=800,top=5000,left=5000");
 
     await tsCommon.sleep(2000);
     linkedInCommon.callAlisonHookWindow('initialization');
+
+    linkedInApp.user = who;
 }
