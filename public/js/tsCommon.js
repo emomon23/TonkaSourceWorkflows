@@ -129,6 +129,36 @@
         return html;
     }
 
+    const _findAHyperLink = (hrefContains, documentReference = null) => {
+        if (documentReference == null){
+            documentReference = window.document;
+        }
+
+        const result =  documentReference.querySelector(`a[href*='${hrefContains}']`);
+        if (result == undefined || result == null){
+            return null;
+        }
+
+        return result;
+    }
+
+    const _clickAHyperLink = (hrefContains, documentReference = null) => {
+        _findAHyperLink(hrefContains, documentReference).click();
+    }
+
+    const _navigateToHyperLink = (hrefContains, parentWindow = null) => {
+        if (parentWindow == null){
+            parentWindow = window;
+        }
+        const linkRef = _findAHyperLink(hrefContains, parentWindow.document);
+        if (linkRef != null){
+            const href = linkRef.getAttribute('href');
+            parentWindow.location.href = href;
+        }
+    }
+
+   
+
     class TSCommon {
         constructor(){};
 
@@ -142,6 +172,9 @@
         extendWebElement = _extendWebElement;
         setUpPostMessageListener = _setUpPostMessageListener;
         postMessageToWindow = _postMessageToWindow;
+        clickAHyperLink = _clickAHyperLink;
+        navigateToHyperLink = _navigateToHyperLink;
+        findAHyperLink = _findAHyperLink;
         
     }
 

@@ -33,6 +33,38 @@
         }
     }
 
+    const _searchCandidates = (scrapedCandidates, searchFor) => {
+        let candidateReference = null;
+        
+        try {
+            candidateReference = scrapedCandidates[searchFor];
+        }catch {}
+
+        if (candidateReference != undefined && canidateReference != null){
+            return candidateReference.candidate;
+        }
+
+        let firstAndLastName = searchFor.split(' ');
+        if (firstAndLastName.length === 2){
+            candidateReference
+            firstAndLastName[0] = firstAndLastName[0].toLowerCase();
+            firstAndLastName[1] = firstAndLastName[1].toLowerCase();
+
+            for(let k in scrapedCandidates) {
+                const c = scrapedCandidates[k].candidate;
+                const cFirstName = (c.firstName || '').toLowerCase();
+                const cLastName = (c.lastName || '').toLowerCase();
+
+                if (cFirstName === firstAndLastName[0] && cLastName === firstAndLastName[1]){
+                    candidateReference = c;
+                    break;
+                }
+            }
+
+            return candidateReference;
+        }
+    }
+
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
@@ -88,6 +120,10 @@
                 this.scrapedCandidates[memberId].isSelected = false;
             }
         };
+
+        findCandidate = (searchFor) => {
+            return _searchCandidates(this.scrapedCandidates, searchFor);
+        }
 
         interceptSearchResults = _interceptSearchResults;
     }

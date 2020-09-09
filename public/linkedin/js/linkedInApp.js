@@ -18,7 +18,7 @@
     }
 
     class LinkedInApp {
-        sendMessageToCandidates = linkedInMessageSender.sendMessagesToLinkedInCandidates;
+        sendLinkedInMessageOrConnectionRequestToCandidate = linkedInMessageSender.sendLinkedInMessageOrConnectionRequestToCandidate;
         candidateUnselect = _candidateUnselect;
         changeBadgeColor = _changeBadgeColor;
         user = "";
