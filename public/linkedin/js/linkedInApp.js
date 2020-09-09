@@ -17,10 +17,15 @@
         searchResultsScraper.deselectCandidate(memberId);
     }
 
+    const _upsertContact = async(candidate) = {
+
+    }
+    
     class LinkedInApp {
         sendLinkedInMessageOrConnectionRequestToCandidate = linkedInMessageSender.sendLinkedInMessageOrConnectionRequestToCandidate;
         candidateUnselect = _candidateUnselect;
         changeBadgeColor = _changeBadgeColor;
+        upsertContact = _upsertContact;
         user = "";
     }
 
@@ -33,6 +38,7 @@
 tsCommon.setUpPostMessageListener('linkedInApp');
 
 tsInterceptor.interceptResponse('get', '/api/smartsearch?', searchResultsScraper.interceptSearchResults);
+tsInterceptor.interceptResponse('post', '/voyager/api/messaging/conversations/', linkedInMessageSender.interceptLinkedInMessageSent);
 
 window.launchTonkaSource = async (who) => {
     if (who == undefined){

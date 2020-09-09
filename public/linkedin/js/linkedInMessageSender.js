@@ -60,6 +60,11 @@
         return message;
     }
 
+    const _interceptLinkedInMessageSent = (responseObj) => {
+
+    }
+
+
     const _sendLinkedInMessageOrConnectionRequestToCandidate = async (memberIdOrFirstNameAndLastName, messageToSend, connectionRequestToSend = null) => {
             
             if (connectionRequestToSend == null){
@@ -73,7 +78,10 @@
                 connectionRequestToSend = _processAnyTemplateText(candidate, connectionRequestToSend);
 
                 publicProfileWindow = await _navigateToPublicProfilePage(candidate);
-                
+                candidate.linkedInUrl = publicProfileWindow.location.href;
+
+                linkedInCommon.callAlisonHookWindow('upsertContact', candidate);
+
                 const whatButtonIsAvailable = _getPublicProfile_MessageButtonSelector(publicProfileWindow);
                 if (whatButtonIsAvailable == null){
                     console.log(`Unable to send a message to ${canidate.firstName} ${candidate.lastName}`);
@@ -97,6 +105,7 @@
         constructor() {}
 
         sendLinkedInMessageOrConnectionRequestToCandidate = _sendLinkedInMessageOrConnectionRequestToCandidate;
+        interceptLinkedInMessageSent = _interceptLinkedInMessageSent;
     }
 
     window.linkedInMessageSender = new LinkedInMessageSender();
