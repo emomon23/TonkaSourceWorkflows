@@ -1,7 +1,12 @@
  (function() {
     const _callAlisonHookWindow = (actionString, data) => {
-        const jsonData = JSON.stringify(data);
-        tsCommon.postMessageToWindow(alisonHookWindow, actionString, jsonData);
+        if (window.alisonHookWindow != undefined){
+            const jsonData = JSON.stringify(data);
+            tsCommon.postMessageToWindow(alisonHookWindow, actionString, jsonData);
+        }
+        else {
+            console.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()?)");
+        }
     }
 
     const _advanceToNextLinkedInResultPage = () => {
