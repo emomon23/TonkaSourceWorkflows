@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.123
+// @version      0.156
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -11,12 +11,15 @@
 // @require      http://code.jquery.com/jquery-latest.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInPublicProfile.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/projectSearchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultScraperFactory.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSender.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
 // @grant        none
 
@@ -26,83 +29,4 @@
     'use strict';
 
     console.log("Tamper Monkey: LinkedIn Recruiter Parser user script running...");
-
-    window.fireEvent = (element, theEventName) => {
-        const eventName = `${theEventName}_evt`;
-        let event = window[eventName];
-
-        if (!event) {
-            event = jQuery.Event(theEventName);
-
-            if (theEventName.indexOf('key') === 0){
-               event.which=65;
-               event.code=65;
-               event.keyCode=65
-            }
-          window[eventName] = event;
-       }
-
-       $(element).trigger(event);
-    }
-
-    window.fireMouseSeries = (element) => {
-        fireEvent(element, 'mouseenter');
-        fireEvent(element, 'mouseover');
-        fireEvent(element, 'mousemove')
-        fireEvent(element, 'mousedown');
-        fireEvent(element, 'mouseup');
-        fireEvent(element, 'click');
-    };
-
-    window.fireKeyPressSeries = (element) => {
-       window.fireEvent(element, 'keydown');
-       window.fireEvent(element, 'keypress');
-       window.fireEvent(element, 'textInput');
-       window.fireEvent(element, 'input');
-       window.fireEvent(element, 'keyup');
-    }
-
-    window.observeDOM = (function(){
-        var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-
-        return function( obj, callback ){
-            if( !obj || obj.nodeType !== 1 ) return; // validation
-
-            if( MutationObserver ){
-                // define a new observer
-                var obs = new MutationObserver(function(mutations, observer){
-                    callback(mutations);
-                })
-                // have the observer observe foo for changes in children
-                obs.observe( obj, { childList:true, subtree:true });
-            }
-
-            else if( window.addEventListener ){
-                obj.addEventListener('DOMNodeInserted', callback, false);
-                obj.addEventListener('DOMNodeRemoved', callback, false);
-            }
-        }
-    })();
-
-    window.setupHackMonitors = (jQuerySelector) => {
-         $(jQuerySelector).on("click focus blur focusin keydown change click dblclick keydown keyup keypress input textInput touchstart touchmove touchend touchcancel resize scroll select change submit reset",function(e){
-            console.log({element: 'body', e});
-         });
-    }
-
-    window.monitorDom = () => {
-        $(document).on('keypress', () => {
-            $('[role*="textbox"').toArray().forEach( (el) => {
-                console.log(el);
-            });
-        });
-    }
-
-    window.startMonitoringElement = (elementId) => {
-         $(`#${elementId}`).on("click focus focusin blur keydown change click dblclick keydown keyup keypress input textInput touchstart touchmove touchend touchcancel resize scroll select change submit reset",function(e){
-            console.log({element: elementId, e});
-         });
-
-    }
-
 })();
