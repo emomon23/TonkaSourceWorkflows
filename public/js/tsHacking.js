@@ -1,32 +1,4 @@
-// ==UserScript==
-// @name         LinkedIN Recruiter Parser
-// @namespace    http://tampermonkey.net/
-// @version      0.123
-// @description  try to take over the world!
-// @author       You
-// @domain       linkedin.com
-// @domain       www.linkedin.com
-// @include      https://www.linkedin.com/*
-// @include      https://linkedin.com/*
-// @require      http://code.jquery.com/jquery-latest.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInPublicProfile.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/projectSearchResultsScraper.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultScraperFactory.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSender.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
-// @grant        none
-
-// ==/UserScript==
-
 (() => {
-    'use strict';
-
-    console.log("Tamper Monkey: LinkedIn Recruiter Parser user script running...");
-
     window.fireEvent = (element, theEventName) => {
         const eventName = `${theEventName}_evt`;
         let event = window[eventName];
@@ -89,20 +61,4 @@
             console.log({element: 'body', e});
          });
     }
-
-    window.monitorDom = () => {
-        $(document).on('keypress', () => {
-            $('[role*="textbox"').toArray().forEach( (el) => {
-                console.log(el);
-            });
-        });
-    }
-
-    window.startMonitoringElement = (elementId) => {
-         $(`#${elementId}`).on("click focus focusin blur keydown change click dblclick keydown keyup keypress input textInput touchstart touchmove touchend touchcancel resize scroll select change submit reset",function(e){
-            console.log({element: elementId, e});
-         });
-
-    }
-
 })();

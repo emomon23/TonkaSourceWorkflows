@@ -175,7 +175,6 @@
         clickAHyperLink = _clickAHyperLink;
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
-        
     }
 
     window.tsCommon = new TSCommon();

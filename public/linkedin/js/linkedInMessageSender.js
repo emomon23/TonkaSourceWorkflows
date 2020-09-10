@@ -19,16 +19,22 @@
         return null;
     }
 
-    const _SendMessage = (publicProfileWindow, messageToSend) => {
+    const _sendMessage = async (publicProfileWindow, messageToSend) => {
         messageToSend = messageToSend.trim();
 
-        const paragraphElement = publicProfileWindow.document.querySelector('div[class*="msg-form__contenteditable"] p');
-        const htmlElement = window.htmlToElement(messageToSend);
-        paragraphElement.appendChild(htmlElement);
-        publicProfileWindow.document.querySelector('div[id*="msg-form__contenteditable-placeholder"]').style.display = 'none';
+        await tsCommon.sleep(2000);
+        const paragraphElement = publicProfileWindow.document.getElementsByClassName('msg-form__contenteditable')[0];
+        paragraphElement.focus();
+
+        publicProfileWindow.document.execCommand('insertText', true, messageToSend);
+        await tsCommon.sleep(1000);
+        publicProfileWindow.document.getElementsByClassName('msg-form__send-button')[0].click();
+        await tsCommon.sleep(1000);
+
+        $('button[data-control-name*="close_conversation_window"]').click();
     }
 
-    const _SendConnectionRequest = async (publicProfileWindow, messageToSend) => {
+    const _sendConnectionRequest = async (publicProfileWindow, messageToSend) => {
         publicProfileWindow.document.querySelector('button[aria-label*="Add a note"]').click();
         await tsCommon.sleep(1000);
         publicProfileWindow.document.querySelector('textarea[name="message"]').outerText = messageToSend;
@@ -36,7 +42,7 @@
         const doneButton = publicProfileWindow.document.querySelector('button[aria-label="Done"]');
         doneButton.removeAttribute('disabled');
         doneButton.classList.remove('artdeco-button--disabled');
-      //  doneButton.click();
+        doneButton.click();
     }
 
     const _navigateToPublicProfilePage = async (candidate) => {
@@ -60,11 +66,6 @@
         return message;
     }
 
-    const _interceptLinkedInMessageSent = (responseObj) => {
-
-    }
-
-
     const _sendLinkedInMessageOrConnectionRequestToCandidate = async (memberIdOrFirstNameAndLastName, messageToSend, connectionRequestToSend = null) => {
             
             if (connectionRequestToSend == null){
@@ -78,6 +79,8 @@
                 connectionRequestToSend = _processAnyTemplateText(candidate, connectionRequestToSend);
 
                 publicProfileWindow = await _navigateToPublicProfilePage(candidate);
+                tsInterceptor.copyToAnotherWindow(publicProfileWindow);
+
                 candidate.linkedInUrl = publicProfileWindow.location.href;
 
                 linkedInCommon.callAlisonHookWindow('upsertContact', candidate);
@@ -91,12 +94,15 @@
                     await tsCommon.sleep(5000);
 
                     if (whatButtonIsAvailable.type === 'MESSAGE'){
-                        _SendMessage(publicProfileWindow, messageToSend);
+                        await _sendMessage(publicProfileWindow, messageToSend);
+                        //linkedInMessageSpy should pick up that a message was sent
                     }
                     else {
-                        _SendConnectionRequest(publicProfileWindow, connectionRequestToSend);
-                      //  publicProfileWindow.close();
+                        await _sendConnectionRequest(publicProfileWindow, connectionRequestToSend);
+                        linkedInCommon.callAlisonHookWindow('linkedInMessageWasSent_EvtHandler', {candidate, connectionRequestToSend, type:'connectionRequest'});
                     }
+
+                    
                 }
             }
     }
@@ -105,7 +111,6 @@
         constructor() {}
 
         sendLinkedInMessageOrConnectionRequestToCandidate = _sendLinkedInMessageOrConnectionRequestToCandidate;
-        interceptLinkedInMessageSent = _interceptLinkedInMessageSent;
     }
 
     window.linkedInMessageSender = new LinkedInMessageSender();
