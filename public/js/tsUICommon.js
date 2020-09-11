@@ -32,13 +32,49 @@
 
         return $(button);
     }
+
+    const _findDomElement = (selector) => {
+        if ($(selector).length === 0){
+            return null;
+        }
+
+        return $(selector);
+    }
+
+    const _htmlToElement = (html) => {
+        var template = document.createElement('template');
+        html = html.trim(); // Never return a text node of whitespace as the result
+        template.innerHTML = html;
+        return template.content.firstChild;
+     }
+ 
+     const _findPreviousElement = (startElement, selector) => {
+        let result = null;
+        for(let i=0; i < $(startElement).siblings().length; i++){
+            const sibling = $(startElement).siblings()[i];
+            const found = $(sibling).find(selector);
+            if (found.length > 0){
+                result = found;
+                break;
+            }
+        }
    
+        if (result != null || $(startElement).parent().length == 0){
+          return result;
+        }
+   
+        return _findPreviousElement($(startElement).parent()[0], selector);
+     }
+
     class TsUICommon {
         constructor(){}
 
         createListItem = _createListItem;
         removeListItem = _removeListItem;
         addButton = _addButton;
+        findDomElement = _findDomElement;
+        findPreviousElement = _findPreviousElement;
+        htmlToElement = _htmlToElement;
     }
 
     window.tsUICommon = new TsUICommon();

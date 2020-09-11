@@ -35,6 +35,22 @@
             const intercept = {method: method.toLowerCase(), urlContains: urlContains.toLowerCase(), callBack};
             __responseIntercepts.push(intercept);
         }
+
+        copyToAnotherWindow = (otherWindow) => {
+            if (otherWindow.tsInterceptor == null || otherWindow.tsInterceptor == undefined){
+                const interceptor = new TsHttpInterceptor();
+
+                __requestIntercepts.forEach((ri) => {
+                    interceptor.interceptRequest(ri.method, ri.urlContains, ri.callBack);
+                });
+
+                __responseIntercepts.forEach((ri) => {
+                    interceptor.interceptResponse(ri.method, ri.urlContains, ri.callBack);
+                });
+
+                otherWindow.tsInterceptor = interceptor;
+            }
+        }
     }
 
     window.tsInterceptor = new TsHttpInterceptor();
