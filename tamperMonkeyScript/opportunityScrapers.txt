@@ -1,0 +1,36 @@
+// ==UserScript==
+// @name         Opportunity Scrapers
+// @namespace    http://tampermonkey.net/
+// @version      0.3
+// @description  Scrape opportunities from partner / other websites
+// @author       Tonka Source, Inc
+// @domain       starcollaborative.com
+// @domain       www.starcollaborative.com
+// @include      http://starcollaborative.com/opportunities/*
+// @include      http://www.starcollaborative.com/opportunities/*
+// @include      https://starcollaborative.com/cpopportunities/*
+// @include      https://www.starcollaborative.com/cpopportunities/*
+// @require      http://code.jquery.com/jquery-latest.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/js/opportunityScraperFactory.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/star/starPartnerScraper.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/star/starPublicScraper.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/opportunityScraperManager.js
+
+// @require      http://localhost:5000/js/tsCommon.js
+// @require      http://localhost:5000/scrapers/opportunity/js/opportunityScraperFactory.js
+// @require      http://localhost:5000/scrapers/opportunity/star/starPartnerScraper.js
+// @require      http://localhost:5000/scrapers/opportunity/star/starPublicScraper.js
+// @require      http://localhost:5000/scrapers/opportunity/opportunityScraperManager.js
+// @grant        none
+
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    console.info("Tampermonkey is running for Opportunity Scrapers");
+
+    window.scrapers = [];
+
+})();
