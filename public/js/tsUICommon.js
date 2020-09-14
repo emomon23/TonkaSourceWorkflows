@@ -74,7 +74,7 @@
 
     const _cleanseTextOfHtml = (text) => {
         const tempHtml = `<div>${text}</div>`;
-        return $(textHtml).text();
+        return $(tempHtml).text();
     }
 
     class TsUICommon {
