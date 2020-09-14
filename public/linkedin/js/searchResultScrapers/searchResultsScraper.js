@@ -1,5 +1,7 @@
 (function() {
-    const _scrapeCandidateHtml = (candidate) => {
+    const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
+
+    const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
         const liTag = $(`#search-result-${candidate.memberId}`);
         tsCommon.extendWebElement(liTag);
@@ -15,9 +17,18 @@
         candidate.state = cityState.length > 1? cityState[1].trim() : "";
 
         if (candidate.degree){
-            candidate.networkConnection = candidate.degree.replace('FIRST_DEGREE', '1').replace('SECOND_DEGREE', '2').replace('THIRD_DEGREE', 3);
-            if ('123'.indexOf(candidate.networkConnection) == -1){
-                candidate.networkConnection = '4';
+            let networkConnection = candidate.degree.replace('FIRST_DEGREE', '1').replace('SECOND_DEGREE', '2').replace('THIRD_DEGREE', 3);
+            if ('123'.indexOf(networkConnection) == -1){
+                networkConnection = '4';
+            }
+
+            if (!candidate.alisonConnections){
+                candidate.alisonConnections = {};
+            }
+
+            const loggedInAlisonUserName = await linkedInApp.getAlisonLoggedInUser();
+            if (loggedInAlisonUserName != null){
+                candidate.alisonConnections[loggedInAlisonUserName] = networkConnection;
             }
         }
     }
@@ -38,24 +49,35 @@
         
         try {
             candidateReference = scrapedCandidates[searchFor];
+            if (candidateReference != undefined && candidateReference != null){
+                return candidateReference.candidate;
+            }
         }catch {}
 
-        if (candidateReference != undefined && canidateReference != null){
-            return candidateReference.candidate;
+        let firstName =  null; 
+        let lastName = null; 
+
+        if (typeof searchFor === "string"){
+            const firstAndLastName = searchFor.toLowerCase().split(' ');
+            if (firstAndLastName.length === 2){
+                firstName = firstAndLastName[0];
+                lastName = firstAndLastName[1];
+            }
+        }
+        else {
+            firstName = (searchFor.firstName || searchFor.first || '').toLowerCase();
+            lastName = (searchFor.lastName || searchFor.last || '').toLowerCase();
         }
 
-        let firstAndLastName = searchFor.split(' ');
-        if (firstAndLastName.length === 2){
-            candidateReference
-            firstAndLastName[0] = firstAndLastName[0].toLowerCase();
-            firstAndLastName[1] = firstAndLastName[1].toLowerCase();
-
-            for(let k in scrapedCandidates) {
+        if (firstName !== null && firstName !== undefined && lastName !== null && lastName !== undefined){
+            let candidateReference = null;
+        
+             for(let k in scrapedCandidates) {
                 const c = scrapedCandidates[k].candidate;
                 const cFirstName = (c.firstName || '').toLowerCase();
                 const cLastName = (c.lastName || '').toLowerCase();
 
-                if (cFirstName === firstAndLastName[0] && cLastName === firstAndLastName[1]){
+                if (cFirstName === firstName && cLastName === lastName){
                     candidateReference = c;
                     break;
                 }
@@ -63,25 +85,36 @@
 
             return candidateReference;
         }
+
+        return null;
     }
 
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
+        let persist = false;
 
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length -1]);
 
-            candidatesInResults.forEach((candidate) => {
-                _scrapeCandidateHtml(candidate);
+            await window.promiseLoop(candidatesInResults, async (candidate) => {
+                await _scrapeCandidateHtml(candidate);
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
                 if (existingCachedCandidate === undefined){
-                    searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate, isSelected:false};
+                    const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInpuytModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
+                    const trimmedCandidate = _.omit(candidate, omitFields);
+                    
+                    searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
+                    persist = true;
                 }
                 else if (existingCachedCandidate.isSelected == true) {
                     linkedInApp.changeBadgeColor(candidate.memberId, 'red');
                 }
             });
+
+            if (persist){
+                searchResultsScraper.persistToLocalStorage();
+            }
 
             $('.badges abbr').bind("click", function(e) {
                 const element = $(e.currentTarget);
@@ -100,6 +133,7 @@
                     container.isSelected = !isRed;
                     const {memberId, firstName, lastName, location, networkConnection, isJobSeeker} = candidate;
                     linkedInCommon.callAlisonHookWindow('toggleCandidateSelection', {memberId, firstName, lastName, location, networkConnection, isJobSeeker, isSelected: !isRed});
+                    linkedInCommon.callAlisonHookWindow('saveLinkedInContact',)
                 }
                 else {
                     console.log({msg: 'Unable to find candidate:', helper});
@@ -111,7 +145,13 @@
 
     class SearchResultsScraper {
         scrapedCandidates = {};
-        constructor(){}
+        
+        constructor(){
+            var jsonString = window.localStorage.getItem(_localStorageItemName);
+            if (jsonString != null && jsonString != undefined){
+                this.scrapedCandidates = JSON.parse(jsonString);
+            }
+        }
 
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         
@@ -123,6 +163,15 @@
 
         findCandidate = (searchFor) => {
             return _searchCandidates(this.scrapedCandidates, searchFor);
+        }
+
+        persistToLocalStorage = () => {
+            var jsonString = JSON.stringify(this.scrapedCandidates);
+            window.localStorage.setItem(_localStorageItemName, jsonString);
+        }
+
+        clearLocalStorage = () => {
+            window.localStorage.removeItem(_localStorageItemName);
         }
 
         interceptSearchResults = _interceptSearchResults;

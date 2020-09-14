@@ -1,5 +1,10 @@
  (function() {
-    const _callAlisonHookWindow = (actionString, data) => {
+    const _callAlisonHookWindow = async (actionString, data) => {
+        if (window.alisonHookWindow == undefined){
+            window.launchTonkaSource();
+            await tsCommon.sleep(2000);
+        }
+
         if (window.alisonHookWindow != undefined){
             const jsonData = JSON.stringify(data);
             tsCommon.postMessageToWindow(alisonHookWindow, actionString, jsonData);

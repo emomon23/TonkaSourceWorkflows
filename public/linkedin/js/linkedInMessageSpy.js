@@ -55,7 +55,7 @@
                     const recipientName = _getFirstAndLastName(__lastEdittableDiv);
                     const messageText = $(__lastEdittableDiv).html();
 
-                    linkedInCommon.callAlisonHookWindow('linkedInMessageWasSent_EvtHandler', {recipientName, messageText, type:'linkedInMessage'});
+                    linkedInApp.recordMessageWasSent(recipientName, messageText);
             }); 
        }
        catch {}
