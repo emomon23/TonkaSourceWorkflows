@@ -7,7 +7,7 @@
             state: lic.state,
             positions: lic.positions,
             alisonConnections: lic.alisonConnections,
-            schools: lic.educations,
+            educations: lic.educations,
             firstName: lic.firstName,
             lastName: lic.lastName,
             title: lic.headline,
