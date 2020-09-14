@@ -25,32 +25,30 @@
     const _getAlisonLoggedInUser = async () => {
         let scrapedUser =  window.linkedInApp.alisonUserName;
         if (scrapedUser == null || scrapedUser == undefined){
-            await tsCommon.sleep(300);
+            await tsCommon.sleep(2000);
             let loggedInUserFirstAndLastName = null;
 
-            let loggedInUserPhoto = tsUICommon.findDomElement('#nav-tools-user img[class*="profile-photo"]');
-            if (loggedInUserPhoto != null){
-                loggedInUserFirstAndLastName = $(loggedInUserPhoto).attr('alt');
-            }
-            else {
-                loggedInUserPhoto = tsUICommon.findDomElement('li[class="account"] span[class="text"]');
-                if (loggedInUserPhoto != null){
-                    loggedInUserFirstAndLastName = $(loggedInUserPhoto).text().trim();
+            let loggedInUserPhoto = tsUICommon.findFirstDomElement(['#nav-tools-user img[class*="profile-photo"]',
+                                                                    'li[role="menuitem"] a[href*="account-sub-nav"] span[class="text"]',
+                                                                    'img[class*="global-nav__me-photo"]'
+                                                                    ]);
+           
+
+            if (loggedInUserPhoto){
+                loggedInUserFirstAndLastName = ($(loggedInUserPhoto).attr('alt') || $(loggedInUserPhoto).text() || '').trim();
+
+                switch(loggedInUserFirstAndLastName){
+                    case 'Mike R. Emo' :
+                        scrapedUser = "Mike";
+                        break;
+                    case 'Joe Harstad' :
+                        scrapedUser = "Joe";
+                        break;
+                    default: 
+                        scrapedUser = null;
+                        break;
                 }
             }
-
-            switch(loggedInUserFirstAndLastName){
-                case 'Mike R. Emo' :
-                    scrapedUser = "Mike";
-                    break;
-                case 'Joe Harstad' :
-                    scrapedUser = "Joe";
-                    break;
-                default: 
-                    scrapedUser = null;
-                    break;
-            }
-
             window.linkedInApp.loggedInUserFirstAndLastName = loggedInUserFirstAndLastName;
             window.linkedInApp.alisonUserName = scrapedUser;
         }
@@ -82,7 +80,7 @@
             text,
             type,
             date: Date.now(),
-            who: linkedInApp.getAlisonLoggedInUser()
+            who:  window.linkedInApp.alisonUserName
         };
     }
 
@@ -91,7 +89,7 @@
         
         if (candidate != null){
             //make a copy of what we need for this save
-            const {firstName, lastName, linkedInMemberId} = candidate;
+            const {firstName, lastName, memberId} = candidate;
             candidate = {firstName, lastName, memberId};
 
             let messageObject = _createMessageRecordObject(messageSent, type);
@@ -124,6 +122,7 @@
     }
 
     window.linkedInApp = new LinkedInApp();
+    _getAlisonLoggedInUser();
 
     //All messages posted back to the Linked In windows (browser tab) / tamper Monkey
     //should be routed to the linkedInApp object.
