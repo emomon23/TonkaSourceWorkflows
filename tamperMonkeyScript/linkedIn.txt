@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.156
+// @version      0.201
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -10,11 +10,13 @@
 // @include      https://linkedin.com/*
 // @require      http://code.jquery.com/jquery-latest.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsQueryStringParser.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInPublicProfile.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInRecruiterProfile.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/projectSearchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultScraperFactory.js
