@@ -40,13 +40,6 @@
 
         return $(selector);
     }
-
-    const _htmlToElement = (html) => {
-        var template = document.createElement('template');
-        html = html.trim(); // Never return a text node of whitespace as the result
-        template.innerHTML = html;
-        return template.content.firstChild;
-     }
  
     const _findPreviousElement = (startElement, selector) => {
         let result = null;
@@ -79,6 +72,11 @@
          return result;
      }
 
+    const _cleanseTextOfHtml = (text) => {
+        const tempHtml = `<div>${text}</div>`;
+        return $(tempHtml).text();
+    }
+
     class TsUICommon {
         constructor(){}
 
@@ -88,7 +86,7 @@
         findDomElement = _findDomElement;
         findFirstDomElement = _findFirstDomElement;
         findPreviousElement = _findPreviousElement;
-        htmlToElement = _htmlToElement;
+        cleanseTextOfHtml = _cleanseTextOfHtml;
     }
 
     window.tsUICommon = new TsUICommon();
