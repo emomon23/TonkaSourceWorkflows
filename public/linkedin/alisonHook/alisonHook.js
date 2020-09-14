@@ -46,11 +46,6 @@
         };
 
         saveLinkedInContact = alisonContactService.saveLinkedInContact;
-        recordLinkedInConnectionRequest = alisonContactService.recordConnectionRequestSent;
-        recordLinkedInMessageSent = alisonContactService.recordMessageSent
-        recordOpportunityPitch = alisonContactService.recordOpportunityPitch;
-
-
     }
 
     const initialization =() => { console.log("initialization called from linked in user script")};

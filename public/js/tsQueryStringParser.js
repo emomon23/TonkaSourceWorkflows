@@ -18,7 +18,7 @@
         return result;
     }
 
-    const _parseMemberId = () => {
+    const _parseLinkedInMemberIdIsPresent = () => {
         //recruiter/profile/16530706,6KCd,CAP?
         const lookFor = 'recruiter/profile/';
         const href = window.location.href;
@@ -40,7 +40,11 @@
     }
 
     const queryParams = _parseQueryString();
-    queryParams.memberId = _parseMemberId();
+    
+    const memberId = _parseLinkedInMemberIdIsPresent();
+    if (memberId !== null && memberId !== undefined){
+        queryParams.memberId = memberId;
+    }
 
     window.tsQueryStringParser = queryParams;
 })();
