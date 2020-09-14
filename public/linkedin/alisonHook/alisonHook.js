@@ -1,4 +1,5 @@
 (() => {
+
     const __doesMethodExistOnActiveTemplate = (methodName) => {
         try {
             return eval(`alisonHook.activeTemplate && alisonHook.activeTemplate['${methodName}'] != undefined`);
@@ -44,44 +45,52 @@
             }
         };
 
+        saveLinkedInContact = alisonContactService.saveLinkedInContact;
+        recordLinkedInConnectionRequest = alisonContactService.recordConnectionRequestSent;
+        recordLinkedInMessageSent = alisonContactService.recordMessageSent
+        recordOpportunityPitch = alisonContactService.recordOpportunityPitch;
+
 
     }
 
     const initialization =() => { console.log("initialization called from linked in user script")};
     window.alisonHook = new AlisonHook();
+
+    $(document).ready(() => {
+        window.addEventListener('message', function(e) {
+            var d = e.data;
+            linkedInConsoleReference = e.source;
+    
+            const action = d.action;
+            let data = null;
+            try {
+                data = JSON.parse(d.parameter);
+            }
+            catch {
+                data = d.parameter;
+            }
+    
+            if (__doesMethodExistOnActiveTemplate(action)){
+                eval(`alisonHook.activeTemplate.${action}(${data});`)
+            }
+            else if (__doesMethodExistOnAlisonHook(action)){
+                eval(`alisonHook.${action}(${data});`);
+            }
+            else if(__doesMethodExistOnWindow(action)){
+                eval(`${action}(${data});`)
+            }
+            else {
+                console.log(`ERROR.  Unable to find action '${action}'`);
+            }
+    
+        });
+        
+        alisonHook.loadTemplate('sendLinkedInMessages');
+        
+    });
+    
 })();
 
 
-$(document).ready(() => {
-    window.addEventListener('message', function(e) {
-        var d = e.data;
-        linkedInConsoleReference = e.source;
 
-        const action = d.action;
-        let data = null;
-        try {
-            data = JSON.parse(d.parameter);
-        }
-        catch {
-            data = d.parameter;
-        }
-
-        if (__doesMethodExistOnActiveTemplate(action)){
-            eval(`alisonHook.activeTemplate.${action}(${data});`)
-        }
-        else if (__doesMethodExistOnAlisonHook(action)){
-            eval(`alisonHook.${action}(${data});`);
-        }
-        else if(__doesMethodExistOnWindow(action)){
-            eval(`${action}(${data});`)
-        }
-        else {
-            console.log(`ERROR.  Unable to find action '${action}'`);
-        }
-
-    });
-    
-    alisonHook.loadTemplate('sendLinkedInMessages');
-    
-});
     

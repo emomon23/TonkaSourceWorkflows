@@ -36,12 +36,13 @@
 
     const _sendConnectionRequest = async (publicProfileWindow, messageToSend) => {
         publicProfileWindow.document.querySelector('button[aria-label*="Add a note"]').click();
-        await tsCommon.sleep(1000);
+        await tsCommon.sleep(800);
         publicProfileWindow.document.querySelector('textarea[name="message"]').outerText = messageToSend;
 
         const doneButton = publicProfileWindow.document.querySelector('button[aria-label="Done"]');
         doneButton.removeAttribute('disabled');
         doneButton.classList.remove('artdeco-button--disabled');
+        await tsCommon.sleep(200);
         doneButton.click();
     }
 
@@ -99,7 +100,7 @@
                     }
                     else {
                         await _sendConnectionRequest(publicProfileWindow, connectionRequestToSend);
-                        linkedInCommon.callAlisonHookWindow('linkedInMessageWasSent_EvtHandler', {candidate, connectionRequestToSend, type:'connectionRequest'});
+                        linkedInApp.recordConnectionRequestMade(memberIdOrFirstNameAndLastName, connectionRequestToSend);
                     }
 
                     
