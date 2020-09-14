@@ -48,7 +48,7 @@
         return template.content.firstChild;
      }
  
-     const _findPreviousElement = (startElement, selector) => {
+    const _findPreviousElement = (startElement, selector) => {
         let result = null;
         for(let i=0; i < $(startElement).siblings().length; i++){
             const sibling = $(startElement).siblings()[i];
@@ -66,6 +66,19 @@
         return _findPreviousElement($(startElement).parent()[0], selector);
      }
 
+     const _findFirstDomElement = (arrayOfSelectors) => {
+         let result = null;
+
+         for (let i=0; i<arrayOfSelectors.length; i++){
+            result = _findDomElement(arrayOfSelectors[i]);
+            if (result !== null){
+                break;
+            }
+         }
+
+         return result;
+     }
+
     class TsUICommon {
         constructor(){}
 
@@ -73,6 +86,7 @@
         removeListItem = _removeListItem;
         addButton = _addButton;
         findDomElement = _findDomElement;
+        findFirstDomElement = _findFirstDomElement;
         findPreviousElement = _findPreviousElement;
         htmlToElement = _htmlToElement;
     }
