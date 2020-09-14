@@ -79,6 +79,11 @@
          return result;
      }
 
+    const _cleanseTextOfHtml = (text) => {
+        const node = _htmlToElement(text);
+        return node.textContent
+    }
+
     class TsUICommon {
         constructor(){}
 
@@ -88,6 +93,7 @@
         findDomElement = _findDomElement;
         findFirstDomElement = _findFirstDomElement;
         findPreviousElement = _findPreviousElement;
+        cleanseTextOfHtml = _cleanseTextOfHtml;
         htmlToElement = _htmlToElement;
     }
 
