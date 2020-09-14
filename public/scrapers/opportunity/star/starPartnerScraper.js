@@ -14,6 +14,7 @@
         var confirmed = true;
         var currentPage = 1;
 
+        // Scrape the listing of opportunities, there may be multiple pages
         do {
             tsCommon.log("Scraping current page, stand by...");
 
@@ -77,18 +78,36 @@
         
         // Get STAR Opportunity details
         const cpJobUrlElement = oppColumns[1].mineTag('a');
+        // Remove target _blank
+        $(cpJobUrlElement).attr("target","");
         starOpportunity.cpJobUrl = $(cpJobUrlElement).attr('href');
         starOpportunity.JobNumber = $(cpJobUrlElement).html().trim();
 
-        return starOpportunity;
+        var starOpportunityDetail = _scrapeOpportunityDetail(starOpportunity.cpJobUrl);
+
+        return Object.assign(starOpportunity, starOpportunityDetail);
+    }
+
+    const _scrapeOpportunityDetail = async (jobUrl) => {
+        // $(jobLink).attr("target","");
+        // $(jobLink)[0].click();
+
+        let html = await tsCommon.getHttpText(jobUrl);
+
+        window.history.back();
+
+    }
+
+    const _interceptJob = async (response) => {
+        alert(response);
     }
 
     class StarPartnerScraper {
         constructor(){}
 
         scrapeResults = _scrapeResults;
-        scrapeCurrentPageOpportunityResults = _scrapeCurrentPageOpportunityResults;
-        scrapeOpportunity = _scrapeOpportunity;
+        scrapeOpportunityDetail = _scrapeOpportunityDetail;
+        interceptJob = _interceptJob;
     }
 
     window.__ts_starPartnerScraper = new StarPartnerScraper();
