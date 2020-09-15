@@ -3,7 +3,7 @@
   "description": "Cloud Functions for Firebase",
   "scripts": {
     "lint": "eslint .",
-    "serve": "firebase serve",
+    "serve": "firebase serve --port 5001",
     "start": "npm run shell",
     "deploy": "firebase deploy",
     "test": "jasmine"
