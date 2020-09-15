@@ -15,7 +15,7 @@ function clean(cb) {
 function html(cb) {
     return gulp.src('public/**/*.html')
         .pipe(replace(/http:\/\/localhost:5001/g, 'https://tonkasourceworkflows.firebaseapp.com'))
-        .pipe(replace(/http:\/\/localhost:5000/g, 'https://us-central1-alison-krause.cloudfunctions.net'))
+        .pipe(replace(/http:\/\/localhost:5000\/alison-krause\/us-central1/g, 'https://us-central1-alison-krause.cloudfunctions.net'))
         .pipe(useref())
         .pipe(gulpif('*.js', uglify()))
         .pipe(gulpif('*.css', minifyCss()))
@@ -25,7 +25,7 @@ function html(cb) {
 function js(cb) {
     return gulp.src('public/**/*.js')
         .pipe(replace(/http:\/\/localhost:5001/g, 'https://tonkasourceworkflows.firebaseapp.com'))
-        .pipe(replace(/http:\/\/localhost:5000/g, 'https://us-central1-alison-krause.cloudfunctions.net'))
+        .pipe(replace(/http:\/\/localhost:5000\/alison-krause\/us-central1/g, 'https://us-central1-alison-krause.cloudfunctions.net'))
         .pipe(gulp.dest('build/Release'));
 }
 
