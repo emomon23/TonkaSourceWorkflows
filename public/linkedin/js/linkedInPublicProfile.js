@@ -1,6 +1,8 @@
 (() => {
 
-    const _parseOutLinkedInMemberId = () => {
+    const _parseOutLinkedInMemberId = async () => {
+        await tsCommon.sleep(2000);
+
         const codeElement = tsUICommon.findDomElement('code:contains("urn:li:member:")');
         if (!codeElement){
             return null;
@@ -23,17 +25,17 @@
         return jsonString.substr(startIndex, endIndex - startIndex);
     }
 
-    const _scrapeProfile = () => {
+    const _scrapeProfile = async () => {
         if (window.location.href.indexOf('.com/in/') === -1){
             return null;
         }
 
         const result = {
-            memberId: _parseOutLinkedInMemberId(),
+            memberId: await _parseOutLinkedInMemberId(),
         }
 
         //first and last name
-        name = $('title').text().split('|')[0].trim().split(' ');
+        const name = $('title').text().split('|')[0].trim().split(' ');
         result.firstName = name[0];
         result.lastName = name[1];
 
@@ -44,7 +46,12 @@
     }
 
     class LinkedInPublicProfile{
-       scrapeProfile = _scrapeProfile        
+        constructor() {
+            _scrapeProfile()
+                .then((result) => {
+                    this.profile = result;
+                })
+        }      
     }
 
     window.linkedInPublicProfile = new LinkedInPublicProfile();
