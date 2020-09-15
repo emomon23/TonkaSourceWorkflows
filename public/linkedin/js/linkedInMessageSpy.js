@@ -9,7 +9,7 @@
         let headerSpan = tsUICommon.findPreviousElement(peerElement, 'h4 span');
         let text = headerSpan && headerSpan.length > 0? headerSpan[0].textContent.trim() : null;
 
-        if (!headerSpan || headerSpan.length === 0 || text === "New message"){
+        if (!headerSpan || headerSpan.length === 0 || text === "New message" || text === "Messaging"){
             headerSpan = tsUICommon.findPreviousElement(peerElement, 'span[class*="artdeco-pill__text"]')
         }
 
