@@ -1,5 +1,5 @@
 (() => {
-    const _baseUrl = 'https://us-central1-alison-krause.cloudfunctions.net/';
+    const _baseUrl = tsConstants.FUNCTIONS_URL;
 
     const _mapContact = (lic) => {
         const result = {
@@ -37,7 +37,7 @@
 
     const _saveLinkedInContact = async (linkedInRawContact) => {
         const contact = _mapContact(linkedInRawContact);
-        const url = `${_baseUrl}importContact`;
+        const url = `${_baseUrl}/importContact`;
 
         try {
             $.post(url, contact);

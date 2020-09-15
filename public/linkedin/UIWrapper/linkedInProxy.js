@@ -1,5 +1,7 @@
 (() => {
-    const redirectToBackToAlisonUrl = "https://tonkasourceworkflows.firebaseapp.com/linkedin/UIWrapper/";
+    const functionsUrl = tsConstants.FUNCTIONS_URL;
+
+    const redirectToBackToAlisonUrl = `${functionsUrl}/linkedin/UIWrapper/`;
     const requestAccessTokenUrl = "https://www.linkedin.com/oauth/v2/accessToken";
     const apiKey = "78bjtmkynqyvkl";
     const secret = "BhpHIZBHZwjJRJYz";
@@ -12,7 +14,7 @@
     }
 
     const _requestAccessToken = () => {
-        url = `https://us-central1-alison-krause.cloudfunctions.net/acquireLinkedInAccessToken2?code=${tsQueryString.code}`;
+        url = `${functionsUrl}/acquireLinkedInAccessToken2?code=${tsQueryString.code}`;
         
         return new Promise((resolve, reject) => {
             $.get(url, (response) => {

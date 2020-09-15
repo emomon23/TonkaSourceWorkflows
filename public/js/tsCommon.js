@@ -123,7 +123,7 @@
     }
 
     const _httpGetTemplate = async (templateName) => {
-        const url = `https://tonkasourceworkflows.firebaseapp.com/linkedin/alisonHook/templates/${templateName}/${templateName}.html`;
+        const url = `${tsConstants.HOSTING_URL}/linkedin/alisonHook/templates/${templateName}/${templateName}.html`;
         const html = await _httpGetText(url);
 
         return html;
