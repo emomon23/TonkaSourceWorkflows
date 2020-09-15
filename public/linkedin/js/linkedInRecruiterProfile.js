@@ -7,11 +7,13 @@
             const publicProfileLink = tsUICommon.findDomElement('a[href*="linkedin.com/in/"][target="_blank"]');
             if (publicProfileLink != null){
                
-                $(publicProfileLink).click(() => {
+                $(publicProfileLink).bind('click', () => {
                     const memberId = tsQueryStringParser.memberId;
                     if (memberId != null){
                         const candidateContainer = searchResultsScraper.scrapedCandidates[memberId];
                         if (candidateContainer && candidateContainer.candidate){
+                            // Add LinkedIn Profile URL to candidate
+                            candidateContainer.candidate.linkedIn = $(publicProfileLink).attr('href');
                             linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidateContainer.candidate);
                         } 
                     }

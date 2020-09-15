@@ -10,6 +10,7 @@
             educations: lic.educations,
             firstName: lic.firstName,
             lastName: lic.lastName,
+            linkedIn: lic.linkedIn,
             title: lic.headline,
             imageUrl: lic.imageUrl,
             industry: lic.industry,
@@ -39,6 +40,7 @@
         const url = `${_baseUrl}importContact`;
 
         $.post(url, contact);
+        console.log(`${contact.firstName} ${contact.lastName} has been saved.`);
     }
 
    
