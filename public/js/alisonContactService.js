@@ -39,8 +39,26 @@
         const contact = _mapContact(linkedInRawContact);
         const url = `${_baseUrl}importContact`;
 
-        $.post(url, contact);
-        console.log(`${contact.firstName} ${contact.lastName} has been saved.`);
+        try {
+            $.post(url, contact);
+
+            $("#message-container")
+                .show()
+                .attr("style", "background-color: green; width: 100%; height: 25px;")
+                .html(`${contact.firstName} ${contact.lastName} has been saved.`);
+            
+                setTimeout(function() { 
+                    $("#message-container").hide();
+                }, 4000);
+        }
+        catch (e) {
+            console.error(e);
+            $("#message-container")
+                .attr("style", "background-color: red;")
+                .html('Error saving LinkedIN contact.  Check the console.')
+                .show();
+            
+        }
     }
 
    
