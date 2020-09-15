@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.201
+// @version      0.210
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -9,20 +9,38 @@
 // @include      https://www.linkedin.com/*
 // @include      https://linkedin.com/*
 // @require      http://code.jquery.com/jquery-latest.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsQueryStringParser.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInRecruiterProfile.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/projectSearchResultsScraper.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultScraperFactory.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSender.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSpy.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
+
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsConstants.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsQueryStringParser.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInRecruiterProfile.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/projectSearchResultsScraper.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultScraperFactory.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSender.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSpy.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
+
+// @require      http://localhost:5001/js/tsHttpInterceptor.js
+// @require      http://localhost:5001/js/promiseLoop.js
+// @require      http://localhost:5001/js/tsConstants.js
+// @require      http://localhost:5001/js/tsCommon.js
+// @require      http://localhost:5001/js/tsUICommon.js
+// @require      http://localhost:5001/js/tsHacking.js
+// @require      http://localhost:5001/js/tsQueryStringParser.js
+// @require      http://localhost:5001/linkedin/js/linkedInCommon.js
+// @require      http://localhost:5001/linkedin/js/linkedInRecruiterProfile.js
+// @require      http://localhost:5001/linkedin/js/searchResultScrapers/searchResultsScraper.js
+// @require      http://localhost:5001/linkedin/js/searchResultScrapers/projectSearchResultsScraper.js
+// @require      http://localhost:5001/linkedin/js/searchResultScrapers/searchResultScraperFactory.js
+// @require      http://localhost:5001/linkedin/js/linkedInMessageSender.js
+// @require      http://localhost:5001/linkedin/js/linkedInMessageSpy.js
+// @require      http://localhost:5001/linkedin/js/linkedInApp.js
 // @grant        none
 
 // ==/UserScript==

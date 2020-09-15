@@ -131,7 +131,7 @@
     tsInterceptor.interceptResponse('get', '/api/smartsearch?', searchResultsScraper.interceptSearchResults);
    
     window.launchTonkaSource = async () => {
-        const url = 'https://tonkasourceworkflows.firebaseapp.com/linkedin/alisonHook/alisonHook.html';
+        const url = `${tsConstants.HOSTING_URL}/linkedin/alisonHook/alisonHook.html`;
         window.alisonHookWindow = window.open(url, "Linked In Hack", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=900,height=800,top=5000,left=5000");
 
         await tsCommon.sleep(2000);
