@@ -44,14 +44,7 @@
         return result;
     }
 
-    class LinkedInPublicProfile{
-        constructor() {
-            _scrapeProfile()
-                .then((result) => {
-                    this.profile = result;
-                })
-        }
-
+    class LinkedInPublicProfile {
         getMemberId = _getMemberId;
         scrapeProfile = _scrapeProfile;        
     }

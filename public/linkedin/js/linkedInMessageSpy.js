@@ -37,6 +37,30 @@
         document.execCommand('insertText', true, ' ');
     }
 
+    const _tsDomSpy = () => {
+        __lastEdittableDiv = this;
+        if (this.outerText.trim().length > 0 && this.outerText.indexOf('[firstName]') >= 0){
+            const recipientName = _getFirstAndLastName(this);
+            let text = this.innerHTML.split('[firstName]').join(recipientName.firstName);
+            if (text != this.innerHTML){
+                this.innerHTML = text;
+                _addASpaceToTheMessage(text);
+            }
+        }
+    }
+
+    const _tsSendMessageButtonClickSpyHandler = () => {
+        const recipientName = _getFirstAndLastName(__lastEdittableDiv);
+        const messageText = $(__lastEdittableDiv).html();
+
+        linkedInApp.recordMessageWasSent(recipientName, messageText);
+    }
+
+    const _tsSendConnectionRequestButtonClickSpyHandler = () => {
+        const textArea = tsUICommon.findDomElement('textarea[name=“message”]');
+        const text = textArea === null? 'NO NOTE IN REQUEST' : $(textArea).val();
+    }
+
     const _attachTemplateProcessingListenerToMessageObjects = async () => {
         await tsCommon.sleep(1000);
 
@@ -45,43 +69,14 @@
             return;
         }
 
-        try {
-            $(editableDiv).unbind('DOMSubtreeModified');
+        tsUICommon.rebind(editableDiv, 'DOMSubtreeModified', _tsDomSpy);
+        tsUICommon.rebind('button[class*="msg-form__send-button"]', 'click', _tsSendMessageButtonClickSpyHandler);
+
+        if (tsUICommon.findDomElement('div[data-test-modal]') !== null){
+            tsUICommon.rebind('button[aria-label=“Done”]', 'click', _tsSendConnectionRequestButtonClickSpyHandler);
         }
-        catch {}
-
-        try {
-            $(editableDiv).bind('DOMSubtreeModified', function(){
-                    __lastEdittableDiv = this;
-                    if (this.outerText.trim().length > 0 && this.outerText.indexOf('[firstName]') >= 0){
-                        const recipientName = _getFirstAndLastName(this);
-                        let text = this.innerHTML.split('[firstName]').join(recipientName.firstName);
-                        if (text != this.innerHTML){
-                            this.innerHTML = text;
-                            _addASpaceToTheMessage(text);
-                        }
-                    }
-            });
-        }
-        catch {}
-
-       try {
-            $('button[class*="msg-form__send-button"]').unbind('click');
-       }
-       catch {}
-
-       try {
-            $('button[class*="msg-form__send-button"]').bind('click', () => {
-                    const recipientName = _getFirstAndLastName(__lastEdittableDiv);
-                    const messageText = $(__lastEdittableDiv).html();
-
-                    linkedInApp.recordMessageWasSent(recipientName, messageText);
-            }); 
-       }
-       catch {}
     }      
     
-
     class LinkedInMessageSpy {
         constructor() {
             if (window.location.href.toLowerCase().indexOf('.linkedin.com/in/') > 0){

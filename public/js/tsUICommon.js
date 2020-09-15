@@ -77,6 +77,22 @@
         return $(tempHtml).text();
     }
 
+    const _rebind = (selector, eventName, functionReference_NOT_AnAnonomousFunction) => {
+        try {
+            $(selector).unbind(eventName, functionReference_NOT_AnAnonomousFunction)
+        }
+        catch (unbindError){
+            console.log("unbind error")
+        }
+
+        try {
+            $(selector).bind(eventName, functionReference_NOT_AnAnonomousFunction);
+        }
+        catch (bindError){
+            console.log("bind error");
+        }
+    }
+
     class TsUICommon {
         constructor(){}
 
@@ -87,6 +103,7 @@
         findFirstDomElement = _findFirstDomElement;
         findPreviousElement = _findPreviousElement;
         cleanseTextOfHtml = _cleanseTextOfHtml;
+        rebind = _rebind;
     }
 
     window.tsUICommon = new TsUICommon();
