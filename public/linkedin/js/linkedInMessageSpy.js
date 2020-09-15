@@ -5,12 +5,23 @@
         return $('div[class*="msg-form__contenteditable"]').length;
     }
 
+    const _getMessageModal_RecipientNameElement = (peerElement) => {
+        let headerSpan = tsUICommon.findPreviousElement(peerElement, 'h4 span');
+        let text = headerSpan && headerSpan.length > 0? headerSpan[0].textContent.trim() : null;
+
+        if (!headerSpan || headerSpan.length === 0 || text === "New message" || text === "Messaging"){
+            headerSpan = tsUICommon.findPreviousElement(peerElement, 'span[class*="artdeco-pill__text"]')
+        }
+
+        return headerSpan && headerSpan.length > 0? headerSpan[0]: null;
+    }
+
     const _getFirstAndLastName = (peerElement) => {
         let result = {firstName: '', lastName: ''};
+        const headerSpan = _getMessageModal_RecipientNameElement(peerElement);
 
-        const headerSpan = tsUICommon.findPreviousElement(peerElement, 'h4 span');
         if (headerSpan != null){
-            const firstAndLastName = headerSpan[0].textContent.trim().split(' ');
+            const firstAndLastName = headerSpan.textContent.trim().split(' ');
             result.firstName = firstAndLastName[0];
             result.lastName = firstAndLastName.length > 1? firstAndLastName[1] : '';
         }
