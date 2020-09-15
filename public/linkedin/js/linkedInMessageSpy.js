@@ -29,6 +29,14 @@
         return result;
     }
 
+    const _addASpaceToTheMessage = async () => {
+        await tsCommon.sleep(200);
+        const paragraphElement = document.getElementsByClassName('msg-form__contenteditable')[0];
+        paragraphElement.focus();
+
+        document.execCommand('insertText', true, ' ');
+    }
+
     const _attachTemplateProcessingListenerToMessageObjects = async () => {
         await tsCommon.sleep(1000);
 
@@ -50,6 +58,7 @@
                         let text = this.innerHTML.split('[firstName]').join(recipientName.firstName);
                         if (text != this.innerHTML){
                             this.innerHTML = text;
+                            _addASpaceToTheMessage(text);
                         }
                     }
             });
