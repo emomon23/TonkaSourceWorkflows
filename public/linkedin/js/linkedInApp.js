@@ -135,7 +135,6 @@
         window.alisonHookWindow = window.open(url, "Linked In Hack", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=900,height=800,top=5000,left=5000");
 
         await tsCommon.sleep(2000);
-        linkedInCommon.callAlisonHookWindow('initialization');
     }
 
     window.setActiveOpportunity = (opportunityId) => {

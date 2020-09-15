@@ -48,7 +48,6 @@
         saveLinkedInContact = alisonContactService.saveLinkedInContact;
     }
 
-    const initialization =() => { console.log("initialization called from linked in user script")};
     window.alisonHook = new AlisonHook();
 
     $(document).ready(() => {
@@ -66,16 +65,31 @@
             }
     
             if (__doesMethodExistOnActiveTemplate(action)){
-                eval(`alisonHook.activeTemplate.${action}(${data});`)
+                eval(`alisonHook.activeTemplate.${action}(${data});`);
+
+                // Close the window if we're successful
+                setTimeout(function() { 
+                    window.close();
+                }, 5000);
             }
             else if (__doesMethodExistOnAlisonHook(action)){
                 eval(`alisonHook.${action}(${data});`);
+                
+                // Close the window if we're successful
+                setTimeout(function() { 
+                    window.close();
+                }, 5000);
             }
             else if(__doesMethodExistOnWindow(action)){
-                eval(`${action}(${data});`)
+                eval(`${action}(${data});`);
+                
+                // Close the window if we're successful
+                setTimeout(function() { 
+                    window.close();
+                }, 5000);
             }
             else {
-                console.log(`ERROR.  Unable to find action '${action}'`);
+                console.error(`ERROR.  Unable to find action '${action}'`);
             }
     
         });
