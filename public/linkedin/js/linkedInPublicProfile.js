@@ -24,6 +24,26 @@
         return jsonString.substr(startIndex, endIndex - startIndex);
     }
 
+    const _scrapeFirstAndLastNameFromProfile = () => {
+        let element = tsUICommon.findFirstDomElement(['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")']);
+        if (element === null){
+            return;
+        }
+
+        let wholeName = $(element).text();
+        ["Connect with", "profile via message", "profile to PDF", "Report or block", "'s"].forEach((remove) => {
+            wholeName = wholeName.split(remove).join('');
+        })
+
+        const firstAndLast = wholeName.split(' ');
+        if (firstAndLast.length > 1){
+            return {
+                firstName: firstAndLast[0],
+                lastName: firstAndLast[firstAndLast.length -1]
+            }
+        }
+    }
+
     const _scrapeProfile = async () => {
         if (window.location.href.indexOf('.com/in/') === -1){
             return null;
@@ -33,14 +53,12 @@
             memberId: await _getMemberId(),
         }
 
-        //first and last name
-        const name = $('title').text().split('|')[0].trim().split(' ');
-        result.firstName = name[0];
-        result.lastName = name[1];
-
-        //TO DO: keep going...
-
-
+        const firstAndLast = _scrapeFirstAndLastNameFromProfile();
+        if (firstAndLast != null){
+            result.firstName = firstAndLast.firstName;
+            result.lastName = firstAndLast.lastName;
+        }
+        
         return result;
     }
 
