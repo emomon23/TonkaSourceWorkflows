@@ -23,11 +23,26 @@
         return false;
     }
 
+    const _whatPageAmIOn = () => {
+        const href = window.location.href;
+        if (href.indexOf(linkedInConstants.urls.RECRUITER_PROFILE) > 0) {
+            return linkedInConstants.pages.RECRUITER_PROFILE;
+        } else if (href.indexOf(linkedInConstants.urls.PUBLIC_PROFILE) > 0) {
+            return linkedInConstants.pages.PUBLIC_PROFILE;
+        } else if (href.indexOf(linkedInConstants.urls.RECRUITER_SEARCH_RESULTS) > 0) {
+            return linkedInConstants.pages.RECRUITER_SEARCH_RESULTS;
+        } else {
+            tsCommon.log("Could not determine the LinkedIN page")
+            return null;
+        }
+    }
+
     class LinkedInCommon {
         constructor() {}
 
-        callAlisonHookWindow = _callAlisonHookWindow;
         advanceToNextLinkedInResultPage = _advanceToNextLinkedInResultPage;
+        callAlisonHookWindow = _callAlisonHookWindow;
+        whatPageAmIOn = _whatPageAmIOn;
     }
 
     window.linkedInCommon = new LinkedInCommon();
