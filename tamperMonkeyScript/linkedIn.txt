@@ -24,7 +24,8 @@
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInRecruiterProfileSpy.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSender.js
-// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSpy.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInPublicProfileSpy.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInPublicProfile.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
 
 // @require      http://localhost:5001/js/tsHttpInterceptor.js
@@ -42,7 +43,8 @@
 // @require      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
 // @require      http://localhost:5001/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      http://localhost:5001/linkedin/js/linkedInMessageSender.js
-// @require      http://localhost:5001/linkedin/js/linkedInMessageSpy.js
+// @require      http://localhost:5001/linkedin/js/linkedInPublicProfileSpy.js
+// @require      http://localhost:5001/linkedin/js/linkedInPublicProfile.js
 // @require      http://localhost:5001/linkedin/js/linkedInApp.js
 // @grant        none
 

@@ -98,7 +98,7 @@
 
     }      
     
-    class LinkedInMessageSpy {
+    class LinkedInPublicProfileSpy {
         constructor() {
             if (window.location.href.toLowerCase().indexOf('.linkedin.com/in/') > 0){
                 console.log("Spy is spying - good news!");
@@ -118,5 +118,5 @@
         }
     }
 
-    window.linkedInMessageSpy = new LinkedInMessageSpy();
+    window.linkedInPublicProfileSpy = new LinkedInPublicProfileSpy();
 })();
