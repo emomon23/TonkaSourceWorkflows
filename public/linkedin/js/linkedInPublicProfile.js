@@ -30,8 +30,8 @@
             return;
         }
 
-        let wholeName = $(element).text();
-        ["Connect with ", "Share ", "Save ","'s profile via message", "' profile via message", "profile via message", "'s profile to PDF", "' profile to PDF", "profile to PDF", "Report or block"].forEach((remove) => {
+        let wholeName =  $(element).prop("tagName") === "BUTTON" ? $(element).attr('aria-label') : $(element).text();
+        ["Connect with ", "Share ", "Save ","’s profile via message", "' profile via message", "profile via message", "'s profile to PDF", "' profile to PDF", "profile to PDF", "Report or block"].forEach((remove) => {
             wholeName = wholeName.split(remove).join('');
         })
 
