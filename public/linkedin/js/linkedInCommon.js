@@ -1,6 +1,6 @@
  (function() {
     const _callAlisonHookWindow = async (actionString, data) => {
-        window.launchTonkaSource();
+        await window.launchTonkaSource();
         await tsCommon.sleep(2000);
 
         if (window.alisonHookWindow != undefined){

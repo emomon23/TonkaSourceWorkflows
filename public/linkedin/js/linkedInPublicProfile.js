@@ -24,6 +24,34 @@
         return jsonString.substr(startIndex, endIndex - startIndex);
     }
 
+    const _scrapeFirstAndLastNameFromProfile = () => {
+        let element = tsUICommon.findFirstDomElement(['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")']);
+        if (element === null){
+            return;
+        }
+
+        let wholeName =  $(element).prop("tagName") === "BUTTON" ? $(element).attr('aria-label') : $(element).text();
+        ["Connect with ", "Share ", "Save ","’s profile via message", "' profile via message", "profile via message", "'s profile to PDF", "' profile to PDF", "profile to PDF", "Report or block"].forEach((remove) => {
+            wholeName = wholeName.split(remove).join('');
+        })
+
+        wholeName = wholeName.split(',')[0].trim(); //This will handle "Alan Haggerty, MCEE"
+        if (wholeName.indexOf('(') === 0){
+            wholeName = wholeName.substr(wholeName.indexOf(' ')); //This will handle "(75) Alan Haggerty"
+        }
+
+        const firstAndLast = wholeName.split(' ');
+        let result = {}
+
+        if (firstAndLast.length > 1){
+            result.firstName = firstAndLast[0];
+            firstAndLast.splice(0, 1);
+            result.lastName = firstAndLast.join(' ');
+        }
+
+        return result;
+    }
+
     const _scrapeProfile = async () => {
         if (window.location.href.indexOf('.com/in/') === -1){
             return null;
@@ -33,25 +61,16 @@
             memberId: await _getMemberId(),
         }
 
-        //first and last name
-        const name = $('title').text().split('|')[0].trim().split(' ');
-        result.firstName = name[0];
-        result.lastName = name[1];
-
-        //TO DO: keep going...
-
-
+        const firstAndLast = _scrapeFirstAndLastNameFromProfile();
+        if (firstAndLast != null){
+            result.firstName = firstAndLast.firstName;
+            result.lastName = firstAndLast.lastName;
+        }
+        
         return result;
     }
 
-    class LinkedInPublicProfile{
-        constructor() {
-            _scrapeProfile()
-                .then((result) => {
-                    this.profile = result;
-                })
-        }
-
+    class LinkedInPublicProfile {
         getMemberId = _getMemberId;
         scrapeProfile = _scrapeProfile;        
     }
