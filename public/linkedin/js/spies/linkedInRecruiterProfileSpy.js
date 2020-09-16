@@ -1,4 +1,5 @@
 (() => {
+    
     const _bindToPublicProfileLink = async() => {
         await tsCommon.sleep(2000);
         const publicProfileLink = tsUICommon.findDomElement('a[href*="linkedin.com/in/"][target="_blank"]');
