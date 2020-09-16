@@ -1,6 +1,6 @@
 (() => {
     const _getMemberId = () => {
-        return tsQueryStringParser.memberId;
+        return $(linkedInSelectors.recruiterProfilePage.profileId).val();
     }
 
     const _scrapeProfile = async () => {

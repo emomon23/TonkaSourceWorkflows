@@ -1,6 +1,7 @@
 (function() {
 
     const _recruiterProfilePage = {
+        profileId: 'input[name*="profile-id"]',
         skillsList: '#profile-skills div ul[class*="skills"]'
     }
 
