@@ -41,12 +41,15 @@
         }
 
         const firstAndLast = wholeName.split(' ');
+        let result = {}
+
         if (firstAndLast.length > 1){
-            return {
-                firstName: firstAndLast[0],
-                lastName: firstAndLast[firstAndLast.length -1]
-            }
+            result.firstName = firstAndLast[0];
+            firstAndLast.splice(0, 1);
+            result.lastName = firstAndLast.join(' ');
         }
+
+        return result;
     }
 
     const _scrapeProfile = async () => {
