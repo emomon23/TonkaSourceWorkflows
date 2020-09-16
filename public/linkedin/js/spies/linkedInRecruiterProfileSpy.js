@@ -1,11 +1,11 @@
 (() => {
     const _bindToPublicProfileLink = async() => {
-        await tsCommon.sleep(300);
+        await tsCommon.sleep(2000);
         const publicProfileLink = tsUICommon.findDomElement('a[href*="linkedin.com/in/"][target="_blank"]');
         if (publicProfileLink != null){
             
             $(publicProfileLink).bind('click', () => {
-                const memberId = tsQueryStringParser.memberId;
+                const memberId = linkedInRecruiterProfileScraper.getMemberId();
                 if (memberId != null){
                     const candidateContainer = searchResultsScraper.scrapedCandidates[memberId];
                     if (candidateContainer && candidateContainer.candidate){
