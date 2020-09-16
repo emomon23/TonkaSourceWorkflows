@@ -31,7 +31,7 @@
         }
 
         let wholeName = $(element).text();
-        ["Connect with", "profile via message", "profile to PDF", "Report or block", "'s"].forEach((remove) => {
+        ["Connect with ", "Share ", "Save ","'s profile via message", "' profile via message", "profile via message", "'s profile to PDF", "' profile to PDF", "profile to PDF", "Report or block"].forEach((remove) => {
             wholeName = wholeName.split(remove).join('');
         })
 
