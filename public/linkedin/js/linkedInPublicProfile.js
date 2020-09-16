@@ -35,6 +35,11 @@
             wholeName = wholeName.split(remove).join('');
         })
 
+        wholeName = wholeName.split(',')[0].trim(); //This will handle "Alan Haggerty, MCEE"
+        if (wholeName.indexOf('(') === 0){
+            wholeName = wholeName.substr(wholeName.indexOf(' ')); //This will handle "(75) Alan Haggerty"
+        }
+
         const firstAndLast = wholeName.split(' ');
         if (firstAndLast.length > 1){
             return {
