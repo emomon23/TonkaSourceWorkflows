@@ -1,6 +1,5 @@
 (() => {
-
-    const _parseOutLinkedInMemberId = async () => {
+    const _getMemberId = async () => {
         await tsCommon.sleep(2000);
 
         const codeElement = tsUICommon.findDomElement('code:contains("urn:li:member:")');
@@ -31,7 +30,7 @@
         }
 
         const result = {
-            memberId: await _parseOutLinkedInMemberId(),
+            memberId: await _getMemberId(),
         }
 
         //first and last name
@@ -51,7 +50,10 @@
                 .then((result) => {
                     this.profile = result;
                 })
-        }      
+        }
+
+        getMemberId = _getMemberId;
+        scrapeProfile = _scrapeProfile;        
     }
 
     window.linkedInPublicProfile = new LinkedInPublicProfile();

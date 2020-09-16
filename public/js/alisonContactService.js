@@ -16,6 +16,7 @@
             industry: lic.industry,
             linkedInIsJobSeeker: lic.isJobSeeker,
             linkedInMemberId: lic.memberId,
+            linkedInSkills: lic.linkedInSkills,
             messagesSent: lic.messagesSent,
             opportunitiesPresented: lic.opportunitiesPresented
         };
