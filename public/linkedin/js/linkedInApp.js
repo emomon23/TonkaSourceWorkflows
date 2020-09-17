@@ -18,15 +18,19 @@
 
     const _showTagsVisualIndicator = () => {
         const tags = window.localStorage.getItem(_tagsKey);
+        const selectors = ['a[class*="product-logo"]', 
+                'span[class*="special-seat"]:contains("Lite")'];
+
+        const element = tsUICommon.findFirstDomElement(selectors);
+        if (!element){
+            return;
+        }
 
         if (tags != undefined && tags != null){
-            const selectors = ['a[class*="product-logo"]', 
-                                'span[class*="special-seat"]:contains("Lite")'];
-
-            const element = tsUICommon.findFirstDomElement(selectors);
-            if (element !== null){
-                $(element).attr('style', 'color:yellow');
-            }
+            $(element).attr('style', 'color:yellow');
+        }
+        else {
+            $(element).removeAttr('style');
         }
     }
 
@@ -89,7 +93,7 @@
 
     const _upsertContact =  async (candidate) => {
         const tags = linkedInApp.getAlisonTags();
-        const activeOpp = linkedInCommon.getAlisonTags();
+        const activeOpp = linkedInApp.getAlisonTags();
 
         if (tags !== null && tags !== undefined){
             candidate.tags = tags;
@@ -98,7 +102,7 @@
         if (activeOpp !== null && activeOpp !== undefined){
             candidate.tags += ', ' + activeOpp;
         }
-        
+
         await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
     }
 
@@ -171,7 +175,7 @@
     }
 
     window.setAlisonTags = (tags) => {
-        window.location.setItem(_tagsKey, tags);
+        window.localStorage.setItem(_tagsKey, tags);
         _showTagsVisualIndicator();
     }
 
