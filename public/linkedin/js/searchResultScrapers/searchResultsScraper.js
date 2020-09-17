@@ -118,11 +118,12 @@
 
             await window.promiseLoop(candidatesInResults, async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
-                const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
-                if (existingCachedCandidate === undefined){
-                    const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInpuytModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
-                    const trimmedCandidate = _.omit(candidate, omitFields);
                 
+                const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInpuytModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
+                const trimmedCandidate = _.omit(candidate, omitFields);
+                const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
+                
+                if (existingCachedCandidate === undefined){
                     trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
                     
@@ -133,8 +134,15 @@
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
                 }
-                else if (existingCachedCandidate.isSelected == true) {
-                    linkedInApp.changeBadgeColor(candidate.memberId, 'red');
+                else {
+                    if (existingCachedCandidate.isSelected == true) {
+                        linkedInApp.changeBadgeColor(candidate.memberId, 'red');
+                    }
+
+                    if (existingCachedCandidate.isJobSeeker !== candidate.isJobSeeker){
+                        searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
+                        await linkedInApp.upsertContact(trimmedCandidate);
+                    }
                 }
             });
 
