@@ -44,6 +44,25 @@
         }
     }
 
+    const _highlightJobSeekers = (currentPageOfCandidates) => {
+        try {
+            if (currentPageOfCandidates && Array.isArray(currentPageOfCandidates) && currentPageOfCandidates.length > 0){
+                currentPageOfCandidates.forEach((candidate) => {
+                    if (candidate.isJobSeeker){
+                        const jobSeekerElement = tsUICommon.findFirstDomElement([`a[href*="${candidate.memberId}"]`, `a:contains("${candidate.fullName}")`]);
+                        if (jobSeekerElement !== null){
+                            const newLabel = '** ' + $(jobSeekerElement).text();
+                            $(jobSeekerElement).attr('style', 'color:orange').text(newLabel);
+                        }
+                    }
+                });
+            }
+        }
+        catch(e) {
+            console.log(`Unable to highlight job seekers.  ${e.message}. ${e}.`)
+        }
+    }
+
     const _searchCandidates = (scrapedCandidates, searchFor) => {
         let candidateReference = null;
         
@@ -109,11 +128,17 @@
                     
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
                     persist = true;
+
+                    if (trimmedCandidate.isJobSeeker){
+                        await linkedInApp.upsertContact(trimmedCandidate);
+                    }
                 }
                 else if (existingCachedCandidate.isSelected == true) {
                     linkedInApp.changeBadgeColor(candidate.memberId, 'red');
                 }
             });
+
+            _highlightJobSeekers(candidatesInResults);
 
             if (persist){
                 searchResultsScraper.persistToLocalStorage();

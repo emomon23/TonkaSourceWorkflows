@@ -71,8 +71,8 @@
         searchResultsScraper.deselectCandidate(memberId);
     }
 
-    const _upsertContact = async(candidate) => {
-        console.log('upsertContact called');
+    const _upsertContact =  async (candidate) => {
+        await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
     }
 
     const _createMessageRecordObject = (text, type) => {
