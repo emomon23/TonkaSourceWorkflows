@@ -169,7 +169,6 @@
                     container.isSelected = !isRed;
                     const {memberId, firstName, lastName, location, networkConnection, isJobSeeker} = candidate;
                     linkedInCommon.callAlisonHookWindow('toggleCandidateSelection', {memberId, firstName, lastName, location, networkConnection, isJobSeeker, isSelected: !isRed});
-                    linkedInCommon.callAlisonHookWindow('saveLinkedInContact',)
                 }
                 else {
                     console.log({msg: 'Unable to find candidate:', helper});

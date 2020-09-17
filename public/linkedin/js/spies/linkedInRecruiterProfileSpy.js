@@ -12,7 +12,7 @@
                     if (candidateContainer && candidateContainer.candidate){
                         // Add LinkedIn Profile URL to candidate
                         candidateContainer.candidate.linkedIn = $(publicProfileLink).attr('href');
-                        linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidateContainer.candidate);
+                        linkedInApp.upsertContact(candidateContainer.candidate);
                     } 
                 }
             });
