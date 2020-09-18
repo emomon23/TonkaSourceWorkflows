@@ -18,6 +18,7 @@
             linkedInMemberId: lic.memberId,
             linkedInSkills: lic.linkedInSkills,
             messagesSent: lic.messagesSent,
+            tags: lic.tags,
             opportunitiesPresented: lic.opportunitiesPresented
         };
 

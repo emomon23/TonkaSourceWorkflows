@@ -1,5 +1,6 @@
 (function() {
     const _activeOpportunityKey = 'tsActiveOpportunityKey';
+    const _tagsKey = 'tsTagsKey';
 
     const _showOpportunityVisualIndicatorOnSelelector = (selector) => {
         const activeOpp = window.localStorage.getItem(_activeOpportunityKey);
@@ -14,6 +15,25 @@
             }
         }
     }
+
+    const _showTagsVisualIndicator = () => {
+        const tags = window.localStorage.getItem(_tagsKey);
+        const selectors = ['a[class*="product-logo"]', 
+                'span[class*="special-seat"]:contains("Lite")'];
+
+        const element = tsUICommon.findFirstDomElement(selectors);
+        if (!element){
+            return;
+        }
+
+        if (tags != undefined && tags != null){
+            $(element).attr('style', 'color:yellow');
+        }
+        else {
+            $(element).removeAttr('style');
+        }
+    }
+
     const _showOpportunityVisualIndicator = () => {
         _showOpportunityVisualIndicatorOnSelelector('h1 span:contains("Recruiter")');
         _showOpportunityVisualIndicatorOnSelelector('a[class*="message-anywhere-button"]');
@@ -71,8 +91,19 @@
         searchResultsScraper.deselectCandidate(memberId);
     }
 
-    const _upsertContact = async(candidate) => {
-        console.log('upsertContact called');
+    const _upsertContact =  async (candidate) => {
+        const tags = linkedInApp.getAlisonTags();
+        const activeOpp = linkedInApp.getAlisonTags();
+
+        if (tags !== null && tags !== undefined){
+            candidate.tags = tags;
+        }
+
+        if (activeOpp !== null && activeOpp !== undefined){
+            candidate.tags += ', ' + activeOpp;
+        }
+
+        await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
     }
 
     const _createMessageRecordObject = (text, type) => {
@@ -102,7 +133,7 @@
                 candidate.opportunitiesPresented = [opportunityRecord]
             }
 
-            linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
+            _upsertContact(candidate);
         }
     }
 
@@ -119,6 +150,7 @@
         recordMessageWasSent = _recordMessageWasSent;
         recordConnectionRequestMade = _recordConnectionRequestMade;
         getActiveOpportunity = () => { return window.localStorage.getItem(_activeOpportunityKey); };
+        getAlisonTags = () => { return window.localStorage.getItem(_tagsKey); };
     }
 
     window.linkedInApp = new LinkedInApp();
@@ -142,12 +174,23 @@
         _showOpportunityVisualIndicator();
     }
 
+    window.setAlisonTags = (tags) => {
+        window.localStorage.setItem(_tagsKey, tags);
+        _showTagsVisualIndicator();
+    }
+
     window.clearActiveOpportunity = () => {
         window.localStorage.removeItem(_activeOpportunityKey);
         _showOpportunityVisualIndicator();
     }
 
+    window.clearAlisonTags = () => {
+        window.localStorage.removeItem(_tagsKey);
+        _showTagsVisualIndicator();
+    }
+
     _showOpportunityVisualIndicator();
+    _showTagsVisualIndicator();
 })();
 
 

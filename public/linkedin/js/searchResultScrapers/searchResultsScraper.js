@@ -44,6 +44,25 @@
         }
     }
 
+    const _highlightJobSeekers = (currentPageOfCandidates) => {
+        try {
+            if (currentPageOfCandidates && Array.isArray(currentPageOfCandidates) && currentPageOfCandidates.length > 0){
+                currentPageOfCandidates.forEach((candidate) => {
+                    if (candidate.isJobSeeker){
+                        const jobSeekerElement = tsUICommon.findFirstDomElement([`a[href*="${candidate.memberId}"]`, `a:contains("${candidate.fullName}")`]);
+                        if (jobSeekerElement !== null){
+                            const newLabel = '** ' + $(jobSeekerElement).text();
+                            $(jobSeekerElement).attr('style', 'color:orange').text(newLabel);
+                        }
+                    }
+                });
+            }
+        }
+        catch(e) {
+            console.log(`Unable to highlight job seekers.  ${e.message}. ${e}.`)
+        }
+    }
+
     const _searchCandidates = (scrapedCandidates, searchFor) => {
         let candidateReference = null;
         
@@ -99,21 +118,35 @@
 
             await window.promiseLoop(candidatesInResults, async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
-                const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
-                if (existingCachedCandidate === undefined){
-                    const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInpuytModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
-                    const trimmedCandidate = _.omit(candidate, omitFields);
                 
+                const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInpuytModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
+                const trimmedCandidate = _.omit(candidate, omitFields);
+                const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
+                
+                if (existingCachedCandidate === undefined){
                     trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
                     
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
                     persist = true;
+
+                    if (trimmedCandidate.isJobSeeker){
+                        await linkedInApp.upsertContact(trimmedCandidate);
+                    }
                 }
-                else if (existingCachedCandidate.isSelected == true) {
-                    linkedInApp.changeBadgeColor(candidate.memberId, 'red');
+                else {
+                    if (existingCachedCandidate.isSelected == true) {
+                        linkedInApp.changeBadgeColor(candidate.memberId, 'red');
+                    }
+
+                    if (existingCachedCandidate.isJobSeeker !== candidate.isJobSeeker){
+                        searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
+                        await linkedInApp.upsertContact(trimmedCandidate);
+                    }
                 }
             });
+
+            _highlightJobSeekers(candidatesInResults);
 
             if (persist){
                 searchResultsScraper.persistToLocalStorage();
@@ -136,7 +169,6 @@
                     container.isSelected = !isRed;
                     const {memberId, firstName, lastName, location, networkConnection, isJobSeeker} = candidate;
                     linkedInCommon.callAlisonHookWindow('toggleCandidateSelection', {memberId, firstName, lastName, location, networkConnection, isJobSeeker, isSelected: !isRed});
-                    linkedInCommon.callAlisonHookWindow('saveLinkedInContact',)
                 }
                 else {
                     console.log({msg: 'Unable to find candidate:', helper});
