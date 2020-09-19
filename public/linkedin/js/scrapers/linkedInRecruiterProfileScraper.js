@@ -6,7 +6,28 @@
     const _scrapeProfile = async () => {
         await tsCommon.sleep(2000);
         var memberId = _getMemberId();
+        var candidateObj = searchResultsScraper.scrapedCandidates[memberId];
 
+        // If we've scraped this candidate, proceed
+        if (candidateObj) {
+            var candidate = candidateObj.candidate;
+
+            // Scrape skills
+            candidate.linkedInSkills = _scrapeSkills();
+
+            if (_shouldSaveCandidate(candidate)) {
+                await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
+            } else {
+                // If we don't save the candidate, we need to update local storage with details
+                searchResultsScraper.scrapedCandidates[memberId].candidate = candidate;
+                searchResultsScraper.persistToLocalStorage();
+            }
+        }
+
+        return null;
+    }
+
+    const _scrapeSkills = () => {
         const skills = [];
         var skillElements = $(linkedInSelectors.recruiterProfilePage.skillsList).children("li");
 
@@ -16,11 +37,19 @@
             });
         }
 
-        if (searchResultsScraper.scrapedCandidates[memberId]) {
-            searchResultsScraper.scrapedCandidates[memberId].candidate.linkedInSkills = skills; 
-        }
+        return skills;
+    }
 
-        return null;
+    const _shouldSaveCandidate = (candidate) => {
+        // This is our ability to scrape and save anyone we step into after searching
+        if (linkedInConstants.SAVE_AFTER_RECRUITER_PROFILE_SCRAPE) {
+            return true;
+        }
+        // Save candidate if isJobSeeker
+        if (candidate.isJobSeeker === true) {
+            return true;
+        }
+        return false;
     }
 
     class LinkedInRecruiterProfileScraper {
