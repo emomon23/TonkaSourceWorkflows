@@ -12,6 +12,9 @@
         if (candidateObj) {
             var candidate = candidateObj.candidate;
 
+            // Scrape Public Profile
+            candidate.linkedIn = _scrapePublicProfileLink();
+
             // Scrape skills
             candidate.linkedInSkills = _scrapeSkills();
 
@@ -25,6 +28,10 @@
         }
 
         return null;
+    }
+
+    const _scrapePublicProfileLink = () => {
+        return $(linkedInSelectors.recruiterProfilePage.publicProfileLink).attr("href");
     }
 
     const _scrapeSkills = () => {

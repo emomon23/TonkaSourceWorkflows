@@ -2,6 +2,7 @@
 
     const _recruiterProfilePage = {
         profileId: 'input[name*="profile-id"]',
+        publicProfileLink: 'a:contains("Public Profile")',
         skillsList: '#profile-skills div ul[class*="skills"]'
     }
 
