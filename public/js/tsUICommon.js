@@ -23,7 +23,7 @@
 
     const _addButton = (containerId, buttonId, buttonText, height, width, clickFunction) => {
         const button = document.createElement("button");
-        button.id = `${buttonId}_button`;;
+        button.id = `${buttonId}_button`;
         $(button).text(buttonText);
         button.setAttribute('style', `margin-left: 10px; height: ${height}px; width:${width}px`)
 
@@ -52,7 +52,7 @@
             }
         }
    
-        if (result != null || $(startElement).parent().length == 0){
+        if (result !== null || $(startElement).parent().length === 0){
           return result;
         }
    

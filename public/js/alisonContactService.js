@@ -49,7 +49,7 @@
                 .attr("style", "background-color: green; width: 100%; height: 25px;")
                 .html(`${contact.firstName} ${contact.lastName} has been saved.`);
             
-                setTimeout(function() { 
+                setTimeout(() => { 
                     $("#message-container").hide();
                 }, 4000);
         }

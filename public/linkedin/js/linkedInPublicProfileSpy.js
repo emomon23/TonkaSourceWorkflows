@@ -20,7 +20,7 @@
         let result = {firstName: '', lastName: ''};
         const headerSpan = _getMessageModal_RecipientNameElement(peerElement);
 
-        if (headerSpan != null){
+        if (headerSpan !== null){
             const firstAndLastName = headerSpan.textContent.trim().split(' ');
             result.firstName = firstAndLastName[0];
             result.lastName = firstAndLastName.length > 1? firstAndLastName[1] : '';
@@ -41,7 +41,7 @@
         if (__lastEditableDiv && __lastEditableDiv.outerText.trim().length > 0 && __lastEditableDiv.outerText.indexOf('[firstName]') >= 0){
             const recipientName = _getFirstAndLastName(__lastEditableDiv);
             let text = __lastEditableDiv.innerHTML.split('[firstName]').join(recipientName.firstName);
-            if (text != __lastEditableDiv.innerHTML){
+            if (text !== __lastEditableDiv.innerHTML){
                 __lastEditableDiv.innerHTML = text;
                 _addASpaceToTheMessage(text);
             }
@@ -88,7 +88,7 @@
         await tsCommon.sleep(1000);
 
         const editableDiv = tsUICommon.findDomElement('div[class*="msg-form__contenteditable"]');
-        if (editableDiv == null){
+        if (editableDiv === null){
             return;
         }
 

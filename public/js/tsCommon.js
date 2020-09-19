@@ -82,14 +82,16 @@
             try {
                 return JSON.parse(data);
             }
-            catch {}
+            catch {
+                // Do nothing
+            }
         }
       
         return data;
     }
 
     const _setUpPostMessageListener = (container) => {
-        window.addEventListener('message', function(e) {
+        window.addEventListener('message', (e) => {
             var d = e.data;
     
             const action = d.action;
@@ -97,6 +99,7 @@
     
             const fncToCall =  container && container.length? `${container}.${action}` : `${action}`;
             const script = `if (${fncToCall}){ ${fncToCall}(data); }`
+            // eslint-disable-next-line no-eval
             eval(script);
         });
     }
@@ -108,7 +111,7 @@
 
     const _httpGetJson = (url) => {
         return new Promise((resolve, reject) => {
-           $.get(url, function(data) {
+           $.get(url, (data) => {
                resolve(data);
            });
         });
@@ -116,7 +119,7 @@
 
     const _httpGetText = (url) => {
         return new Promise((resolve, reject) => {
-            $.get(url, function(response) {
+            $.get(url, (response) => {
                 resolve(response);
             });
          });
@@ -130,12 +133,12 @@
     }
 
     const _findAHyperLink = (hrefContains, documentReference = null) => {
-        if (documentReference == null){
+        if (documentReference === null){
             documentReference = window.document;
         }
 
         const result =  documentReference.querySelector(`a[href*='${hrefContains}']`);
-        if (result == undefined || result == null){
+        if (result === undefined || result === null){
             return null;
         }
 
@@ -147,11 +150,11 @@
     }
 
     const _navigateToHyperLink = (hrefContains, parentWindow = null) => {
-        if (parentWindow == null){
+        if (parentWindow === null){
             parentWindow = window;
         }
         const linkRef = _findAHyperLink(hrefContains, parentWindow.document);
-        if (linkRef != null){
+        if (linkRef !== null){
             const href = linkRef.getAttribute('href');
             parentWindow.location.href = href;
         }
@@ -160,7 +163,7 @@
    
 
     class TSCommon {
-        constructor(){};
+        constructor(){}
 
         log = _log;
         sleep = _sleep;
