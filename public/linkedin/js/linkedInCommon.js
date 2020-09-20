@@ -23,6 +23,18 @@
         }
     }
 
+    const _getRoleName = (roleName) => {
+        if (linkedInConstants.roles[roleName.toUpperCase()]) {
+            return linkedInConstants.roles[roleName.toUpperCase()];
+        } else {
+            tsCommon.log({
+                message: "Role Not Defined",
+                roles: linkedInConstants.roles
+            }, "WARN");
+        }
+        return null;
+    }
+
     const _whatPageAmIOn = () => {
         const href = window.location.href;
         if (href.indexOf(linkedInConstants.urls.RECRUITER_PROFILE) > 0) {
@@ -41,6 +53,7 @@
         constructor() {}
 
         advanceToNextLinkedInResultPage = _advanceToNextLinkedInResultPage;
+        getRoleName = _getRoleName;
         callAlisonHookWindow = _callAlisonHookWindow;
         whatPageAmIOn = _whatPageAmIOn;
     }
