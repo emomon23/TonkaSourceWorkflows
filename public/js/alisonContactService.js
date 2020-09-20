@@ -14,6 +14,7 @@
             title: lic.headline,
             imageUrl: lic.imageUrl,
             industry: lic.industry,
+            industryGroup: lic.role,
             linkedInIsJobSeeker: lic.isJobSeeker,
             linkedInMemberId: lic.memberId,
             linkedInSkills: lic.linkedInSkills,
@@ -28,10 +29,6 @@
 
         if (lic.referencesReceived){
             result.referencesReceived = lic.referencesReceived
-        }
-
-        if (lic.skills || lic.linkedInSkillsList){
-            result.linkedInSkillsList = lic.skills || lic.linkedInSkillsList;
         }
 
         return result;
@@ -62,8 +59,6 @@
             
         }
     }
-
-   
 
     class AlisonContactService {
         saveLinkedInContact = _saveLinkedInContact;
