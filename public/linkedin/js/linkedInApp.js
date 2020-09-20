@@ -1,6 +1,7 @@
 (function() {
-    const _activeOpportunityKey = 'tsActiveOpportunityKey';
-    const _tagsKey = 'tsTagsKey';
+    const _activeOpportunityKey = linkedInConstants.localStorageKeys.ACTIVE_OPPORTUNITY;
+    const _roleKey = linkedInConstants.localStorageKeys.ROLE;
+    const _tagsKey = linkedInConstants.localStorageKeys.TAGS;
 
     const _showOpportunityVisualIndicatorOnSelelector = (selector) => {
         const activeOpp = window.localStorage.getItem(_activeOpportunityKey);

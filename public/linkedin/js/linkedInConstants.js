@@ -1,5 +1,11 @@
 (function() {
     class LinkedInConstants {
+        localStorageKeys = {
+            ACTIVE_OPPORTUNITY: 'tsActiveOpportunityKey',
+            ROLE: 'tsRoleKey',
+            TAGS: 'tsTagsKey'
+        };
+
         pages = {
             RECRUITER_SEARCH_RESULTS: "Recruiter Search Results",
             RECRUITER_PROFILE: "Recruiter Profile",
