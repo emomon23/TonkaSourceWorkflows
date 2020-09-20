@@ -3,7 +3,15 @@
     const _roleKey = linkedInConstants.localStorageKeys.ROLE;
     const _tagsKey = linkedInConstants.localStorageKeys.TAGS;
 
-    const _showOpportunityVisualIndicatorOnSelelector = (selector) => {
+    const _getActiveOpportunity = () => {
+        return window.localStorage.getItem(_activeOpportunityKey);
+    }
+
+    const _getAlisonTags = () => {
+        return window.localStorage.getItem(_tagsKey);
+    }
+
+    const _showOpportunityVisualIndicatorOnSelector = (selector) => {
         const activeOpp = window.localStorage.getItem(_activeOpportunityKey);
         const recruiterNode = tsUICommon.findDomElement(selector);
 
@@ -36,9 +44,9 @@
     }
 
     const _showOpportunityVisualIndicator = () => {
-        _showOpportunityVisualIndicatorOnSelelector('h1 span:contains("Recruiter")');
-        _showOpportunityVisualIndicatorOnSelelector('a[class*="message-anywhere-button"]');
-        _showOpportunityVisualIndicatorOnSelelector('button[aria-label*="Connect with"]');
+        _showOpportunityVisualIndicatorOnSelector('h1 span:contains("Recruiter")');
+        _showOpportunityVisualIndicatorOnSelector('a[class*="message-anywhere-button"]');
+        _showOpportunityVisualIndicatorOnSelector('button[aria-label*="Connect with"]');
     }
 
     //These are High Level 'Commands' that the app supports
@@ -96,7 +104,7 @@
 
     const _upsertContact =  async (candidate) => {
         const tags = linkedInApp.getAlisonTags();
-        const activeOpp = linkedInApp.getAlisonTags();
+        const activeOpp = linkedInApp.getActiveOpportunity();
 
         if (tags !== null && tags !== undefined){
             candidate.tags = tags;
@@ -107,6 +115,7 @@
         }
 
         await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
+        return null;
     }
 
     const _createMessageRecordObject = (text, type) => {
@@ -152,8 +161,8 @@
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
         recordMessageWasSent = _recordMessageWasSent;
         recordConnectionRequestMade = _recordConnectionRequestMade;
-        getActiveOpportunity = () => { return window.localStorage.getItem(_activeOpportunityKey); };
-        getAlisonTags = () => { return window.localStorage.getItem(_tagsKey); };
+        getActiveOpportunity = _getActiveOpportunity;
+        getAlisonTags = _getAlisonTags;
     }
 
     window.linkedInApp = new LinkedInApp();
@@ -181,6 +190,10 @@
         window.localStorage.removeItem(_tagsKey);
         _showTagsVisualIndicator();
     }
+
+    window.getActiveOpportunity = _getActiveOpportunity;
+
+    window.getAlisonTags = _getAlisonTags;
 
     window.setActiveOpportunity = (opportunityId) => {
         window.localStorage.setItem(_activeOpportunityKey, opportunityId);
