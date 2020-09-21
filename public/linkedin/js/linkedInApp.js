@@ -226,7 +226,7 @@
         _showOpportunityVisualIndicator();
     }
 
-    window.clearAlisonRole = () => {
+    window.clearActiveRole = () => {
         window.localStorage.removeItem(_roleKey);
         _showRoleVisualIndicator();
     }

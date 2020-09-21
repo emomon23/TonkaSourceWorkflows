@@ -1,12 +1,14 @@
 var gulp = require('gulp');
-var useref = require('gulp-useref');
-var gulpif = require('gulp-if');
-var uglify = require('gulp-uglify');
-var minifyCss = require('gulp-clean-css');
-var replace = require('gulp-replace');
+
+var cp = require('child_process');
 var del = require('del');
 var exec = require('gulp-exec')
-var cp = require('child_process');
+var gulpif = require('gulp-if');
+var eslint = require ('gulp-eslint');
+var minifyCss = require('gulp-clean-css');
+var replace = require('gulp-replace');
+var uglify = require('gulp-uglify');
+var useref = require('gulp-useref');
 
 function clean(cb) {
     return del('build');
@@ -20,6 +22,13 @@ function html(cb) {
         .pipe(gulpif('*.js', uglify()))
         .pipe(gulpif('*.css', minifyCss()))
         .pipe(gulp.dest('build/Release'));
+}
+
+function lint(cb) {
+    return gulp.src('public/**/*.js')
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
 }
 
 function js(cb) {
@@ -48,7 +57,7 @@ exports.build = gulp.series(
     gulp.parallel(
         html,
         root,
-        js,
+        gulp.series(lint, js),
         css
     )
 );
