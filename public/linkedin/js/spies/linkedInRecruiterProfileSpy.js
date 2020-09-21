@@ -1,13 +1,11 @@
 (() => {
-    
     const _bindToPublicProfileLink = async() => {
         await tsCommon.sleep(2000);
         const publicProfileLink = tsUICommon.findDomElement('a[href*="linkedin.com/in/"][target="_blank"]');
-        if (publicProfileLink != null){
-            
+        if (publicProfileLink !== null){
             $(publicProfileLink).bind('click', () => {
                 const memberId = linkedInRecruiterProfileScraper.getMemberId();
-                if (memberId != null){
+                if (memberId !== null){
                     const candidateContainer = searchResultsScraper.scrapedCandidates[memberId];
                     if (candidateContainer && candidateContainer.candidate){
                         // Add LinkedIn Profile URL to candidate
@@ -16,7 +14,6 @@
                     } 
                 }
             });
-
         }
     }
    

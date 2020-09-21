@@ -1,17 +1,4 @@
- (function() {
-    const _callAlisonHookWindow = async (actionString, data) => {
-        await window.launchTonkaSource();
-        await tsCommon.sleep(2000);
-
-        if (window.alisonHookWindow != undefined){
-            const jsonData = JSON.stringify(data);
-            tsCommon.postMessageToWindow(alisonHookWindow, actionString, jsonData);
-        }
-        else {
-            console.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()?)");
-        }
-    }
-
+(function() {
     const _advanceToNextLinkedInResultPage = () => {
         const buttonExists = $("[type='chevron-right-icon']").length;
         if (buttonExists){
@@ -21,6 +8,19 @@
         }
 
         return false;
+    }
+
+    const _callAlisonHookWindow = async (actionString, data) => {
+        await window.launchTonkaSource();
+        await tsCommon.sleep(2000);
+
+        if (window.alisonHookWindow !== undefined){
+            const jsonData = JSON.stringify(data);
+            tsCommon.postMessageToWindow(alisonHookWindow, actionString, jsonData);
+        }
+        else {
+            console.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()?)");
+        }
     }
 
     const _whatPageAmIOn = () => {

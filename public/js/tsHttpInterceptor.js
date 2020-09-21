@@ -37,7 +37,7 @@
         }
 
         copyToAnotherWindow = (otherWindow) => {
-            if (otherWindow.tsInterceptor == null || otherWindow.tsInterceptor == undefined){
+            if (otherWindow.tsInterceptor === null || otherWindow.tsInterceptor === undefined){
                 const interceptor = new TsHttpInterceptor();
 
                 __requestIntercepts.forEach((ri) => {

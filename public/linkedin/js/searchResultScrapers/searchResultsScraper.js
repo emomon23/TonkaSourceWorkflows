@@ -18,7 +18,7 @@
 
         if (candidate.degree){
             let networkConnection = candidate.degree.replace('FIRST_DEGREE', '1').replace('SECOND_DEGREE', '2').replace('THIRD_DEGREE', 3);
-            if ('123'.indexOf(networkConnection) == -1){
+            if ('123'.indexOf(networkConnection) === -1){
                 networkConnection = '4';
             }
 
@@ -27,7 +27,7 @@
             }
 
             const loggedInAlisonUserName = await linkedInApp.getAlisonLoggedInUser();
-            if (loggedInAlisonUserName != null){
+            if (loggedInAlisonUserName !== null){
                 candidate.alisonConnections[loggedInAlisonUserName] = networkConnection;
             }
         }
@@ -39,6 +39,7 @@
         let count = 0;
 
         while(count < 50 && (!liTag || !$(liTag).attr('id'))){
+            // eslint-disable-next-line no-await-in-loop
             await tsCommon.sleep(100);
             liTag = $(lastCandidateId);
         }
@@ -68,10 +69,12 @@
         
         try {
             candidateReference = scrapedCandidates[searchFor];
-            if (candidateReference != undefined && candidateReference != null){
+            if (candidateReference !== undefined && candidateReference !== null){
                 return candidateReference.candidate;
             }
-        }catch {}
+        } catch {
+            // Do nothing
+        }
 
         let firstName =  null; 
         let lastName = null; 
@@ -135,7 +138,7 @@
                     }
                 }
                 else {
-                    if (existingCachedCandidate.isSelected == true) {
+                    if (existingCachedCandidate.isSelected === true) {
                         linkedInApp.changeBadgeColor(candidate.memberId, 'red');
                     }
 
@@ -152,7 +155,7 @@
                 searchResultsScraper.persistToLocalStorage();
             }
 
-            $('.badges abbr').bind("click", function(e) {
+            $('.badges abbr').bind("click", (e) => {
                 const element = $(e.currentTarget);
 
                 const style = $(element).attr('style') || '';
@@ -164,7 +167,7 @@
                 const candidateMemberId = $('li').has(element).attr('id').replace('search-result-', '')
                 const container = searchResultsScraper.scrapedCandidates[candidateMemberId];
                 
-                if (container != undefined){
+                if (container !== undefined){
                     const candidate = container.candidate;
                     container.isSelected = !isRed;
                     const {memberId, firstName, lastName, location, networkConnection, isJobSeeker} = candidate;
@@ -183,7 +186,7 @@
         
         constructor(){
             var jsonString = window.localStorage.getItem(_localStorageItemName);
-            if (jsonString != null && jsonString != undefined){
+            if (jsonString !== null && jsonString !== undefined){
                 this.scrapedCandidates = JSON.parse(jsonString);
             }
         }
@@ -191,7 +194,7 @@
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         
         deselectCandidate = (memberId) => {
-            if (this.scrapedCandidates[memberId] != undefined){
+            if (this.scrapedCandidates[memberId] !== undefined){
                 this.scrapedCandidates[memberId].isSelected = false;
             }
         };

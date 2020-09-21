@@ -1,3 +1,4 @@
+/* eslint-disable no-eval */
 (() => {
 
     const __doesMethodExistOnActiveTemplate = (methodName) => {
@@ -28,7 +29,7 @@
     }
 
     class AlisonHook {
-        constructor(){};
+        constructor(){}
 
         activeTemplate = null;
         linkedInConsoleReference = null;
@@ -51,7 +52,7 @@
     window.alisonHook = new AlisonHook();
 
     $(document).ready(() => {
-        window.addEventListener('message', function(e) {
+        window.addEventListener('message', (e) => {
             var d = e.data;
             linkedInConsoleReference = e.source;
     
@@ -68,7 +69,7 @@
                 eval(`alisonHook.activeTemplate.${action}(${data});`);
 
                 // Close the window if we're successful
-                setTimeout(function() { 
+                setTimeout(() => { 
                     window.close();
                 }, 5000);
             }
@@ -76,7 +77,7 @@
                 eval(`alisonHook.${action}(${data});`);
                 
                 // Close the window if we're successful
-                setTimeout(function() { 
+                setTimeout(() => { 
                     window.close();
                 }, 5000);
             }
@@ -84,7 +85,7 @@
                 eval(`${action}(${data});`);
                 
                 // Close the window if we're successful
-                setTimeout(function() { 
+                setTimeout(() => { 
                     window.close();
                 }, 5000);
             }

@@ -42,7 +42,7 @@
 
             if( MutationObserver ){
                 // define a new observer
-                var obs = new MutationObserver(function(mutations, observer){
+                var obs = new MutationObserver((mutations, observer) => {
                     callback(mutations);
                 })
                 // have the observer observe foo for changes in children
@@ -57,7 +57,7 @@
     })();
 
     window.setupHackMonitors = (jQuerySelector) => {
-         $(jQuerySelector).on("click focus blur focusin keydown change click dblclick keydown keyup keypress input textInput touchstart touchmove touchend touchcancel resize scroll select change submit reset",function(e){
+         $(jQuerySelector).on("click focus blur focusin keydown change click dblclick keydown keyup keypress input textInput touchstart touchmove touchend touchcancel resize scroll select change submit reset",(e) => {
             console.log({element: 'body', e});
          });
     }

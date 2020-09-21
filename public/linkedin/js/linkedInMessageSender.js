@@ -1,7 +1,7 @@
 (function() {
     const _getPublicProfile_MessageButtonSelector = (publicProfileWindow) => {
         let linkButton = tsCommon.findAHyperLink('/messaging/thread/', publicProfileWindow.document);
-        if (linkButton != null){
+        if (linkButton !== null){
             return {
                 type: 'MESSAGE',
                 clickable: linkButton
@@ -9,7 +9,7 @@
         }
 
         linkButton = publicProfileWindow.document.querySelector('button[aria-label*="Connect with"]');
-        if (linkButton != undefined && linkButton != null){
+        if (linkButton !== undefined && linkButton !== null){
             return {
                 type: 'CONNECTION REQUEST',
                 clickable: linkButton
@@ -69,13 +69,13 @@
 
     const _sendLinkedInMessageOrConnectionRequestToCandidate = async (memberIdOrFirstNameAndLastName, messageToSend, connectionRequestToSend = null) => {
             
-            if (connectionRequestToSend == null){
+            if (connectionRequestToSend === null){
                 connectionRequestToSend = messageToSend;
             }
 
             const candidate = searchResultsScraper.findCandidate(memberIdOrFirstNameAndLastName);
 
-            if (candidate != undefined && candidate != null){
+            if (candidate !== undefined && candidate !== null){
                 messageToSend = _processAnyTemplateText(candidate, messageToSend);
                 connectionRequestToSend = _processAnyTemplateText(candidate, connectionRequestToSend);
 
@@ -87,7 +87,7 @@
                 linkedInCommon.callAlisonHookWindow('upsertContact', candidate);
 
                 const whatButtonIsAvailable = _getPublicProfile_MessageButtonSelector(publicProfileWindow);
-                if (whatButtonIsAvailable == null){
+                if (whatButtonIsAvailable === null){
                     console.log(`Unable to send a message to ${canidate.firstName} ${candidate.lastName}`);
                 }
                 else {

@@ -27,7 +27,7 @@
     const _scrapeFirstAndLastNameFromProfile = () => {
         let element = tsUICommon.findFirstDomElement(['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")']);
         if (element === null){
-            return;
+            return null;
         }
 
         let wholeName =  $(element).prop("tagName") === "BUTTON" ? $(element).attr('aria-label') : $(element).text();
@@ -62,7 +62,7 @@
         }
 
         const firstAndLast = _scrapeFirstAndLastNameFromProfile();
-        if (firstAndLast != null){
+        if (firstAndLast !== null){
             result.firstName = firstAndLast.firstName;
             result.lastName = firstAndLast.lastName;
         }

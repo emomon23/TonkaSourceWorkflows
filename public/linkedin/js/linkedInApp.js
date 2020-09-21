@@ -6,8 +6,8 @@
         const activeOpp = window.localStorage.getItem(_activeOpportunityKey);
         const recruiterNode = tsUICommon.findDomElement(selector);
 
-        if (recruiterNode != null){
-            if (activeOpp != undefined && activeOpp != null){
+        if (recruiterNode !== null){
+            if (activeOpp !== undefined && activeOpp !== null){
                 $(recruiterNode.attr('style', 'color:red'))
             }
             else {
@@ -26,7 +26,7 @@
             return;
         }
 
-        if (tags != undefined && tags != null){
+        if (tags !== undefined && tags !== null){
             $(element).attr('style', 'color:yellow');
         }
         else {
@@ -44,7 +44,7 @@
     //that the alisonHook UI (or user) can call.
     const _getAlisonLoggedInUser = async () => {
         let scrapedUser =  window.linkedInApp.alisonUserName;
-        if (scrapedUser == null || scrapedUser == undefined){
+        if (scrapedUser === null || scrapedUser === undefined){
             await tsCommon.sleep(2000);
             let loggedInUserFirstAndLastName = null;
 
@@ -81,7 +81,9 @@
             const query = `#search-result-${memberId} abbr`;
             $($(query)[0]).attr('style', `color:${color}`)
         }
-        catch {}
+        catch {
+            // Do Nothing
+        }
     }
 
     const _candidateUnselect = async(data) => {
@@ -118,7 +120,7 @@
     const _recordMessageWasSent = (recipient, messageSent, type = 'message') => {
         let candidate = searchResultsScraper.findCandidate(recipient);
         
-        if (candidate != null){
+        if (candidate !== null){
             //make a copy of what we need for this save
             const {firstName, lastName, memberId} = candidate;
             candidate = {firstName, lastName, memberId};
@@ -127,7 +129,7 @@
             candidate.messagesSent = [messageObject];
 
             const opportunity = window.localStorage.getItem(_activeOpportunityKey);
-            if (opportunity != null && opportunity != undefined) {
+            if (opportunity !== null && opportunity !== undefined) {
                 const opportunityRecord = _createMessageRecordObject(messageSent, type);
                 opportunityRecord.opportunityName = opportunity;
                 candidate.opportunitiesPresented = [opportunityRecord]
@@ -169,16 +171,6 @@
         await tsCommon.sleep(2000);
     }
 
-    window.setActiveOpportunity = (opportunityId) => {
-        window.localStorage.setItem(_activeOpportunityKey, opportunityId);
-        _showOpportunityVisualIndicator();
-    }
-
-    window.setAlisonTags = (tags) => {
-        window.localStorage.setItem(_tagsKey, tags);
-        _showTagsVisualIndicator();
-    }
-
     window.clearActiveOpportunity = () => {
         window.localStorage.removeItem(_activeOpportunityKey);
         _showOpportunityVisualIndicator();
@@ -186,6 +178,16 @@
 
     window.clearAlisonTags = () => {
         window.localStorage.removeItem(_tagsKey);
+        _showTagsVisualIndicator();
+    }
+
+    window.setActiveOpportunity = (opportunityId) => {
+        window.localStorage.setItem(_activeOpportunityKey, opportunityId);
+        _showOpportunityVisualIndicator();
+    }
+
+    window.setAlisonTags = (tags) => {
+        window.localStorage.setItem(_tagsKey, tags);
         _showTagsVisualIndicator();
     }
 
