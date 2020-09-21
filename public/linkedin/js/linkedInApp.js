@@ -1,8 +1,23 @@
 (function() {
-    const _activeOpportunityKey = 'tsActiveOpportunityKey';
-    const _tagsKey = 'tsTagsKey';
+    const _activeOpportunityKey = linkedInConstants.localStorageKeys.ACTIVE_OPPORTUNITY;
+    const _roleKey = linkedInConstants.localStorageKeys.ROLE;
+    const _tagsKey = linkedInConstants.localStorageKeys.TAGS;
+    // In case a page is saving MANY contacts...we only want to alert message once.
+    let roleAlert = false;
 
-    const _showOpportunityVisualIndicatorOnSelelector = (selector) => {
+    const _getActiveOpportunity = () => {
+        return window.localStorage.getItem(_activeOpportunityKey);
+    }
+
+    const _getActiveRole = () => {
+        return window.localStorage.getItem(_roleKey);
+    }
+
+    const _getAlisonTags = () => {
+        return window.localStorage.getItem(_tagsKey);
+    }
+
+    const _showOpportunityVisualIndicatorOnSelector = (selector) => {
         const activeOpp = window.localStorage.getItem(_activeOpportunityKey);
         const recruiterNode = tsUICommon.findDomElement(selector);
 
@@ -35,9 +50,30 @@
     }
 
     const _showOpportunityVisualIndicator = () => {
-        _showOpportunityVisualIndicatorOnSelelector('h1 span:contains("Recruiter")');
-        _showOpportunityVisualIndicatorOnSelelector('a[class*="message-anywhere-button"]');
-        _showOpportunityVisualIndicatorOnSelelector('button[aria-label*="Connect with"]');
+        _showOpportunityVisualIndicatorOnSelector('h1 span:contains("Recruiter")');
+        _showOpportunityVisualIndicatorOnSelector('a[class*="message-anywhere-button"]');
+        _showOpportunityVisualIndicatorOnSelector('button[aria-label*="Connect with"]');
+    }
+
+    const _showRoleVisualIndicator = () => {
+        _showRoleVisualIndicatorOnSelector(linkedInSelectors.searchResultsPage.BADGES);
+    }
+
+    const _showRoleVisualIndicatorOnSelector = (selector) => {
+        const role = window.localStorage.getItem(linkedInConstants.localStorageKeys.ROLE);
+        const els = tsUICommon.findDomElement(selector);
+
+
+        if (els && els.length){
+            $(els).each((index) => {
+                if (role){
+                    $(els[index]).append(`<span style="font-size: 15px; color: red; font-weight: bold; font-style: underline">${role}</span>`);
+                }
+                else {
+                    $(els[index]).find('span').remove();
+                }
+            })
+        }
     }
 
     //These are High Level 'Commands' that the app supports
@@ -93,9 +129,21 @@
         searchResultsScraper.deselectCandidate(memberId);
     }
 
-    const _upsertContact =  async (candidate) => {
+    const _upsertContact =  async (candidate, requireRole = true) => {
+        if(requireRole && _getActiveRole() === null) {
+            if (!roleAlert) {
+                // eslint-disable-next-line no-alert
+                alert('Role must be set to save contacts.  Use setActiveRole(roleName)');
+                roleAlert = true;
+            }
+            return null;
+        }
+
         const tags = linkedInApp.getAlisonTags();
-        const activeOpp = linkedInApp.getAlisonTags();
+        const activeOpp = linkedInApp.getActiveOpportunity();
+        candidate.role = linkedInApp.getActiveRole();
+
+        
 
         if (tags !== null && tags !== undefined){
             candidate.tags = tags;
@@ -106,6 +154,7 @@
         }
 
         await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
+        return null;
     }
 
     const _createMessageRecordObject = (text, type) => {
@@ -135,7 +184,7 @@
                 candidate.opportunitiesPresented = [opportunityRecord]
             }
 
-            _upsertContact(candidate);
+            _upsertContact(candidate, false);
         }
     }
 
@@ -151,8 +200,9 @@
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
         recordMessageWasSent = _recordMessageWasSent;
         recordConnectionRequestMade = _recordConnectionRequestMade;
-        getActiveOpportunity = () => { return window.localStorage.getItem(_activeOpportunityKey); };
-        getAlisonTags = () => { return window.localStorage.getItem(_tagsKey); };
+        getActiveOpportunity = _getActiveOpportunity;
+        getActiveRole = _getActiveRole;
+        getAlisonTags = _getAlisonTags;
     }
 
     window.linkedInApp = new LinkedInApp();
@@ -176,14 +226,33 @@
         _showOpportunityVisualIndicator();
     }
 
+    window.clearAlisonRole = () => {
+        window.localStorage.removeItem(_roleKey);
+        _showRoleVisualIndicator();
+    }
+
     window.clearAlisonTags = () => {
         window.localStorage.removeItem(_tagsKey);
         _showTagsVisualIndicator();
     }
 
+    window.getActiveOpportunity = _getActiveOpportunity;
+
+    window.getActiveRole = _getActiveRole;
+
+    window.getAlisonTags = _getAlisonTags;
+
     window.setActiveOpportunity = (opportunityId) => {
         window.localStorage.setItem(_activeOpportunityKey, opportunityId);
         _showOpportunityVisualIndicator();
+    }
+
+    window.setActiveRole = (role) => {
+        var roleName = linkedInCommon.getRoleName(role);
+        if (roleName) {
+            window.localStorage.setItem(_roleKey, roleName);
+            _showRoleVisualIndicator();
+        }
     }
 
     window.setAlisonTags = (tags) => {
@@ -193,6 +262,12 @@
 
     _showOpportunityVisualIndicator();
     _showTagsVisualIndicator();
+
+    $(document).ready(() => {
+        // Results aren't loaded right away, wait a few seconds.
+        setTimeout(_showRoleVisualIndicator, 5000);
+    });
+    
 })();
 
 

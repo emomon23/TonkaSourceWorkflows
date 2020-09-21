@@ -19,7 +19,7 @@
             candidate.linkedInSkills = _scrapeSkills();
 
             if (_shouldSaveCandidate(candidate)) {
-                await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
+                await linkedInApp.upsertContact(candidate);
             } else {
                 // If we don't save the candidate, we need to update local storage with details
                 searchResultsScraper.scrapedCandidates[memberId].candidate = candidate;

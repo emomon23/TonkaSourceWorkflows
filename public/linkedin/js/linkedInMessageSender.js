@@ -82,9 +82,9 @@
                 publicProfileWindow = await _navigateToPublicProfilePage(candidate);
                 tsInterceptor.copyToAnotherWindow(publicProfileWindow);
 
-                candidate.linkedInUrl = publicProfileWindow.location.href;
+                candidate.linkedIn = publicProfileWindow.location.href;
 
-                linkedInCommon.callAlisonHookWindow('upsertContact', candidate);
+                await linkedInApp.upsertContact(candidate);
 
                 const whatButtonIsAvailable = _getPublicProfile_MessageButtonSelector(publicProfileWindow);
                 if (whatButtonIsAvailable === null){

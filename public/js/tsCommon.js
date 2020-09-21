@@ -1,6 +1,15 @@
 (function() {
-    const _log = (message) => {
-        console.log("  " + message);
+    const _log = (message, type = 'LOG') => {
+        switch (type.toUpperCase()) {
+            case 'WARN':
+                console.warn(message);
+                break;
+            case 'ERROR':
+                console.error(message);
+                break;
+            default:
+                console.log(message);
+        }
     }
 
     const _sleep = (ms) => {
