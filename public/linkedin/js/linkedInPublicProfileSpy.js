@@ -33,7 +33,7 @@
     }
 
     const _addASpaceToTheMessage = async (textEntry) => {
-        const id = tsUICommon.getOrCreateElementId(textEntry);
+        const id = _getTextEntryParentId(textEntry);
 
         if (_messagesThatNeedASpacedInsertedBeforeSending[id] === true){
             //This is the bug fix so we don't sent 'Hello [firstName] ...'
@@ -41,6 +41,22 @@
             textEntry.focus();
             document.execCommand('insertText', true, ' ');
         }
+    }
+
+    const _getTextEntryParentId = (textEntry) => {
+        let elementCheck = textEntry;
+        let id = $(textEntry).attr('id');
+
+        for(let i=0; i<5; i++){
+            if (id){
+                break;
+            }
+
+            elementCheck = $(elementCheck).parent();
+            id = $(elementCheck).attr('id');
+        }
+
+        return id;
     }
 
     const _processFirstNameTemplateReplacement = () => {
@@ -53,7 +69,7 @@
             text = textEntry.innerHTML.split('[firstName]').join(recipientName.firstName);
             if (text !== textEntry.innerHTML){
                 textEntry.innerHTML = text;
-                const id = tsUICommon.getOrCreateElementId(textEntry);
+                const id = _getTextEntryParentId(textEntry);
                 _messagesThatNeedASpacedInsertedBeforeSending[id] = true;
             }
         }

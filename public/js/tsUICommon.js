@@ -126,7 +126,6 @@
         findFirstDomElement = _findFirstDomElement;
         findPreviousElement = _findPreviousElement;
         cleanseTextOfHtml = _cleanseTextOfHtml;
-        getOrCreateElementId = _getOrCreateElementId;
         rebind = _rebind;
     }
 
