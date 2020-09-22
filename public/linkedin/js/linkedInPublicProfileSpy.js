@@ -95,7 +95,7 @@
 
     const _tsSendMessageButtonClickSpyHandler = () => {
         const recipientName = _getFirstAndLastName();
-        const fullName = `${recipientName.firstName || ''}${recipientName.lastName || ''}`;
+        const fullName = `${recipientName.firstName}${recipientName.lastName}`;
         if (_suspendedRecording[fullName] === true){
             return;
         }
@@ -112,7 +112,8 @@
 
         const publicProfile = await linkedInPublicProfile.scrapeProfile();
         if (!publicProfile){
-            console.log("Unable to record connection request, unable to scrape profile");
+            console.log("Unable to record connection request, unable to scrape profile", "WARN");
+            return;
         }
        
         linkedInApp.recordConnectionRequestMade(publicProfile, text);

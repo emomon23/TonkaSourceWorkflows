@@ -1,27 +1,17 @@
 (() => {
-    const _getMemberId = async () => {
-        await tsCommon.sleep(2000);
+    const _getMemberId = () => {
+       const linkToRecruiterProfile = tsUICommon.findFirstDomElement([linkedInSelectors.publicProfilePage.linkToRecruiterProfile]);
+       
+       if (linkToRecruiterProfile){
+            // https://www.linkedin.com/recruiter/profile/281387497,ccPf,name?openDialog=send-inmail&trk=recr-inmail-upsell
+            let splitText = $(linkToRecruiterProfile).attr('href').replace('https://www.linkedin.com/recruiter/profile/', '').split(',');
+            const memberId = splitText && splitText.length > 0? splitText[0].trim() : '';
+            if (!Number.isNaN(memberId)){
+                return memberId;
+            }
+       }
 
-        const codeElement = tsUICommon.findDomElements('code:contains("urn:li:member:")');
-        if (!codeElement){
-            return null;
-        }
-
-        const jsonString = $(codeElement).text();
-        const lookFor = "\"trackingUrn\":\"urn:li:member:";
-        
-        let startIndex = jsonString.indexOf(lookFor);
-        if (startIndex === -1){
-            return null;
-        }
-
-        startIndex+= lookFor.length;
-        const endIndex = jsonString.indexOf("\"", startIndex);
-        if (endIndex === -1){
-            return null;
-        }
-
-        return jsonString.substr(startIndex, endIndex - startIndex);
+       return null;
     }
 
     const _scrapeFirstAndLastNameFromProfile = () => {
@@ -67,7 +57,7 @@
             result.lastName = firstAndLast.lastName;
         }
 
-        result.linkedInUrl = window.location.href;
+        result.linkedIn = window.location.href;
         
         return result;
     }

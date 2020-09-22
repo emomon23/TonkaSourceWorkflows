@@ -26,6 +26,7 @@
             connectionNoteTextEntries: ['textarea[name*=“message”]', '#custom-message', 'textarea']
         },
 
+        linkToRecruiterProfile: 'a[href*="/recruiter/profile/',
         memberIdCodeScript: 'code:contains("urn:li:member:")',
     }
 

@@ -183,7 +183,7 @@
         candidate.messagesSent = [messageObject];
 
         const opportunity = window.localStorage.getItem(_activeOpportunityKey);
-        if (opportunity !== null && opportunity !== undefined) {
+        if (opportunity) {
             const opportunityRecord = _createMessageRecordObject(messageSent, type);
             opportunityRecord.opportunityName = opportunity;
             candidate.opportunitiesPresented = [opportunityRecord]

@@ -41,14 +41,6 @@
         return $(selector);
     }
 
-    const _findDomElementss = (selector) => {
-        if ($(selector).length === 0){
-            return null;
-        }
-
-        return $(selector);
-    }
- 
     const _findPreviousElement = (startElement, selector) => {
         let result = null;
         for(let i=0; i < $(startElement).siblings().length; i++){
