@@ -40,6 +40,14 @@
 
         return $(selector);
     }
+
+    const _findDomElements = (selector) => {
+        if ($(selector).length === 0){
+            return null;
+        }
+
+        return $(selector);
+    }
  
     const _findPreviousElement = (startElement, selector) => {
         let result = null;
@@ -93,6 +101,20 @@
         }
     }
 
+    const _getOrCreateElementId = (element) => {
+        if (!element){
+            return null;
+        }
+
+        let id = $(element).attr('id');
+        if (!id || id.length === 0){
+            id = tsCommon.newGuid();
+            $(element).attr('id', id);
+        }
+
+        return id;
+    }
+
     class TsUICommon {
         constructor(){}
 
@@ -100,9 +122,11 @@
         removeListItem = _removeListItem;
         addButton = _addButton;
         findDomElement = _findDomElement;
+        findDomElements = _findDomElements;
         findFirstDomElement = _findFirstDomElement;
         findPreviousElement = _findPreviousElement;
         cleanseTextOfHtml = _cleanseTextOfHtml;
+        getOrCreateElementId = _getOrCreateElementId;
         rebind = _rebind;
     }
 

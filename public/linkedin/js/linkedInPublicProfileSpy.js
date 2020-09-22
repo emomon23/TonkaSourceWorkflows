@@ -1,16 +1,19 @@
 (() => {
-    let __lastEditableDiv = null;
-
+    let __numberOfMessageWindowsPresent = 0;
+    const _messagesThatNeedASpacedInsertedBeforeSending = {};
+    const _messageModalSelectors = linkedInSelectors.publicProfilePage.messageModal;
+    const _connectionRequestSelectors = linkedInSelectors.publicProfilePage.connectionRequestModal;
+    
     const _getNumberOfMessageWindows = () => {
-        return $('div[class*="msg-form__contenteditable"]').length;
+        return $(_messageModalSelectors.textEntries).length;
     }
 
     const _getMessageModal_RecipientNameElement = (peerElement) => {
-        let headerSpan = tsUICommon.findPreviousElement(peerElement, 'h4 span');
+        let headerSpan = tsUICommon.findPreviousElement(peerElement, _messageModalSelectors.activeMessageModalHeader);
         let text = headerSpan && headerSpan.length > 0? headerSpan[0].textContent.trim() : null;
 
         if (!headerSpan || headerSpan.length === 0 || text === "New message" || text === "Messaging"){
-            headerSpan = tsUICommon.findPreviousElement(peerElement, 'span[class*="artdeco-pill__text"]')
+            headerSpan = tsUICommon.findPreviousElement(peerElement, _messageModalSelectors.multipleMessageRecipientPills);
         }
 
         return headerSpan && headerSpan.length > 0? headerSpan[0]: null;
@@ -29,38 +32,49 @@
         return result;
     }
 
-    const _addASpaceToTheMessage = async () => {
-        await tsCommon.sleep(200);
-        const paragraphElement = document.getElementsByClassName('msg-form__contenteditable')[0];
-        paragraphElement.focus();
+    const _addASpaceToTheMessage = async (textEntry) => {
+        const id = tsUICommon.getOrCreateElementId(textEntry);
 
-        document.execCommand('insertText', true, ' ');
+        if (_messagesThatNeedASpacedInsertedBeforeSending[id] === true){
+            //This is the bug fix so we don't sent 'Hello [firstName] ...'
+            await tsCommon.sleep(200);
+            textEntry.focus();
+            document.execCommand('insertText', true, ' ');
+        }
     }
 
     const _processFirstNameTemplateReplacement = () => {
-        if (__lastEditableDiv && __lastEditableDiv.outerText.trim().length > 0 && __lastEditableDiv.outerText.indexOf('[firstName]') >= 0){
-            const recipientName = _getFirstAndLastName(__lastEditableDiv);
-            let text = __lastEditableDiv.innerHTML.split('[firstName]').join(recipientName.firstName);
-            if (text !== __lastEditableDiv.innerHTML){
-                __lastEditableDiv.innerHTML = text;
-                _addASpaceToTheMessage(text);
+        const textEntry = document.activeElement;
+
+        let text = textEntry && textEntry.outerText? textEntry.outerText.trim() : '';
+
+        if (text.indexOf('[firstName]') >= 0){
+            const recipientName = _getFirstAndLastName(textEntry);
+            text = textEntry.innerHTML.split('[firstName]').join(recipientName.firstName);
+            if (text !== textEntry.innerHTML){
+                textEntry.innerHTML = text;
+                const id = tsUICommon.getOrCreateElementId(textEntry);
+                _messagesThatNeedASpacedInsertedBeforeSending[id] = true;
             }
         }
     }
 
-    const _tsDomSpy = () => {
-       _processFirstNameTemplateReplacement();
-    }
-
     const _tsSendMessageButtonClickSpyHandler = () => {
-        const recipientName = _getFirstAndLastName(__lastEditableDiv);
-        const messageText = $(__lastEditableDiv).html();
+        const sendButton = document.activeElement;
 
-        linkedInApp.recordMessageWasSent(recipientName, messageText);
+        const recipientName = _getFirstAndLastName(sendButton);
+
+        const textEntry = tsUICommon.findPreviousElement(_messageModalSelectors.textEntries);
+        _addASpaceToTheMessage(textEntry);
+
+        const messageText = $(textEntry).html();
+
+        console.log({recipientName, messageText});
+        //linkedInApp.recordMessageWasSent(recipientName, messageText);
     }
 
     const _tsSendConnectionRequestButtonClickSpyHandler = async () => {
-        const textArea = tsUICommon.findFirstDomElement(['textarea[name*=“message”]', '#custom-message', 'textarea']);
+        const textArea = tsUICommon.findFirstDomElement(_connectionRequestSelectors.connectionNoteTextEntries);
         const text = textArea === null? 'NO NOTE IN REQUEST' : $(textArea).val();
 
         const publicProfile = await linkedInPublicProfile.scrapeProfile();
@@ -70,50 +84,51 @@
             return;
         }
 
-        linkedInApp.recordConnectionRequestMade(memberId, text);
+        console.log({memberId, text});
+       // linkedInApp.recordConnectionRequestMade(memberId, text);
     }
 
     const _checkIfConnectionRequestModalIsPresent = () => {
          //Bind to the Connection Request "Done" button, if present
-         const doneButtonSelectors = ['button[aria-label=“Done”]', 'button span:contains("Done")'];
-
+         const doneButtonSelectors = _connectionRequestSelectors.connectionRequestDoneButtons;
          const doneButton = tsUICommon.findFirstDomElement(doneButtonSelectors)
-         if (tsUICommon.findDomElement('div[data-test-modal]') !== null && doneButton !== null){
+            
+         if (tsUICommon.findDomElement(_connectionRequestSelectors.connectionRequestModal) && doneButton){
             tsUICommon.rebind(doneButton, 'click', _tsSendConnectionRequestButtonClickSpyHandler);
         }
-
     }
 
     const _attachTemplateProcessingListenerToMessageObjects = async () => {
         await tsCommon.sleep(1000);
 
-        const editableDiv = tsUICommon.findDomElement('div[class*="msg-form__contenteditable"]');
-        if (editableDiv === null){
+        const allEditableMessageWindowDivs = tsUICommon.findDomElements(_messageModalSelectors.textEntries);
+        if (allEditableMessageWindowDivs === null){
             return;
         }
 
-        __lastEditableDiv = editableDiv[0];
-        tsUICommon.rebind(editableDiv, 'DOMSubtreeModified', _tsDomSpy);
-        tsUICommon.rebind('button[class*="msg-form__send-button"]', 'click', _tsSendMessageButtonClickSpyHandler);
+        tsUICommon.rebind(allEditableMessageWindowDivs, 'DOMSubtreeModified', _processFirstNameTemplateReplacement);
+        tsUICommon.rebind(_messageModalSelectors.sendButtons, 'click', _tsSendMessageButtonClickSpyHandler);
 
-    }      
+    }   
+    
+    const _monitorMessageModals = () => {
+        const currentNumberOfMessageWindows = _getNumberOfMessageWindows();
+        
+        if (__numberOfMessageWindowsPresent !== currentNumberOfMessageWindows){
+            _attachTemplateProcessingListenerToMessageObjects();
+            __numberOfMessageWindowsPresent = currentNumberOfMessageWindows;
+        }
+
+        _checkIfConnectionRequestModalIsPresent();
+    }
     
     class LinkedInPublicProfileSpy {
         constructor() {
-            if (window.location.href.toLowerCase().indexOf('.linkedin.com/in/') > 0){
+            if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PUBLIC_PROFILE){
                 console.log("Spy is spying - good news!");
 
-                this.numberOfMessageWindows = _getNumberOfMessageWindows();
-                
-                $(document).bind('DOMSubtreeModified', () => {
-                    const currentNumberOfMessageWindows = _getNumberOfMessageWindows();
-                    if (this.numberOfMessageWindows !== currentNumberOfMessageWindows){
-                        _attachTemplateProcessingListenerToMessageObjects();
-                        this.numberOfMessageWindows = currentNumberOfMessageWindows;
-                    }
-
-                    _checkIfConnectionRequestModalIsPresent();
-                });
+                __numberOfMessageWindowsPresent = _getNumberOfMessageWindows();
+                tsUICommon.rebind(document, 'DOMSubtreeModified', _monitorMessageModals);
             }
         }
     }
