@@ -2,7 +2,7 @@
     const _getMemberId = async () => {
         await tsCommon.sleep(2000);
 
-        const codeElement = tsUICommon.findDomElement('code:contains("urn:li:member:")');
+        const codeElement = tsUICommon.findDomElements('code:contains("urn:li:member:")');
         if (!codeElement){
             return null;
         }
@@ -53,7 +53,7 @@
     }
 
     const _scrapeProfile = async () => {
-        if (window.location.href.indexOf('.com/in/') === -1){
+        if (linkedInCommon.whatPageAmIOn() !== linkedInConstants.pages.PUBLIC_PROFILE){
             return null;
         }
 
@@ -66,6 +66,8 @@
             result.firstName = firstAndLast.firstName;
             result.lastName = firstAndLast.lastName;
         }
+
+        result.linkedInUrl = window.location.href;
         
         return result;
     }

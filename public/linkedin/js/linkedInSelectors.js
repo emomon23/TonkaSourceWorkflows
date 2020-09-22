@@ -14,6 +14,7 @@
         messageModal: {
             textEntries: 'div[class*="msg-form__contenteditable"]',
             sendButtons: 'button[class*="msg-form__send-button"]',
+            leftActionSection: 'div[class*="msg-form__left-actions"]',
             activeMessageModalHeader: 'h4 span',
             memberProfileFullNameSelectors: ['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")'],
             multipleMessageRecipientPills: 'span[class*="artdeco-pill__text"]',      

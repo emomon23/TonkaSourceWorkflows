@@ -20,7 +20,7 @@
 
     const _showOpportunityVisualIndicatorOnSelector = (selector) => {
         const activeOpp = window.localStorage.getItem(_activeOpportunityKey);
-        const recruiterNode = tsUICommon.findDomElement(selector);
+        const recruiterNode = tsUICommon.findDomElements(selector);
 
         if (recruiterNode !== null){
             if (activeOpp !== undefined && activeOpp !== null){
@@ -62,7 +62,7 @@
 
     const _showRoleVisualIndicatorOnSelector = (selector) => {
         const role = window.localStorage.getItem(linkedInConstants.localStorageKeys.ROLE);
-        const els = tsUICommon.findDomElement(selector);
+        const els = tsUICommon.findDomElements(selector);
 
 
         if (els && els.length){
@@ -171,22 +171,25 @@
         let candidate = searchResultsScraper.findCandidate(recipient);
         
         if (candidate !== null){
-            //make a copy of what we need for this save
             const {firstName, lastName, memberId} = candidate;
-            candidate = {firstName, lastName, memberId};
-
-            let messageObject = _createMessageRecordObject(messageSent, type);
-            candidate.messagesSent = [messageObject];
-
-            const opportunity = window.localStorage.getItem(_activeOpportunityKey);
-            if (opportunity !== null && opportunity !== undefined) {
-                const opportunityRecord = _createMessageRecordObject(messageSent, type);
-                opportunityRecord.opportunityName = opportunity;
-                candidate.opportunitiesPresented = [opportunityRecord]
-            }
-
-            _upsertContact(candidate, false);
+            candidate = {firstName, lastName, memberId};  //make a copy of what we need for this save
         }
+        else {
+            candidate = recipient; //Try and save the message based on just the 1st and last names
+        } 
+        
+
+        let messageObject = _createMessageRecordObject(messageSent, type);
+        candidate.messagesSent = [messageObject];
+
+        const opportunity = window.localStorage.getItem(_activeOpportunityKey);
+        if (opportunity !== null && opportunity !== undefined) {
+            const opportunityRecord = _createMessageRecordObject(messageSent, type);
+            opportunityRecord.opportunityName = opportunity;
+            candidate.opportunitiesPresented = [opportunityRecord]
+        }
+
+        _upsertContact(candidate, false);
     }
 
     const _recordConnectionRequestMade = (memberIdOrFirstNameAndLastName, note) => {
