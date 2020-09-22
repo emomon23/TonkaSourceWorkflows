@@ -49,7 +49,8 @@
 
     const _shouldSaveCandidate = (candidate) => {
         // This is our ability to scrape and save anyone we step into after searching
-        if (linkedInConstants.SAVE_AFTER_RECRUITER_PROFILE_SCRAPE) {
+        const shouldSave = $.parseJSON(window.localStorage.getItem(linkedInConstants.localStorageKeys.SAVE_ON_RECRUITER_PROFILE))
+        if (shouldSave) {
             return true;
         }
         // Save candidate if isJobSeeker

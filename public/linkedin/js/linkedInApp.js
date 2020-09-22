@@ -1,6 +1,7 @@
 (function() {
     const _activeOpportunityKey = linkedInConstants.localStorageKeys.ACTIVE_OPPORTUNITY;
     const _roleKey = linkedInConstants.localStorageKeys.ROLE;
+    const _saveOnRecruiterProfileKey = linkedInConstants.localStorageKeys.SAVE_ON_RECRUITER_PROFILE;
     const _tagsKey = linkedInConstants.localStorageKeys.TAGS;
     // In case a page is saving MANY contacts...we only want to alert message once.
     let roleAlert = false;
@@ -241,6 +242,10 @@
     window.getActiveRole = _getActiveRole;
 
     window.getAlisonTags = _getAlisonTags;
+
+    window.saveOnRecruiterProfile = (val) => {
+        window.localStorage.setItem(_saveOnRecruiterProfileKey, val)
+    }
 
     window.setActiveOpportunity = (opportunityId) => {
         window.localStorage.setItem(_activeOpportunityKey, opportunityId);

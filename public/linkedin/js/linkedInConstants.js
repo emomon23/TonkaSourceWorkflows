@@ -3,6 +3,7 @@
         localStorageKeys = {
             ACTIVE_OPPORTUNITY: 'tsActiveOpportunityKey',
             ROLE: 'tsRoleKey',
+            SAVE_ON_RECRUITER_PROFILE: 'tsSaveOnRecruiterProfile',
             TAGS: 'tsTagsKey'
         };
 
@@ -28,9 +29,6 @@
             SCRUM_COACH: "Scrum Coach",
 
         }
-
-        // This is our ability to scrape and save anyone we step into after searching
-        SAVE_AFTER_RECRUITER_PROFILE_SCRAPE = false;
 
         urls = {
             RECRUITER_SEARCH_RESULTS: "/recruiter/smartsearch",
