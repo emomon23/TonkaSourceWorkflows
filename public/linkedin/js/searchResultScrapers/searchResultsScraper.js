@@ -142,8 +142,8 @@
                         linkedInApp.changeBadgeColor(candidate.memberId, 'red');
                     }
 
-                    if ((existingCachedCandidate.isJobSeeker === true && candidate.isJobSeeker !== true)
-                        || (existingCachedCandidate.isJobSeeker !== true && candidate.isJobSeeker === true)){
+                    if ((existingCachedCandidate.candidate.isJobSeeker === true && candidate.isJobSeeker !== true)
+                        || (existingCachedCandidate.candidate.isJobSeeker !== true && candidate.isJobSeeker === true)){
                         searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
