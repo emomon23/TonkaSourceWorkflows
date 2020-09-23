@@ -16,7 +16,7 @@
 
         if (window.alisonHookWindow !== undefined){
             const jsonData = JSON.stringify(data);
-            tsCommon.postMessageToWindow(alisonHookWindow, actionString, jsonData);
+            tsCommon.postMessageToWindow(window.alisonHookWindow, actionString, jsonData);
         }
         else {
             console.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()?)");
