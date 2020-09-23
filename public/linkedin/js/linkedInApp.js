@@ -284,6 +284,14 @@
     $(document).ready(() => {
         // Results aren't loaded right away, wait a few seconds.
         setTimeout(_showRoleVisualIndicator, 5000);
+
+        // Extend jQuery
+        $.extend($.expr[':'], {
+            containsi: function(elem, index, match) {
+                /* For example $(‘#ShowItems li:containsi(“Share”)’), then match[3] will be Share */
+                return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || '').toLowerCase()) >= 0;
+            }
+        });
     });
     
 })();
