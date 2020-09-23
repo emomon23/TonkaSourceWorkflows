@@ -41,17 +41,26 @@
     }
 
     const _whatPageAmIOn = () => {
-        const href = window.location.href;
-        if (href.indexOf(linkedInConstants.urls.RECRUITER_PROFILE) > 0) {
-            return linkedInConstants.pages.RECRUITER_PROFILE;
-        } else if (href.indexOf(linkedInConstants.urls.PUBLIC_PROFILE) > 0) {
-            return linkedInConstants.pages.PUBLIC_PROFILE;
-        } else if (href.indexOf(linkedInConstants.urls.RECRUITER_SEARCH_RESULTS) > 0) {
-            return linkedInConstants.pages.RECRUITER_SEARCH_RESULTS;
-        } else {
-            tsCommon.log("Could not determine the LinkedIN page")
-            return null;
+        const href = window.location.href.toLowerCase();
+        let result = null;
+
+        if (href === "https://www.linkedin.com/" || href === "https://www.linkedin.com"){
+            return linkedInConstants.pages.LOGIN;
         }
+
+        for(let key in linkedInConstants.pages){
+           let pageConst = linkedInConstants.pages[k];
+           if (href.indexOf(pageConst) >= 0){
+               result = pageConst;
+               break;
+           }
+        }
+
+        if (!result){
+            console.log(`whatPageAmIOn = null (href: ${href})`);
+        }
+
+        return result;
     }
 
     class LinkedInCommon {

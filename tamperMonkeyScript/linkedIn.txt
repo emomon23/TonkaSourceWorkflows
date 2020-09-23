@@ -1,15 +1,15 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.210
+// @version      0.263
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
 // @domain       www.linkedin.com
 // @include      https://www.linkedin.com/*
 // @include      https://linkedin.com/*
-// @ignore      http://code.jquery.com/jquery-latest.js
 
+// @require      http://code.jquery.com/jquery-latest.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsConstants.js
@@ -27,6 +27,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInPublicProfileSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInPublicProfile.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/tsCommand.js
 
 // @ignore      http://localhost:5001/js/tsHttpInterceptor.js
 // @ignore      http://localhost:5001/js/promiseLoop.js
@@ -46,6 +47,7 @@
 // @ignore      http://localhost:5001/linkedin/js/linkedInPublicProfileSpy.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInPublicProfile.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInApp.js
+// @ignore      http://localhost:5001/linkedin/js/tsCommand.js
 // @grant        none
 
 // ==/UserScript==
@@ -54,4 +56,5 @@
     'use strict';
 
     console.log("Tamper Monkey: LinkedIn Recruiter Parser user script running...");
+
 })();
