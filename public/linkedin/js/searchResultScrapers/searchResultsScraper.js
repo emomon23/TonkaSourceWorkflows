@@ -32,11 +32,10 @@
             }
         }
 
-        const isJobSeekerTexts = ['seeking new opportunit', 'actively looking', 'opentowork', 'open to work']
+        const isJobSeekerTexts = ['seeking new opportunit', 'actively looking', 'opentowork', 'open to work', 'looking for new']
         if (!candidate.isJobSeeker){
             isJobSeekerTexts.forEach((text) => {
-                const variants = tsCommon.createTextVariants(text);
-                if (liTag.containsText(variants)){
+                if (liTag.containsText(text)){
                     candidate.isJobSeeker = true;
                 }
             })
