@@ -22,6 +22,12 @@
         return _sleep(ms);
     }
 
+    const _decodeHtml = (html) => {
+        const txt = document.createElement("textarea");
+        txt.innerHTML = html;
+        return txt.value;
+    }
+
     const _extendWebElements = (webElements) => {
         webElements.forEach((we) => {_extendWebElement(we);});
     }
@@ -190,19 +196,20 @@
     class TSCommon {
         constructor(){}
 
-        log = _log;
-        sleep = _sleep;
+        clickAHyperLink = _clickAHyperLink;
+        decodeHtml = _decodeHtml;
+        extendWebElements = _extendWebElements;
+        extendWebElement = _extendWebElement;
+        findAHyperLink = _findAHyperLink;
         httpGetJson = _httpGetJson;
         httpGetText = _httpGetText;
         httpGetTemplate = _httpGetTemplate;
-        randomSleep = _randomSleep;
-        extendWebElements = _extendWebElements;
-        extendWebElement = _extendWebElement;
-        setUpPostMessageListener = _setUpPostMessageListener;
-        postMessageToWindow = _postMessageToWindow;
-        clickAHyperLink = _clickAHyperLink;
+        log = _log;
         navigateToHyperLink = _navigateToHyperLink;
-        findAHyperLink = _findAHyperLink;
+        postMessageToWindow = _postMessageToWindow;
+        randomSleep = _randomSleep;
+        setUpPostMessageListener = _setUpPostMessageListener;
+        sleep = _sleep;
     }
 
     window.tsCommon = new TSCommon();
