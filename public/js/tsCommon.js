@@ -65,8 +65,22 @@
         }
 
         webElement.containsText = (searchForText) => {
-            const query = ":contains('" + searchForText + "')";
-            return $(webElement).find(query).length > 0;
+            if (Array.isArray(searchForText)){
+                let result = false;
+                for (let i=0; i<searchForText.length; i++){
+                    const query = ":contains('" + searchForText[i] + "')";
+                    result = result || $(webElement).find(query).length > 0;
+                    if (result){
+                        break;
+                    }
+                }
+
+                return result;
+            }
+            else {
+                const query = ":contains('" + searchForText + "')";
+                return $(webElement).find(query).length > 0;
+            }
         }
 
         webElement.mineTags = (tagName) => {
@@ -173,6 +187,31 @@
         }
     }
 
+    const _capitalizeFirstLetterInText = (text) => {
+        if (!text || !text.toUpperCase){
+            return '';
+        }
+
+        return  text.length > 1? text.substr(0, 1).toUpperCase() + text.substr(1) : text.toUpperCase();
+    }
+
+    const _createTextVariants = (text) => {
+        const result = [];
+        result.push(text);
+        result.push(text.toLowerCase());
+        result.push(text.toUpperCase());
+
+        result.push(_capitalizeFirstLetterInText(text));
+
+        let words = text.split(' ');
+        if (words.length > 1){
+            words = words.map(w => _capitalizeFirstLetterInText(w));
+            result.push(words.join(' '));
+        }
+
+        return result;
+    }
+
     class TSCommon {
         constructor(){}
 
@@ -189,6 +228,7 @@
         clickAHyperLink = _clickAHyperLink;
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
+        createTextVariants = _createTextVariants;
     }
 
     window.tsCommon = new TSCommon();
