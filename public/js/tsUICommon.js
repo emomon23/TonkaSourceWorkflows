@@ -33,14 +33,14 @@
         return $(button);
     }
 
-    const _findDomElement = (selector) => {
+    const _findDomElements = (selector) => {
         if ($(selector).length === 0){
             return null;
         }
 
         return $(selector);
     }
- 
+
     const _findPreviousElement = (startElement, selector) => {
         let result = null;
         for(let i=0; i < $(startElement).siblings().length; i++){
@@ -63,7 +63,7 @@
          let result = null;
 
          for (let i=0; i<arrayOfSelectors.length; i++){
-            result = _findDomElement(arrayOfSelectors[i]);
+            result = _findDomElements(arrayOfSelectors[i]);
             if (result !== null){
                 break;
             }
@@ -99,7 +99,7 @@
         createListItem = _createListItem;
         removeListItem = _removeListItem;
         addButton = _addButton;
-        findDomElement = _findDomElement;
+        findDomElements = _findDomElements;
         findFirstDomElement = _findFirstDomElement;
         findPreviousElement = _findPreviousElement;
         cleanseTextOfHtml = _cleanseTextOfHtml;

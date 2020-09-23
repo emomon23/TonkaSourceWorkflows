@@ -20,7 +20,7 @@
 
     const _showOpportunityVisualIndicatorOnSelector = (selector) => {
         const activeOpp = window.localStorage.getItem(_activeOpportunityKey);
-        const recruiterNode = tsUICommon.findDomElement(selector);
+        const recruiterNode = tsUICommon.findDomElements(selector);
 
         if (recruiterNode !== null){
             if (activeOpp !== undefined && activeOpp !== null){
@@ -62,7 +62,7 @@
 
     const _showRoleVisualIndicatorOnSelector = (selector) => {
         const role = window.localStorage.getItem(linkedInConstants.localStorageKeys.ROLE);
-        const els = tsUICommon.findDomElement(selector);
+        const els = tsUICommon.findDomElements(selector);
 
 
         if (els && els.length){
@@ -171,22 +171,25 @@
         let candidate = searchResultsScraper.findCandidate(recipient);
         
         if (candidate !== null){
-            //make a copy of what we need for this save
             const {firstName, lastName, memberId} = candidate;
-            candidate = {firstName, lastName, memberId};
-
-            let messageObject = _createMessageRecordObject(messageSent, type);
-            candidate.messagesSent = [messageObject];
-
-            const opportunity = window.localStorage.getItem(_activeOpportunityKey);
-            if (opportunity !== null && opportunity !== undefined) {
-                const opportunityRecord = _createMessageRecordObject(messageSent, type);
-                opportunityRecord.opportunityName = opportunity;
-                candidate.opportunitiesPresented = [opportunityRecord]
-            }
-
-            _upsertContact(candidate, false);
+            candidate = {firstName, lastName, memberId};  //make a copy of what we need for this save
         }
+        else {
+            candidate = recipient; //Try and save the message based on just the 1st and last names
+        } 
+        
+
+        let messageObject = _createMessageRecordObject(messageSent, type);
+        candidate.messagesSent = [messageObject];
+
+        const opportunity = window.localStorage.getItem(_activeOpportunityKey);
+        if (opportunity) {
+            const opportunityRecord = _createMessageRecordObject(messageSent, type);
+            opportunityRecord.opportunityName = opportunity;
+            candidate.opportunitiesPresented = [opportunityRecord]
+        }
+
+        _upsertContact(candidate, false);
     }
 
     const _recordConnectionRequestMade = (memberIdOrFirstNameAndLastName, note) => {
@@ -219,7 +222,17 @@
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonHook/alisonHook.html`;
         window.alisonHookWindow = window.open(url, "Linked In Hack", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=10,height=10,top=5000,left=5000");
 
-        await tsCommon.sleep(2000);
+        await tsCommon.sleep(1000);
+
+        await promiseLoop([{}, {}, {}], async () => {
+            if (!window.alisonHookWindow){
+                await tsCommon.sleep(2000);
+            }
+        });
+
+        if (!window.alisonHookWindow){
+            console.log("Unable to open alisonHook.  CHECK POP UP BLOCKER?", "WARN");
+        }
     }
 
     window.clearActiveOpportunity = () => {

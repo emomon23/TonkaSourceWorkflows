@@ -7,12 +7,6 @@
             TAGS: 'tsTagsKey'
         };
 
-        pages = {
-            RECRUITER_SEARCH_RESULTS: "Recruiter Search Results",
-            RECRUITER_PROFILE: "Recruiter Profile",
-            PUBLIC_PROFILE: "Public Profile"
-        };
-
         roles = {
             BUSINESS_ANALYST: "Business Analyst",
             CORP_RECRUITER: "Corp Recruiter",
@@ -27,13 +21,14 @@
             QA_MANUAL: "QA Manual",
             RECRUITER: "Recruiter",
             SCRUM_COACH: "Scrum Coach",
+        };
 
-        }
-
-        urls = {
+        pages = {
             RECRUITER_SEARCH_RESULTS: "/recruiter/smartsearch",
             RECRUITER_PROFILE: "/recruiter/profile/",
-            PUBLIC_PROFILE: "linkedin.com/in/"
+            PUBLIC_PROFILE: "linkedin.com/in/",
+            LOGIN: "login",
+            FEED: 'feed'
         };
     }
     window.linkedInConstants = new LinkedInConstants();

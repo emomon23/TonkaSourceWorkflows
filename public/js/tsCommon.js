@@ -115,7 +115,11 @@
 
     const _postMessageToWindow = (windowReference, actionString, data) => {
         const jsonData = JSON.stringify(data);
-        windowReference.postMessage({action: actionString, parameter: jsonData}, "*");
+        if (windowReference){
+            windowReference.postMessage({action: actionString, parameter: jsonData}, "*");
+        } else {
+            console.log("Unable to postMessage to Alison Hook", "WARN");
+        }
     }
 
     const _httpGetJson = (url) => {
@@ -168,8 +172,6 @@
             parentWindow.location.href = href;
         }
     }
-
-   
 
     class TSCommon {
         constructor(){}

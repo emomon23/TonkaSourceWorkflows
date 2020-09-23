@@ -1,7 +1,7 @@
 (() => {
     const _bindToPublicProfileLink = async() => {
         await tsCommon.sleep(2000);
-        const publicProfileLink = tsUICommon.findDomElement(linkedInSelectors.recruiterProfilePage.PROFILE_LINK);
+        const publicProfileLink = tsUICommon.findDomElements(linkedInSelectors.recruiterProfilePage.PROFILE_LINK);
         if (publicProfileLink !== null){
             $(publicProfileLink).bind('click', () => {
                 const memberId = linkedInRecruiterProfileScraper.getMemberId();
