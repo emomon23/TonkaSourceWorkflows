@@ -229,6 +229,10 @@
                 await tsCommon.sleep(2000);
             }
         });
+
+        if (!window.alisonHookWindow){
+            console.log("Unable to open alisonHook.  CHECK POP UP BLOCKER?", "WARN");
+        }
     }
 
     window.clearActiveOpportunity = () => {

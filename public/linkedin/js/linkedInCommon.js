@@ -14,12 +14,17 @@
         await window.launchTonkaSource();
         await tsCommon.sleep(2000);
 
-        if (window.alisonHookWindow !== undefined){
-            const jsonData = JSON.stringify(data);
-            tsCommon.postMessageToWindow(window.alisonHookWindow, actionString, jsonData);
+        if (window.alisonHookWindow){
+            try {
+                const jsonData = JSON.stringify(data);
+                tsCommon.postMessageToWindow(window.alisonHookWindow, actionString, jsonData);
+            }
+            catch(postError) {
+                console.log(`Error posting message to alison hook (check pop up blocker?). ${e.message}.  (${e})`, 'ERROR');
+            }
         }
         else {
-            console.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()?)");
+            console.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()? Check Pop up blocker?)");
         }
     }
 
