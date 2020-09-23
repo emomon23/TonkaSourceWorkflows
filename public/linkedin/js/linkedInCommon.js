@@ -49,7 +49,7 @@
         }
 
         for(let key in linkedInConstants.pages){
-           let pageConst = linkedInConstants.pages[k];
+           let pageConst = linkedInConstants.pages[key];
            if (href.indexOf(pageConst) >= 0){
                result = pageConst;
                break;

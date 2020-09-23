@@ -27,7 +27,7 @@
             RECRUITER_SEARCH_RESULTS: "/recruiter/smartsearch",
             RECRUITER_PROFILE: "/recruiter/profile/",
             PUBLIC_PROFILE: "linkedin.com/in/",
-            LOGIN: "login-submit",
+            LOGIN: "login",
             FEED: 'feed'
         };
     }
