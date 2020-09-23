@@ -13,7 +13,7 @@
         //If (url.indexOf('') >= 0)
         //   return __ts_starPublicScraper
         //}
-        return __ts_starPartnerScraper;
+        return starPartnerScraper;
     }
 
     const _getType = (type) => {
@@ -24,6 +24,9 @@
             return _type.CONTRACT;
         } else if ('fte full time full-time'.indexOf(c) >= 0){
             return _type.FTE;
+        } else {
+            tsCommon.log("Unable to determine the type of role.");
+            return null;
         }
     }
 

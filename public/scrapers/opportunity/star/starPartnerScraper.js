@@ -5,6 +5,8 @@
                 return opportunityScraperFactory.Status.CLOSED;
             case "open":
                 return opportunityScraperFactory.Status.NEW;
+            default:
+                return opportunityScraperFactory.Status.NEW;
         }
     }
 
@@ -25,6 +27,7 @@
             keepScraping = starUtils.advanceToNextOpportunityPage();
             if (keepScraping){
                 //Wait for it to load
+                // eslint-disable-next-line no-await-in-loop
                 await tsCommon.sleep(5000);
             }
             else {
@@ -92,14 +95,18 @@
         // $(jobLink).attr("target","");
         // $(jobLink)[0].click();
 
-        let html = await tsCommon.getHttpText(jobUrl);
-
-        window.history.back();
+        return await tsCommon.httpGetText(jobUrl);
 
     }
 
     const _interceptJob = async (response) => {
-        alert(response);
+
+        const encodedHtml = response.responseText.split("Hello Collaborative Provider,")[1].split("www.STARcollaborative.com")[0]
+        const decodedHtml = tsCommon.decodeHtml(encodedHtml);
+        const jobDetailsObj = $('<div></div>').html(decodedHtml).children();
+        // eslint-disable-next-line no-alert
+        alert($(jobDetailsObj).html());
+        console.log($(jobDetailsObj).html());
     }
 
     class StarPartnerScraper {
@@ -110,6 +117,6 @@
         interceptJob = _interceptJob;
     }
 
-    window.__ts_starPartnerScraper = new StarPartnerScraper();
+    window.starPartnerScraper = new StarPartnerScraper();
 })();
 
