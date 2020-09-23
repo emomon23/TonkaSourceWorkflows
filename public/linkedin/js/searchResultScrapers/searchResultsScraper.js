@@ -31,6 +31,16 @@
                 candidate.alisonConnections[loggedInAlisonUserName] = networkConnection;
             }
         }
+
+        const isJobSeekerTexts = ['seeking new opportunit', 'actively looking', 'opentowork', 'open to work']
+        if (!candidate.isJobSeeker){
+            isJobSeekerTexts.forEach((text) => {
+                const variants = tsCommon.createTextVariants(text);
+                if (liTag.containsText(variants)){
+                    candidate.isJobSeeker = true;
+                }
+            })
+        }
     }
 
     const _waitForResultsHTMLToRender = async (lastCandidate) => {
