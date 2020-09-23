@@ -118,7 +118,7 @@
         if (windowReference){
             windowReference.postMessage({action: actionString, parameter: jsonData}, "*");
         } else {
-            console.log("Unable to postMessage to Alison Hook", "WARNING");
+            console.log("Unable to postMessage to Alison Hook", "WARN");
         }
     }
 
