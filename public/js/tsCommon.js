@@ -30,6 +30,10 @@
         }
     }
 
+    const _clearLocalStorage = (key) => {
+        window.localStorage.removeItem(key);
+    }
+
     const _convertCurrencyStringToNumber = (currency) => {
         return Number(currency.replace(/[^0-9.-]+/g,""));
     }
@@ -45,6 +49,11 @@
             default:
                 console.log(message);
         }
+    }
+
+    const _persistToLocalStorage = (key, data) => {
+        var jsonString = JSON.stringify(data);
+        window.localStorage.setItem(key, jsonString);
     }
 
     const _sleep = (ms) => {
@@ -247,6 +256,7 @@
         calculateRateGuidance = _calculateRateGuidance;
         callAlisonHookWindow = _callAlisonHookWindow;
         clickAHyperLink = _clickAHyperLink;
+        clearLocalStorage = _clearLocalStorage;
         convertCurrencyStringToNumber = _convertCurrencyStringToNumber;
         decodeHtml = _decodeHtml;
         extendWebElements = _extendWebElements;
@@ -257,6 +267,7 @@
         httpGetTemplate = _httpGetTemplate;
         log = _log;
         navigateToHyperLink = _navigateToHyperLink;
+        persistToLocalStorage = _persistToLocalStorage;
         postMessageToWindow = _postMessageToWindow;
         randomSleep = _randomSleep;
         setUpPostMessageListener = _setUpPostMessageListener;

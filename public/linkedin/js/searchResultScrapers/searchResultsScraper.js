@@ -215,11 +215,11 @@
 
         persistToLocalStorage = () => {
             var jsonString = JSON.stringify(this.scrapedCandidates);
-            window.localStorage.setItem(_localStorageItemName, jsonString);
+            tsCommon.persistToLocalStorage(_localStorageItemName, jsonString);
         }
 
         clearLocalStorage = () => {
-            window.localStorage.removeItem(_localStorageItemName);
+            tsCommon.clearLocalStorage(_localStorageItemName);
         }
 
         interceptSearchResults = _interceptSearchResults;
