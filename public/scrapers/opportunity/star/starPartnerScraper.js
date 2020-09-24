@@ -49,7 +49,7 @@
 
     const _getRateFromDetail = (html) => {
         // eslint-disable-next-line no-useless-escape
-        const currencyRegExp = '[$]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?';
+        const currencyRegExp = '[$]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?';
         const re = `Rate Guidance: ((${currencyRegExp}) - (${currencyRegExp}))`;
         const regexp = new RegExp(re);
         

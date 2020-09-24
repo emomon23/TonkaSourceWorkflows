@@ -1,7 +1,7 @@
 (function() {
     const _calculateRateGuidance = (lowRate, highRate) => {
-        const candidateLowRate = (lowRate - 20).floor();
-        const candidateHighRate = (highRate - (highRate * 0.20)).floor();
+        const candidateLowRate = (lowRate) ? Math.floor(lowRate - 20) : 0;
+        const candidateHighRate = (highRate) ? Math.floor(highRate - (highRate * 0.20)) : 150;
         return {
             candidateLowRate: candidateLowRate,
             candidateHighRate: candidateHighRate,
