@@ -32,7 +32,7 @@
 
     const _newOpportunity = (opp) => {
         
-        var base = {
+        const baseOpportunity = {
             company: {
                 name: "",
                 contact: ""
@@ -40,22 +40,24 @@
             contact: "",
             dateCreated: "",
             description: "",
+            duration: "",
             jobNumber: "",
             location: "",
             partnerCompany: {
                 name: "",
                 contact: ""
             },
+            paymentTerms: "",
+            rate: "",
+            rates: {},
             source: "",
             status: _status.NEW,
             title: "",
-            tsHighRate: "",
-            tsLowRate: "",
             type: ""
         }
 
         return {
-            ...base,
+            ...baseOpportunity,
             ...opp
         }
 
