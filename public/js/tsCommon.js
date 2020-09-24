@@ -193,6 +193,21 @@
         }
     }
 
+    const _waitForTrue = (timeOut, maxChecks, checkFunction) => {
+        let currentChecks = 0;
+        let result = false;
+
+        const intervalReference = window.setInterval(() => {
+            result = checkFunction();
+            currentChecks+=1;
+            if (result === true || currentChecks >= maxChecks){
+                intervalReference.clearInterval();
+            }
+        }, timeOut);
+
+        return result;
+    }
+
     class TSCommon {
         constructor(){}
 
@@ -210,6 +225,7 @@
         randomSleep = _randomSleep;
         setUpPostMessageListener = _setUpPostMessageListener;
         sleep = _sleep;
+        waitForTrue = _waitForTrue;
     }
 
     window.tsCommon = new TSCommon();
