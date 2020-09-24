@@ -12,6 +12,24 @@
         }
     }
 
+    const _callAlisonHookWindow = async (actionString, data) => {
+        await window.launchTonkaSource();
+        await tsCommon.sleep(2000);
+
+        if (window.alisonHookWindow){
+            try {
+                const jsonData = JSON.stringify(data);
+                tsCommon.postMessageToWindow(window.alisonHookWindow, actionString, jsonData);
+            }
+            catch(postError) {
+                console.log(`Error posting message to alison hook (check pop up blocker?). ${e.message}.  (${e})`, 'ERROR');
+            }
+        }
+        else {
+            console.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()? Check Pop up blocker?)");
+        }
+    }
+
     const _convertCurrencyStringToNumber = (currency) => {
         return Number(currency.replace(/[^0-9.-]+/g,""));
     }
@@ -227,6 +245,7 @@
         constructor(){}
 
         calculateRateGuidance = _calculateRateGuidance;
+        callAlisonHookWindow = _callAlisonHookWindow;
         clickAHyperLink = _clickAHyperLink;
         convertCurrencyStringToNumber = _convertCurrencyStringToNumber;
         decodeHtml = _decodeHtml;
@@ -246,4 +265,21 @@
     }
 
     window.tsCommon = new TSCommon();
+
+    window.launchTonkaSource = async () => {
+        const url = `${tsConstants.HOSTING_URL}/linkedin/alisonHook/alisonHook.html`;
+        window.alisonHookWindow = window.open(url, "Linked In Hack", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=10,height=10,top=5000,left=5000");
+
+        await tsCommon.sleep(1000);
+
+        await promiseLoop([{}, {}, {}], async () => {
+            if (!window.alisonHookWindow){
+                await tsCommon.sleep(2000);
+            }
+        });
+
+        if (!window.alisonHookWindow){
+            console.log("Unable to open alisonHook.  CHECK POP UP BLOCKER?", "WARN");
+        }
+    }
 })();

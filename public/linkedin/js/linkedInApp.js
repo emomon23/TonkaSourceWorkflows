@@ -154,7 +154,7 @@
             candidate.tags += ', ' + activeOpp;
         }
 
-        await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
+        await tsCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
         return null;
     }
 
@@ -217,23 +217,6 @@
     tsCommon.setUpPostMessageListener('linkedInApp');
 
     tsInterceptor.interceptResponse('get', '/api/smartsearch?', searchResultsScraper.interceptSearchResults);
-   
-    window.launchTonkaSource = async () => {
-        const url = `${tsConstants.HOSTING_URL}/linkedin/alisonHook/alisonHook.html`;
-        window.alisonHookWindow = window.open(url, "Linked In Hack", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=10,height=10,top=5000,left=5000");
-
-        await tsCommon.sleep(1000);
-
-        await promiseLoop([{}, {}, {}], async () => {
-            if (!window.alisonHookWindow){
-                await tsCommon.sleep(2000);
-            }
-        });
-
-        if (!window.alisonHookWindow){
-            console.log("Unable to open alisonHook.  CHECK POP UP BLOCKER?", "WARN");
-        }
-    }
 
     window.clearActiveOpportunity = () => {
         window.localStorage.removeItem(_activeOpportunityKey);
