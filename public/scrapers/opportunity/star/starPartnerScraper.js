@@ -1,8 +1,22 @@
 (function() {
-    const _getJobDetailsAndDescriptionFromDetail = (html) => {
-        const regexp = /View job in the ".*Portal<\/a>/;
+    const _localStorageItemName = opportunityConstants.localStorageKeys.SCRAPED_OPPORTUNITIES;
+
+    const _getDurationFromDetail = (html) => {
+        const regexp = /Role duration is estimated to be (\d+ \w+)/;
         
         const matches = html.match(regexp);
+        
+        if (matches && matches.length > 0) {
+            return matches[1];
+        }
+        tsCommon.log("STAR Opportunity Detail: Could not scrape Duration.");
+        return null;
+    }
+
+    const _getDetailsAndDescriptionFromDetail = (html) => {
+        const regexp = /["]?View job in the.*STAR CP Opportunity Portal<\/a>/;
+        
+        const matches = html.split(regexp);
         
         if (matches && matches.length > 0) {
             return matches;
@@ -23,31 +37,19 @@
         return null;
     }
 
-    const _getClientFromDetail = (html) => {
-        const regexp = /Client: (\w+(\s)?)*\(/;
+    const _getPaymentTermsFromDetail = (html) => {
+        const regexp = /PAYMENT TERMS: first payment is (\d+ \w+)/;
         
         const matches = html.match(regexp);
         
         if (matches && matches.length > 0) {
             return matches[1];
         }
-        tsCommon.log("STAR Opportunity Detail: Could not scrape Client.");
+        tsCommon.log("STAR Opportunity Detail: Could not scrape Payment Terms.");
         return null;
     }
 
-    const _getDurationFromDetail = (html) => {
-        const regexp = /Role duration is estimated to be (\d+ \w+)/;
-        
-        const matches = html.match(regexp);
-        
-        if (matches && matches.length > 0) {
-            return matches[1];
-        }
-        tsCommon.log("STAR Opportunity Detail: Could not scrape Duration.");
-        return null;
-    }
-
-    const _getRateFromDetail = (html) => {
+    const _getRatesFromDetail = (html) => {
         // eslint-disable-next-line no-useless-escape
         const currencyRegExp = '[$]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{1,2})?';
         const re = `Rate Guidance: ((${currencyRegExp}) - (${currencyRegExp}))`;
@@ -87,8 +89,50 @@
         }
     }
 
+    const _interceptOpportunity = async (response) => {
+
+        const firstPart = response.responseText.split("Hello Collaborative Provider,")[1];
+        const secondParts = firstPart.split("www.STARcollaborative.com");
+        
+        const encodedHtml = secondParts[0];
+        const decodedHtml = tsCommon.decodeHtml(encodedHtml);
+
+        const results = _getDetailsAndDescriptionFromDetail(decodedHtml);
+        
+        const opportunity = {};
+        if (results && results.length) {
+            opportunity.details = results[0];
+            opportunity.description = results[1];
+        }
+
+        let starNumber = '';
+
+        if (opportunity.details) {
+            opportunity.duration = _getDurationFromDetail(opportunity.details);
+            opportunity.jobNumber = _getJobNumberFromDetail(opportunity.details);
+            opportunity.paymentTerms = _getPaymentTermsFromDetail(opportunity.details)
+            opportunity.rates = _getRatesFromDetail(opportunity.details);
+            opportunity.rate = (opportunity.rates) ? opportunity.rates.candidateRateGuidance : '';
+            
+            starNumber = _getStarNumberFromDetail(opportunity.details);
+
+            const cachedOpportunity = starPartnerScraper.scrapedOpportunities[starNumber];
+
+            if (cachedOpportunity) {
+                cachedOpportunity.opportunity = Object.assign(cachedOpportunity.opportunity, opportunity);
+                starPartnerScraper.scrapedOpportunities[starNumber] = cachedOpportunity;
+                opportunityScraperManager.upsertOpportunity(cachedOpportunity);
+            } else {
+                console.log(`STAR #${starNumber}: Intercepted this opportunity but could not locate a cached opportunity.`, 'WARN');
+            }
+        } else {
+            console.log('STAR Opportunity: Intercepted opportunity but could not parse the details.', 'WARN');
+        }
+        
+        return opportunity;
+    }
+
     const _scrapeResults = async (confirmEach = false) => {
-        const opportunities = [];
         let keepScraping = false;
         let confirmed = true;
         let currentPage = 1;
@@ -97,7 +141,8 @@
         do {
             tsCommon.log("Scraping current page, stand by...");
 
-            const opportunitiesOnThisPage = _scrapeOpportunityList(opportunities);
+            const opportunitiesOnThisPage = _scrapeOpportunityList();
+            tsCommon.persistToLocalStorage(_localStorageItemName, starPartnerScraper.scrapedOpportunities);
 
             tsCommon.log("Page " + currentPage + " scraped. " + opportunitiesOnThisPage + " opportunities on this page.");
             
@@ -108,23 +153,21 @@
                 await tsCommon.sleep(5000);
             }
             else {
-                tsCommon.log("Completed scraping STAR Collaborative opportunities. " + opportunities.length + " opportunities were scraped.");
+                tsCommon.log("Completed scraping STAR Collaborative opportunities. " + starPartnerScraper.scrapedOpportunities.length + " opportunities were scraped.");
             }
             currentPage++;
         }
         while(keepScraping)
-
-        return opportunities;
     }
 
-    const _scrapeOpportunityList = (opportunities) => {
+    const _scrapeOpportunityList = () => {
         const opportunityRows = $("#contacttable tbody tr").toArray();
         tsCommon.extendWebElements(opportunityRows);
 
         opportunityRows.forEach((opp) => {
             const newOpportunity = _scrapeOpportunity(opp, true);
 
-            opportunities.push(newOpportunity);
+            starPartnerScraper.scrapedOpportunities[newOpportunity.starNumber] = newOpportunity;
         });
 
         return opportunityRows.length;
@@ -161,7 +204,7 @@
         // Remove target _blank
         $(cpJobUrlElement).attr("target","");
         starOpportunity.cpJobUrl = $(cpJobUrlElement).attr('href');
-        starOpportunity.JobNumber = $(cpJobUrlElement).html().trim();
+        starOpportunity.starNumber = $(cpJobUrlElement).html().trim();
 
         const starOpportunityDetail = _scrapeOpportunityDetail(starOpportunity.cpJobUrl);
 
@@ -169,34 +212,20 @@
     }
 
     const _scrapeOpportunityDetail = async (jobUrl) => {
-        // $(jobLink).attr("target","");
-        // $(jobLink)[0].click();
-
-        return await tsCommon.httpGetText(jobUrl);
-
-    }
-
-    const _interceptJob = async (response) => {
-
-        const encodedHtml = response.responseText.split("Hello Collaborative Provider,")[1].split("www.STARcollaborative.com")[0]
-        const decodedHtml = tsCommon.decodeHtml(encodedHtml);
-
-        const [jobDetails, jobDescription] = _getJobDetailsAndDescriptionFromDetail(decodedHtml)
-
-        const client = _getClientFromDetail(jobDetails);
-        const starNumber = _getStarNumberFromDetail(jobDetails);
-        const jobNumber = _getJobNumberFromDetail(jobDetails);
-        const duration = _getDurationFromDetail(jobDetails);
-        const rates = _getRateFromDetail(jobDetails);
-
+        const properUrl = jobUrl.replace('http://starcollaborativeportal.force','https://starcollaborativeportal.secure.force')
+        return await tsCommon.httpGetText(properUrl);
     }
 
     class StarPartnerScraper {
-        constructor(){}
+        constructor() {
+            tsCommon.clearLocalStorage(_localStorageItemName);
+        }
 
+        scrapedOpportunities = {};
+
+        interceptOpportunity = _interceptOpportunity;
         scrapeResults = _scrapeResults;
         scrapeOpportunityDetail = _scrapeOpportunityDetail;
-        interceptJob = _interceptJob;
     }
 
     window.starPartnerScraper = new StarPartnerScraper();

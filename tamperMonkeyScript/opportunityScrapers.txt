@@ -21,8 +21,9 @@
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/js/tsQueryStringParser.js
-// @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/star/starUtils.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/js/opportunityConstants.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/js/opportunityScraperFactory.js
+// @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/star/starUtils.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/star/starPartnerScraper.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/star/starPublicScraper.js
 // @ignore      https://tonkasourceworkflows.firebaseapp.com/scrapers/opportunity/opportunityScraperManager.js
@@ -34,8 +35,9 @@
 // @require      http://localhost:5001/js/tsUICommon.js
 // @require      http://localhost:5001/js/tsHacking.js
 // @require      http://localhost:5001/js/tsQueryStringParser.js
-// @require      http://localhost:5001/scrapers/opportunity/star/starUtils.js
+// @require      http://localhost:5001/scrapers/opportunity/js/opportunityConstants.js
 // @require      http://localhost:5001/scrapers/opportunity/js/opportunityScraperFactory.js
+// @require      http://localhost:5001/scrapers/opportunity/star/starUtils.js
 // @require      http://localhost:5001/scrapers/opportunity/star/starPartnerScraper.js
 // @require      http://localhost:5001/scrapers/opportunity/star/starPublicScraper.js
 // @require      http://localhost:5001/scrapers/opportunity/opportunityScraperManager.js
@@ -47,11 +49,5 @@
     'use strict';
 
     console.info("Tampermonkey is running for Opportunity Scrapers");
-
-    window.scrapers = [];
-
-    $(document).load(function() {
-        tsCommon.sleep(3000);
-    });
 
 })();
