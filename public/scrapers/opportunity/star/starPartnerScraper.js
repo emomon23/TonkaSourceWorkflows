@@ -1,4 +1,81 @@
 (function() {
+    const _getJobDetailsAndDescriptionFromDetail = (html) => {
+        const regexp = /View job in the ".*Portal<\/a>/;
+        
+        const matches = html.match(regexp);
+        
+        if (matches && matches.length > 0) {
+            return matches;
+        }
+        tsCommon.log("STAR Opportunity Detail: Could not scrape Details and Description.");
+        return null;
+    }
+
+    const _getJobNumberFromDetail = (html) => {
+        const regexp = /Client Job #: (\d+|\d+-\d+|MED\w\w\w\d+)/;
+        
+        const matches = html.match(regexp);
+        
+        if (matches && matches.length > 0) {
+            return matches[1];
+        }
+        tsCommon.log("STAR Opportunity Detail: Could not scrape Job Number.");
+        return null;
+    }
+
+    const _getClientFromDetail = (html) => {
+        const regexp = /Client: (\w+(\s)?)*\(/;
+        
+        const matches = html.match(regexp);
+        
+        if (matches && matches.length > 0) {
+            return matches[1];
+        }
+        tsCommon.log("STAR Opportunity Detail: Could not scrape Client.");
+        return null;
+    }
+
+    const _getDurationFromDetail = (html) => {
+        const regexp = /Role duration is estimated to be (\d+ \w+)/;
+        
+        const matches = html.match(regexp);
+        
+        if (matches && matches.length > 0) {
+            return matches[1];
+        }
+        tsCommon.log("STAR Opportunity Detail: Could not scrape Duration.");
+        return null;
+    }
+
+    const _getRateFromDetail = (html) => {
+        // eslint-disable-next-line no-useless-escape
+        const currencyRegExp = '[$]?[0-9]{1,3}(?:,?[0-9]{3})*(?:\.[0-9]{2})?';
+        const re = `Rate Guidance: ((${currencyRegExp}) - (${currencyRegExp}))`;
+        const regexp = new RegExp(re);
+        
+        const matches = html.match(regexp);
+
+        if (matches && matches.length > 0) {
+            const lowRate = tsCommon.convertCurrencyStringToNumber(matches[2]);
+            const highRate = tsCommon.convertCurrencyStringToNumber(matches[3]);
+            return tsCommon.calculateRateGuidance(lowRate, highRate);
+        }
+        tsCommon.log("STAR Opportunity Detail: Could not scrape Rate.");
+        return null;
+    }
+
+    const _getStarNumberFromDetail = (html) => {
+        const regexp = /STAR # (\d+)/;
+        
+        const matches = html.match(regexp);
+        
+        if (matches && matches.length > 0) {
+            return matches[1];
+        }
+        tsCommon.log("STAR Opportunity Detail: Could not scrape STAR #.");
+        return null;
+    }
+
     const _getStatus = (status) => {
         switch (status.toLowerCase()) {
             case "closed":
@@ -11,16 +88,16 @@
     }
 
     const _scrapeResults = async (confirmEach = false) => {
-        var opportunities = [];
-        var keepScraping = false;
-        var confirmed = true;
-        var currentPage = 1;
+        const opportunities = [];
+        let keepScraping = false;
+        let confirmed = true;
+        let currentPage = 1;
 
         // Scrape the listing of opportunities, there may be multiple pages
         do {
             tsCommon.log("Scraping current page, stand by...");
 
-            const opportunitiesOnThisPage = _scrapeCurrentPageOpportunityResults(opportunities);
+            const opportunitiesOnThisPage = _scrapeOpportunityList(opportunities);
 
             tsCommon.log("Page " + currentPage + " scraped. " + opportunitiesOnThisPage + " opportunities on this page.");
             
@@ -40,7 +117,7 @@
         return opportunities;
     }
 
-    const _scrapeCurrentPageOpportunityResults = (opportunities) => {
+    const _scrapeOpportunityList = (opportunities) => {
         const opportunityRows = $("#contacttable tbody tr").toArray();
         tsCommon.extendWebElements(opportunityRows);
 
@@ -86,7 +163,7 @@
         starOpportunity.cpJobUrl = $(cpJobUrlElement).attr('href');
         starOpportunity.JobNumber = $(cpJobUrlElement).html().trim();
 
-        var starOpportunityDetail = _scrapeOpportunityDetail(starOpportunity.cpJobUrl);
+        const starOpportunityDetail = _scrapeOpportunityDetail(starOpportunity.cpJobUrl);
 
         return Object.assign(starOpportunity, starOpportunityDetail);
     }
@@ -103,10 +180,15 @@
 
         const encodedHtml = response.responseText.split("Hello Collaborative Provider,")[1].split("www.STARcollaborative.com")[0]
         const decodedHtml = tsCommon.decodeHtml(encodedHtml);
-        const jobDetailsObj = $('<div></div>').html(decodedHtml).children();
-        // eslint-disable-next-line no-alert
-        alert($(jobDetailsObj).html());
-        console.log($(jobDetailsObj).html());
+
+        const [jobDetails, jobDescription] = _getJobDetailsAndDescriptionFromDetail(decodedHtml)
+
+        const client = _getClientFromDetail(jobDetails);
+        const starNumber = _getStarNumberFromDetail(jobDetails);
+        const jobNumber = _getJobNumberFromDetail(jobDetails);
+        const duration = _getDurationFromDetail(jobDetails);
+        const rates = _getRateFromDetail(jobDetails);
+
     }
 
     class StarPartnerScraper {

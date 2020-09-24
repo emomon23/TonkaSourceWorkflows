@@ -1,4 +1,21 @@
 (function() {
+    const _calculateRateGuidance = (lowRate, highRate) => {
+        const candidateLowRate = (lowRate - 20).floor();
+        const candidateHighRate = (highRate - (highRate * 0.20)).floor();
+        return {
+            candidateLowRate: candidateLowRate,
+            candidateHighRate: candidateHighRate,
+            candidateRateGuidance: `$${candidateLowRate} - $${candidateHighRate}`,
+            tonkaLowRate: lowRate,
+            tonkaHighRate: highRate,
+            tonkaRateGuidance: `$${lowRate} - $${highRate}`
+        }
+    }
+
+    const _convertCurrencyStringToNumber = (currency) => {
+        return Number(currency.replace(/[^0-9.-]+/g,""));
+    }
+
     const _log = (message, type = 'LOG') => {
         switch (type.toUpperCase()) {
             case 'WARN':
@@ -54,8 +71,6 @@
              else {
                  return null;
              }
-
-
         }
 
         webElement.mineElementWhereClassContains = (classContains) => {
@@ -211,7 +226,9 @@
     class TSCommon {
         constructor(){}
 
+        calculateRateGuidance = _calculateRateGuidance;
         clickAHyperLink = _clickAHyperLink;
+        convertCurrencyStringToNumber = _convertCurrencyStringToNumber;
         decodeHtml = _decodeHtml;
         extendWebElements = _extendWebElements;
         extendWebElement = _extendWebElement;
