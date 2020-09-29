@@ -1,10 +1,14 @@
 (function() {
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
-
+    let _pageCandidates = [];
+    let _pageLiTags = {};
+    let _keepAddingToProject = true;
+    
     const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
         const liTag = $(`#search-result-${candidate.memberId}`);
         tsCommon.extendWebElement(liTag);
+        _pageLiTags[candidate.memberId] = liTag;
 
         const profileLink = liTag.mineElementWhereClassContains('profile-link');
         candidate.linkedInRecruiterUrl = $(profileLink).attr("href");
@@ -36,7 +40,7 @@
         if (!candidate.isJobSeeker){
             isJobSeekerTexts.forEach((text) => {
                 if (liTag.containsText(text)){
-                    candidate.isJobSeeker = true;
+                    candidate.isActivelyLooking = true;
                 }
             })
         }
@@ -58,11 +62,12 @@
         try {
             if (currentPageOfCandidates && Array.isArray(currentPageOfCandidates) && currentPageOfCandidates.length > 0){
                 currentPageOfCandidates.forEach((candidate) => {
-                    if (candidate.isJobSeeker){
+                    if (candidate.isJobSeeker || candidate.isActivelyLooking){
+                        const styleColor = candidate.isJobSeeker? 'color:orange' : 'color:firebrick';
                         const jobSeekerElement = tsUICommon.findFirstDomElement([`a[href*="${candidate.memberId}"]`, `a:contains("${candidate.fullName}")`]);
                         if (jobSeekerElement !== null){
                             const newLabel = '** ' + $(jobSeekerElement).text();
-                            $(jobSeekerElement).attr('style', 'color:orange').text(newLabel);
+                            $(jobSeekerElement).attr('style', styleColor).text(newLabel);
                         }
                     }
                 });
@@ -120,9 +125,83 @@
         return null;
     }
 
+    const _addCurrentPageOfJobSeekersToProject = async() => {
+        const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
+        let totalAdded = 0;
+
+        if (seekers.length > 0){
+            window.scrollTo(0,document.body.scrollHeight);
+            console.log(`# of seekers on this page ${seekers.length}`);
+            let needToWait = false;
+
+            for (let i=0; i<seekers.length; i++){
+                const seeker = seekers[i];
+                const liTag = _pageLiTags[seeker.memberId];
+                
+                if (liTag){
+                    if (needToWait === true){
+                        // eslint-disable-next-line no-await-in-loop
+                        await tsCommon.randomSleep(3000, 6000);
+                        needToWait = false;
+                    }
+
+                    const saveToProject = tsUICommon.findFirstDomElement([`li[id*="${seeker.memberId}"] button[class*="save-btn"]`]);
+                   
+                    if (saveToProject){
+                        $(saveToProject).click();
+                        totalAdded += 1;
+                        console.log(`Added ${seeker.firstName} ${seeker.lastName} to project.  ${(new Date()).toLocaleTimeString()}`);
+                        needToWait = true;
+                    }
+                    else {
+                        console.log(`No 'SAVE' button found for candidate ${seeker.firstName} ${seeker.lastName}.  Are they already added to the project?`);
+                    }
+                } else {
+                    console.log(`Hmmm, unable to find liTag for candidate ${seeker.firstName} ${seeker.lastName}`)
+                }
+
+            }
+        }
+
+        return totalAdded;
+    }
+
+    const _addJobSeekersToCurrentProject = async (totalDesiredNumber) => {
+        if (!totalDesiredNumber || isNaN(totalDesiredNumber)){
+            console.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
+            return 0;
+        }
+
+        _keepAddingToProject = true;
+        let numberAdded = await _addCurrentPageOfJobSeekersToProject();
+        let totalAdded = numberAdded;
+        
+        while(totalAdded < totalDesiredNumber && _keepAddingToProject){
+            if (numberAdded > 0){
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.randomSleep(3000, 5000);
+            }
+
+            if (!linkedInCommon.advanceToNextLinkedInResultPage()){
+                break;
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.randomSleep(5000, 10000);
+            // eslint-disable-next-line no-await-in-loop
+            numberAdded= await _addCurrentPageOfJobSeekersToProject();
+            totalAdded+= numberAdded;
+        }
+        
+       return totalAdded;
+    }
+
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
+        _pageCandidates = [];
+        _pageLiTags = {};
+
         let persist = false;
 
         if (candidatesInResults && candidatesInResults.length > 0){
@@ -135,6 +214,8 @@
                 const trimmedCandidate = _.omit(candidate, omitFields);
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
                 
+                _pageCandidates.push(candidate);
+
                 if (existingCachedCandidate === undefined){
                     trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
@@ -220,7 +301,12 @@
 
         clearLocalStorage = () => {
             window.localStorage.removeItem(_localStorageItemName);
+            this.scrapedCandidates = {};
         }
+
+        addCurrentPageOfJobSeekersToProject = _addCurrentPageOfJobSeekersToProject;
+        addJobSeekersToCurrentProject = _addJobSeekersToCurrentProject;
+        suspendAddJobSeekersToCurrentProject = (val) => {_keepAddingToProject = val;}
 
         interceptSearchResults = _interceptSearchResults;
     }
