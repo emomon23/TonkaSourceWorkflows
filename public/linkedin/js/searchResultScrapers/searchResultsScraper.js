@@ -78,9 +78,10 @@
         }
     }
 
-    const _searchCandidates = (scrapedCandidates, searchFor) => {
+    const _searchCandidates = (searchFor) => {
         let candidateReference = null;
-        
+        const scrapedCandidates = searchResultsScraper.scrapedCandidates;
+
         try {
             candidateReference = scrapedCandidates[searchFor];
             if (candidateReference !== undefined && candidateReference !== null){
@@ -125,7 +126,89 @@
         return null;
     }
 
-    const _addCurrentPageOfJobSeekersToProject = async() => {
+    const _getWordCount = (baseElement, word) => {
+        let count = 0;
+        let index = 0;
+    
+        index = $(baseElement).text().indexOf(word);
+        while(index >= 0){
+          count+=1;
+          index+= word.length;
+          index = $(baseElement).text().indexOf(word, index);
+        }
+      
+        return count;
+    }
+
+    const _getCandidateKeywordCount = async (candidateNameOrId, commaSeperatedListOfKeywords) => {
+        const candidate = _searchCandidates(candidateNameOrId);
+        if (candidate){
+            liTag = _pageLiTags[candidate.memberId];
+            if (!liTag){
+                console.log(`Unable to find link for ${candidate.firstName} ${candidate.lastName}`);
+                return;
+            }
+
+            var href = "https://www.linkedin.com" + $(`#search-result-${candidate.memberId} a`).attr('href');
+            const candidateWindow = window.open(href);
+
+            await tsCommon.sleep(2000);
+            const baseRef = $(candidateWindow.document).find('#primary-content');
+            const keyWords = commaSeperatedListOfKeywords.split(",");
+            const result = [];
+
+            keyWords.forEach((key) => {
+                const k = key.trim();
+                const count = _getWordCount(baseRef, k);
+                result.push({key: k, count});
+            });
+
+            candidateWindow.close();
+            await tsCommon.sleep(2000);
+
+            // eslint-disable-next-line consistent-return
+            return result;
+        }
+        else {
+            console.log(`Unable to find candidate '${candidateNameOrId}'`);
+        }
+    }
+
+    const _recruiterProfileKeyWordsMatchCount = async(candidate, commaSeperatedListOfWords) => {
+        //EG.
+        //commaSeperatedListOfWords = "C#:3,AWS:4,Postgres"
+        //we want C# mentioned 3+ times,  AWS mentioned 4+ times, and Postgress at least once
+
+        if (!commaSeperatedListOfWords || commaSeperatedListOfWords.trim().length === 0){
+            return true;
+        }
+
+        const justSkillNamesArray = commaSeperatedListOfWords.split(",").map(i => i.split(":")[0].trim())
+        const keywordsCount = await _getCandidateKeywordCount(candidate, justSkillNamesArray.join());
+       
+        const desiredCounts = commaSeperatedListOfWords.split(",").map(i => i.split(":").length > 1? i.split(":")[1].trim() : 1)
+        let result = true;
+
+        for (let i=0; i<justSkillNamesArray.length; i++){
+            const minCount = desiredCounts[i];
+            if (isNaN(minCount)){
+                console.log(`${commaSeperatedListOfWords[i]} doesn't make sense`);
+                break;
+            }
+
+            count = keywordsCount.find(k => k.key === justSkillNamesArray[i]).count;
+            if (count < minCount){
+                result = false;
+                break;
+            }
+        }
+
+        console.log(`Just keyword verified ${candidate.firstName} ${candidate.lastName} (keyword counts do ${result === false? "not " : ""} match), need to pause for a bit...`);
+        await tsCommon.randomSleep(6000, 11000);
+        return result;
+    }
+
+    const _addCurrentPageOfJobSeekersToProject = async(commaSeperatedKeywordsCountGreaterThanThree = null) => {
         const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
         let totalAdded = 0;
 
@@ -147,11 +230,16 @@
 
                     const saveToProject = tsUICommon.findFirstDomElement([`li[id*="${seeker.memberId}"] button[class*="save-btn"]`]);
                    
-                    if (saveToProject){
-                        $(saveToProject).click();
-                        totalAdded += 1;
-                        console.log(`Added ${seeker.firstName} ${seeker.lastName} to project.  ${(new Date()).toLocaleTimeString()}`);
-                        needToWait = true;
+                    if (saveToProject) {
+                        // eslint-disable-next-line no-await-in-loop
+                        const mayAddToProject = await _recruiterProfileKeyWordsMatchCount(seeker, commaSeperatedKeywordsCountGreaterThanThree);
+                        
+                        if (mayAddToProject){
+                            $(saveToProject).click();
+                            totalAdded += 1;
+                            console.log(`Added ${seeker.firstName} ${seeker.lastName} to project.  ${(new Date()).toLocaleTimeString()}`);
+                            needToWait = true;
+                        }
                     }
                     else {
                         console.log(`No 'SAVE' button found for candidate ${seeker.firstName} ${seeker.lastName}.  Are they already added to the project?`);
@@ -166,14 +254,14 @@
         return totalAdded;
     }
 
-    const _addJobSeekersToCurrentProject = async (totalDesiredNumber) => {
+    const _addJobSeekersToCurrentProject = async (totalDesiredNumber, commaSeperatedKeywordsCountGreaterThanThree = null) => {
         if (!totalDesiredNumber || isNaN(totalDesiredNumber)){
             console.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
             return 0;
         }
 
         _keepAddingToProject = true;
-        let numberAdded = await _addCurrentPageOfJobSeekersToProject();
+        let numberAdded = await _addCurrentPageOfJobSeekersToProject(commaSeperatedKeywordsCountGreaterThanThree);
         let totalAdded = numberAdded;
         
         while(totalAdded < totalDesiredNumber && _keepAddingToProject){
@@ -189,7 +277,7 @@
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.randomSleep(5000, 10000);
             // eslint-disable-next-line no-await-in-loop
-            numberAdded= await _addCurrentPageOfJobSeekersToProject();
+            numberAdded= await _addCurrentPageOfJobSeekersToProject(commaSeperatedKeywordsCountGreaterThanThree);
             totalAdded+= numberAdded;
         }
         
@@ -290,9 +378,7 @@
             }
         };
 
-        findCandidate = (searchFor) => {
-            return _searchCandidates(this.scrapedCandidates, searchFor);
-        }
+        findCandidate = _searchCandidates;
 
         persistToLocalStorage = () => {
             var jsonString = JSON.stringify(this.scrapedCandidates);
@@ -305,8 +391,10 @@
         }
 
         addCurrentPageOfJobSeekersToProject = _addCurrentPageOfJobSeekersToProject;
-        addJobSeekersToCurrentProject = _addJobSeekersToCurrentProject;
-        suspendAddJobSeekersToCurrentProject = (val) => {_keepAddingToProject = val;}
+        addAllJobSeekersToCurrentProject = _addJobSeekersToCurrentProject;
+        suspendAddJobSeekersToCurrentProject = (val) => {_keepAddingToProject = !val;}
+
+        getCandidateKeywordCount = _getCandidateKeywordCount;
 
         interceptSearchResults = _interceptSearchResults;
     }
