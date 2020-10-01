@@ -231,7 +231,7 @@
         });
 
         if (!window.alisonHookWindow){
-            console.log("Unable to open alisonHook.  CHECK POP UP BLOCKER?", "WARN");
+            tsCommon.log("Unable to open alisonHook.  CHECK POP UP BLOCKER?", "WARN");
         }
     }
 

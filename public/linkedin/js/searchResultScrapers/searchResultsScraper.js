@@ -1,10 +1,14 @@
 (function() {
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
-
+    let _pageCandidates = [];
+    let _pageLiTags = {};
+    let _keepAddingToProject = true;
+    
     const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
         const liTag = $(`#search-result-${candidate.memberId}`);
         tsCommon.extendWebElement(liTag);
+        _pageLiTags[candidate.memberId] = liTag;
 
         const profileLink = liTag.mineElementWhereClassContains('profile-link');
         candidate.linkedInRecruiterUrl = $(profileLink).attr("href");
@@ -36,7 +40,7 @@
         if (!candidate.isJobSeeker){
             isJobSeekerTexts.forEach((text) => {
                 if (liTag.containsText(text)){
-                    candidate.isJobSeeker = true;
+                    candidate.isActivelyLooking = true;
                 }
             })
         }
@@ -58,24 +62,26 @@
         try {
             if (currentPageOfCandidates && Array.isArray(currentPageOfCandidates) && currentPageOfCandidates.length > 0){
                 currentPageOfCandidates.forEach((candidate) => {
-                    if (candidate.isJobSeeker){
+                    if (candidate.isJobSeeker || candidate.isActivelyLooking){
+                        const styleColor = candidate.isJobSeeker? 'color:orange' : 'color:firebrick';
                         const jobSeekerElement = tsUICommon.findFirstDomElement([`a[href*="${candidate.memberId}"]`, `a:contains("${candidate.fullName}")`]);
                         if (jobSeekerElement !== null){
                             const newLabel = '** ' + $(jobSeekerElement).text();
-                            $(jobSeekerElement).attr('style', 'color:orange').text(newLabel);
+                            $(jobSeekerElement).attr('style', styleColor).text(newLabel);
                         }
                     }
                 });
             }
         }
         catch(e) {
-            console.log(`Unable to highlight job seekers.  ${e.message}. ${e}.`)
+            tsCommon.log(`Unable to highlight job seekers.  ${e.message}. ${e}.`)
         }
     }
 
-    const _searchCandidates = (scrapedCandidates, searchFor) => {
+    const _searchCandidates = (searchFor) => {
         let candidateReference = null;
-        
+        const scrapedCandidates = searchResultsScraper.scrapedCandidates;
+
         try {
             candidateReference = scrapedCandidates[searchFor];
             if (candidateReference !== undefined && candidateReference !== null){
@@ -120,9 +126,156 @@
         return null;
     }
 
+    const _getCandidateKeywordCount = async (candidateNameOrId, commaSeperatedListOfKeywords) => {
+        const candidate = _searchCandidates(candidateNameOrId);
+        if (candidate){
+            liTag = _pageLiTags[candidate.memberId];
+            if (!liTag){
+                tsCommon.log(`Unable to find link for ${candidate.firstName} ${candidate.lastName}`);
+                return;
+            }
+
+            var href = "https://www.linkedin.com" + $(`#search-result-${candidate.memberId} a`).attr('href');
+            const candidateWindow = window.open(href);
+
+            await tsCommon.sleep(2000);
+            const baseRef = $(candidateWindow.document).find(linkedInSelectors.recruiterProfilePage.profilePrimaryContent);
+            const keyWords = commaSeperatedListOfKeywords.split(",");
+            const result = [];
+
+            keyWords.forEach((key) => {
+                const k = key.trim();
+                const count = tsUICommon.getWordCount(baseRef, k);
+                result.push({key: k, count});
+            });
+
+            candidateWindow.close();
+            await tsCommon.sleep(2000);
+
+            // eslint-disable-next-line consistent-return
+            return result;
+        }
+        else {
+            tsCommon.log(`Unable to find candidate '${candidateNameOrId}'`);
+        }
+    }
+
+    const _recruiterProfileKeyWordsMatchCount = async(candidate, commaSeperatedListOfWords) => {
+        //EG.
+        //commaSeperatedListOfWords = "C#:3,AWS:4,Postgres"
+        //we want C# mentioned 3+ times,  AWS mentioned 4+ times, and Postgress at least once
+
+        if (!commaSeperatedListOfWords || commaSeperatedListOfWords.trim().length === 0){
+            return true;
+        }
+
+        const justSkillNamesArray = commaSeperatedListOfWords.split(",").map(i => i.split(":")[0].trim())
+        const keywordsCount = await _getCandidateKeywordCount(candidate, justSkillNamesArray.join());
+       
+        const desiredCounts = commaSeperatedListOfWords.split(",").map(i => i.split(":").length > 1? i.split(":")[1].trim() : 1)
+        let result = true;
+
+        for (let i=0; i<justSkillNamesArray.length; i++){
+            const minCount = desiredCounts[i];
+            if (isNaN(minCount)){
+                tsCommon.log(`${commaSeperatedListOfWords[i]} doesn't make sense`, "WARN");
+                break;
+            }
+
+            count = keywordsCount.find(k => k.key === justSkillNamesArray[i]).count;
+            if (count < minCount){
+                result = false;
+                break;
+            }
+        }
+
+        tsCommon.log(`Just keyword verified ${candidate.firstName} ${candidate.lastName} (keyword counts do ${result === false? "not " : ""} match), need to pause for a bit...`);
+        await tsCommon.randomSleep(6000, 11000);
+        return result;
+    }
+
+    const _addCurrentPageOfJobSeekersToProject = async(commaSeperatedKeywordsCountGreaterThanThree = null) => {
+        const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
+        let totalAdded = 0;
+
+        if (seekers.length > 0){
+            window.scrollTo(0,document.body.scrollHeight);
+            tsCommon.log(`# of seekers on this page ${seekers.length}`);
+            let needToWait = false;
+
+            for (let i=0; i<seekers.length; i++){
+                const seeker = seekers[i];
+                const liTag = _pageLiTags[seeker.memberId];
+                
+                if (liTag){
+                    if (needToWait === true){
+                        // eslint-disable-next-line no-await-in-loop
+                        await tsCommon.randomSleep(3000, 6000);
+                        needToWait = false;
+                    }
+
+                    const saveToProject = tsUICommon.findFirstDomElement([`li[id*="${seeker.memberId}"] button[class*="save-btn"]`]);
+                   
+                    if (saveToProject) {
+                        // eslint-disable-next-line no-await-in-loop
+                        const mayAddToProject = await _recruiterProfileKeyWordsMatchCount(seeker, commaSeperatedKeywordsCountGreaterThanThree);
+                        
+                        if (mayAddToProject){
+                            $(saveToProject).click();
+                            totalAdded += 1;
+                            tsCommon.log(`Added ${seeker.firstName} ${seeker.lastName} to project.  ${(new Date()).toLocaleTimeString()}`);
+                            needToWait = true;
+                        }
+                    }
+                    else {
+                        tsCommon.log(`No 'SAVE' button found for candidate ${seeker.firstName} ${seeker.lastName}.  Are they already added to the project?`);
+                    }
+                } else {
+                    tsCommon.log(`Hmmm, unable to find liTag for candidate ${seeker.firstName} ${seeker.lastName}`)
+                }
+
+            }
+        }
+
+        return totalAdded;
+    }
+
+    const _addJobSeekersToCurrentProject = async (totalDesiredNumber, commaSeperatedKeywordsCountGreaterThanThree = null) => {
+        if (!totalDesiredNumber || isNaN(totalDesiredNumber)){
+            tsCommon.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
+            return 0;
+        }
+
+        _keepAddingToProject = true;
+        let numberAdded = await _addCurrentPageOfJobSeekersToProject(commaSeperatedKeywordsCountGreaterThanThree);
+        let totalAdded = numberAdded;
+        
+        while(totalAdded < totalDesiredNumber && _keepAddingToProject){
+            if (numberAdded > 0){
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.randomSleep(3000, 5000);
+            }
+
+            if (!linkedInCommon.advanceToNextLinkedInResultPage()){
+                break;
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.randomSleep(5000, 10000);
+            // eslint-disable-next-line no-await-in-loop
+            numberAdded= await _addCurrentPageOfJobSeekersToProject(commaSeperatedKeywordsCountGreaterThanThree);
+            totalAdded+= numberAdded;
+        }
+        
+       return totalAdded;
+    }
+
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
+        _pageCandidates = [];
+        _pageLiTags = {};
+
         let persist = false;
 
         if (candidatesInResults && candidatesInResults.length > 0){
@@ -135,6 +288,8 @@
                 const trimmedCandidate = _.omit(candidate, omitFields);
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
                 
+                _pageCandidates.push(candidate);
+
                 if (existingCachedCandidate === undefined){
                     trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
@@ -184,7 +339,7 @@
                     linkedInCommon.callAlisonHookWindow('toggleCandidateSelection', {memberId, firstName, lastName, location, networkConnection, isJobSeeker, isSelected: !isRed});
                 }
                 else {
-                    console.log({msg: 'Unable to find candidate:', helper});
+                    tsCommon.log({msg: 'Unable to find candidate:', helper});
                 }
 
             });
@@ -209,9 +364,7 @@
             }
         };
 
-        findCandidate = (searchFor) => {
-            return _searchCandidates(this.scrapedCandidates, searchFor);
-        }
+        findCandidate = _searchCandidates;
 
         persistToLocalStorage = () => {
             var jsonString = JSON.stringify(this.scrapedCandidates);
@@ -220,7 +373,14 @@
 
         clearLocalStorage = () => {
             window.localStorage.removeItem(_localStorageItemName);
+            this.scrapedCandidates = {};
         }
+
+        addCurrentPageOfJobSeekersToProject = _addCurrentPageOfJobSeekersToProject;
+        addAllJobSeekersToCurrentProject = _addJobSeekersToCurrentProject;
+        suspendAddJobSeekersToCurrentProject = (val) => {_keepAddingToProject = !val;}
+
+        getCandidateKeywordCount = _getCandidateKeywordCount;
 
         interceptSearchResults = _interceptSearchResults;
     }

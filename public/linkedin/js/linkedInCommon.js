@@ -20,11 +20,11 @@
                 tsCommon.postMessageToWindow(window.alisonHookWindow, actionString, jsonData);
             }
             catch(postError) {
-                console.log(`Error posting message to alison hook (check pop up blocker?). ${e.message}.  (${e})`, 'ERROR');
+                tsCommon.log(`Error posting message to alison hook (check pop up blocker?). ${e.message}.  (${e})`, 'ERROR');
             }
         }
         else {
-            console.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()? Check Pop up blocker?)");
+            tsCommon.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()? Check Pop up blocker?)");
         }
     }
 
@@ -57,7 +57,7 @@
         }
 
         if (!result){
-            console.log(`whatPageAmIOn = null (href: ${href})`);
+            tsCommon.log(`whatPageAmIOn = null (href: ${href})`);
         }
 
         return result;

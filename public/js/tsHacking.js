@@ -58,7 +58,7 @@
 
     window.setupHackMonitors = (jQuerySelector) => {
          $(jQuerySelector).on("click focus blur focusin keydown change click dblclick keydown keyup keypress input textInput touchstart touchmove touchend touchcancel resize scroll select change submit reset",(e) => {
-            console.log({element: 'body', e});
+            tsCommon.log({element: 'body', e});
          });
     }
 })();
