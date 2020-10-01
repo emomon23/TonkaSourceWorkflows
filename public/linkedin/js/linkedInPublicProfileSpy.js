@@ -112,7 +112,7 @@
 
         const publicProfile = await linkedInPublicProfile.scrapeProfile();
         if (!publicProfile){
-            console.log("Unable to record connection request, unable to scrape profile", "WARN");
+            tsCommon.log("Unable to record connection request, unable to scrape profile", "WARN");
             return;
         }
        
@@ -147,7 +147,7 @@
     class LinkedInPublicProfileSpy {
         constructor() {
             if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PUBLIC_PROFILE){
-                console.log("Spy is spying - good news!");
+                tsCommon.log("Spy is spying - good news!");
 
                 this.numberOfMessageWindows = _getNumberOfMessageWindows();
                 

@@ -74,7 +74,7 @@
             }
         }
         catch(e) {
-            console.log(`Unable to highlight job seekers.  ${e.message}. ${e}.`)
+            tsCommon.log(`Unable to highlight job seekers.  ${e.message}. ${e}.`)
         }
     }
 
@@ -131,7 +131,7 @@
         if (candidate){
             liTag = _pageLiTags[candidate.memberId];
             if (!liTag){
-                console.log(`Unable to find link for ${candidate.firstName} ${candidate.lastName}`);
+                tsCommon.log(`Unable to find link for ${candidate.firstName} ${candidate.lastName}`);
                 return;
             }
 
@@ -156,7 +156,7 @@
             return result;
         }
         else {
-            console.log(`Unable to find candidate '${candidateNameOrId}'`);
+            tsCommon.log(`Unable to find candidate '${candidateNameOrId}'`);
         }
     }
 
@@ -178,7 +178,7 @@
         for (let i=0; i<justSkillNamesArray.length; i++){
             const minCount = desiredCounts[i];
             if (isNaN(minCount)){
-                console.log(`${commaSeperatedListOfWords[i]} doesn't make sense`, "WARN");
+                tsCommon.log(`${commaSeperatedListOfWords[i]} doesn't make sense`, "WARN");
                 break;
             }
 
@@ -189,7 +189,7 @@
             }
         }
 
-        console.log(`Just keyword verified ${candidate.firstName} ${candidate.lastName} (keyword counts do ${result === false? "not " : ""} match), need to pause for a bit...`);
+        tsCommon.log(`Just keyword verified ${candidate.firstName} ${candidate.lastName} (keyword counts do ${result === false? "not " : ""} match), need to pause for a bit...`);
         await tsCommon.randomSleep(6000, 11000);
         return result;
     }
@@ -200,7 +200,7 @@
 
         if (seekers.length > 0){
             window.scrollTo(0,document.body.scrollHeight);
-            console.log(`# of seekers on this page ${seekers.length}`);
+            tsCommon.log(`# of seekers on this page ${seekers.length}`);
             let needToWait = false;
 
             for (let i=0; i<seekers.length; i++){
@@ -223,15 +223,15 @@
                         if (mayAddToProject){
                             $(saveToProject).click();
                             totalAdded += 1;
-                            console.log(`Added ${seeker.firstName} ${seeker.lastName} to project.  ${(new Date()).toLocaleTimeString()}`);
+                            tsCommon.log(`Added ${seeker.firstName} ${seeker.lastName} to project.  ${(new Date()).toLocaleTimeString()}`);
                             needToWait = true;
                         }
                     }
                     else {
-                        console.log(`No 'SAVE' button found for candidate ${seeker.firstName} ${seeker.lastName}.  Are they already added to the project?`);
+                        tsCommon.log(`No 'SAVE' button found for candidate ${seeker.firstName} ${seeker.lastName}.  Are they already added to the project?`);
                     }
                 } else {
-                    console.log(`Hmmm, unable to find liTag for candidate ${seeker.firstName} ${seeker.lastName}`)
+                    tsCommon.log(`Hmmm, unable to find liTag for candidate ${seeker.firstName} ${seeker.lastName}`)
                 }
 
             }
@@ -242,7 +242,7 @@
 
     const _addJobSeekersToCurrentProject = async (totalDesiredNumber, commaSeperatedKeywordsCountGreaterThanThree = null) => {
         if (!totalDesiredNumber || isNaN(totalDesiredNumber)){
-            console.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
+            tsCommon.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
             return 0;
         }
 
@@ -339,7 +339,7 @@
                     linkedInCommon.callAlisonHookWindow('toggleCandidateSelection', {memberId, firstName, lastName, location, networkConnection, isJobSeeker, isSelected: !isRed});
                 }
                 else {
-                    console.log({msg: 'Unable to find candidate:', helper});
+                    tsCommon.log({msg: 'Unable to find candidate:', helper});
                 }
 
             });
