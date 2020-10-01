@@ -147,7 +147,7 @@
     class LinkedInPublicProfileSpy {
         constructor() {
             if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PUBLIC_PROFILE){
-                tsCommon.log("Spy is spying - good news!");
+                tsCommon.log("LinkedInPublicProfile spy is spying - good news!");
 
                 this.numberOfMessageWindows = _getNumberOfMessageWindows();
                 

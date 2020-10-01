@@ -88,7 +88,7 @@
 
                 const whatButtonIsAvailable = _getPublicProfile_MessageButtonSelector(publicProfileWindow);
                 if (whatButtonIsAvailable === null){
-                    tsCommon.log(`Unable to send a message to ${canidate.firstName} ${candidate.lastName}`);
+                    tsCommon.log(`Unable to send a message to ${candidate.firstName} ${candidate.lastName}`);
                 }
                 else {
                     whatButtonIsAvailable.clickable.click();
