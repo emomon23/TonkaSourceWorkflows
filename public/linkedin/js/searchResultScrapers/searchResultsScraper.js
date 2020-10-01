@@ -126,20 +126,6 @@
         return null;
     }
 
-    const _getWordCount = (baseElement, word) => {
-        let count = 0;
-        let index = 0;
-    
-        index = $(baseElement).text().indexOf(word);
-        while(index >= 0){
-          count+=1;
-          index+= word.length;
-          index = $(baseElement).text().indexOf(word, index);
-        }
-      
-        return count;
-    }
-
     const _getCandidateKeywordCount = async (candidateNameOrId, commaSeperatedListOfKeywords) => {
         const candidate = _searchCandidates(candidateNameOrId);
         if (candidate){
@@ -153,13 +139,13 @@
             const candidateWindow = window.open(href);
 
             await tsCommon.sleep(2000);
-            const baseRef = $(candidateWindow.document).find('#primary-content');
+            const baseRef = $(candidateWindow.document).find(linkedInSelectors.recruiterProfilePage.profilePrimaryContent);
             const keyWords = commaSeperatedListOfKeywords.split(",");
             const result = [];
 
             keyWords.forEach((key) => {
                 const k = key.trim();
-                const count = _getWordCount(baseRef, k);
+                const count = tsUICommon.getWordCount(baseRef, k);
                 result.push({key: k, count});
             });
 
@@ -192,7 +178,7 @@
         for (let i=0; i<justSkillNamesArray.length; i++){
             const minCount = desiredCounts[i];
             if (isNaN(minCount)){
-                console.log(`${commaSeperatedListOfWords[i]} doesn't make sense`);
+                console.log(`${commaSeperatedListOfWords[i]} doesn't make sense`, "WARN");
                 break;
             }
 

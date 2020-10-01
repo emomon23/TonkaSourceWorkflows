@@ -93,6 +93,20 @@
         }
     }
 
+    const _getWordCount = (baseElement, word) => {
+        let count = 0;
+        let index = 0;
+    
+        index = $(baseElement).text().indexOf(word);
+        while(index >= 0){
+          count+=1;
+          index+= word.length;
+          index = $(baseElement).text().indexOf(word, index);
+        }
+      
+        return count;
+    }
+
     class TsUICommon {
         constructor(){}
 
@@ -104,6 +118,7 @@
         findPreviousElement = _findPreviousElement;
         cleanseTextOfHtml = _cleanseTextOfHtml;
         rebind = _rebind;
+        getWordCount = _getWordCount;
     }
 
     window.tsUICommon = new TsUICommon();
