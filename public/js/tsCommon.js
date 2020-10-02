@@ -187,6 +187,27 @@
         }
     }
 
+    class Now {
+        constructor() {
+            const d = new Date();
+            this.month = d.getMonth() + 1;
+            this.day = d.getDate();
+            this.year = d.getFullYear();
+            this.time = d.getTime();
+            this.dateTimeString = d.toString();
+            this.dateString = d.toLocaleDateString();
+            this.timeString = d.toLocaleTimeString();
+        }
+           
+        dayDiff(compareToDate) {
+            const compareTo = new Date(compareToDate);
+            const difference_In_Time = this.time - compareTo.getTime(); 
+            const difference_In_Days = difference_In_Time / (1000 * 3600 * 24);
+        
+            return difference_In_Days;
+        }
+    }
+
     class TSCommon {
         constructor(){}
 
@@ -203,6 +224,7 @@
         clickAHyperLink = _clickAHyperLink;
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
+        now = () => { return new Now(); }
     }
 
     window.tsCommon = new TSCommon();

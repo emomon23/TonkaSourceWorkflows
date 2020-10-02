@@ -290,13 +290,12 @@
                 
                 _pageCandidates.push(candidate);
 
-                if (existingCachedCandidate === undefined){
+                if (!existingCachedCandidate){
                     trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
                     
-                    searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
-                    _candidateOrder.push(candidate.memberId);
-
+                    searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
+                    
                     persist = true;
 
                     if (trimmedCandidate.isJobSeeker){
@@ -368,17 +367,32 @@
 
         findCandidate = _searchCandidates;
 
-        persistToLocalStorage = () => {
-            const onlyJobSeekers = {};
+        persistToLocalStorage = (daysOld = null) => {
+            if (daysOld === 0){
+                searchResultsScraper.clearLocalStorage();
+                return;
+            }
+
+            let onlyJobSeekers = {};
+            const now = tsCommon.now();
+
             for(var k in this.scrapedCandidates){
                 const c = this.scrapedCandidates[k].candidate;
-                if (c.isJobSeeker === true || c.isActivelyLooking === true){
+                if ((c.isJobSeeker === true || c.isActivelyLooking === true)
+                    && (daysOld === null || now.dayDiff(this.scrapedCandidates[k].dateScraped) > daysOld)){
                     onlyJobSeekers[k] = this.scrapedCandidates[k];
                 }
             }
             
             const jsonString = JSON.stringify(onlyJobSeekers);
-            window.localStorage.setItem(_localStorageItemName, jsonString);
+            try {
+                window.localStorage.setItem(_localStorageItemName, jsonString);
+            }
+            catch(e) {
+                onlyJobSeekers = null; // free up this memory before making a recursive call
+                const onlyRecentDays = dayDiff === null? 1 : 0;
+                this.persistToLocalStorage(onlyRecentDays);
+            }
         }
 
         clearLocalStorage = () => {
