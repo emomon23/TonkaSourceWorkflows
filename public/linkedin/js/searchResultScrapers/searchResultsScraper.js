@@ -295,6 +295,8 @@
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
                     
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
+                    _candidateOrder.push(candidate.memberId);
+
                     persist = true;
 
                     if (trimmedCandidate.isJobSeeker){
@@ -367,7 +369,15 @@
         findCandidate = _searchCandidates;
 
         persistToLocalStorage = () => {
-            var jsonString = JSON.stringify(this.scrapedCandidates);
+            const onlyJobSeekers = {};
+            for(var k in this.scrapedCandidates){
+                const c = this.scrapedCandidates[k].candidate;
+                if (c.isJobSeeker === true || c.isActivelyLooking === true){
+                    onlyJobSeekers[k] = this.scrapedCandidates[k];
+                }
+            }
+            
+            const jsonString = JSON.stringify(onlyJobSeekers);
             window.localStorage.setItem(_localStorageItemName, jsonString);
         }
 
