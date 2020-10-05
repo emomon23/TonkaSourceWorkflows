@@ -162,8 +162,6 @@
                 jobPosition.description = scrapedExperience.description;
             }
         });
-
-        return result;
     }
 
     const _scrapePublicProfileLink = () => {
