@@ -158,6 +158,27 @@
         return null;
     }
 
+    const _retrieveAlisonContact = async(searchFor) => {
+        await linkedInCommon.callAlisonHookWindow('retrieveAlisonContact', searchFor);
+    }
+
+    const _retrieveAlisonContactResult = async(alisonContact) => {
+        if (alisonContact && alisonContact.linkedInMemberId){
+            const memberId = alisonContact.linkedInMemberId;
+            const localCandidateContainer = searchResultsScraper.scrapedCandidates[memberId];
+
+            if (localCandidateContainer && localCandidateContainer.candidate){
+                if (alisonContact.scrapedSkillGrades){
+                    localCandidateContainer.candidate.scrapedSkillGrades = alisonContact.scrapedSkillGrades
+                }
+
+                if (alisonContact.positions){
+                    localCandidateContainer.candidate.positions = alisonContact.positions;
+                }
+            }
+        }
+    }
+
     const _createMessageRecordObject = (text, type) => {
         return {
             text,
@@ -201,6 +222,8 @@
         candidateUnselect = _candidateUnselect;
         changeBadgeColor = _changeBadgeColor;
         upsertContact = _upsertContact;
+        retrieveAlisonContact = _retrieveAlisonContact;
+        retrieveAlisonContactResult = _retrieveAlisonContactResult;
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
         recordMessageWasSent = _recordMessageWasSent;
         recordConnectionRequestMade = _recordConnectionRequestMade;

@@ -17,6 +17,7 @@
 
             // Scrape skills
             candidate.linkedInSkills = _scrapeSkills();
+            _mergeCandidatePositionsWithScrapedJobExperience(candidate);
 
             if (_shouldSaveCandidate(candidate)) {
                 await linkedInApp.upsertContact(candidate);
@@ -54,6 +55,8 @@
         //June 2015 - November 2015(1 Year 5 months)
         const dateParts = $(positionElement).text().split('(')[0].split(' - ');
         durationData.startDate = new Date(dateParts[0]);
+        durationData.startDateMonth = durationData.startDate.getMonth();
+        durationData.startDateYear = durationData.startDate.getFullYear();
         durationData.endDate = dateParts[1] === 'Present'? new Date() : new Date(dateParts[1]);
 
         const dateTo = new Date();
@@ -64,7 +67,7 @@
     const _scrapeOutJobExperiences = () => {
         const professionalExperienceListItems = $('#profile-experience li[class*="position"]').toArray();
         const result = [];
-
+        
         professionalExperienceListItems.forEach((li) => {
             const job = {};
             job.jobTitle = $(li).find("h4").text();
@@ -124,44 +127,20 @@
         return score;
     }
 
-    const _scoreThisSkillAndAliases = (skillAndItsAliases, jobExperiances) => {
-        const result = [];
-
-        let skillNameScore = _scoreASkillString(skillAndItsAliases.name, jobExperiances);
-        if (skillAndItsAliases.aliases){
-            skillAndItsAliases.aliases.forEach((alias) => {
-                const aliasScore = _scoreASkillString(alias, jobExperiances);
-                if (aliasScore > skillNameScore){
-                    skillNameScore = aliasScore;
-                }
-            });
-
-            result.push({name: alias, score: skillNameScore});
-        }
-
-        result.push({name: skillAndItsAliases.name, score: skillNameScore});
-    }
-
-    const _weighDefinedSkills = () => {
-        const skillsThatMatterToTonka = [
-            {name: '.NET', aliases: ['c#', 'asp.net', 'asp.mvc', '.net core', 'vb.net']},
-            {name: 'xamarin'},
-            {name: 'posgress'},
-            {name: 'mssql'},
-            {name: 'javascript', aliases: ['angular', 'react', 'vue', 'nodejs', 'jquery', 'svelte', 'express',]},
-            {name: 'azure'},
-            {name: 'aws', aliases: ['amazon']},
-            {name: 'java ', aliases: ['java,', 'java.', 'android', 'spring boot', 'springboot']},
-            {name: 'ios', aliases: ['swift', 'objective-c']},
-            {name: 'blockchain', aliases: ['block chain']}
-        ];
-        
-        let result = [];
-        const jobExperiances = _scrapeOutJobExperiences();
-        
-        skillsThatMatterToTonka.forEach((skillWithAliases) => {
-            const scores = _scoreThisSkillAndAliases(skillWithAliases, jobExperiances, result);
-            result = result.concat(scores);
+    const _mergeCandidatePositionsWithScrapedJobExperience = (candidate) => {
+        /* [{
+            jobTitle, 
+            employer, 
+            description: (open text), 
+            durationData: { years: months: totalMonthsOnJob: startDate, endDate, startDateMonth, startDateYear, ageOfPositionInMonths: (0 = present)}
+            }]
+        */
+        const jobExperiences = _scrapeOutJobExperiences();
+        jobExperiences.forEach((scrapedExperience) => {
+            const jobPosition = candidate.position.find((p) => p.companyName === scrapedExperience.employer && p.startDateMonth === scrapedExperience.durationData.startDateMonth && p.title === scrapedExperience.jobTitle);
+            if (jobPosition){
+                jobPosition.description = scrapedExperience.description;
+            }
         });
 
         return result;

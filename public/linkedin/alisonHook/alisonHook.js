@@ -47,6 +47,7 @@
         };
 
         saveLinkedInContact = alisonContactService.saveLinkedInContact;
+        retrieveAlisonContact = alisonContactService.retrieveAlisonContact;
     }
 
     window.alisonHook = new AlisonHook();

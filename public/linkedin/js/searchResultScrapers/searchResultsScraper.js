@@ -298,7 +298,7 @@
                     
                     persist = true;
 
-                    if (trimmedCandidate.isJobSeeker){
+                    if (trimmedCandidate.isJobSeeker || trimmedCandidate.isJobSeeker){
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
                 }
@@ -307,8 +307,10 @@
                         linkedInApp.changeBadgeColor(candidate.memberId, 'red');
                     }
 
-                    if ((existingCachedCandidate.candidate.isJobSeeker === true && candidate.isJobSeeker !== true)
-                        || (existingCachedCandidate.candidate.isJobSeeker !== true && candidate.isJobSeeker === true)){
+                    const existingIsJobSeeker = existingCachedCandidate.candidate.isJobSeeker || existingCachedCandidate.candidate.isActivelyLooking;
+                    const scrapedIsJobSeeker = candidate.isJobSeeker || candidate.isActivelyLooking;
+                    if ((existingIsJobSeeker === true && scrapedIsJobSeeker !== true)
+                        || (existingIsJobSeeker !== true && scrapedIsJobSeeker === true)){
                         searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
