@@ -5,7 +5,7 @@
             
             const contactInfoLink = $(linkedInSelectors.publicProfilePage.CONTACT_INFO_LINK);
             const contactInfoWindow = window.open($(contactInfoLink).attr("href"));
-            await tsCommon.sleep(5000);
+            await tsCommon.randomSleep(4000,7000);
 
             const contactInfoContainer = $(contactInfoWindow.document).find(linkedInSelectors.contactInfoPage.CONTACT_INFO_CONTAINER);
             
@@ -15,7 +15,10 @@
             } else {
                 tsCommon.log("Contact Info Scraper: Could not find contact info container", "WARN");
             }
-            contactInfoWindow.close();
+            window.setTimeout(() => {
+                contactInfoWindow.close();
+            }, tsCommon.randomSleep(3000, 10000));
+            
         }
         
         return cachedCandidate;
