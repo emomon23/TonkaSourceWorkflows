@@ -126,7 +126,7 @@
         return null;
     }
 
-    const _getCandidateKeywordCount = async (candidateNameOrId, commaSeperatedListOfKeywords) => {
+    const _getCandidateKeywordCount = async (candidateNameOrId, commaSeparatedListOfKeywords) => {
         const candidate = _searchCandidates(candidateNameOrId);
         if (candidate){
             liTag = _pageLiTags[candidate.memberId];
@@ -140,7 +140,7 @@
 
             await tsCommon.sleep(2000);
             const baseRef = $(candidateWindow.document).find(linkedInSelectors.recruiterProfilePage.profilePrimaryContent);
-            const keyWords = commaSeperatedListOfKeywords.split(",");
+            const keyWords = commaSeparatedListOfKeywords.split(",");
             const result = [];
 
             keyWords.forEach((key) => {
@@ -160,25 +160,25 @@
         }
     }
 
-    const _recruiterProfileKeyWordsMatchCount = async(candidate, commaSeperatedListOfWords) => {
+    const _recruiterProfileKeyWordsMatchCount = async(candidate, commaSeparatedListOfWords) => {
         //EG.
-        //commaSeperatedListOfWords = "C#:3,AWS:4,Postgres"
-        //we want C# mentioned 3+ times,  AWS mentioned 4+ times, and Postgress at least once
+        //commaSeparatedListOfWords = "C#:3,AWS:4,PostgreSQL"
+        //we want C# mentioned 3+ times,  AWS mentioned 4+ times, and PostgreSQL at least once
 
-        if (!commaSeperatedListOfWords || commaSeperatedListOfWords.trim().length === 0){
+        if (!commaSeparatedListOfWords || commaSeparatedListOfWords.trim().length === 0){
             return true;
         }
 
-        const justSkillNamesArray = commaSeperatedListOfWords.split(",").map(i => i.split(":")[0].trim())
+        const justSkillNamesArray = commaSeparatedListOfWords.split(",").map(i => i.split(":")[0].trim())
         const keywordsCount = await _getCandidateKeywordCount(candidate, justSkillNamesArray.join());
        
-        const desiredCounts = commaSeperatedListOfWords.split(",").map(i => i.split(":").length > 1? i.split(":")[1].trim() : 1)
+        const desiredCounts = commaSeparatedListOfWords.split(",").map(i => i.split(":").length > 1? i.split(":")[1].trim() : 1)
         let result = true;
 
         for (let i=0; i<justSkillNamesArray.length; i++){
             const minCount = desiredCounts[i];
             if (isNaN(minCount)){
-                tsCommon.log(`${commaSeperatedListOfWords[i]} doesn't make sense`, "WARN");
+                tsCommon.log(`${commaSeparatedListOfWords[i]} doesn't make sense`, "WARN");
                 break;
             }
 
@@ -284,7 +284,7 @@
             await window.promiseLoop(candidatesInResults, async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
                 
-                const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInpuytModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
+                const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
                 const trimmedCandidate = _.omit(candidate, omitFields);
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
                 
