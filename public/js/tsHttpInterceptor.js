@@ -9,7 +9,8 @@
             var responseListeners = __responseIntercepts.filter(rl => rl.method === method.toLowerCase() && url.toLowerCase().indexOf(rl.urlContains) >= 0);
             responseListeners.forEach((rl) => {
                 if (rl.callBack) {
-                    rl.callBack({response: this.response, responseText: this.responseText, url: this.responseURL});
+                    const text = (this.responseType === 'text' || this.responseType === '') ? this.responseText : "";
+                    rl.callBack({response: this.response, responseText: text, url: this.responseURL});
                 }
             });
         });

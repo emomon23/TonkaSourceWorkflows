@@ -8,8 +8,9 @@
 // @domain       www.linkedin.com
 // @include      https://www.linkedin.com/*
 // @include      https://linkedin.com/*
-
 // @require      http://code.jquery.com/jquery-latest.js
+
+// @ignore       --- TONKA SOURCE WORKFLOWS ---
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsConstants.js
@@ -20,6 +21,8 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInConstants.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInSelectors.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInRecruiterProfileSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
@@ -39,6 +42,8 @@
 // @ignore      http://localhost:5001/linkedin/js/linkedInConstants.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInSelectors.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInCommon.js
+// @ignore      http://localhost:5001/js/scrapers/linkedInContactInfoScraper.js
+// @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInRecruiterProfileSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
