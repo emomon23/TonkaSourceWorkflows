@@ -1,5 +1,6 @@
 (function() {
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
+    const _localStorageLastCandidateMemberId = 'tsLastMemberId';
     let _pageCandidates = [];
     let _pageLiTags = {};
     let _keepAddingToProject = true;
@@ -369,6 +370,21 @@
 
         findCandidate = _searchCandidates;
 
+        persistLastRecruiterProfile = (memberId) => {
+            const candidateContainer = this.scrapedCandidates[memberId];
+            if (candidateContainer && candidateContainer.candidate){
+                candidateContainer.candidate.persistToLocalStorage = true;
+                window.localStorage.setItem(_localStorageLastCandidateMemberId, memberId);
+            }
+
+            return candidateContainer;
+        }
+
+        getRecruiterProfileCandidate = () => {
+            const memberId = window.localStorage.getItem(_localStorageLastCandidateMemberId);
+            return this.scrapedCandidates[memberId];
+        }
+
         persistToLocalStorage = (daysOld = null) => {
             if (daysOld === 0){
                 searchResultsScraper.clearLocalStorage();
@@ -380,7 +396,7 @@
 
             for(var k in this.scrapedCandidates){
                 const c = this.scrapedCandidates[k].candidate;
-                if ((c.isJobSeeker === true || c.isActivelyLooking === true)
+                if ((c.isJobSeeker === true || c.isActivelyLooking === true || c.persistToLocalStorage === true)
                     && (daysOld === null || now.dayDiff(this.scrapedCandidates[k].dateScraped) > daysOld)){
                     onlyJobSeekers[k] = this.scrapedCandidates[k];
                 }

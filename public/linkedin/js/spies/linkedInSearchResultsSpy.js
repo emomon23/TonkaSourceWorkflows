@@ -3,7 +3,9 @@
         await tsCommon.sleep(1000);
         const profileLinks = $('a[href*="/recruiter/profile/"]');
 
-        $(profileLinks).bind('click', () => {
+        $(profileLinks).bind('click', (e) => {
+            const memberId = $(e.target).attr('href').replace('/recruiter/profile/', '').split(',')[0];
+            searchResultsScraper.persistLastRecruiterProfile(memberId);
             searchResultsScraper.persistToLocalStorage();
         });
     }

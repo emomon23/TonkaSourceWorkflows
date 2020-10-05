@@ -1,12 +1,16 @@
 (() => {
     const _getMemberId = () => {
+        const candidateContainer = searchResultsScraper.getRecruiterProfileCandidate();
+        if (candidateContainer && candidateContainer.candidate){
+            return candidateContainer.candidate.memberId;
+        }
+
         return $(linkedInSelectors.recruiterProfilePage.profileId).val();
     }
 
     const _scrapeProfile = async () => {
         await tsCommon.sleep(2000);
-        var memberId = _getMemberId();
-        var candidateObj = searchResultsScraper.scrapedCandidates[memberId];
+        var candidateObj = searchResultsScraper.getRecruiterProfileCandidate();
 
         // If we've scraped this candidate, proceed
         if (candidateObj) {
@@ -35,30 +39,37 @@
         //(2 years 1 month)
         //(5 months)
         //(1 year 5 months)
-        $(element).text().split('(').join('').split(')').join('');
+        let rawDuration = $(element).text().split('(').join('').split(')').join('');
 
-        const years = rawDuration.indexOf('year') >= 0? rawDuration.split('year')[0] : 0;
+        let years = rawDuration.indexOf('year') >= 0? rawDuration.split('year')[0].trim() : 0;
+        
         let months = 0;
-        if (rawDuration.index('month') >= 0){
+        if (rawDuration.indexOf('month') >= 0){
             const parts = rawDuration.split(' ');
-            months = parts[parts.length -1];
+            months = parts[parts.length -2].trim();
         }
       
-        return {
-            years,
-            months,
-            totalMonthsOnJob: months + (years * 12)
+        const result = {
+            years: Number.parseInt(years),
+            months: Number.parseInt(months),
         };
+
+        result.totalMonthsOnJob = (result.years * 12) + result.months;
+        return result;
     }
 
     const _scrapeOutAndAppendStartDateAndEndDate = (positionElement, durationData) => {
         //June 2015 - November 2015(1 Year 5 months)
-        const dateParts = $(positionElement).text().split('(')[0].split(' - ');
-        durationData.startDate = new Date(dateParts[0]);
-        durationData.startDateMonth = durationData.startDate.getMonth();
+        const rangeString = $(positionElement).text().split("(")[0].trim();
+        const dateParts = rangeString.split('–');
+        durationData.startDate = new Date(dateParts[0].trim());
+        durationData.startDateMonth = durationData.startDate.getMonth() +1;
         durationData.startDateYear = durationData.startDate.getFullYear();
-        durationData.endDate = dateParts[1] === 'Present'? new Date() : new Date(dateParts[1]);
 
+        dateParts[1] = dateParts[1].trim();
+        durationData.isPresent = dateParts[1] === 'Present';
+        durationData.endDate = durationData.isPresent === true? new Date() : new Date(dateParts[1]);
+        
         const dateTo = new Date();
         durationData.ageOfPositionInMonths = dateTo.getMonth() - durationData.endDate.getMonth() + 
         (12 * (dateTo.getFullYear() - durationData.endDate.getFullYear()));
@@ -137,7 +148,12 @@
         */
         const jobExperiences = _scrapeOutJobExperiences();
         jobExperiences.forEach((scrapedExperience) => {
-            const jobPosition = candidate.position.find((p) => p.companyName === scrapedExperience.employer && p.startDateMonth === scrapedExperience.durationData.startDateMonth && p.title === scrapedExperience.jobTitle);
+            const jobPosition = candidate.positions.find((p) => {
+                return p.companyName === scrapedExperience.employer 
+                        && p.startDateMonth === scrapedExperience.durationData.startDateMonth 
+                        && p.title === scrapedExperience.jobTitle
+                })
+                ;
             if (jobPosition){
                 jobPosition.description = scrapedExperience.description;
             }
@@ -170,7 +186,7 @@
             return true;
         }
         // Save candidate if isJobSeeker
-        if (candidate.isJobSeeker === true) {
+        if (candidate.isJobSeeker === true || candidate.isActivelyLooking === true) {
             return true;
         }
         return false;
