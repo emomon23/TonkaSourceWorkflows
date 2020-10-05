@@ -6,6 +6,7 @@
     }
 
     const _recruiterProfilePage = {
+        fullName: 'div[class*="profile-info"] h1',
         profileId: 'input[name*="profile-id"]',
         profilePrimaryContent: '#primary-content',
         publicProfileLink: 'a:contains("Public Profile")',

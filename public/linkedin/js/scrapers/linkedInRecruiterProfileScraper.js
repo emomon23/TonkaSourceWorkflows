@@ -1,6 +1,6 @@
 (() => {
     const _getMemberId = () => {
-        const candidateContainer = searchResultsScraper.getRecruiterProfileCandidate();
+        const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
         if (candidateContainer && candidateContainer.candidate){
             return candidateContainer.candidate.memberId;
         }
@@ -10,11 +10,15 @@
 
     const _scrapeProfile = async () => {
         await tsCommon.sleep(2000);
-        var candidateObj = searchResultsScraper.getRecruiterProfileCandidate();
+        const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
+        var candidateObj = searchResultsScraper.getCurrentRecruiterProfileCandidate();
 
         // If we've scraped this candidate, proceed
         if (candidateObj) {
             var candidate = candidateObj.candidate;
+            if (scrapedFullName.indexOf(candidate.lastName) === -1){
+                return null;
+            }
 
             // Scrape Public Profile
             candidate.linkedIn = _scrapePublicProfileLink();

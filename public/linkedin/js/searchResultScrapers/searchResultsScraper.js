@@ -380,7 +380,7 @@
             return candidateContainer;
         }
 
-        getRecruiterProfileCandidate = () => {
+        getCurrentRecruiterProfileCandidate = () => {
             const memberId = window.localStorage.getItem(_localStorageLastCandidateMemberId);
             return this.scrapedCandidates[memberId];
         }
