@@ -4,9 +4,16 @@
         const profileLinks = $('a[href*="/recruiter/profile/"]');
 
         $(profileLinks).bind('click', (e) => {
-            const memberId = $(e.target).attr('href').replace('/recruiter/profile/', '').split(',')[0];
-            searchResultsScraper.persistLastRecruiterProfile(memberId);
-            searchResultsScraper.persistToLocalStorage();
+            let parent = e.target.parentElement;
+            while (parent && parent.tagName !== 'LI'){
+                parent = parent.parentElement;
+            }
+
+            if (parent){
+                const memberId = $(parent).attr('id').replace('search-result-', '');
+                searchResultsScraper.persistLastRecruiterProfile(memberId);
+                searchResultsScraper.persistToLocalStorage()
+            }
         });
     }
 

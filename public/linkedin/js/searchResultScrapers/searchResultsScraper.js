@@ -277,12 +277,10 @@
         _pageCandidates = [];
         _pageLiTags = {};
 
-        let persist = false;
-
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length -1]);
 
-            await window.promiseLoop(candidatesInResults, async (candidate) => {
+            candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
                 
                 const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
@@ -296,10 +294,7 @@
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
                     
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
-                    
-                    persist = true;
-
-                    if (trimmedCandidate.isJobSeeker || trimmedCandidate.isJobSeeker){
+                    if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
                 }
@@ -319,10 +314,6 @@
             });
 
             _highlightJobSeekers(candidatesInResults);
-
-            if (persist){
-                searchResultsScraper.persistToLocalStorage();
-            }
 
             $('.badges abbr').bind("click", (e) => {
                 const element = $(e.currentTarget);
@@ -376,7 +367,10 @@
                 candidateContainer.candidate.persistToLocalStorage = true;
                 window.localStorage.setItem(_localStorageLastCandidateMemberId, memberId);
             }
-
+            else {
+                window.localStorage.setItem(_localStorageLastCandidateMemberId, '');
+            }        
+            
             return candidateContainer;
         }
 
