@@ -215,25 +215,14 @@
                         needToWait = false;
                     }
 
-                    const saveToProject = tsUICommon.findFirstDomElement([`li[id*="${seeker.memberId}"] button[class*="save-btn"]`]);
-                   
-                    if (saveToProject) {
-                        // eslint-disable-next-line no-await-in-loop
-                        const mayAddToProject = await _recruiterProfileKeyWordsMatchCount(seeker, commaSeperatedKeywordsCountGreaterThanThree);
-                        
-                        if (mayAddToProject){
-                            $(saveToProject).click();
-                            totalAdded += 1;
-                            tsCommon.log(`Added ${seeker.firstName} ${seeker.lastName} to project.  ${(new Date()).toLocaleTimeString()}`);
-                            needToWait = true;
+                    if (addToProject){
+                        const saveToProjectButton = $(candidateWindow).find(linkedInSelectors.recruiterProfilePage.saveButton);
+                        if (saveToProjectButton){
+                            saveToProjectButton.click();
+                            // eslint-disable-next-line no-await-in-loop
+                            await tsCommon.randomSleep(2000, 4000);
                         }
                     }
-                    else {
-                        tsCommon.log(`No 'SAVE' button found for candidate ${seeker.firstName} ${seeker.lastName}.  Are they already added to the project?`);
-                    }
-                } else {
-                    tsCommon.log(`Hmmm, unable to find liTag for candidate ${seeker.firstName} ${seeker.lastName}`)
-                }
 
             }
         }
