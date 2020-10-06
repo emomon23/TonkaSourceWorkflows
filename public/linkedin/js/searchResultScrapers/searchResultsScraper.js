@@ -3,7 +3,7 @@
     const _localStorageLastCandidateMemberId = 'tsLastMemberId';
     let _pageCandidates = [];
     let _pageLiTags = {};
-    let _keepAddingToProject = true;
+    let _keepGatheringJobSeekerExperience = true;
     
     const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
@@ -195,35 +195,58 @@
         return result;
     }
 
-    const _addCurrentPageOfJobSeekersToProject = async(commaSeperatedKeywordsCountGreaterThanThree = null) => {
+    const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProject) => {
         const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
         let totalAdded = 0;
 
         if (seekers.length > 0){
-            window.scrollTo(0,document.body.scrollHeight);
             tsCommon.log(`# of seekers on this page ${seekers.length}`);
             let needToWait = false;
 
             for (let i=0; i<seekers.length; i++){
-                const seeker = seekers[i];
+                const candidate = seekers[i];
                 const liTag = _pageLiTags[seeker.memberId];
-                
-                if (liTag){
-                    if (needToWait === true){
-                        // eslint-disable-next-line no-await-in-loop
-                        await tsCommon.randomSleep(3000, 6000);
-                        needToWait = false;
+                const alreadyGatheredData = seeker.positions.find(p => p.description && p.description.length > 1);
+            
+                if (alreadyGatheredData){
+                    if (addToProject){
+                        const saveToProjectProjectButton = tsUICommon.findFirstDomElement([`li[id*="${seeker.memberId}"] button[class*="save-btn"]`]);
+                        
+                        if (saveToProjectProjectButton) {
+                            saveToProjectProjectButton.click();
+                            // eslint-disable-next-line no-await-in-loop
+                            await tsCommon.randomSleep(5000, 8000);
+                        }
                     }
+                }
+                else {
+                    searchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
+                    searchResultsScraper.persistToLocalStorage();
+
+                    // eslint-disable-next-line no-await-in-loop
+                    await tsCommon.randomSleep(2000, 3000);
+                    
+                    var href = "https://www.linkedin.com" + $(`#search-result-${candidate.memberId} a`).attr('href');
+                    const candidateWindow = window.open(href);
+                    // eslint-disable-next-line no-await-in-loop
+                    await tsCommon.sleep(5000);
+
+                    const expandedCandidate = candidateWindow.searchResultsScraper.scrapedCandidates[candidate.memberId];
+                    searchResultsScraper.scrapedCandidates[candidate.memberId] = expandedCandidate;
+
+                    // wait 30 to 45 seconds to proceed
+                    // eslint-disable-next-line no-await-in-loop
+                    await tsCommon.randomSleep(22000, 45000);
 
                     if (addToProject){
-                        const saveToProjectButton = $(candidateWindow).find(linkedInSelectors.recruiterProfilePage.saveButton);
+                        const saveToProjectButton = $(candidateWindow.document).find(linkedInSelectors.recruiterProfilePage.saveButton);
                         if (saveToProjectButton){
                             saveToProjectButton.click();
                             // eslint-disable-next-line no-await-in-loop
-                            await tsCommon.randomSleep(2000, 4000);
+                            await tsCommon.randomSleep(3000, 6000);
                         }
                     }
-
+                }
             }
         }
 
@@ -236,28 +259,20 @@
             return 0;
         }
 
-        _keepAddingToProject = true;
-        let numberAdded = await _addCurrentPageOfJobSeekersToProject(commaSeperatedKeywordsCountGreaterThanThree);
-        let totalAdded = numberAdded;
+        await _gatherCurrentPageOfJobSeekersExperienceData(addToProject);
+        let currentPage = 0;
         
-        while(totalAdded < totalDesiredNumber && _keepAddingToProject){
-            if (numberAdded > 0){
-                // eslint-disable-next-line no-await-in-loop
-                await tsCommon.randomSleep(3000, 5000);
-            }
-
+        while(currentPage < totalPages && _keepGatheringJobSeekerExperience){
             if (!linkedInCommon.advanceToNextLinkedInResultPage()){
                 break;
             }
 
             // eslint-disable-next-line no-await-in-loop
-            await tsCommon.randomSleep(5000, 10000);
+            await tsCommon.randomSleep(3000, 5000);
             // eslint-disable-next-line no-await-in-loop
-            numberAdded= await _addCurrentPageOfJobSeekersToProject(commaSeperatedKeywordsCountGreaterThanThree);
-            totalAdded+= numberAdded;
+            await _gatherCurrentPageOfJobSeekersExperienceData(addToProject);
+            currentPage+=1;
         }
-        
-       return totalAdded;
     }
 
     const _filterDefaultCandidatesToPersistToLocalStorage = (scrapedCandidates, daysOld) => {
@@ -405,9 +420,15 @@
             this.scrapedCandidates = {};
         }
 
+<<<<<<< HEAD
         addCurrentPageOfJobSeekersToProject = _addCurrentPageOfJobSeekersToProject;
         addAllJobSeekersToCurrentProject = _addJobSeekersToCurrentProject;
         suspendAddJobSeekersToCurrentProject = (val) => {_keepAddingToProject = !val;}
+=======
+        gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
+        gatherAllJobSeekersExperienceData = _gatherAllJobSeekersExperienceData;
+        suspendAddJobSeekersToCurrentProject = (val) => {_keepGatheringJobSeekerExperience = !val;}
+>>>>>>> pretest code
 
         getCandidateKeywordCount = _getCandidateKeywordCount;
 
