@@ -19,7 +19,6 @@
             linkedInMemberId: lic.memberId,
             linkedInSkills: lic.linkedInSkills,
             messagesSent: lic.messagesSent,
-            scrapedSkillGrades: lic.scrapedSkillGrades,
             tags: lic.tags,
             opportunitiesPresented: lic.opportunitiesPresented
         };
