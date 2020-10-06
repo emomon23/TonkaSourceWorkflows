@@ -10,6 +10,7 @@
         profileId: 'input[name*="profile-id"]',
         profilePrimaryContent: '#primary-content',
         publicProfileLink: 'a:contains("Public Profile")',
+        saveButton: 'div[class*="profile-actions"] button[class*="save-btn"]',
         skillsList: '#profile-skills div ul[class*="skills"]'
     }
 

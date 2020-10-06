@@ -28,13 +28,8 @@
             candidate.linkedInSkills = _scrapeSkills();
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
 
-            if (_shouldSaveCandidate(candidate)) {
-                await linkedInApp.upsertContact(candidate);
-            } else {
-                // If we don't save the candidate, we need to update local storage with details
-                searchResultsScraper.scrapedCandidates[memberId].candidate = candidate;
-                searchResultsScraper.persistToLocalStorage();
-            }
+            await linkedInApp.upsertContact(candidate);
+            searchResultsScraper.scrapedCandidates[memberId].candidate = candidate;
         }
 
         return null;
@@ -180,19 +175,6 @@
         }
 
         return skills;
-    }
-
-    const _shouldSaveCandidate = (candidate) => {
-        // This is our ability to scrape and save anyone we step into after searching
-        const shouldSave = $.parseJSON(window.localStorage.getItem(linkedInConstants.localStorageKeys.SAVE_ON_RECRUITER_PROFILE))
-        if (shouldSave) {
-            return true;
-        }
-        // Save candidate if isJobSeeker
-        if (candidate.isJobSeeker === true || candidate.isActivelyLooking === true) {
-            return true;
-        }
-        return false;
     }
 
     class LinkedInRecruiterProfileScraper {
