@@ -9,7 +9,7 @@
     }
 
     const _scrapeProfile = async () => {
-        await tsCommon.sleep(2000);
+        await tsCommon.sleep(3000);
         const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
         var candidateObj = searchResultsScraper.getCurrentRecruiterProfileCandidate();
 
@@ -17,6 +17,7 @@
         if (candidateObj) {
             var candidate = candidateObj.candidate;
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
+                tsCommon.log("candidate in local storage does not match what's on the profile page", "WARN");
                 return null;
             }
 
