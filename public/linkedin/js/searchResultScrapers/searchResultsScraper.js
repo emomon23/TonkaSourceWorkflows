@@ -484,10 +484,10 @@
 
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
         gatherAllJobSeekersExperienceData = _gatherAllJobSeekersExperienceData;
-        suspendAddJobSeekersToCurrentProject = (val) => {_keepGatheringJobSeekerExperience = !val;}
+        suspendGatherJobSeekersExperienceData = (val) => {_keepGatheringJobSeekerExperience = val? false : true;}
 
         touchSearchResultsPages = _touchSearchResultsPages;
-        suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = !val;}
+        suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = val? false : true;}
 
         getCandidateKeywordCount = _getCandidateKeywordCount;
 
