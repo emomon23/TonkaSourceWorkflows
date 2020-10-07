@@ -49,7 +49,7 @@
 
         try {
             $.post(url, contact, (savedContact) => {
-                alisonHook.callBackToLinkedIn('contactFetchedResult',  savedContact);
+                alisonHook.callBackToLinkedIn('getAlisonContactResult',  savedContact);
             });
 
             $("#message-container")
