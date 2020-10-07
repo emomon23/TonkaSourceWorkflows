@@ -11,11 +11,12 @@
     const _scrapeProfile = async () => {
         await tsCommon.sleep(3000);
         const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
-        var candidateObj = searchResultsScraper.getCurrentRecruiterProfileCandidate();
-
+        const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
+        
         // If we've scraped this candidate, proceed
-        if (candidateObj) {
-            var candidate = candidateObj.candidate;
+        if (candidateContainer) {
+            const candidate = candidateContainer.candidate;
+
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
                 return null;
@@ -29,7 +30,7 @@
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
 
             await linkedInApp.upsertContact(candidate);
-            searchResultsScraper.scrapedCandidates[memberId].candidate = candidate;
+            searchResultsScraper.scrapedCandidates[candidate.memberId] = candidateContainer;
         }
 
         return null;

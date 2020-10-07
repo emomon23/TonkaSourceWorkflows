@@ -1,6 +1,6 @@
 (function() {
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
-    const _localStorageLastCandidateMemberId = 'tsLastMemberId';
+    const _localStorageLastCandidateProfile = 'tsLastCandidateProfile';
     let _pageCandidates = [];
     let _pageLiTags = {};
     let _keepGatheringJobSeekerExperience = true;
@@ -11,7 +11,7 @@
         const liTag = $(`#search-result-${candidate.memberId}`);
         tsCommon.extendWebElement(liTag);
         _pageLiTags[candidate.memberId] = liTag;
-
+ 
         const profileLink = liTag.mineElementWhereClassContains('profile-link');
         candidate.linkedInRecruiterUrl = $(profileLink).attr("href");
 
@@ -201,7 +201,8 @@
         let totalAdded = 0;
 
         if (seekers.length > 0){
-            tsCommon.log(`# of seekers on this page ${seekers.length}`);
+            let names = seekers.map(s => `${s.firstName} ${s.lastName}`).join(', ');
+            tsCommon.log(`# of seekers on this page ${seekers.length}. (${names})`);
             
             for (let i=0; i<seekers.length; i++){
                 const candidate = seekers[i];
@@ -228,12 +229,22 @@
                     
                     var href = "https://www.linkedin.com" + $(`#search-result-${candidate.memberId} a`).attr('href');
                     const candidateWindow = window.open(href);
+                   
                     // eslint-disable-next-line no-await-in-loop
-                    await tsCommon.sleep(5000);
+                    await tsCommon.waitTilTrue(() => {
+                        //wait for linkedInRecruiterProfileScraper to exist.
+                        return candidateWindow.linkedInRecruiterProfileScraper ? true : false;
+                    }, 15000);
 
-                    const expandedCandidate = candidateWindow.searchResultsScraper.scrapedCandidates[candidate.memberId];
+                     // eslint-disable-next-line no-await-in-loop
+                     await tsCommon.sleep(5000);
+
+                    // eslint-disable-next-line no-await-in-loop
+                    await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile();
+                    const expandedCandidate = candidateWindow.searchResultsScraper.scrapedCandidates[candidate.memberId]
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = expandedCandidate;
 
+                    searchResultsScraper.persistToLocalStorage();
                     // wait 30 to 45 seconds to proceed
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(22000, 45000);
@@ -246,6 +257,8 @@
                             await tsCommon.randomSleep(3000, 6000);
                         }
                     }
+
+                    candidateWindow.close();
                 }
             }
         }
@@ -273,6 +286,8 @@
             await tsCommon.randomSleep(3000, 5000);
             currentPage+=1;
         }
+
+        return null;
     }
 
     const _filterDefaultCandidatesToPersistToLocalStorage = (scrapedCandidates, daysOld) => {
@@ -282,10 +297,12 @@
         for(var k in scrapedCandidates){
             const c = scrapedCandidates[k].candidate;
             if ((c.isJobSeeker === true || c.isActivelyLooking === true || c.persistToLocalStorage === true)
-                && (daysOld === null || now.dayDiff(this.scrapedCandidates[k].dateScraped) < daysOld)){
-                    result[k] = this.scrapedCandidates[k];
+                && (daysOld === null || now.dayDiff(scrapedCandidates[k].dateScraped) < daysOld)){
+                    result[k] = scrapedCandidates[k];
             }
         }
+
+        return result;
     }
 
     const _interceptSearchResults = async (responseObj) => {
@@ -364,7 +381,7 @@
 
         while (advancedToNextPage && currentPage < numberOfPages && _keepWalkingResultsPages){
             // eslint-disable-next-line no-await-in-loop
-            await tsCommon.randomSleep(5000, 15000);
+            await tsCommon.randomSleep(15000, 5000);
             advancedToNextPage = linkedInCommon.advanceToNextLinkedInResultPage();
             currentPage+=1;
         }
@@ -374,14 +391,42 @@
         scrapedCandidates = {};
         
         constructor(){
-            var jsonString = window.localStorage.getItem(_localStorageItemName);
-            if (jsonString !== null && jsonString !== undefined){
-                this.scrapedCandidates = JSON.parse(jsonString);
+            try {
+                var jsonString = window.localStorage.getItem(_localStorageItemName);
+                if (jsonString !== null && jsonString !== undefined){
+                    this.scrapedCandidates = JSON.parse(jsonString);
+                }
+            }
+            catch(e){
+                tsCommon.log(`error loading scaped candidate from local storage. ${e.message}.  jsonString: ${jsonString}`, 'ERROR');
             }
         }
 
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         
+        getScrapedCandidateCount = () => {
+            let result = 0;
+            for (let k in this.scrapedCandidates){
+                result+=1;
+            }
+
+            return result;
+        }
+
+        getScrapedCandidatesWithJobDetails = () => {
+            const result = [];
+
+            for (let k in this.scrapedCandidates){
+                const candidate = this.scrapedCandidates[k].candidate;
+
+                if (candidate && candidate.positions && candidate.positions.find(p => p.description && p.description.length > 0)){
+                    result.push(candidate);
+                }
+            }
+
+            return result;
+        }
+
         deselectCandidate = (memberId) => {
             if (this.scrapedCandidates[memberId] !== undefined){
                 this.scrapedCandidates[memberId].isSelected = false;
@@ -393,19 +438,24 @@
         persistLastRecruiterProfile = (memberId) => {
             const candidateContainer = this.scrapedCandidates[memberId];
             if (candidateContainer && candidateContainer.candidate){
-                candidateContainer.candidate.persistToLocalStorage = true;
-                window.localStorage.setItem(_localStorageLastCandidateMemberId, memberId);
+                const jsonString = JSON.stringify(candidateContainer);
+                window.localStorage.setItem(_localStorageLastCandidateProfile, jsonString);
             }
             else {
-                window.localStorage.setItem(_localStorageLastCandidateMemberId, '');
+                window.localStorage.setItem(_localStorageLastCandidateProfile, '{}');
             }        
             
             return candidateContainer;
         }
 
         getCurrentRecruiterProfileCandidate = () => {
-            const memberId = window.localStorage.getItem(_localStorageLastCandidateMemberId);
-            return this.scrapedCandidates[memberId];
+            const jsonString = window.localStorage.getItem(_localStorageLastCandidateProfile);
+            try {
+                return JSON.parse(jsonString);
+            }
+            catch {
+                return null;
+            }
         }
 
         persistToLocalStorage = (daysOld = null) => {

@@ -187,6 +187,26 @@
         }
     }
 
+    const _waitTilTrue = async(callBack, maxMilliseconds) => {
+        let currentMs = 0;
+        let step = 300;
+        return new Promise((resolve, reject) => {
+            const intervalRef = window.setInterval(() => {
+                currentMs+=step;
+                const goodToGo = callBack();
+                if (goodToGo){
+                    clearInterval(intervalRef);
+                    resolve(true);
+                }
+
+                if (currentMs >= maxMilliseconds){
+                    resolve(false);
+                }
+
+            }, step);
+        });
+    }
+
     class Now {
         constructor() {
             const d = new Date();
@@ -224,6 +244,7 @@
         clickAHyperLink = _clickAHyperLink;
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
+        waitTilTrue = _waitTilTrue;
         now = () => { return new Now(); }
     }
 
