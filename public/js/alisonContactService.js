@@ -34,11 +34,11 @@
         return result;
     }
 
-    const _retrieveAlisonContact = async(searchFor) => {
+    const _getAlisonContact = async(searchFor) => {
         const url = `${_baseUrl}/contactsFullTextSearch?sv=` + searchFor;
         $.get(url, (contactList) => {
             if (contactList && contactList.count === 1){
-                alisonHook.callBackToLinkedIn('retrieveAlisonContactResult',  contactList.data[0]);
+                alisonHook.callBackToLinkedIn('getAlisonContactResult',  contactList.data[0]);
             }
         })
     }
@@ -73,7 +73,7 @@
 
     class AlisonContactService {
         saveLinkedInContact = _saveLinkedInContact;
-        retrieveAlisonContact = _retrieveAlisonContact
+        getAlisonContact = _getAlisonContact
     }
 
     window.alisonContactService = new AlisonContactService();

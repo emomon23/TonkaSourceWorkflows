@@ -158,11 +158,11 @@
         return null;
     }
 
-    const _retrieveAlisonContact = async(searchFor) => {
-        await linkedInCommon.callAlisonHookWindow('retrieveAlisonContact', searchFor);
+    const _getAlisonContact = async(searchFor) => {
+        await linkedInCommon.callAlisonHookWindow('getAlisonContact', searchFor);
     }
 
-    const _retrieveAlisonContactResult = async(alisonContact) => {
+    const _getAlisonContactResult = async(alisonContact) => {
         if (alisonContact && alisonContact.linkedInMemberId){
             const memberId = alisonContact.linkedInMemberId;
             const localCandidateContainer = searchResultsScraper.scrapedCandidates[memberId];
@@ -222,8 +222,8 @@
         candidateUnselect = _candidateUnselect;
         changeBadgeColor = _changeBadgeColor;
         upsertContact = _upsertContact;
-        retrieveAlisonContact = _retrieveAlisonContact;
-        retrieveAlisonContactResult = _retrieveAlisonContactResult;
+        getAlisonContact = _getAlisonContact;
+        getAlisonContactResult = _getAlisonContactResult;
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
         recordMessageWasSent = _recordMessageWasSent;
         recordConnectionRequestMade = _recordConnectionRequestMade;

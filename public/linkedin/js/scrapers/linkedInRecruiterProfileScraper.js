@@ -17,7 +17,7 @@
         if (candidateObj) {
             var candidate = candidateObj.candidate;
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
-                tsCommon.log("candidate in local storage does not match what's on the profile page", "WARN");
+                tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
                 return null;
             }
 

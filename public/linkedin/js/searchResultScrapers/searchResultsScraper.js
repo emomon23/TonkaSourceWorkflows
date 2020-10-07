@@ -271,6 +271,19 @@
        return totalAdded;
     }
 
+    const _filterDefaultCandidatesToPersistToLocalStorage = (scrapedCandidates, daysOld) => {
+        const result = {};
+        const now = tsCommon.now();
+
+        for(var k in scrapedCandidates){
+            const c = scrapedCandidates[k].candidate;
+            if ((c.isJobSeeker === true || c.isActivelyLooking === true || c.persistToLocalStorage === true)
+                && (daysOld === null || now.dayDiff(this.scrapedCandidates[k].dateScraped) < daysOld)){
+                    result[k] = this.scrapedCandidates[k];
+            }
+        }
+    }
+
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
@@ -385,24 +398,15 @@
                 return;
             }
 
-            let onlyJobSeekers = {};
-            const now = tsCommon.now();
-
-            for(var k in this.scrapedCandidates){
-                const c = this.scrapedCandidates[k].candidate;
-                if ((c.isJobSeeker === true || c.isActivelyLooking === true || c.persistToLocalStorage === true)
-                    && (daysOld === null || now.dayDiff(this.scrapedCandidates[k].dateScraped) > daysOld)){
-                    onlyJobSeekers[k] = this.scrapedCandidates[k];
-                }
-            }
-            
+            let onlyJobSeekers = _filterDefaultCandidatesToPersistToLocalStorage(this.scrapedCandidates, daysOld);
             const jsonString = JSON.stringify(onlyJobSeekers);
+            
             try {
                 window.localStorage.setItem(_localStorageItemName, jsonString);
             }
             catch(e) {
                 onlyJobSeekers = null; // free up this memory before making a recursive call
-                const onlyRecentDays = dayDiff === null? 1 : 0;
+                const onlyRecentDays = dayDiff === null ? 1 : 0;
                 this.persistToLocalStorage(onlyRecentDays);
             }
         }

@@ -47,7 +47,7 @@
         };
 
         saveLinkedInContact = alisonContactService.saveLinkedInContact;
-        retrieveAlisonContact = alisonContactService.retrieveAlisonContact;
+        getAlisonContact = alisonContactService.getAlisonContact;
     }
 
     window.alisonHook = new AlisonHook();
