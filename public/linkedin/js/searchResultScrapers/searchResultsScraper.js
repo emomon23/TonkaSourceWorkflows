@@ -4,6 +4,7 @@
     let _pageCandidates = [];
     let _pageLiTags = {};
     let _keepGatheringJobSeekerExperience = true;
+    let _keepWalkingResultsPages = true;
     
     const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
@@ -201,16 +202,15 @@
 
         if (seekers.length > 0){
             tsCommon.log(`# of seekers on this page ${seekers.length}`);
-            let needToWait = false;
-
+            
             for (let i=0; i<seekers.length; i++){
                 const candidate = seekers[i];
-                const liTag = _pageLiTags[seeker.memberId];
-                const alreadyGatheredData = seeker.positions.find(p => p.description && p.description.length > 1);
+                const alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
             
                 if (alreadyGatheredData){
                     if (addToProject){
-                        const saveToProjectProjectButton = tsUICommon.findFirstDomElement([`li[id*="${seeker.memberId}"] button[class*="save-btn"]`]);
+                        const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
+                        const saveToProjectProjectButton = tsUICommon.findFirstDomElement([selector]);
                         
                         if (saveToProjectProjectButton) {
                             saveToProjectProjectButton.click();
@@ -253,24 +253,24 @@
         return totalAdded;
     }
 
-    const _addJobSeekersToCurrentProject = async (totalDesiredNumber, commaSeperatedKeywordsCountGreaterThanThree = null) => {
-        if (!totalDesiredNumber || isNaN(totalDesiredNumber)){
+    const _gatherAllJobSeekersExperienceData = async (addToProject = false, totalPages = 100) => {
+        if (!totalPages || isNaN(totalPages)){
             tsCommon.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
             return 0;
         }
 
-        await _gatherCurrentPageOfJobSeekersExperienceData(addToProject);
         let currentPage = 0;
         
         while(currentPage < totalPages && _keepGatheringJobSeekerExperience){
+            // eslint-disable-next-line no-await-in-loop
+            await _gatherCurrentPageOfJobSeekersExperienceData(addToProject);
+
             if (!linkedInCommon.advanceToNextLinkedInResultPage()){
                 break;
             }
 
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.randomSleep(3000, 5000);
-            // eslint-disable-next-line no-await-in-loop
-            await _gatherCurrentPageOfJobSeekersExperienceData(addToProject);
             currentPage+=1;
         }
     }
@@ -358,6 +358,18 @@
         }
     }
 
+    const _touchSearchResultsPages = async (numberOfPages = 100) => {
+        let advancedToNextPage = linkedInCommon.advanceToNextLinkedInResultPage();
+        let currentPage = 0;
+
+        while (advancedToNextPage && currentPage < numberOfPages && _keepWalkingResultsPages){
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.randomSleep(5000, 15000);
+            advancedToNextPage = linkedInCommon.advanceToNextLinkedInResultPage();
+            currentPage+=1;
+        }
+    }
+
     class SearchResultsScraper {
         scrapedCandidates = {};
         
@@ -420,15 +432,12 @@
             this.scrapedCandidates = {};
         }
 
-<<<<<<< HEAD
-        addCurrentPageOfJobSeekersToProject = _addCurrentPageOfJobSeekersToProject;
-        addAllJobSeekersToCurrentProject = _addJobSeekersToCurrentProject;
-        suspendAddJobSeekersToCurrentProject = (val) => {_keepAddingToProject = !val;}
-=======
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
         gatherAllJobSeekersExperienceData = _gatherAllJobSeekersExperienceData;
         suspendAddJobSeekersToCurrentProject = (val) => {_keepGatheringJobSeekerExperience = !val;}
->>>>>>> pretest code
+
+        touchSearchResultsPages = _touchSearchResultsPages;
+        suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = !val;}
 
         getCandidateKeywordCount = _getCandidateKeywordCount;
 

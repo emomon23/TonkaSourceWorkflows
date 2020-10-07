@@ -15,9 +15,10 @@
     }
 
     const _searchResultsPage = {
-        BADGES: 'div[class*="badges"]'
+        BADGES: 'div[class*="badges"]',
+        addToProjectButton: (memberId) => { return `li[id*="${memberId}"] button[class*="save-btn"]`; }
     }
-
+    
     const _publicProfilePage = {
         CONTACT_INFO_LINK: 'a[data-control-name*="contact_see_more"]',
         connectionRequestModal : {
