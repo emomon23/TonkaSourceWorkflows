@@ -46,7 +46,7 @@
         //(1 year 5 months)
         let rawDuration = $(element).text().split('(').join('').split(')').join('');
 
-        let years = rawDuration.indexOf('year') >= 0? rawDuration.split('year')[0].trim() : 0;
+        let years = rawDuration.indexOf('year') >= 0 ? rawDuration.split('year')[0].trim() : 0;
         
         let months = 0;
         if (rawDuration.indexOf('month') >= 0){
