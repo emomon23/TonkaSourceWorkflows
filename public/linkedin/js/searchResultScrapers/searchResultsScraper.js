@@ -1,5 +1,6 @@
 (function() {
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
+    const _localStorageLastCandidateMemberId = 'tsLastMemberId';
     let _pageCandidates = [];
     let _pageLiTags = {};
     let _keepAddingToProject = true;
@@ -270,18 +271,29 @@
        return totalAdded;
     }
 
+    const _filterDefaultCandidatesToPersistToLocalStorage = (scrapedCandidates, daysOld) => {
+        const result = {};
+        const now = tsCommon.now();
+
+        for(var k in scrapedCandidates){
+            const c = scrapedCandidates[k].candidate;
+            if ((c.isJobSeeker === true || c.isActivelyLooking === true || c.persistToLocalStorage === true)
+                && (daysOld === null || now.dayDiff(this.scrapedCandidates[k].dateScraped) < daysOld)){
+                    result[k] = this.scrapedCandidates[k];
+            }
+        }
+    }
+
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
         _pageCandidates = [];
         _pageLiTags = {};
 
-        let persist = false;
-
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length -1]);
 
-            await window.promiseLoop(candidatesInResults, async (candidate) => {
+            candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
                 
                 const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
@@ -290,14 +302,12 @@
                 
                 _pageCandidates.push(candidate);
 
-                if (existingCachedCandidate === undefined){
+                if (!existingCachedCandidate){
                     trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
                     
-                    searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
-                    persist = true;
-
-                    if (trimmedCandidate.isJobSeeker){
+                    searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
+                    if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
                 }
@@ -306,8 +316,10 @@
                         linkedInApp.changeBadgeColor(candidate.memberId, 'red');
                     }
 
-                    if ((existingCachedCandidate.candidate.isJobSeeker === true && candidate.isJobSeeker !== true)
-                        || (existingCachedCandidate.candidate.isJobSeeker !== true && candidate.isJobSeeker === true)){
+                    const existingIsJobSeeker = existingCachedCandidate.candidate.isJobSeeker || existingCachedCandidate.candidate.isActivelyLooking;
+                    const scrapedIsJobSeeker = candidate.isJobSeeker || candidate.isActivelyLooking;
+                    if ((existingIsJobSeeker === true && scrapedIsJobSeeker !== true)
+                        || (existingIsJobSeeker !== true && scrapedIsJobSeeker === true)){
                         searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
@@ -315,10 +327,6 @@
             });
 
             _highlightJobSeekers(candidatesInResults);
-
-            if (persist){
-                searchResultsScraper.persistToLocalStorage();
-            }
 
             $('.badges abbr').bind("click", (e) => {
                 const element = $(e.currentTarget);
@@ -366,9 +374,41 @@
 
         findCandidate = _searchCandidates;
 
-        persistToLocalStorage = () => {
-            var jsonString = JSON.stringify(this.scrapedCandidates);
-            window.localStorage.setItem(_localStorageItemName, jsonString);
+        persistLastRecruiterProfile = (memberId) => {
+            const candidateContainer = this.scrapedCandidates[memberId];
+            if (candidateContainer && candidateContainer.candidate){
+                candidateContainer.candidate.persistToLocalStorage = true;
+                window.localStorage.setItem(_localStorageLastCandidateMemberId, memberId);
+            }
+            else {
+                window.localStorage.setItem(_localStorageLastCandidateMemberId, '');
+            }        
+            
+            return candidateContainer;
+        }
+
+        getCurrentRecruiterProfileCandidate = () => {
+            const memberId = window.localStorage.getItem(_localStorageLastCandidateMemberId);
+            return this.scrapedCandidates[memberId];
+        }
+
+        persistToLocalStorage = (daysOld = null) => {
+            if (daysOld === 0){
+                searchResultsScraper.clearLocalStorage();
+                return;
+            }
+
+            let onlyJobSeekers = _filterDefaultCandidatesToPersistToLocalStorage(this.scrapedCandidates, daysOld);
+            const jsonString = JSON.stringify(onlyJobSeekers);
+            
+            try {
+                window.localStorage.setItem(_localStorageItemName, jsonString);
+            }
+            catch(e) {
+                onlyJobSeekers = null; // free up this memory before making a recursive call
+                const onlyRecentDays = dayDiff === null ? 1 : 0;
+                this.persistToLocalStorage(onlyRecentDays);
+            }
         }
 
         clearLocalStorage = () => {

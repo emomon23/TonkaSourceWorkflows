@@ -34,12 +34,23 @@
         return result;
     }
 
+    const _getAlisonContact = async(searchFor) => {
+        const url = `${_baseUrl}/contactsFullTextSearch?sv=` + searchFor;
+        $.get(url, (contactList) => {
+            if (contactList && contactList.count === 1){
+                alisonHook.callBackToLinkedIn('getAlisonContactResult',  contactList.data[0]);
+            }
+        })
+    }
+
     const _saveLinkedInContact = async (linkedInRawContact) => {
         const contact = _mapContact(linkedInRawContact);
         const url = `${_baseUrl}/importContact`;
 
         try {
-            $.post(url, contact);
+            $.post(url, contact, (savedContact) => {
+                alisonHook.callBackToLinkedIn('getAlisonContactResult',  savedContact);
+            });
 
             $("#message-container")
                 .show()
@@ -62,6 +73,7 @@
 
     class AlisonContactService {
         saveLinkedInContact = _saveLinkedInContact;
+        getAlisonContact = _getAlisonContact
     }
 
     window.alisonContactService = new AlisonContactService();
