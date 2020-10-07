@@ -69,7 +69,7 @@
 
         dateParts[1] = dateParts[1].trim();
         durationData.isPresent = dateParts[1] === 'Present';
-        durationData.endDate = durationData.isPresent === true? new Date() : new Date(dateParts[1]);
+        durationData.endDate = durationData.isPresent === true ? new Date() : new Date(dateParts[1]);
         
         const dateTo = new Date();
         durationData.ageOfPositionInMonths = dateTo.getMonth() - durationData.endDate.getMonth() + 

@@ -16,11 +16,11 @@
         candidate.linkedInRecruiterUrl = $(profileLink).attr("href");
 
         const imageTag = liTag.mineTag('img');
-        candidate.imageUrl = imageTag? $(imageTag).attr('src') : '';
+        candidate.imageUrl = imageTag ? $(imageTag).attr('src') : '';
  
-        const cityState = candidate.location? candidate.location.split(',') : [""];
+        const cityState = candidate.location ? candidate.location.split(',') : [""];
         candidate.city = cityState[0];
-        candidate.state = cityState.length > 1? cityState[1].trim() : "";
+        candidate.state = cityState.length > 1 ? cityState[1].trim() : "";
 
         if (candidate.degree){
             let networkConnection = candidate.degree.replace('FIRST_DEGREE', '1').replace('SECOND_DEGREE', '2').replace('THIRD_DEGREE', 3);
@@ -65,7 +65,7 @@
             if (currentPageOfCandidates && Array.isArray(currentPageOfCandidates) && currentPageOfCandidates.length > 0){
                 currentPageOfCandidates.forEach((candidate) => {
                     if (candidate.isJobSeeker || candidate.isActivelyLooking){
-                        const styleColor = candidate.isJobSeeker? 'color:orange' : 'color:firebrick';
+                        const styleColor = candidate.isJobSeeker ? 'color:orange' : 'color:firebrick';
                         const jobSeekerElement = tsUICommon.findFirstDomElement([`a[href*="${candidate.memberId}"]`, `a:contains("${candidate.fullName}")`]);
                         if (jobSeekerElement !== null){
                             const newLabel = '** ' + $(jobSeekerElement).text();
@@ -174,7 +174,7 @@
         const justSkillNamesArray = commaSeparatedListOfWords.split(",").map(i => i.split(":")[0].trim())
         const keywordsCount = await _getCandidateKeywordCount(candidate, justSkillNamesArray.join());
        
-        const desiredCounts = commaSeparatedListOfWords.split(",").map(i => i.split(":").length > 1? i.split(":")[1].trim() : 1)
+        const desiredCounts = commaSeparatedListOfWords.split(",").map(i => i.split(":").length > 1 ?  i.split(":")[1].trim() : 1)
         let result = true;
 
         for (let i=0; i<justSkillNamesArray.length; i++){
@@ -191,7 +191,7 @@
             }
         }
 
-        tsCommon.log(`Just keyword verified ${candidate.firstName} ${candidate.lastName} (keyword counts do ${result === false? "not " : ""} match), need to pause for a bit...`);
+        tsCommon.log(`Just keyword verified ${candidate.firstName} ${candidate.lastName} (keyword counts do ${result === false ? "not " : ""} match), need to pause for a bit...`);
         await tsCommon.randomSleep(6000, 11000);
         return result;
     }
@@ -354,7 +354,7 @@
 
                 const style = $(element).attr('style') || '';
                 const isRed = style.indexOf('red') > -1;
-                const changeColor = isRed? 'black' : 'red';
+                const changeColor = isRed ? 'black' : 'red';
 
                 $(element).attr('style', 'color:' + changeColor);
 
@@ -484,10 +484,10 @@
 
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
         gatherAllJobSeekersExperienceData = _gatherAllJobSeekersExperienceData;
-        suspendGatherJobSeekersExperienceData = (val) => {_keepGatheringJobSeekerExperience = val? false : true;}
+        suspendGatherJobSeekersExperienceData = (val) => {_keepGatheringJobSeekerExperience = val ? false : true;}
 
         touchSearchResultsPages = _touchSearchResultsPages;
-        suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = val? false : true;}
+        suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = val ? false : true;}
 
         getCandidateKeywordCount = _getCandidateKeywordCount;
 
