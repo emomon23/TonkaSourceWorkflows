@@ -207,6 +207,15 @@
         });
     }
 
+    const _dayDifference = (d1, d2) => {
+        const compareFrom = new Date(d1);
+        const compareTo = new Date(d2);
+        const difference_In_Time = compareFrom.getTime() - compareTo.getTime(); 
+        const difference_In_Days = difference_In_Time / (1000 * 3600 * 24);
+    
+        return difference_In_Days;
+    }
+
     class Now {
         constructor() {
             const d = new Date();
@@ -245,7 +254,8 @@
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
         waitTilTrue = _waitTilTrue;
-        now = () => { return new Now(); }
+        now = () => { return new Now(); };
+        dayDifference = _dayDifference
     }
 
     window.tsCommon = new TSCommon();

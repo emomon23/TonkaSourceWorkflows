@@ -27,7 +27,7 @@
             connectionNoteTextEntries: ['textarea[name*=“message”]', '#custom-message', 'textarea']
         },
         linkToRecruiterProfile: 'a[href*="/recruiter/profile/',
-        memberIdCodeScript: 'code:contains("urn:li:member:")',
+       
         messageModal: {
             textEntries: 'div[class*="msg-form__contenteditable"]',
             sendButtons: 'button[class*="msg-form__send-button"]',
@@ -36,6 +36,20 @@
             memberProfileFullNameSelectors: ['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")'],
             multipleMessageRecipientPills: 'span[class*="artdeco-pill__text"]',      
         },
+
+        experience: {
+            positionListItems: '[class*="experience-section"] li',
+            seeMorePositions: '[class*="experience-section"] [class*="see-more"] button',
+            positionTitle: 'h3',
+            positionCompany: '[class*="secondary-title"]',
+            dates:  'h4:first',
+            location: 'h4',
+            experienceDescription: 'div[class*="extra-details"] p[class*="show-more-text"]'
+        },
+
+        fullName: 'ul[class*="pv-top-card"] li',
+        degreeConnection: 'ul[class*="pv-top-card"] span',
+        location: 'ul[class*="list-bullet"] li'
     }
 
     class LinkedInSelectors {
