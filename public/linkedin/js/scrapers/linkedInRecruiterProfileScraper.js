@@ -11,11 +11,12 @@
     const _scrapeProfile = async () => {
         await tsCommon.sleep(3000);
         const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
-        var candidateObj = searchResultsScraper.getCurrentRecruiterProfileCandidate();
-
+        const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
+        
         // If we've scraped this candidate, proceed
-        if (candidateObj) {
-            var candidate = candidateObj.candidate;
+        if (candidateContainer) {
+            const candidate = candidateContainer.candidate;
+
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
                 return null;
@@ -28,13 +29,8 @@
             candidate.linkedInSkills = _scrapeSkills();
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
 
-            if (_shouldSaveCandidate(candidate)) {
-                await linkedInApp.upsertContact(candidate);
-            } else {
-                // If we don't save the candidate, we need to update local storage with details
-                searchResultsScraper.scrapedCandidates[memberId].candidate = candidate;
-                searchResultsScraper.persistToLocalStorage();
-            }
+            await linkedInApp.upsertContact(candidate);
+            searchResultsScraper.scrapedCandidates[candidate.memberId] = candidateContainer;
         }
 
         return null;
@@ -73,7 +69,7 @@
 
         dateParts[1] = dateParts[1].trim();
         durationData.isPresent = dateParts[1] === 'Present';
-        durationData.endDate = durationData.isPresent === true? new Date() : new Date(dateParts[1]);
+        durationData.endDate = durationData.isPresent === true ? new Date() : new Date(dateParts[1]);
         
         const dateTo = new Date();
         durationData.ageOfPositionInMonths = dateTo.getMonth() - durationData.endDate.getMonth() + 
@@ -180,19 +176,6 @@
         }
 
         return skills;
-    }
-
-    const _shouldSaveCandidate = (candidate) => {
-        // This is our ability to scrape and save anyone we step into after searching
-        const shouldSave = $.parseJSON(window.localStorage.getItem(linkedInConstants.localStorageKeys.SAVE_ON_RECRUITER_PROFILE))
-        if (shouldSave) {
-            return true;
-        }
-        // Save candidate if isJobSeeker
-        if (candidate.isJobSeeker === true || candidate.isActivelyLooking === true) {
-            return true;
-        }
-        return false;
     }
 
     class LinkedInRecruiterProfileScraper {

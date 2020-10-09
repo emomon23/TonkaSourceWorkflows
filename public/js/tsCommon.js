@@ -54,7 +54,7 @@
 
         webElement.mineElementWhereClassContains = (classContains) => {
             const list = webElement.mineElementsWhereClassContains(classContains);
-            var result = list && list.length > 0? list[0]: null;
+            var result = list && list.length > 0 ? list[0]: null;
 
             return result;
         }
@@ -85,7 +85,7 @@
 
         webElement.mineTags = (tagName) => {
             const list = $(webElement).find(tagName);
-            var result = list && list.length > 0? list.toArray() : [];
+            var result = list && list.length > 0 ? list.toArray() : [];
 
             _extendWebElements(result);
 
@@ -94,7 +94,7 @@
 
         webElement.mineTag = (tagName) => {
             const list = webElement.mineTags(tagName);
-            const result = list && list.length > 0? list[0] : null;
+            const result = list && list.length > 0 ? list[0] : null;
 
             return result;
         }
@@ -187,6 +187,26 @@
         }
     }
 
+    const _waitTilTrue = async(callBack, maxMilliseconds) => {
+        let currentMs = 0;
+        let step = 300;
+        return new Promise((resolve, reject) => {
+            const intervalRef = window.setInterval(() => {
+                currentMs+=step;
+                const goodToGo = callBack();
+                if (goodToGo){
+                    clearInterval(intervalRef);
+                    resolve(true);
+                }
+
+                if (currentMs >= maxMilliseconds){
+                    resolve(false);
+                }
+
+            }, step);
+        });
+    }
+
     class Now {
         constructor() {
             const d = new Date();
@@ -224,6 +244,7 @@
         clickAHyperLink = _clickAHyperLink;
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
+        waitTilTrue = _waitTilTrue;
         now = () => { return new Now(); }
     }
 
