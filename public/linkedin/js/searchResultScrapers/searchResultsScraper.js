@@ -329,6 +329,7 @@
                     
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
                     if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
+                        trimmedCandidate.source = "RESULT_LIST";
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
                 }
@@ -342,6 +343,7 @@
                     if ((existingIsJobSeeker === true && scrapedIsJobSeeker !== true)
                         || (existingIsJobSeeker !== true && scrapedIsJobSeeker === true)){
                         searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
+                        trimmedCandidate.source = "RESULT_LIST";
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
                 }

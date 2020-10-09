@@ -29,6 +29,7 @@
             candidate.linkedInSkills = _scrapeSkills();
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
 
+            candidate.source = "RECRUITER_PROFILE";
             await linkedInApp.upsertContact(candidate);
             searchResultsScraper.scrapedCandidates[candidate.memberId] = candidateContainer;
         }

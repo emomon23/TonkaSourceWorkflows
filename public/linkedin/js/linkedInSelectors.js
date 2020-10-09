@@ -2,7 +2,8 @@
     const _contactInfoPage = {
         CONTACT_INFO_CONTAINER: 'div[class*="pv-profile-section__section-info"]',
         PHONE_SECTION: 'section[class*="ci-phone"]',
-        EMAIL_SECTION: 'section[class*="ci-email"]'
+        EMAIL_SECTION: 'section[class*="ci-email"]',
+        CLOSE: 'button[aria-label*="Dismiss"]'
     }
 
     const _recruiterProfilePage = {
@@ -39,17 +40,19 @@
 
         experience: {
             positionListItems: '[class*="experience-section"] li',
-            seeMorePositions: '[class*="experience-section"] [class*="see-more"] button',
+            seeMorePositions: 'button[class*="see-more-inline"]:contains("more experiences")',
+            showMoreJobDescriptionText: 'button[class*="show-more-text"]:contains("see more")',
             positionTitle: 'h3',
-            positionCompany: '[class*="secondary-title"]',
-            dates:  'h4:first',
+            employer: 'p:contains("Company Name")',
+            dates:  'h4:contains("Dates Employed")',
             location: 'h4',
             experienceDescription: 'div[class*="extra-details"] p[class*="show-more-text"]'
         },
 
         fullName: 'ul[class*="pv-top-card"] li',
         degreeConnection: 'ul[class*="pv-top-card"] span',
-        location: 'ul[class*="list-bullet"] li'
+        location: 'ul[class*="list-bullet"] li',
+        education: 'h2[class*="profile-section"]:contains("Education")'
     }
 
     class LinkedInSelectors {
