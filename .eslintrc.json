@@ -117,14 +117,22 @@
       // Forces developers to return console logs and http calls in promises. 
       "promise/always-return": 2,
   
-      //Enforces the use of catch() on un-returned promises
+      // Enforces the use of catch() on un-returned promises
       "promise/catch-or-return": 2,
   
       // Warn against nested then() or catch() statements
       "promise/no-nesting": 1,
 
       // We should turn this back on... once we figure out exactly what it means
-      "require-atomic-updates" : "off"
+      "require-atomic-updates" : "off",
+
+      // Ensures there is a space before function paren: async () vs async()
+      "space-before-function-paren" : ["error", "always"],
+
+      // Ensures spaces around operators:  2+2 -> 2 + 2
+      // and ternary as such (isEmpty)? true: false -> (isEmpty) ? true : false
+      "space-infix-ops": ["error", { "int32Hint": false }]
     }
-  }
+}
+
   
