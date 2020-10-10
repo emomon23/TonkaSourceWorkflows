@@ -197,7 +197,7 @@
         return result;
     }
 
-    const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProject) => {
+    const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProject, tagString = null) => {
         const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
         let totalAdded = 0;
 
@@ -242,12 +242,12 @@
                      await tsCommon.sleep(5000);
 
                     // eslint-disable-next-line no-await-in-loop
-                    await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile();
+                    await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile(tagString);
                     const expandedCandidate = candidateWindow.searchResultsScraper.scrapedCandidates[candidate.memberId]
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = expandedCandidate;
                     searchResultsScraper.persistToLocalStorage();
                     _jobsGathered[candidate.memberId] = true;
-                    
+
                     // wait 30 to 45 seconds to proceed
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(22000, 45000);
@@ -269,7 +269,7 @@
         return totalAdded;
     }
 
-    const _gatherAllJobSeekersExperienceData = async (addToProject = false, totalPages = 100) => {
+    const _gatherAllJobSeekersExperienceData = async (addToProject = false, totalPages = 100, tagString=null) => {
         if (!totalPages || isNaN(totalPages)){
             tsCommon.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
             return 0;
@@ -279,7 +279,7 @@
         
         while(currentPage < totalPages && _keepGatheringJobSeekerExperience){
             // eslint-disable-next-line no-await-in-loop
-            await _gatherCurrentPageOfJobSeekersExperienceData(addToProject);
+            await _gatherCurrentPageOfJobSeekersExperienceData(addToProject, tagString);
 
             if (!linkedInCommon.advanceToNextLinkedInResultPage()){
                 break;

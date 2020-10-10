@@ -8,7 +8,7 @@
         return $(linkedInSelectors.recruiterProfilePage.profileId).val();
     }
 
-    const _scrapeProfile = async () => {
+    const _scrapeProfile = async (tagString = null) => {
         await tsCommon.sleep(3000);
         const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
         const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
@@ -35,6 +35,10 @@
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
 
             candidate.source = "RECRUITER_PROFILE";
+            if (tagString && tagString.length > 0){
+                candidate.tags+= `,${tagString}`;
+            }
+            
             await linkedInApp.upsertContact(candidate);
             searchResultsScraper.scrapedCandidates[candidate.memberId] = candidateContainer;
         }
