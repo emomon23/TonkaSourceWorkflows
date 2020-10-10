@@ -305,6 +305,21 @@
         return result;
     }
 
+    const _cleanJobHistoryCompanyNames = (candidate) => {
+        const findAndReplace = [{find: '&#x2F;', replace: '/'}, {find: '&amp;', replace: '&'}];
+
+        if (candidate && candidate.positions && candidate.positions.length > 0){
+            candidate.positions.forEach((p) => {
+                let companyName = p.companyName;
+                findAndReplace.forEach((fr) => {
+                    companyName = companyName.split(fr.find).join(fr.replace);
+                });
+
+                p.companyName = companyName;
+            });
+        }
+    }
+
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
@@ -319,6 +334,10 @@
                 
                 const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
                 const trimmedCandidate = _.omit(candidate, omitFields);
+
+                //clean position company names
+                _cleanJobHistoryCompanyNames(trimmedCandidate);
+
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
                 
                 _pageCandidates.push(candidate);

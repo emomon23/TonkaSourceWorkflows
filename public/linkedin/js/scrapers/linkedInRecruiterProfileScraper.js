@@ -88,8 +88,8 @@
         
         professionalExperienceListItems.forEach((li) => {
             const job = {};
-            job.jobTitle = $(li).find("h4").text();
-            job.employer = $(li).find("h5").text();
+            job.title = $(li).find("h4").text();
+            job.companyName = $(li).find("h5").text();
 
             const durationElement = $(li).find('span[class*="duration"]');
             // durationData = {years:0, months: 0, totalMonthsOnJob: 0, startDate, endDate, ageOfPositionInMonths: [how long ago did they work here]}
@@ -106,31 +106,6 @@
             }
 
             job.description = $(li).find('p[class*="description searchable"]').text();
-            let weight = 0;
-
-            // When was their last day on this job?
-            // When did they work there? (eg - within the last 2 years, or 10 years ago)
-            if (job.durationData.ageOfPositionInMonths < 24) {
-                weight = 0.16;
-            } else if (job.durationData.ageOfPositionInMonths < 48) {
-                weight = 0.12;
-            }
-            else {
-                weight = 0.09
-            }
-
-            // How long did they work there?  > 5 years?  3 years?  6 months?
-            if (job.durationData.totalMonthsOnJob > 59){
-                weight+= 0.03;
-            }
-            else if (job.durationData.totalMonthsOnJob >35){
-                weight+= 0.02;
-            }
-            else if (job.durationData.totalMonthsOnJob > 6){
-                weight+= 0.01;
-            }
-
-            job.weight = weight;
             result.push(job);
         });
 
@@ -153,8 +128,8 @@
 
     const _mergeCandidatePositionsWithScrapedJobExperience = (candidate) => {
         /* [{
-            jobTitle, 
-            employer, 
+            title, 
+            companyName, 
             description: (open text), 
             durationData: { years: months: totalMonthsOnJob: startDate, endDate, startDateMonth, startDateYear, ageOfPositionInMonths: (0 = present)}
             }]
@@ -162,11 +137,10 @@
         const jobExperiences = _scrapeOutJobExperiences();
         jobExperiences.forEach((scrapedExperience) => {
             const jobPosition = candidate.positions.find((p) => {
-                return p.companyName === scrapedExperience.employer 
-                        && p.startDateMonth === scrapedExperience.durationData.startDateMonth 
-                        && p.title === scrapedExperience.jobTitle
-                })
-                ;
+                return p.companyName === scrapedExperience.companyName 
+                        && p.startDateMonth === scrapedExperience.startDateMonth 
+                });
+                
             if (jobPosition){
                 jobPosition.description = scrapedExperience.description;
             }
