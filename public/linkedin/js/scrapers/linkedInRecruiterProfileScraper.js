@@ -92,16 +92,18 @@
             job.employer = $(li).find("h5").text();
 
             const durationElement = $(li).find('span[class*="duration"]');
-
             // durationData = {years:0, months: 0, totalMonthsOnJob: 0, startDate, endDate, ageOfPositionInMonths: [how long ago did they work here]}
             const durationData = _scrapeOutDurationFromHtmlElement(durationElement);
             const dateRangeElement = $(li).find('p[class*="date-range"]');
             _scrapeOutAndAppendStartDateAndEndDate(dateRangeElement, durationData);
+            
             job.startDateMonth = durationData.startDateMonth;
             job.startDateYear = durationData.startDateYear;
-            job.endDateMonth = durationData.endDateMonth;
-            job.endDateYear = durationData.endDateYear;
-            job.isPresent = durationData.isPresent;
+            
+            if (!durationData.isPresent){
+                job.endDateMonth = durationData.endDateMonth;
+                job.endDateYear = durationData.endDateYear;
+            }
 
             job.description = $(li).find('p[class*="description searchable"]').text();
             let weight = 0;

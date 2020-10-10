@@ -35,23 +35,18 @@
 
         const fromDate = new Date(dates[0]);
         const isPresent = dates[1] === 'Present';
-        const toDate = isPresent ? new Date() : new Date(dates[1]);
-        const daysDiff = Math.ceil(tsCommon.dayDifference(toDate, fromDate) + 30);
-
-        result.years = Number.parseInt(daysDiff / 365);
-        result.months = (daysDiff - (result.years * 365)) / 30.5;
-        result.months = Number.parseInt(result.months) + 1;
-        result.totalMonthsOnJob = Math.round(daysDiff / 30.5);
-        result.startDate = fromDate;
-        result.endDate = toDate;
-        result.isPresent = isPresent;
-        result.startDateMonth = fromDate.getMonth();
-        result.startDateYear = fromDate.getFullYear();
-        result.endDateMonth = toDate.getMonth();
-        result.endDateYear = toDate.getFullYear();
-
-        return result;
+        const toDate = isPresent ? null : new Date(dates[1]);
         
+        result.isPresent = isPresent;
+        result.startDateMonth = fromDate.getMonth() +1;
+        result.startDateYear = fromDate.getFullYear();
+
+        if (toDate){
+            result.endDateMonth = toDate.getMonth();
+            result.endDateYear = toDate.getFullYear();
+        }
+
+        return result;       
     }
 
     const _scrapeJobHistory = async () => {
@@ -78,9 +73,11 @@
                 if (durationData && job.companyName && job.companyName.length > 0){
                     job.startDateMonth = durationData.startDateMonth;
                     job.startDateYear = durationData.startDateYear;
-                    job.endDateMonth = durationData.endDateMonth;
-                    job.endDateYear = durationData.endDateYear;
-                    job.isPresent = durationData.isPresent;
+
+                    if (!durationData.isPresent){
+                        job.endDateMonth = durationData.endDateMonth;
+                        job.endDateYear = durationData.endDateYear;
+                    }
 
                     result.push(job);
                 }
