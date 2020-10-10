@@ -5,6 +5,7 @@
     let _pageLiTags = {};
     let _keepGatheringJobSeekerExperience = true;
     let _keepWalkingResultsPages = true;
+    let _jobsGathered = {};
     
     const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
@@ -206,8 +207,9 @@
             
             for (let i=0; i<seekers.length; i++){
                 const candidate = seekers[i];
-                const alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
-            
+                let alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
+                alreadyGatheredData = alreadyGatheredData || _jobsGathered[candidate.memberId] === true;
+
                 if (alreadyGatheredData){
                     if (addToProject){
                         const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
@@ -243,8 +245,9 @@
                     await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile();
                     const expandedCandidate = candidateWindow.searchResultsScraper.scrapedCandidates[candidate.memberId]
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = expandedCandidate;
-
                     searchResultsScraper.persistToLocalStorage();
+                    _jobsGathered[candidate.memberId] = true;
+                    
                     // wait 30 to 45 seconds to proceed
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(22000, 45000);
