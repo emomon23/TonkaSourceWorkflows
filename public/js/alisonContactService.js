@@ -23,7 +23,7 @@
             opportunitiesPresented: AS_IS,
             referencesReceived: AS_IS,
             summary: 'linkedInSummary', 
-            isJobSeeker:'isLinkedInJobSeeker',
+            isJobSeeker:'linkedInIsJobSeeker',
             memberId: 'linkedInMemberId', 
             headline: 'title', 
             industry: 'industryGroup' 
