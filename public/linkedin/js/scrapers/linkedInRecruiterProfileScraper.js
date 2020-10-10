@@ -25,6 +25,11 @@
             // Scrape Public Profile
             candidate.linkedIn = _scrapePublicProfileLink();
 
+            const summaryElement = $(linkedInSelectors.recruiterProfilePage.aboutSummary);
+            if (summaryElement && summaryElement.length > 0){
+                candidate.summary = $(summaryElement).text().replace('Summary', '').trim();
+            }
+            
             // Scrape skills
             candidate.linkedInSkills = _scrapeSkills();
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
@@ -92,7 +97,11 @@
             const durationData = _scrapeOutDurationFromHtmlElement(durationElement);
             const dateRangeElement = $(li).find('p[class*="date-range"]');
             _scrapeOutAndAppendStartDateAndEndDate(dateRangeElement, durationData);
-            job.durationData = durationData;
+            job.startDateMonth = durationData.startDateMonth;
+            job.startDateYear = durationData.startDateYear;
+            job.endDateMonth = durationData.endDateMonth;
+            job.endDateYear = durationData.endDateYear;
+            job.isPresent = durationData.isPresent;
 
             job.description = $(li).find('p[class*="description searchable"]').text();
             let weight = 0;

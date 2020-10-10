@@ -12,7 +12,8 @@
         profilePrimaryContent: '#primary-content',
         publicProfileLink: 'a:contains("Public Profile")',
         saveButton: 'div[class*="profile-actions"] button[class*="save-btn"]',
-        skillsList: '#profile-skills div ul[class*="skills"]'
+        skillsList: '#profile-skills div ul[class*="skills"]',
+        aboutSummary: '#profile-summary'
     }
 
     const _searchResultsPage = {
@@ -45,14 +46,16 @@
             positionTitle: 'h3',
             employer: 'p:contains("Company Name")',
             dates:  'h4:contains("Dates Employed")',
-            location: 'h4',
+            location: 'ul[class*="pv-top-card"]',
             experienceDescription: 'div[class*="extra-details"] p[class*="show-more-text"]'
         },
 
         fullName: 'ul[class*="pv-top-card"] li',
-        degreeConnection: 'ul[class*="pv-top-card"] span',
+        degreeConnection: ':contains("1st degree connection")',
         location: 'ul[class*="list-bullet"] li',
-        education: 'h2[class*="profile-section"]:contains("Education")'
+        education: 'h2[class*="profile-section"]:contains("Education")',
+        aboutSummary: 'p[class*="summary-text"] span',
+        aboutSummarySeeMore: 'a[id*="line-clamp-show-more-button"]'
     }
 
     class LinkedInSelectors {
