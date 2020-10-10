@@ -6,6 +6,7 @@
             city: lic.city,
             state: lic.state,
             positions: lic.positions,
+            positionsLastScraped: lic.positionsLastScraped,
             alisonConnections: lic.alisonConnections,
             educations: lic.educations,
             firstName: lic.firstName,

@@ -154,7 +154,9 @@
             }
 
             scrapedCandidate.positions = await _scrapeJobHistory();
-            
+            const now = tsCommon.now();
+            scrapedCandidate.positionsLastScraped = now;
+
             const cachedCandidate = await _findCachedCandidate(scrapedCandidate);
             if (cachedCandidate){
                 scrapedCandidate.memberId = cachedCandidate.memberId;
