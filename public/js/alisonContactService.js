@@ -17,7 +17,7 @@
             imageUrl: lic.imageUrl,
             industry: lic.industry,
             industryGroup: lic.role,
-            linkedInIsJobSeeker: lic.isJobSeeker,
+            linkedInIsJobSeeker: lic.isJobSeeker || lic.isActivelyLooking,
             linkedInMemberId: lic.memberId,
             linkedInSkills: lic.linkedInSkills,
             messagesSent: lic.messagesSent,
