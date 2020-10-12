@@ -217,6 +217,24 @@
         _recordMessageWasSent(memberIdOrFirstNameAndLastName, note, 'connectionRequest');
     }
 
+    const _getJobSeekersJobHistoryDetail = async(listOfJobSeekers) => {
+        for (let i=0; i<listOfJobSeekers.length; i++){
+            const seeker = listOfJobSeekers[i];
+            const sendConnectionRequest = "Mike Joe".indexOf(linkedInApp.alisonUserName) === -1;
+
+            // eslint-disable-next-line no-await-in-loop
+            const scrapedProfile = await linkedInPublicProfileScraper.searchForPublicProfile(seeker, sendConnectionRequest);
+            
+            if (scrapedProfile && scrapedProfile.firstName === seeker.firstName){
+                scrapedProfile.memberId = seeker.linkedInMemberId;
+                linkedInApp.upsertContact(scrapedProfile);
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.randomSleep(50000, 90000);
+        }
+    }
+
     class LinkedInApp {
         sendLinkedInMessageOrConnectionRequestToCandidate = linkedInMessageSender.sendLinkedInMessageOrConnectionRequestToCandidate;
         candidateUnselect = _candidateUnselect;
@@ -225,6 +243,7 @@
         getAlisonContact = _getAlisonContact;
         getAlisonContactResult = _getAlisonContactResult;
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
+        getJobSeekersJobHistoryDetail = _getJobSeekersJobHistoryDetail;
         recordMessageWasSent = _recordMessageWasSent;
         recordConnectionRequestMade = _recordConnectionRequestMade;
         getActiveOpportunity = _getActiveOpportunity;

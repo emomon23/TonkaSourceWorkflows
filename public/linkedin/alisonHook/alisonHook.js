@@ -28,6 +28,12 @@
         }
     }
 
+    const _runJobHistoryScraperJob = async() => {
+        await tsCommon.sleep(30000); //REMOVE THIS, IT WAS THERE ONLY TO GIVE MIKE A CHANCE TO OPEN THE DEBUGGER!
+        const jobSeekers = await alisonContactService.getJobSeekersToBeScrapedInABatch();
+        alisonHook.callBackToLinkedIn('getJobSeekersJobHistoryDetail', jobSeekers);
+    }
+
     class AlisonHook {
         constructor(){}
 
@@ -48,6 +54,7 @@
 
         saveLinkedInContact = alisonContactService.saveLinkedInContact;
         getAlisonContact = alisonContactService.getAlisonContact;
+        runJobHistoryScraperJob = _runJobHistoryScraperJob;
     }
 
     window.alisonHook = new AlisonHook();

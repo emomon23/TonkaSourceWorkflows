@@ -29,7 +29,9 @@
             connectionNoteTextEntries: ['textarea[name*=“message”]', '#custom-message', 'textarea']
         },
         linkToRecruiterProfile: 'a[href*="/recruiter/profile/',
-       
+        connectWithButton: 'button[aria-label*="Connect with"]',
+        connectionNoNoteSendButton: 'button[aria-label*="Send now"]',
+        
         messageModal: {
             textEntries: 'div[class*="msg-form__contenteditable"]',
             sendButtons: 'button[class*="msg-form__send-button"]',
@@ -55,7 +57,16 @@
         location: 'ul[class*="list-bullet"] li',
         education: 'h2[class*="profile-section"]:contains("Education")',
         aboutSummary: 'p[class*="summary-text"] span',
-        aboutSummarySeeMore: 'a[id*="line-clamp-show-more-button"]'
+        aboutSummarySeeMore: 'a[id*="line-clamp-show-more-button"]',
+
+        search: {
+            searchInput: 'input[class*="search-global"]',
+            searchInputOverlayList: 'div[role*="listbox"] div[role*="option"]',
+            numberOfResultsFound: 'h3[class*="search-results__total"]',
+            searchResultsListItems: 'li[class*="search-result"]',
+            searchResultListItemProfileLink: 'a[href*="/in/"]'
+
+        }
     }
 
     class LinkedInSelectors {

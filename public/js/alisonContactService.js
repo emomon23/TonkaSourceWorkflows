@@ -74,9 +74,16 @@
         }
     }
 
+    const  _getJobSeekersToBeScrapedInABatch = async() => {
+        const url = `${_baseUrl}/getLiteJobSeekersToBeScraped?howMany=10`;
+        const result = await tsCommon.httpGetJson(url);
+        return result;
+    }
+
     class AlisonContactService {
         saveLinkedInContact = _saveLinkedInContact;
-        getAlisonContact = _getAlisonContact
+        getAlisonContact = _getAlisonContact;
+        getJobSeekersToBeScrapedInABatch = _getJobSeekersToBeScrapedInABatch;
     }
 
     window.alisonContactService = new AlisonContactService();

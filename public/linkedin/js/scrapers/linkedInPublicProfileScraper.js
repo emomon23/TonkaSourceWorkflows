@@ -162,20 +162,78 @@
                 scrapedCandidate.memberId = cachedCandidate.memberId;
             }
             
-            await linkedInApp.upsertContact(scrapedCandidate);
-            console.log({scrapedCandidate})
             return scrapedCandidate;
     }
 
+    const _searchForPublicProfile = async(contact, sendConnectionRequest) => {
+        const selectors = linkedInSelectors.publicProfilePage.search;
+        const searchInput = $(selectors.searchInput); 
+        
+        if (!(contact.firstName && contact.lastName && contact.positions && contact.positions.length > 0 && contact.positions[0].companyName && contact.positions[0].companyName.length > 0)){
+            console.log("Not enough information to search for this contact");
+            return null;
+        }
+
+        let searchString = `${contact.firstName} ${contact.lastName} `;
+        let counter = 0;
+        for (let i=0; i<contact.positions.length; i++){
+            const cn = contact.positions[i].companyName;
+            if (cn && cn.length > 0){
+                searchString+= cn;
+                counter+=1;
+                if (counter >= 3){
+                    break;
+                }
+                searchString+= ' ';
+            }
+        }
+
+        searchInput.focus()
+        await tsCommon.sleep(500);
+        document.execCommand('insertText', true, `${searchString}\n`);
+        await tsCommon.sleep(3000);
+
+        const searchInputOverlayList = $(selectors.searchInputOverlayList);
+        if (searchInputOverlayList && searchInputOverlayList.length > 0 && $(searchInputOverlayList)[0].textContent.trim().indexOf('See all results') === -1){
+            ($(searchInputOverlayList)[0]).click();
+            await tsCommon.sleep(3000);
+        }
+        
+        const searchResultsListItems = $(selectors.searchResultsListItems);
+        if (searchResultsListItems && searchResultsListItems.length > 0){
+            const profileLinks = $($(searchResultsListItems)[0]).find(selectors.searchResultListItemProfileLink);
+            if (profileLinks && profileLinks.length > 0){
+                profileLinks[0].click();
+                await tsCommon.sleep(2000);
+            }
+        }
+
+        const result = await _scrapeProfile();
+        console.log({searchResult: result});
+
+        if (sendConnectionRequest){
+            try {
+                let button = $(linkedInSelectors.publicProfilePage.connectWithButton);
+                if (button && $(button).length > 0){
+                    $(button)[0].click();
+                    await tsCommon.sleep(3000);
+
+                    button = $(linkedInSelectors.publicProfilePage.connectionNoNoteSendButton)[0];
+                    button.click();
+                }
+            }
+            catch(e){
+                console.log(`Unable to send connection request to ${candidate.firstName} ${candidate.lastName}.  ${e.message}`);
+            }
+        }
+        
+        return result;
+    }
+
     class LinkedInPublicProfileScraper {
-        scrapeProfile = _scrapeProfile;      
+        scrapeProfile = _scrapeProfile; 
+        searchForPublicProfile = _searchForPublicProfile;     
     }
 
     window.linkedInPublicProfileScraper = new LinkedInPublicProfileScraper();
-
-    $(document).ready(() => {
-        if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PUBLIC_PROFILE) {
-            _scrapeProfile();
-        }
-    })
 })();
