@@ -38,7 +38,9 @@
             if (tagString && tagString.length > 0){
                 candidate.tags+= `,${tagString}`;
             }
-            
+
+            const now = tsCommon.now();
+            candidate.positionsLastScraped = now;
             await linkedInApp.upsertContact(candidate);
             searchResultsScraper.scrapedCandidates[candidate.memberId] = candidateContainer;
         }

@@ -207,18 +207,27 @@
         });
     }
 
-    const _dayDifference = (d1, d2) => {
-        const compareFrom = new Date(d1);
-        const compareTo = new Date(d2);
-        const difference_In_Time = compareFrom.getTime() - compareTo.getTime(); 
-        const difference_In_Days = difference_In_Time / (1000 * 3600 * 24);
-    
-        return difference_In_Days;
+    const _secondsDiff = (d1, d2) => {
+        var difference = d2.getTime() - d1.getTime(); // This will give difference in milliseconds
+        return  Math.round(difference / 1000);
     }
+    
+    const _minutesDiff = (d1, d2) => {
+        return _secondsDiff(d1, d2) / 60;
+    }
+    
+    const _hoursDiff = (d1, d2) => {
+        return _minutesDiff(d1, d2) / 60;
+    }
+    
+    const _daysDiff = (d1, d2) => {
+        return _hoursDiff(d1, d2) / 24;
+    }
+    
 
     class Now {
         constructor() {
-            const d = new Date();
+            this.date = new Date();
             this.month = d.getMonth() + 1;
             this.day = d.getDate();
             this.year = d.getFullYear();
@@ -229,11 +238,7 @@
         }
            
         dayDiff(compareToDate) {
-            const compareTo = new Date(compareToDate);
-            const difference_In_Time = this.time - compareTo.getTime(); 
-            const difference_In_Days = difference_In_Time / (1000 * 3600 * 24);
-        
-            return difference_In_Days;
+           return _daysDiff(this.date, compareToDate.date || compareToDate);
         }
     }
 
@@ -255,7 +260,7 @@
         findAHyperLink = _findAHyperLink;
         waitTilTrue = _waitTilTrue;
         now = () => { return new Now(); };
-        dayDifference = _dayDifference
+        dayDifference = _daysDiff;
     }
 
     window.tsCommon = new TSCommon();
