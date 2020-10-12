@@ -107,6 +107,26 @@
         return count;
     }
 
+    const _scrollToBottom = () => {
+        const scrollingElement = (document.scrollingElement || document.body);
+        scrollingElement.scrollTop = scrollingElement.scrollHeight;
+    }
+
+    const _scrollTilTrue = async (callBack) => {
+        const stepInterval = 50;
+        const scrollingElement = (document.scrollingElement || document.body);
+        const step = scrollingElement.scrollHeight / stepInterval;
+
+        for(let i=0; i<stepInterval; i++){
+            if (callBack() === true){
+                break;
+            }
+            scrollingElement.scrollTop+= step;
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(300);
+        }
+    }
+
     class TsUICommon {
         constructor(){}
 
@@ -119,6 +139,8 @@
         cleanseTextOfHtml = _cleanseTextOfHtml;
         rebind = _rebind;
         getWordCount = _getWordCount;
+        scrollToBottom = _scrollToBottom;
+        scrollTilTrue = _scrollTilTrue;
     }
 
     window.tsUICommon = new TsUICommon();

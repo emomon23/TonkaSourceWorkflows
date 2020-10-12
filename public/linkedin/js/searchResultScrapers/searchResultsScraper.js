@@ -5,6 +5,7 @@
     let _pageLiTags = {};
     let _keepGatheringJobSeekerExperience = true;
     let _keepWalkingResultsPages = true;
+    let _jobsGathered = {};
     
     const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
@@ -196,7 +197,7 @@
         return result;
     }
 
-    const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProject) => {
+    const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProject, tagString = null) => {
         const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
         let totalAdded = 0;
 
@@ -206,8 +207,9 @@
             
             for (let i=0; i<seekers.length; i++){
                 const candidate = seekers[i];
-                const alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
-            
+                let alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
+                alreadyGatheredData = alreadyGatheredData || _jobsGathered[candidate.memberId] === true;
+
                 if (alreadyGatheredData){
                     if (addToProject){
                         const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
@@ -240,11 +242,12 @@
                      await tsCommon.sleep(5000);
 
                     // eslint-disable-next-line no-await-in-loop
-                    await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile();
+                    await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile(tagString);
                     const expandedCandidate = candidateWindow.searchResultsScraper.scrapedCandidates[candidate.memberId]
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = expandedCandidate;
-
                     searchResultsScraper.persistToLocalStorage();
+                    _jobsGathered[candidate.memberId] = true;
+
                     // wait 30 to 45 seconds to proceed
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(22000, 45000);
@@ -266,7 +269,7 @@
         return totalAdded;
     }
 
-    const _gatherAllJobSeekersExperienceData = async (addToProject = false, totalPages = 100) => {
+    const _gatherAllJobSeekersExperienceData = async (addToProject = false, totalPages = 100, tagString=null) => {
         if (!totalPages || isNaN(totalPages)){
             tsCommon.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
             return 0;
@@ -276,7 +279,7 @@
         
         while(currentPage < totalPages && _keepGatheringJobSeekerExperience){
             // eslint-disable-next-line no-await-in-loop
-            await _gatherCurrentPageOfJobSeekersExperienceData(addToProject);
+            await _gatherCurrentPageOfJobSeekersExperienceData(addToProject, tagString);
 
             if (!linkedInCommon.advanceToNextLinkedInResultPage()){
                 break;
@@ -305,6 +308,21 @@
         return result;
     }
 
+    const _cleanJobHistoryCompanyNames = (candidate) => {
+        const findAndReplace = [{find: '&#x2F;', replace: '/'}, {find: '&amp;', replace: '&'}];
+
+        if (candidate && candidate.positions && candidate.positions.length > 0){
+            candidate.positions.forEach((p) => {
+                let companyName = p.companyName;
+                findAndReplace.forEach((fr) => {
+                    companyName = companyName.split(fr.find).join(fr.replace);
+                });
+
+                p.companyName = companyName;
+            });
+        }
+    }
+
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
@@ -319,6 +337,10 @@
                 
                 const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
                 const trimmedCandidate = _.omit(candidate, omitFields);
+
+                //clean position company names
+                _cleanJobHistoryCompanyNames(trimmedCandidate);
+
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
                 
                 _pageCandidates.push(candidate);
@@ -329,6 +351,7 @@
                     
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
                     if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
+                        trimmedCandidate.source = "RESULT_LIST";
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
                 }
@@ -342,6 +365,7 @@
                     if ((existingIsJobSeeker === true && scrapedIsJobSeeker !== true)
                         || (existingIsJobSeeker !== true && scrapedIsJobSeeker === true)){
                         searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
+                        trimmedCandidate.source = "RESULT_LIST";
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
                 }

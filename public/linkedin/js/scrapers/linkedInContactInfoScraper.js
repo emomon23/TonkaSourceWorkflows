@@ -1,27 +1,32 @@
 (() => {
-    const _scrapeContactInfo = async (cachedCandidate) => {
-        if (!cachedCandidate.isContactInfoScraped) {
-            cachedCandidate.isContactInfoScraped = true;
+    const _scrapeContactInfo = async (candidate) => {
+        try {
+            candidate.isContactInfoScraped = true;
             
             const contactInfoLink = $(linkedInSelectors.publicProfilePage.CONTACT_INFO_LINK);
-            const contactInfoWindow = window.open($(contactInfoLink).attr("href"));
-            await tsCommon.randomSleep(4000,7000);
+            if (contactInfoLink.length === 0){
+                return;
+            }
 
-            const contactInfoContainer = $(contactInfoWindow.document).find(linkedInSelectors.contactInfoPage.CONTACT_INFO_CONTAINER);
+            contactInfoLink[0].click();
+            
+            await tsCommon.waitTilTrue(() => {
+                $(linkedInSelectors.contactInfoPage.CONTACT_INFO_CONTAINER) ? true : false;
+            },5000);
+
+            const contactInfoContainer = $(linkedInSelectors.contactInfoPage.CONTACT_INFO_CONTAINER);
             
             if (contactInfoContainer) {
-                cachedCandidate.phone = _scrapePhoneNumber(contactInfoContainer);
-                cachedCandidate.email = _scrapeEmailAddress(contactInfoContainer);
+                candidate.phone = _scrapePhoneNumber(contactInfoContainer[0]);
+                candidate.email = _scrapeEmailAddress(contactInfoContainer[0]);
             } else {
                 tsCommon.log("Contact Info Scraper: Could not find contact info container", "WARN");
             }
-            window.setTimeout(() => {
-                contactInfoWindow.close();
-            }, tsCommon.randomSleep(3000, 10000));
-            
-        }
         
-        return cachedCandidate;
+            $(linkedInSelectors.contactInfoPage.CLOSE).click();
+        } catch (e) {
+            tsCommon.log(e.message, 'WARN');
+        }
     }
 
     const _scrapeEmailAddress = (container) => {

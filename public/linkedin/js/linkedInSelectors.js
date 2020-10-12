@@ -2,7 +2,8 @@
     const _contactInfoPage = {
         CONTACT_INFO_CONTAINER: 'div[class*="pv-profile-section__section-info"]',
         PHONE_SECTION: 'section[class*="ci-phone"]',
-        EMAIL_SECTION: 'section[class*="ci-email"]'
+        EMAIL_SECTION: 'section[class*="ci-email"]',
+        CLOSE: 'button[aria-label*="Dismiss"]'
     }
 
     const _recruiterProfilePage = {
@@ -11,7 +12,8 @@
         profilePrimaryContent: '#primary-content',
         publicProfileLink: 'a:contains("Public Profile")',
         saveButton: 'div[class*="profile-actions"] button[class*="save-btn"]',
-        skillsList: '#profile-skills div ul[class*="skills"]'
+        skillsList: '#profile-skills div ul[class*="skills"]',
+        aboutSummary: '#profile-summary'
     }
 
     const _searchResultsPage = {
@@ -27,7 +29,7 @@
             connectionNoteTextEntries: ['textarea[name*=“message”]', '#custom-message', 'textarea']
         },
         linkToRecruiterProfile: 'a[href*="/recruiter/profile/',
-        memberIdCodeScript: 'code:contains("urn:li:member:")',
+       
         messageModal: {
             textEntries: 'div[class*="msg-form__contenteditable"]',
             sendButtons: 'button[class*="msg-form__send-button"]',
@@ -36,6 +38,24 @@
             memberProfileFullNameSelectors: ['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")'],
             multipleMessageRecipientPills: 'span[class*="artdeco-pill__text"]',      
         },
+
+        experience: {
+            positionListItems: '[class*="experience-section"] li',
+            seeMorePositions: 'button[class*="see-more-inline"]:contains("more experiences")',
+            showMoreJobDescriptionText: 'button[class*="show-more-text"]:contains("see more")',
+            positionTitle: 'h3',
+            employer: 'p:contains("Company Name")',
+            dates:  'h4:contains("Dates Employed")',
+            location: 'ul[class*="pv-top-card"]',
+            experienceDescription: 'div[class*="extra-details"] p[class*="show-more-text"]'
+        },
+
+        fullName: 'ul[class*="pv-top-card"] li',
+        degreeConnection: ':contains("1st degree connection")',
+        location: 'ul[class*="list-bullet"] li',
+        education: 'h2[class*="profile-section"]:contains("Education")',
+        aboutSummary: 'p[class*="summary-text"] span',
+        aboutSummarySeeMore: 'a[id*="line-clamp-show-more-button"]'
     }
 
     class LinkedInSelectors {

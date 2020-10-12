@@ -1,7 +1,93 @@
 (() => {
-    const _findCachedCandidate = () => {
-        const firstAndLastName = _scrapeFirstAndLastNameFromProfile();
-        return searchResultsScraper.findCandidate(firstAndLastName);
+    const _expSelectors = linkedInSelectors.publicProfilePage.experience;
+
+    const _findCachedCandidate = (scrapedCandidate) => {
+        return searchResultsScraper ? searchResultsScraper.findCandidate(`${scrapedCandidate.firstName} ${scrapedCandidate.lastName}`) : null;
+    }
+
+    const _expandJobHistory = async () => {   
+        await tsUICommon.scrollTilTrue(() => {
+            return $(_expSelectors.seeMorePositions).length > 0;
+        });
+
+        let showMore = $(_expSelectors.seeMorePositions).length > 0 ? $(_expSelectors.seeMorePositions)[0] : null;
+        while (showMore) {
+                showMore.scrollIntoView();
+                showMore.click();
+                showMore = $(_expSelectors.seeMorePositions).length > 0 ? $(_expSelectors.seeMorePositions)[0] : null;
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(500);
+        }
+
+        $(_expSelectors.showMoreJobDescriptionText).click();
+        await tsCommon.sleep(500);
+    }
+
+    const _parseDateStringsForDurationData = (dateStrings) => {
+        const result = {};
+        
+        const dates = dateStrings.split('–').map(d => d.trim());
+        //durationData: { years: months: totalMonthsOnJob: startDate, endDate, startDateMonth, startDateYear, ageOfPositionInMonths: (0 = present)}
+
+        if (dates.length !== 2){
+            return null;
+        }
+
+        const fromDate = new Date(dates[0]);
+        const isPresent = dates[1] === 'Present';
+        const toDate = isPresent ? null : new Date(dates[1]);
+        
+        result.isPresent = isPresent;
+        result.startDateMonth = fromDate.getMonth() +1;
+        result.startDateYear = fromDate.getFullYear();
+
+        if (toDate){
+            result.endDateMonth = toDate.getMonth();
+            result.endDateYear = toDate.getFullYear();
+        }
+
+        return result;       
+    }
+
+    const _scrapeJobHistory = async () => {
+        const result = [];
+
+        await _expandJobHistory();
+        let positionLineItems = tsUICommon.findDomElements(_expSelectors.positionListItems);
+
+        if (!positionLineItems || positionLineItems.length === 0){
+            return null;
+        }
+
+        for (var i=0; i<positionLineItems.length; i++) {
+            try {
+                const li = positionLineItems[i];
+                const job = {};
+                job.title = $(li).find(_expSelectors.positionTitle).text().trim();
+                job.companyName = $(li).find(_expSelectors.employer).next().text().trim().split('\n')[0];
+                job.description = $(li).find(_expSelectors.experienceDescription).text().trim();
+                
+                //eg: Oct 2012 - Nov 2013
+                let dateString = $(li).find(_expSelectors.dates).text().replace('Dates Employed', '').trim();
+                const durationData = _parseDateStringsForDurationData(dateString);
+                if (durationData && job.companyName && job.companyName.length > 0){
+                    job.startDateMonth = durationData.startDateMonth;
+                    job.startDateYear = durationData.startDateYear;
+
+                    if (!durationData.isPresent){
+                        job.endDateMonth = durationData.endDateMonth;
+                        job.endDateYear = durationData.endDateYear;
+                    }
+
+                    result.push(job);
+                }
+            }
+            catch { 
+                tsCommon.log("unable to get entire job history");
+            }
+        }
+      
+        return result;
     }
 
     const _scrapeFirstAndLastNameFromProfile = () => {
@@ -32,22 +118,53 @@
         return result;
     }
 
-    const _scrapeProfile = async () => {
-        const cachedCandidate = await _findCachedCandidate();
+    const _scrapeNameLocationDegree = () => {
+        const selectors = linkedInSelectors.publicProfilePage;
+        const flName = _scrapeFirstAndLastNameFromProfile();
         
-        if (cachedCandidate) {
-            const updatedCandidate = await linkedInContactInfoScraper.scrapeContactInfo(cachedCandidate);
-            searchResultsScraper.scrapedCandidates[cachedCandidate.memberId].candidate = updatedCandidate;
-            searchResultsScraper.persistToLocalStorage();
-            
-            await linkedInApp.upsertContact(updatedCandidate);
+        //Minneapolis-St. Paul
+        const locationAreaElement = $(selectors.location)[0];
+        const locationAreaString = $(locationAreaElement).text().trim().replace('Greater', '').replace('Area', '').trim();
+        const isFirstConnection = $(selectors.fullName).find(selectors.degreeConnection).length > 0;
 
-            return updatedCandidate;
-        } else {
-            tsCommon.log("Public Profile Scraper:  Could not locate cached candidate to update.", "WARN");
+        const result = {
+            firstName: flName.firstName,
+            lastName: flName.lastName,
+            areas: locationAreaString.split('-').map(s => s.trim()),
+            isFirstConnection: isFirstConnection 
         }
-        
-        return null;
+
+        const seeMoreSummaryButton = $(selectors.aboutSummarySeeMore);
+
+        if (seeMoreSummaryButton){
+            seeMoreSummaryButton.click();
+            result.summary = $(selectors.aboutSummary).text().trim();
+        }
+
+        return result;
+    }
+
+    const _scrapeProfile = async () => {
+            const scrapedCandidate =  _scrapeNameLocationDegree();
+            scrapedCandidate.source = 'PUBLIC_PROFILE';
+            scrapedCandidate.linkedIn = window.location.href;
+
+            if (scrapedCandidate.isFirstConnection){
+                await linkedInContactInfoScraper.scrapeContactInfo(scrapedCandidate);
+            }
+
+            scrapedCandidate.positions = await _scrapeJobHistory();
+            const now = tsCommon.now();
+            scrapedCandidate.positionsLastScraped = now;
+
+            const cachedCandidate = await _findCachedCandidate(scrapedCandidate);
+            if (cachedCandidate){
+                scrapedCandidate.memberId = cachedCandidate.memberId;
+            }
+            
+            await linkedInApp.upsertContact(scrapedCandidate);
+            console.log({scrapedCandidate})
+            return scrapedCandidate;
     }
 
     class LinkedInPublicProfileScraper {
