@@ -42,14 +42,29 @@
         result.startDateYear = fromDate.getFullYear();
 
         if (toDate){
-            result.endDateMonth = toDate.getMonth();
+            result.endDateMonth = toDate.getMonth() +1;
             result.endDateYear = toDate.getFullYear();
         }
 
         return result;       
     }
 
+    const _scrapeRawExperienceText = () => {
+        let result = '';
+
+        try {
+            const experienceSection = $(_expSelectors.experienceSection)[0];
+            let text = $(experienceSection).text().split('\n').join(' ').trim();
+            result = tsCommon.stripExcessSpacesFromString(text);
+        } catch (e){
+            console.log(`Error in linkedInPublicProfileScraper._scrapeRawExperienceText. ${e.message}`);
+        }
+
+        return result;
+    }
+
     const _scrapeJobHistory = async () => {
+      
         const result = [];
 
         await _expandJobHistory();
@@ -158,6 +173,8 @@
             }
 
             scrapedCandidate.positions = await _scrapeJobHistory();
+            scrapedCandidate.rawExperienceText = _scrapeRawExperienceText();
+
             const now = tsCommon.now();
             scrapedCandidate.positionsLastScraped = now;
 

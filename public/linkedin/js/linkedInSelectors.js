@@ -42,6 +42,7 @@
         },
 
         experience: {
+            experienceSection: '#experience-section',
             positionListItems: '[class*="experience-section"] li',
             seeMorePositions: 'button[class*="see-more-inline"]:contains("more experiences")',
             showMoreJobDescriptionText: 'button[class*="show-more-text"]:contains("see more")',

@@ -15,6 +15,7 @@
                                     headline
                                     summary
                                     industry
+                                    rawExperienceText
                                     role
                                     memberId
                                     linkedInSkills

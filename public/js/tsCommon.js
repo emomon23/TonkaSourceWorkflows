@@ -187,6 +187,19 @@
         }
     }
 
+    const _stripExcessSpacesFromString = (text) => {
+        if (!text || !text.indexOf){
+            return text;
+        }
+        
+        let result = text;
+        while(result.indexOf('  ') >= 0){
+            result = result.split('  ').join(' ');
+        }
+
+        return result;
+    }
+
     const _waitTilTrue = async(callBack, maxMilliseconds) => {
         let currentMs = 0;
         let step = 300;
@@ -255,7 +268,8 @@
         findAHyperLink = _findAHyperLink;
         waitTilTrue = _waitTilTrue;
         now = () => { return new Now(); };
-        dayDifference = _dayDifference
+        dayDifference = _dayDifference;
+        stripExcessSpacesFromString = _stripExcessSpacesFromString;
     }
 
     window.tsCommon = new TSCommon();
