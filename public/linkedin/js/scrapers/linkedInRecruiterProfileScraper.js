@@ -82,7 +82,7 @@
         durationData.endDate = durationData.isPresent === true ? new Date() : new Date(dateParts[1]);
         
         const dateTo = new Date();
-        durationData.ageOfPositionInMonths = dateTo.getMonth() - durationData.endDate.getMonth() + 
+        durationData.ageOfPositionInMonths = (dateTo.getMonth() +1) - (durationData.endDate.getMonth() +1) + 
         (12 * (dateTo.getFullYear() - durationData.endDate.getFullYear()));
     }
 

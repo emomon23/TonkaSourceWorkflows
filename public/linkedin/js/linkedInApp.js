@@ -131,31 +131,38 @@
     }
 
     const _upsertContact =  async (candidate, requireRole = true) => {
-        if(requireRole && _getActiveRole() === null) {
-            if (!roleAlert) {
-                // eslint-disable-next-line no-alert
-                alert('Role must be set to save contacts.  Use setActiveRole(roleName)');
-                roleAlert = true;
+        try {
+            const activeRole = _getActiveRole();
+
+            if(requireRole && activeRole === null) {
+                if (!roleAlert) {
+                    // eslint-disable-next-line no-alert
+                    alert('Role must be set to save contacts.  Use setActiveRole(roleName)');
+                    roleAlert = true;
+                }
+                return null;
             }
+
+            const tags = linkedInApp.getAlisonTags();
+            const activeOpp = linkedInApp.getActiveOpportunity();
+            
+            if (activeRole){
+                candidate.role = activeRole;
+            }
+
+            if (tags !== null && tags !== undefined){
+                candidate.tags = tags;
+            }
+
+            if (activeOpp !== null && activeOpp !== undefined){
+                candidate.tags += ', ' + activeOpp;
+            }
+
+            await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
             return null;
+        } catch(e) {
+            console.log(e.message);
         }
-
-        const tags = linkedInApp.getAlisonTags();
-        const activeOpp = linkedInApp.getActiveOpportunity();
-        candidate.role = linkedInApp.getActiveRole();
-
-        
-
-        if (tags !== null && tags !== undefined){
-            candidate.tags = tags;
-        }
-
-        if (activeOpp !== null && activeOpp !== undefined){
-            candidate.tags += ', ' + activeOpp;
-        }
-
-        await linkedInCommon.callAlisonHookWindow('saveLinkedInContact', candidate);
-        return null;
     }
 
     const _getAlisonContact = async(searchFor) => {
@@ -217,7 +224,20 @@
         _recordMessageWasSent(memberIdOrFirstNameAndLastName, note, 'connectionRequest');
     }
 
-    const _getJobSeekersJobHistoryDetail = async(listOfJobSeekers) => {
+    const _doesScrapedCandidateMatchAlisonSeeker = (scraped, seeker) => {
+        const firstNamesGoodEnough = scraped.firstName.indexOf(seeker.firstName) >= 0 || seeker.firstName.indexOf(scraped.firstName) >= 0;
+        const lastNamesGoodEnough = scraped.lastName.indexOf(seeker.lastName) >= 0 || seeker.lastName.indexOf(scraped.lastName) >= 0;
+
+        return firstNamesGoodEnough && lastNamesGoodEnough;
+    }
+
+    const _getJobSeekersJobHistoryDetail = async(listOfJobSeekersJson) => {
+        if (!listOfJobSeekersJson || listOfJobSeekersJson.length === 0){
+            return;
+        }
+
+        let listOfJobSeekers = typeof listOfJobSeekersJson === "string" ? JSON.parse(listOfJobSeekersJson) : listOfJobSeekersJson;
+
         for (let i=0; i<listOfJobSeekers.length; i++){
             const seeker = listOfJobSeekers[i];
             const sendConnectionRequest = "Mike Joe".indexOf(linkedInApp.alisonUserName) === -1;
@@ -225,13 +245,18 @@
             // eslint-disable-next-line no-await-in-loop
             const scrapedProfile = await linkedInPublicProfileScraper.searchForPublicProfile(seeker, sendConnectionRequest);
             
-            if (scrapedProfile && scrapedProfile.firstName === seeker.firstName){
-                scrapedProfile.memberId = seeker.linkedInMemberId;
-                linkedInApp.upsertContact(scrapedProfile);
+            const wasTheRightOneScraped = _doesScrapedCandidateMatchAlisonSeeker(scrapedProfile, seeker);
+            if (wasTheRightOneScraped){
+                scrapedProfile.memberId = seeker.linkedInMemberId ? seeker.linkedInMemberId : seeker.memberId;
+                
+                // eslint-disable-next-line no-await-in-loop
+                await _upsertContact(scrapedProfile, false);
+                
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.randomSleep(50000, 90000);
             }
 
-            // eslint-disable-next-line no-await-in-loop
-            await tsCommon.randomSleep(50000, 90000);
+           
         }
     }
 
@@ -264,13 +289,7 @@
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonHook/alisonHook.html`;
         window.alisonHookWindow = window.open(url, "Linked In Hack", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=10,height=10,top=5000,left=5000");
 
-        await tsCommon.sleep(1000);
-
-        await promiseLoop([{}, {}, {}], async () => {
-            if (!window.alisonHookWindow){
-                await tsCommon.sleep(2000);
-            }
-        });
+        await tsCommon.sleep(3000);
 
         if (!window.alisonHookWindow){
             tsCommon.log("Unable to open alisonHook.  CHECK POP UP BLOCKER?", "WARN");

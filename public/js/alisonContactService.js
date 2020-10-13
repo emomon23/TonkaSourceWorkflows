@@ -2,30 +2,35 @@
     const _baseUrl = tsConstants.FUNCTIONS_URL;
 
     const _mapContact = (lic) => {
-        const result = {
-            city: lic.city,
-            state: lic.state,
-            positions: lic.positions,
-            positionsLastScraped: lic.positionsLastScraped,
-            alisonConnections: lic.alisonConnections,
-            educations: lic.educations,
-            firstName: lic.firstName,
-            lastName: lic.lastName,
-            areas: lic.areas,
-            linkedIn: lic.linkedIn,
-            title: lic.headline,
-            summary: lic.summary,
-            imageUrl: lic.imageUrl,
-            industry: lic.industry,
-            industryGroup: lic.role,
-            linkedInIsJobSeeker: lic.isJobSeeker || lic.isActivelyLooking,
-            linkedInMemberId: lic.memberId,
-            linkedInSkills: lic.linkedInSkills,
-            messagesSent: lic.messagesSent,
-            tags: lic.tags,
-            opportunitiesPresented: lic.opportunitiesPresented
-        };
+        const mapIfPresent_Keys = ` city 
+                                    state 
+                                    positions 
+                                    positionsLastScraped
+                                    alisonConnections
+                                    educations
+                                    firstName
+                                    lastName
+                                    areas
+                                    linkedIn
+                                    headline
+                                    summary
+                                    industry
+                                    role
+                                    memberId
+                                    linkedInSkills
+                                    messagesSent
+                                    tags
+                                    opportunitiesPresented`;
 
+        const result = {};
+
+        for (var k in lic){
+            if (mapIfPresent_Keys.indexOf(k) >= 0){
+                result[k] = lic[k];
+            }
+        }
+
+        result.linkedInIsJobSeeker = lic.isJobSeeker || lic.isActivelyLooking;
         if (lic.referencesGiven) {
             result.referencesGiven = lic.referencesGiven;
         }

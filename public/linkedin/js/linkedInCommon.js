@@ -12,7 +12,7 @@
 
     const _callAlisonHookWindow = async (actionString, data) => {
         await window.launchTonkaSource();
-        await tsCommon.sleep(2000);
+        await tsCommon.sleep(3000);
 
         if (window.alisonHookWindow){
             try {

@@ -6,4 +6,6 @@
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
     }
+
+    window.tsCommand = new TSCommand();
 })();

@@ -64,8 +64,12 @@
                 const li = positionLineItems[i];
                 const job = {};
                 job.title = $(li).find(_expSelectors.positionTitle).text().trim();
-                job.companyName = $(li).find(_expSelectors.employer).next().text().trim().split('\n')[0];
-                job.description = $(li).find(_expSelectors.experienceDescription).text().trim();
+                job.companyName = $(li).find(_expSelectors.employer).next().text().trim().split('\n')[0].trim();
+                job.description = $(li).find(_expSelectors.experienceDescription).text().split(':').join(';').trim();
+
+                if (!job.description || job.description.length === 0){
+                    job.description = "EMPTY";
+                }
                 
                 //eg: Oct 2012 - Nov 2013
                 let dateString = $(li).find(_expSelectors.dates).text().replace('Dates Employed', '').trim();
@@ -165,6 +169,23 @@
             return scrapedCandidate;
     }
 
+    const _removeParenthesisFromSearchString = (searchString) => {
+        let startIndex = searchString.indexOf("(");
+        if (startIndex === -1){
+            return searchString;
+        }
+
+        let endIndex = searchString.indexOf(")", startIndex);
+        if (endIndex === -1){
+            return searchString;
+        }
+
+        const replace = searchString.substr(startIndex, (endIndex - startIndex) + 1);
+        const cleaned = searchString.split(replace).join(' ');
+
+        return _removeParenthesisFromSearchString(cleaned);
+    }
+
     const _searchForPublicProfile = async(contact, sendConnectionRequest) => {
         const selectors = linkedInSelectors.publicProfilePage.search;
         const searchInput = $(selectors.searchInput); 
@@ -188,6 +209,10 @@
             }
         }
 
+        searchString = searchString.split("&amp;").join("&").split('&#x27;').join("'");
+        searchString = _removeParenthesisFromSearchString(searchString);
+
+        $(searchInput).val('');
         searchInput.focus()
         await tsCommon.sleep(500);
         document.execCommand('insertText', true, `${searchString}\n`);
@@ -226,7 +251,7 @@
                 console.log(`Unable to send connection request to ${candidate.firstName} ${candidate.lastName}.  ${e.message}`);
             }
         }
-        
+
         return result;
     }
 

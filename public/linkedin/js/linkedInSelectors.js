@@ -31,7 +31,7 @@
         linkToRecruiterProfile: 'a[href*="/recruiter/profile/',
         connectWithButton: 'button[aria-label*="Connect with"]',
         connectionNoNoteSendButton: 'button[aria-label*="Send now"]',
-        
+
         messageModal: {
             textEntries: 'div[class*="msg-form__contenteditable"]',
             sendButtons: 'button[class*="msg-form__send-button"]',
@@ -69,11 +69,18 @@
         }
     }
 
+    const _loginPage = {
+        userName: 'input[autocomplete*="username"], #username',
+        password: 'input[autocomplete*="current-password"], #password',
+        sendButton: 'button[class*="submit-button"], button[aria-label*="Sign in"]'
+    }
+    
     class LinkedInSelectors {
         contactInfoPage = _contactInfoPage;
         recruiterProfilePage = _recruiterProfilePage;
         searchResultsPage = _searchResultsPage;
         publicProfilePage = _publicProfilePage;
+        loginPage = _loginPage;
     }
 
     window.linkedInSelectors = new LinkedInSelectors();
