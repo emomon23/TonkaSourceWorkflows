@@ -92,6 +92,7 @@
                 const role = linkedInCommon.parseJobDurationDateRangeString(rawDatesString);
                 role.title = title;
                 role.description = description;
+                role.companyName = companyName;
                 
                 result.push(role);
             }
