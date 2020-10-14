@@ -7,6 +7,12 @@
         email: 'abtsJohnson@outlook.com',
         password: 'Executive90210!',
         phone: '(929) 900-6742‬'
+    },
+    {
+        userNameTrigger: 'bobby',
+        email: 'bobby12Johnson@outlook.com',
+        password: 'Executive90210!',
+        phone: '612 230-8942'
     }];
 
     const _fillInLoginFormWithFakeCredentials = () => {
