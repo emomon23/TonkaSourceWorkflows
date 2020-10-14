@@ -22,10 +22,10 @@
             tags: AS_IS,
             opportunitiesPresented: AS_IS,
             referencesReceived: AS_IS,
-            summary:'linkedInSummary', 
+            summary: 'linkedInSummary', 
             isJobSeeker:'isLinkedInJobSeeker',
             memberId: 'linkedInMemberId', 
-            headline:'title', 
+            headline: 'title', 
             industry: 'industryGroup' 
         };
 
