@@ -253,8 +253,11 @@
                     // eslint-disable-next-line no-await-in-loop
                     await _upsertContact(scrapedProfile, false);
                     successCount+=1;
-                    // eslint-disable-next-line no-await-in-loop
-                    await tsCommon.randomSleep(50000, 90000);
+
+                    if (i < listOfJobSeekers.length-1){
+                        // eslint-disable-next-line no-await-in-loop
+                        await tsCommon.randomSleep(50000, 90000);
+                    }
                 }
             }  
             else {
