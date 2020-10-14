@@ -2,46 +2,61 @@
     const _baseUrl = tsConstants.FUNCTIONS_URL;
 
     const _mapContact = (lic) => {
-        const mapIfPresent_Keys = ` city 
-                                    state 
-                                    positions 
-                                    scrapedBy
-                                    positionsLastScraped
-                                    alisonConnections
-                                    educations
-                                    firstName
-                                    lastName
-                                    areas
-                                    linkedIn
-                                    headline
-                                    industry
-                                    rawExperienceText
-                                    role
-                                    memberId
-                                    linkedInSkills
-                                    messagesSent
-                                    tags
-                                    opportunitiesPresented`;
+        const { city, 
+                state,
+                positions,
+                scrapedBy,
+                positionsLastScraped,
+                alisonConnections,
+                educators,
+                firstName,
+                lastName,
+                areas,
+                linkedIn,
+                rawExperienceText,
+                role,
+                linkedInSkills,
+                messagesSent,
+                tags,
+                opportunitiesPresented,
+                referencesReceived,
+                summary: linkedInSummary,
+                isJobSeeker: linkedInIsJobSeeker,
+                memberId: linkedInMemberId,
+                headline: title,
+                industry: industryGroup,
+              } = lic;
 
-        const result = {};
-
-        for (var k in lic){
-            if (mapIfPresent_Keys.indexOf(k) >= 0){
-                result[k] = lic[k];
+        const intermediateObject = {
+            state,
+            positions,
+            scrapedBy,
+            positionsLastScraped,
+            alisonConnections,
+            educators,
+            firstName,
+            lastName,
+            areas,
+            linkedIn,
+            rawExperienceText,
+            role,
+            linkedInSkills,
+            messagesSent,
+            tags,
+            opportunitiesPresented,
+            referencesReceived,
+            linkedInSummary,
+            linkedInIsJobSeeker,
+            linkedInMemberId,
+            title,
+            industryGroup,
+        }
+       
+        let result = {}
+        for(let k in intermediateObject){
+            if (intermediateObject[k]){
+                result[k] = intermediateObject[k];
             }
-        }
-
-        result.linkedInIsJobSeeker = lic.isJobSeeker || lic.isActivelyLooking;
-        if (lic.referencesGiven) {
-            result.referencesGiven = lic.referencesGiven;
-        }
-
-        if (lic.referencesReceived){
-            result.referencesReceived = lic.referencesReceived
-        }
-
-        if (lic.summary){
-            result.linkedInSummary = lic.summary;
         }
 
         return result;
