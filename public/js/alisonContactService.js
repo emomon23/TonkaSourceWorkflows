@@ -1,63 +1,39 @@
 (() => {
     const _baseUrl = tsConstants.FUNCTIONS_URL;
+    const AS_IS = 'asIs';
 
     const _mapContact = (lic) => {
-        const { city, 
-                state,
-                positions,
-                scrapedBy,
-                positionsLastScraped,
-                alisonConnections,
-                educators,
-                firstName,
-                lastName,
-                areas,
-                linkedIn,
-                rawExperienceText,
-                role,
-                linkedInSkills,
-                messagesSent,
-                tags,
-                opportunitiesPresented,
-                referencesReceived,
-                summary: linkedInSummary,
-                isJobSeeker: linkedInIsJobSeeker,
-                memberId: linkedInMemberId,
-                headline: title,
-                industry: industryGroup,
-              } = lic;
+        const renameMap = {
+            city: AS_IS, 
+            state: AS_IS,
+            positions: AS_IS,
+            scrapedBy: AS_IS,
+            positionsLastScraped: AS_IS,
+            alisonConnections: AS_IS,
+            educators: AS_IS,
+            firstName: AS_IS,
+            lastName: AS_IS,
+            areas: AS_IS,
+            linkedIn: AS_IS,
+            rawExperienceText: AS_IS,
+            role: AS_IS,
+            linkedInSkills: AS_IS,
+            messagesSent: AS_IS,
+            tags: AS_IS,
+            opportunitiesPresented: AS_IS,
+            referencesReceived: AS_IS,
+            summary:'linkedInSummary', 
+            isJobSeeker:'isLinkedInJobSeeker',
+            memberId: 'linkedInMemberId', 
+            headline:'title', 
+            industry: 'industryGroup' 
+        };
 
-        const intermediateObject = {
-            state,
-            positions,
-            scrapedBy,
-            positionsLastScraped,
-            alisonConnections,
-            educators,
-            firstName,
-            lastName,
-            areas,
-            linkedIn,
-            rawExperienceText,
-            role,
-            linkedInSkills,
-            messagesSent,
-            tags,
-            opportunitiesPresented,
-            referencesReceived,
-            linkedInSummary,
-            linkedInIsJobSeeker,
-            linkedInMemberId,
-            title,
-            industryGroup,
-        }
-       
-        intermediateObject.isJobSeeker = intermediateObject.isJobSeeker ? intermediateObject.isJobSeeker : lic.isActivelyLooking;
-        
-        let result = {}
-        for(let k in intermediateObject){
-            if (intermediateObject[k]){
-                result[k] = intermediateObject[k];
+        const result = {}
+        for(var k in lic){
+            if (renameMap[k] && lic[k]){
+                const resultKey = renameMap[k] === AS_IS? k : renameMap[k];
+                result[resultKey] = lic[k];
             }
         }
 
