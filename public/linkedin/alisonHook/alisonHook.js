@@ -38,9 +38,12 @@
         }
     }
 
-    const _runJobHistoryScraperJob = async() => {
+    const _runJobHistoryScraperJob = async(params) => {
+
+        const howMany = params && params.howMany ? params.howMany : null;
+
         _displayMessage("runJobHistoryScraper called");
-        const jobSeekers = await alisonContactService.getJobSeekersToBeScrapedInABatch();
+        const jobSeekers = await alisonContactService.getJobSeekersToBeScrapedInABatch(howMany);
         alisonHook.callBackToLinkedIn('getJobSeekersJobHistoryDetail', jobSeekers);
         _displayMessage(`found ${jobSeekers.length} job seekers to scrape`);
 

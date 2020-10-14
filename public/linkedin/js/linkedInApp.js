@@ -244,19 +244,18 @@
 
             // eslint-disable-next-line no-await-in-loop
             const scrapedProfile = await linkedInPublicProfileScraper.searchForPublicProfile(seeker, sendConnectionRequest);
-            
-            const wasTheRightOneScraped = _doesScrapedCandidateMatchAlisonSeeker(scrapedProfile, seeker);
-            if (wasTheRightOneScraped){
-                scrapedProfile.memberId = seeker.linkedInMemberId ? seeker.linkedInMemberId : seeker.memberId;
-                
-                // eslint-disable-next-line no-await-in-loop
-                await _upsertContact(scrapedProfile, false);
-                
-                // eslint-disable-next-line no-await-in-loop
-                await tsCommon.randomSleep(50000, 90000);
-            }
-
-           
+            if (scrapedProfile) {
+                const wasTheRightOneScraped = _doesScrapedCandidateMatchAlisonSeeker(scrapedProfile, seeker);
+                if (wasTheRightOneScraped){
+                    scrapedProfile.memberId = seeker.linkedInMemberId ? seeker.linkedInMemberId : seeker.memberId;
+                    
+                    // eslint-disable-next-line no-await-in-loop
+                    await _upsertContact(scrapedProfile, false);
+                    
+                    // eslint-disable-next-line no-await-in-loop
+                    await tsCommon.randomSleep(50000, 90000);
+                }
+            }           
         }
     }
 

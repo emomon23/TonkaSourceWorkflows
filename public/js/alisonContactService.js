@@ -13,7 +13,6 @@
                                     areas
                                     linkedIn
                                     headline
-                                    summary
                                     industry
                                     rawExperienceText
                                     role
@@ -38,6 +37,10 @@
 
         if (lic.referencesReceived){
             result.referencesReceived = lic.referencesReceived
+        }
+
+        if (lic.summary){
+            result.linkedInSummary = lic.summary;
         }
 
         return result;
@@ -80,8 +83,10 @@
         }
     }
 
-    const  _getJobSeekersToBeScrapedInABatch = async() => {
-        const url = `${_baseUrl}/getLiteJobSeekersToBeScraped?howMany=10`;
+    const  _getJobSeekersToBeScrapedInABatch = async(howMany) => {
+        const p = howMany ? howMany : 5;
+
+        const url = `${_baseUrl}/getLiteJobSeekersToBeScraped?howMany=${p}`;
         const result = await tsCommon.httpGetJson(url);
         return result;
     }
