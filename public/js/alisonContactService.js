@@ -88,7 +88,7 @@
 
         const url = `${_baseUrl}/getLiteJobSeekersToBeScraped?howMany=${p}`;
         const result = await tsCommon.httpGetJson(url);
-        return result;
+        return JSON.parse(result);
     }
 
     class AlisonContactService {
