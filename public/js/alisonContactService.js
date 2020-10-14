@@ -52,6 +52,8 @@
             industryGroup,
         }
        
+        intermediateObject.isJobSeeker = intermediateObject.isJobSeeker ? intermediateObject.isJobSeeker : lic.isActivelyLooking;
+        
         let result = {}
         for(let k in intermediateObject){
             if (intermediateObject[k]){
