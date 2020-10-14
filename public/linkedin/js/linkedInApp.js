@@ -237,6 +237,7 @@
         }
 
         let listOfJobSeekers = typeof listOfJobSeekersJson === "string" ? JSON.parse(listOfJobSeekersJson) : listOfJobSeekersJson;
+        let successCount = 0;
 
         for (let i=0; i<listOfJobSeekers.length; i++){
             const seeker = listOfJobSeekers[i];
@@ -251,12 +252,20 @@
                     
                     // eslint-disable-next-line no-await-in-loop
                     await _upsertContact(scrapedProfile, false);
-                    
+                    successCount+=1;
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(50000, 90000);
                 }
-            }           
+            }  
+            else {
+                seeker.positionsLastScraped = (new Date()).getTime();
+                seeker.unableToSearchFromPublicLinkedIn = true;
+                // eslint-disable-next-line no-await-in-loop
+                await _upsertContact(seeker);
+            }         
         }
+
+        tsCommon.log(`Retrieved ${listOfJobSeekers.length} job seekers from Alison, successfully scraped ${successCount} and saved.`)
     }
 
     class LinkedInApp {
