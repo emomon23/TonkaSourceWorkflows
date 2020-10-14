@@ -212,7 +212,16 @@
         return result;
     }
 
+    const _scrapedFakeUser = () => {
+        try {
+            const result = $($('img[class*="me-photo"]')[0]).attr('alt');
+            return result && result.length > 0 ? result : null;
+        } catch(e) {
+            return null;
+        }
+    }
     const _scrapeProfile = async () => {
+            const fakeUser = _scrapedFakeUser();
             const scrapedCandidate =  _scrapeNameLocationDegree();
             scrapedCandidate.source = 'PUBLIC_PROFILE';
             scrapedCandidate.linkedIn = window.location.href;
@@ -225,6 +234,10 @@
             scrapedCandidate.rawExperienceText = _scrapeRawExperienceText();
             scrapedCandidate.positionsLastScraped = (new Date()).getTime();
 
+            if (fakeUser){
+                scrapedCandidate.scrapedBy = fakeUser;
+            }
+            
             const cachedCandidate = await _findCachedCandidate(scrapedCandidate);
             if (cachedCandidate){
                 scrapedCandidate.memberId = cachedCandidate.memberId;
