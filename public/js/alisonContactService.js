@@ -5,6 +5,7 @@
         const mapIfPresent_Keys = ` city 
                                     state 
                                     positions 
+                                    scrapedBy
                                     positionsLastScraped
                                     alisonConnections
                                     educations

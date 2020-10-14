@@ -264,7 +264,7 @@
                 seeker.positionsLastScraped = (new Date()).getTime();
                 seeker.unableToSearchFromPublicLinkedIn = true;
                 // eslint-disable-next-line no-await-in-loop
-                await _upsertContact(seeker);
+                await _upsertContact(seeker, false);
             }         
         }
 
