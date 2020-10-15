@@ -77,10 +77,12 @@
         }
     }
 
-    const  _getJobSeekersToBeScrapedInABatch = async(howMany) => {
-        const p = howMany ? howMany : 5;
+    const  _getJobSeekersToBeScrapedInABatch = async(params) => {
+        const p = params && params.howMany ? params.howMany : 5;
+        const tagsQs = params && params.tagsFilter ? `&tagsFilter=${params.tagsFilter}` : '';
 
-        const url = `${_baseUrl}/getLiteJobSeekersToBeScraped?howMany=${p}`;
+        const url = `${_baseUrl}/getLiteJobSeekersToBeScraped?howMany=${p}${tagsQs}`;
+        console.log(`httpGet on url: ${url}`);
         const result = await tsCommon.httpGetJson(url);
         return JSON.parse(result);
     }
