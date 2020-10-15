@@ -2,15 +2,12 @@
 (() => {
 
     const _displayMessage = (message) => {
-        let msg = $('#message-container').html();
-        if (msg && msg.length > 0){
-            msg+= "</br>";
-        }
+        const newLine = document.createElement('div');
+        $(newLine).text(`- ${message}`);
 
-        msg+= `- ${message}`;
-
-        $('#message-container').html(msg);
+        $('#message-container').append(newLine);
     }
+    
     const __doesMethodExistOnActiveTemplate = (methodName) => {
         try {
             return eval(`alisonHook.activeTemplate && alisonHook.activeTemplate['${methodName}'] != undefined`);
