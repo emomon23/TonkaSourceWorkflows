@@ -18,7 +18,7 @@
 
     const _searchResultsPage = {
         BADGES: 'div[class*="badges"]',
-        addToProjectButton: (memberId) => { return `li[id*="${memberId}"] button[class*="save-btn"]`; }
+        addToProjectButton: (memberId) => { return `#search-result-${memberId} button:contains("Save profile to current project")`; }
     }
     
     const _publicProfilePage = {

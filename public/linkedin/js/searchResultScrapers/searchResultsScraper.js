@@ -401,15 +401,17 @@
 
     const _addCurrentPageOfJobSeekersToProject = async () => {
         //$($('#search-result-690582757')[0]).find('button:contains("Save to a project")').length
-        for (let i=0; i<_pageCandidates; i++){
-            const memberId = _pageCandidates[i].memberId;
-            saveButtonQuery = linkedInSelectors.searchResultsPage.addToProjectButton(memberId);
-            if ($(saveButtonQuery).length > 0){
-                $(saveButtonQuery)[0].click();
-                // eslint-disable-next-line no-await-in-loop
-                await tsCommon.randomSleep(3000, 6000);
+        for (let i=0; i<_pageCandidates.length; i++){
+            const candidate = _pageCandidates[i];
+            if (candidate.isJobSeeker || candidate.isActivelyLooking){
+                const memberId = candidate.memberId;
+                saveButtonQuery = linkedInSelectors.searchResultsPage.addToProjectButton(memberId);
+                if ($(saveButtonQuery).length > 0){
+                    $(saveButtonQuery)[0].click();
+                    // eslint-disable-next-line no-await-in-loop
+                    await tsCommon.randomSleep(3000, 6000);
+                }
             }
-
         }
     }
 
