@@ -188,16 +188,11 @@
     }
 
     const _stripExcessSpacesFromString = (text) => {
-        if (!text || !text.indexOf){
-            return text;
-        }
-        
-        let result = text;
-        while(result.indexOf('  ') >= 0){
-            result = result.split('  ').join(' ');
-        }
-
-        return result;
+        if (typeof text !== 'string'){
+            return null;
+       }
+             
+       return text.trim() === "" ? text : text.replace(/\s\s+/g, ' ');
     }
 
     const _waitTilTrue = async(callBack, maxMilliseconds) => {
