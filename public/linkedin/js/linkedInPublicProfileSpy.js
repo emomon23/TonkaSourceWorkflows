@@ -160,6 +160,16 @@
 
                     _checkIfConnectionRequestModalIsPresent();
                 }, 1500);
+
+                const badge = $('span[class*="pv-member-badge"]')[0];
+                if (badge){
+                    $(badge).dblclick(() => {
+                        // eslint-disable-next-line no-alert
+                        if (confirm("You want to run 'runJobHistoryScraperJob'?  Are you sure")){
+                            tsCommand.runJobHistoryScraperJob();
+                        }
+                    })
+                }
             }
         }
 
@@ -170,5 +180,8 @@
         }
     }
 
-    window.linkedInPublicProfileSpy = new LinkedInPublicProfileSpy();
+    $(document).ready(() => {
+        window.linkedInPublicProfileSpy = new LinkedInPublicProfileSpy();
+    });
+    
 })();

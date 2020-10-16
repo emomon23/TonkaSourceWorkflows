@@ -1,6 +1,13 @@
 /* eslint-disable no-eval */
 (() => {
 
+    const _displayMessage = (message) => {
+        const newLine = document.createElement('div');
+        $(newLine).text(`- ${message}`);
+
+        $('#message-container').append(newLine);
+    }
+    
     const __doesMethodExistOnActiveTemplate = (methodName) => {
         try {
             return eval(`alisonHook.activeTemplate && alisonHook.activeTemplate['${methodName}'] != undefined`);
@@ -28,6 +35,38 @@
         }
     }
 
+    const _runJobHistoryScraperJob = async(params) => {
+        _displayMessage("runJobHistoryScraper called");
+        const jobSeekers = await alisonContactService.getJobSeekersToBeScrapedInABatch(params);
+        alisonHook.callBackToLinkedIn('getJobSeekersJobHistoryDetail', jobSeekers);
+        _displayMessage(`found ${jobSeekers.length} job seekers to scrape`);
+
+        await tsCommon.sleep(3000);
+        window.close();
+    }
+
+    const _getAlisonContact = async(searchFor) => {
+        await alisonContactService.getAlisonContact(searchFor);
+        await tsCommon.sleep(1000);
+        window.close();
+    }
+
+    const _saveLinkedInContact = async(contact) => {
+        try {
+            _displayMessage(`saveLinkedInContact: ${contact.firstName} ${contact.lastName} (${contact.memberId})`);
+
+            const str = contact ? JSON.stringify(contact) : 'null contact!'
+            console.log(`_saveLinkedInContact called.  Calling alisonService.saveLinkedInContact: ${str}`);
+
+            await alisonContactService.saveLinkedInContact(contact);
+            await tsCommon.sleep(1000);
+            window.close();
+        } catch (e) {
+            _displayMessage(`ERROR: ${e.message}`);
+            console.error(`_saveLinkedInContact error. ${e.message}`);
+        }
+    }
+
     class AlisonHook {
         constructor(){}
 
@@ -46,14 +85,19 @@
             }
         };
 
-        saveLinkedInContact = alisonContactService.saveLinkedInContact;
-        getAlisonContact = alisonContactService.getAlisonContact;
+        saveLinkedInContact = _saveLinkedInContact;
+        getAlisonContact = _getAlisonContact;
+        runJobHistoryScraperJob = _runJobHistoryScraperJob;
     }
 
     window.alisonHook = new AlisonHook();
 
     $(document).ready(() => {
+        _displayMessage(`docReady, registering 'message' eventListener`);
+
         window.addEventListener('message', (e) => {
+            _displayMessage('message event fired: ' + e.data.action);
+
             var d = e.data;
             linkedInConsoleReference = e.source;
     
@@ -68,27 +112,12 @@
     
             if (__doesMethodExistOnActiveTemplate(action)){
                 eval(`alisonHook.activeTemplate.${action}(${data});`);
-
-                // Close the window if we're successful
-                setTimeout(() => { 
-                    window.close();
-                }, 5000);
             }
             else if (__doesMethodExistOnAlisonHook(action)){
                 eval(`alisonHook.${action}(${data});`);
-                
-                // Close the window if we're successful
-                setTimeout(() => { 
-                    window.close();
-                }, 5000);
             }
             else if(__doesMethodExistOnWindow(action)){
                 eval(`${action}(${data});`);
-                
-                // Close the window if we're successful
-                setTimeout(() => { 
-                    window.close();
-                }, 5000);
             }
             else {
                 console.error(`ERROR.  Unable to find action '${action}'`);

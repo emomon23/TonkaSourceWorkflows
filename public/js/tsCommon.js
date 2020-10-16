@@ -187,6 +187,14 @@
         }
     }
 
+    const _stripExcessSpacesFromString = (text) => {
+        if (typeof text !== 'string'){
+            return null;
+       }
+             
+       return text.trim() === "" ? text : text.replace(/\s\s+/g, ' ');
+    }
+
     const _waitTilTrue = async(callBack, maxMilliseconds) => {
         let currentMs = 0;
         let step = 300;
@@ -255,7 +263,8 @@
         findAHyperLink = _findAHyperLink;
         waitTilTrue = _waitTilTrue;
         now = () => { return new Now(); };
-        dayDifference = _dayDifference
+        dayDifference = _dayDifference;
+        stripExcessSpacesFromString = _stripExcessSpacesFromString;
     }
 
     window.tsCommon = new TSCommon();

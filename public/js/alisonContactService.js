@@ -1,37 +1,40 @@
 (() => {
     const _baseUrl = tsConstants.FUNCTIONS_URL;
+    const AS_IS = 'asIs';
 
     const _mapContact = (lic) => {
-        const result = {
-            city: lic.city,
-            state: lic.state,
-            positions: lic.positions,
-            positionsLastScraped: lic.positionsLastScraped,
-            alisonConnections: lic.alisonConnections,
-            educations: lic.educations,
-            firstName: lic.firstName,
-            lastName: lic.lastName,
-            areas: lic.areas,
-            linkedIn: lic.linkedIn,
-            title: lic.headline,
-            summary: lic.summary,
-            imageUrl: lic.imageUrl,
-            industry: lic.industry,
-            industryGroup: lic.role,
-            linkedInIsJobSeeker: lic.isJobSeeker || lic.isActivelyLooking,
-            linkedInMemberId: lic.memberId,
-            linkedInSkills: lic.linkedInSkills,
-            messagesSent: lic.messagesSent,
-            tags: lic.tags,
-            opportunitiesPresented: lic.opportunitiesPresented
+        const renameMap = {
+            city: AS_IS, 
+            state: AS_IS,
+            positions: AS_IS,
+            scrapedBy: AS_IS,
+            positionsLastScraped: AS_IS,
+            alisonConnections: AS_IS,
+            educators: AS_IS,
+            firstName: AS_IS,
+            lastName: AS_IS,
+            areas: AS_IS,
+            linkedIn: AS_IS,
+            rawExperienceText: AS_IS,
+            role: AS_IS,
+            linkedInSkills: AS_IS,
+            messagesSent: AS_IS,
+            tags: AS_IS,
+            opportunitiesPresented: AS_IS,
+            referencesReceived: AS_IS,
+            summary: 'linkedInSummary', 
+            isJobSeeker:'isLinkedInJobSeeker',
+            memberId: 'linkedInMemberId', 
+            headline: 'title', 
+            industry: 'industryGroup' 
         };
 
-        if (lic.referencesGiven) {
-            result.referencesGiven = lic.referencesGiven;
-        }
-
-        if (lic.referencesReceived){
-            result.referencesReceived = lic.referencesReceived
+        const result = {}
+        for(var k in lic){
+            if (renameMap[k] && lic[k]){
+                const resultKey = renameMap[k] === AS_IS? k : renameMap[k];
+                result[resultKey] = lic[k];
+            }
         }
 
         return result;
@@ -74,9 +77,20 @@
         }
     }
 
+    const  _getJobSeekersToBeScrapedInABatch = async(params) => {
+        const p = params && params.howMany ? params.howMany : 5;
+        const tagsQs = params && params.tagsFilter ? `&tagsFilter=${params.tagsFilter}` : '';
+
+        const url = `${_baseUrl}/getLiteJobSeekersToBeScraped?howMany=${p}${tagsQs}`;
+        console.log(`httpGet on url: ${url}`);
+        const result = await tsCommon.httpGetJson(url);
+        return JSON.parse(result);
+    }
+
     class AlisonContactService {
         saveLinkedInContact = _saveLinkedInContact;
-        getAlisonContact = _getAlisonContact
+        getAlisonContact = _getAlisonContact;
+        getJobSeekersToBeScrapedInABatch = _getJobSeekersToBeScrapedInABatch;
     }
 
     window.alisonContactService = new AlisonContactService();

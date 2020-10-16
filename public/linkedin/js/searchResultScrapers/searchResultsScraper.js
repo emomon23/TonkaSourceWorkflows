@@ -399,15 +399,40 @@
         }
     }
 
-    const _touchSearchResultsPages = async (numberOfPages = 100) => {
+    const _addCurrentPageOfJobSeekersToProject = async () => {
+        //$($('#search-result-690582757')[0]).find('button:contains("Save to a project")').length
+        for (let i=0; i<_pageCandidates.length; i++){
+            const candidate = _pageCandidates[i];
+            if (candidate.isJobSeeker || candidate.isActivelyLooking){
+                const memberId = candidate.memberId;
+                saveButtonQuery = linkedInSelectors.searchResultsPage.addToProjectButton(memberId);
+                if ($(saveButtonQuery).length > 0){
+                    $(saveButtonQuery)[0].click();
+                    // eslint-disable-next-line no-await-in-loop
+                    await tsCommon.randomSleep(3000, 6000);
+                }
+            }
+        }
+    }
+
+    const _touchSearchResultsPages = async (numberOfPages = 100, addJobSeekersToProject = false) => {
+        if (addJobSeekersToProject) {
+           await  _addCurrentPageOfJobSeekersToProject();
+        }
         let advancedToNextPage = linkedInCommon.advanceToNextLinkedInResultPage();
         let currentPage = 0;
 
         while (advancedToNextPage && currentPage < numberOfPages && _keepWalkingResultsPages){
             // eslint-disable-next-line no-await-in-loop
+            await  _addCurrentPageOfJobSeekersToProject();
+            // eslint-disable-next-line no-await-in-loop
             await tsCommon.randomSleep(15000, 5000);
             advancedToNextPage = linkedInCommon.advanceToNextLinkedInResultPage();
             currentPage+=1;
+        }
+
+        if (currentPage > 0){
+            await  _addCurrentPageOfJobSeekersToProject();
         }
     }
 

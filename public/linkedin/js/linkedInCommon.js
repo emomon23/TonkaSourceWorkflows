@@ -12,7 +12,7 @@
 
     const _callAlisonHookWindow = async (actionString, data) => {
         await window.launchTonkaSource();
-        await tsCommon.sleep(2000);
+        await tsCommon.sleep(3000);
 
         if (window.alisonHookWindow){
             try {
@@ -63,6 +63,28 @@
         return result;
     }
 
+    const _parseJobDurationDateRangeString = (text) => {
+        try {
+            const dateParts = text.split('–').map(d => d.trim());
+            const startDate = new Date(dateParts[0]);
+
+            const result = {
+                startDateMonth: startDate.getMonth() + 1,
+                startDateYear: startDate.getFullYear()
+            }
+
+            if (dateParts[1].toLowerCase().indexOf('present') === -1){
+                const endDate = new Date(dateParts[1]);
+                result.endDateMonth = endDate.getMonth() + 1;
+                result.endDateYear = endDate.getFullYear();
+            }
+
+            return result;
+        } catch (e) {
+            return null;
+        }
+    }
+
     class LinkedInCommon {
         constructor() {}
 
@@ -70,6 +92,7 @@
         getRoleName = _getRoleName;
         callAlisonHookWindow = _callAlisonHookWindow;
         whatPageAmIOn = _whatPageAmIOn;
+        parseJobDurationDateRangeString = _parseJobDurationDateRangeString;
     }
 
     window.linkedInCommon = new LinkedInCommon();
