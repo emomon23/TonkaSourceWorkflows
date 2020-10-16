@@ -58,9 +58,7 @@
     }
 
     $(document).ready(() => {
-        const isLogin = linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.LOGIN
-                        || window.location.href === 'https://www.linkedin.com' 
-                        || window.location.href === 'https://www.linkedin.com/';
+        const isLogin = linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.LOGIN;
 
         if (isLogin){
             _uiElements = _getUIElements();
