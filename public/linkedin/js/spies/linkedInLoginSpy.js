@@ -13,6 +13,18 @@
         email: 'bobby12Johnson@outlook.com',
         password: 'Executive90210!',
         phone: '612 230-8942'
+    },
+    {
+        userNameTrigger: 'cindy',
+        email: 'cindybaker626@outlook.com',
+        password: 'Executive90210!',
+        phone: ''
+    },
+    {
+        userNameTrigger: 'devin',
+        email: 'DevinZappier16@outlook.com',
+        password: 'Executive90200!',
+        phone: '612 230-8942'
     }];
 
     const _fillInLoginFormWithFakeCredentials = () => {
