@@ -77,20 +77,19 @@
         }
     }
 
-    const  _getJobSeekersToBeScrapedInABatch = async(params) => {
-        const p = params && params.howMany ? params.howMany : 5;
-        const tagsQs = params && params.tagsFilter ? `&tagsFilter=${params.tagsFilter}` : '';
+    const  _getNextJobSeeker = async() => {
+        await tsCommon.sleep(2000);
 
-        const url = `${_baseUrl}/getLiteJobSeekersToBeScraped?howMany=${p}${tagsQs}`;
+        const url = `${_baseUrl}/getNextContactToScrape`;
         console.log(`httpGet on url: ${url}`);
         const result = await tsCommon.httpGetJson(url);
-        return JSON.parse(result);
+        return result.length > 100 ? JSON.parse(result) : null;
     }
 
     class AlisonContactService {
         saveLinkedInContact = _saveLinkedInContact;
         getAlisonContact = _getAlisonContact;
-        getJobSeekersToBeScrapedInABatch = _getJobSeekersToBeScrapedInABatch;
+        getNextJobSeeker = _getNextJobSeeker;
     }
 
     window.alisonContactService = new AlisonContactService();

@@ -35,11 +35,15 @@
         }
     }
 
-    const _runJobHistoryScraperJob = async(params) => {
+    const _getNextJobSeekerToScrape = async() => {
         _displayMessage("runJobHistoryScraper called");
-        const jobSeekers = await alisonContactService.getJobSeekersToBeScrapedInABatch(params);
-        alisonHook.callBackToLinkedIn('getJobSeekersJobHistoryDetail', jobSeekers);
-        _displayMessage(`found ${jobSeekers.length} job seekers to scrape`);
+        const jobSeeker = await alisonContactService.getNextJobSeeker();
+        alisonHook.callBackToLinkedIn('getNextJobSeekerResult', jobSeeker);
+        if (jobSeeker) {
+            _displayMessage(`found next jobSeeker: ${jobSeeker.firstName} ${jobSeeker.lastName}`);
+        } else {
+            _displayMessage('no job seeker found in queue');
+        }
 
         await tsCommon.sleep(3000);
         window.close();
@@ -87,7 +91,7 @@
 
         saveLinkedInContact = _saveLinkedInContact;
         getAlisonContact = _getAlisonContact;
-        runJobHistoryScraperJob = _runJobHistoryScraperJob;
+        getNextJobSeekerToScrape = _getNextJobSeekerToScrape;
     }
 
     window.alisonHook = new AlisonHook();
