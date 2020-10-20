@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.435
+// @version      0.444
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -51,7 +51,6 @@
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
 // @ignore      http://localhost:5001/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInMessageSender.js
-// @ignore      http://localhost:5001/linkedin/js/linkedInPublicProfile.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInApp.js
 // @ignore      http://localhost:5001/linkedin/js/tsCommand.js
 // @grant        none
