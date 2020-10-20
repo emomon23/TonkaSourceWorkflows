@@ -165,7 +165,7 @@
                 if (badge){
                     $(badge).dblclick(() => {
                         // eslint-disable-next-line no-alert
-                        if (confirm("You want to run 'runJobHistoryScraperJob'?  Are you sure")){
+                        if (confirm("You want to run 'getNextJobSeekerToScrape'?  Are you sure")){
                             tsCommand.runJobHistoryScraperJob();
                         }
                     })

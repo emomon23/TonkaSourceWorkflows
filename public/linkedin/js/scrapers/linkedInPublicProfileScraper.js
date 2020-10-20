@@ -293,17 +293,36 @@
         }
     }
 
+    const _getCompanyNames = (seeker) => {
+        if (!(seeker && seeker.positions)){
+            return [];
+        }
+
+        let result = seeker.positions.map(p => {
+            if (typeof p === "string"){
+                return p;
+            }
+
+            return p.companyName ? p.companyName : '';
+        });
+
+        result = [...new Set(result)];
+        return result.length === 1 && result[0] === '' ? [] : result;
+    }
+
     const _searchForPublicProfile = async(contact, sendConnectionRequest) => {
         const selectors = linkedInSelectors.publicProfilePage.search;
         const searchInput = $(selectors.searchInput); 
         
-        if (!(contact.firstName && contact.lastName && contact.positions && contact.positions.length > 0 && contact.positions[0].companyName && contact.positions[0].companyName.length > 0)){
+        const companyNames = _getCompanyNames(contact);
+
+        if (!(contact.firstName && contact.lastName && companyNames.length > 0)){
             console.log("Not enough information to search for this contact");
             return null;
         }
 
         //search with minimal infomation 1st (their name and 1st company name - eg Jon Nelson Hollander)
-        let searchString = `${contact.firstName} ${contact.lastName} ${contact.positions[0].companyName}`;
+        let searchString = `${contact.firstName} ${contact.lastName} ${companyNames[0]}`;
         $(searchInput).val('');
         let searchListResult = await _addCompanyNameToSearchIsUniqueEnough(searchString);
 
@@ -311,11 +330,11 @@
         let positionIndex = 1;
         while (searchListResult === KEEP_TRYING){
             //jon nelson hollander wasn't enough, add 1 company at a time until we find him or should stop looking
-            if (contact.positions.length <= positionIndex){
+            if (companyNames.length <= positionIndex){
                 break;
             }
 
-            const appendCompany = contact.positions[positionIndex].companyName;
+            const appendCompany = companyNames[positionIndex];
             // eslint-disable-next-line no-await-in-loop
             searchListResult = await _addCompanyNameToSearchIsUniqueEnough(appendCompany);
             positionIndex+=1;
@@ -362,9 +381,18 @@
         return result;
     }
 
+    const _goHome = async() => {
+        const anchors = $('a[href*="/feed/"]:contains("Home")');
+        if (anchors.length > 0){
+            anchors[0].click();
+            await tsCommon.sleep(3000);
+        }
+    }
+
     class LinkedInPublicProfileScraper {
         scrapeProfile = _scrapeProfile; 
         searchForPublicProfile = _searchForPublicProfile;     
+        goHome = _goHome;
     }
 
     window.linkedInPublicProfileScraper = new LinkedInPublicProfileScraper();

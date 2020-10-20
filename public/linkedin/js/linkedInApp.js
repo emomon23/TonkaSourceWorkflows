@@ -224,51 +224,8 @@
         _recordMessageWasSent(memberIdOrFirstNameAndLastName, note, 'connectionRequest');
     }
 
-    const _doesScrapedCandidateMatchAlisonSeeker = (scraped, seeker) => {
-        const firstNamesGoodEnough = scraped.firstName.indexOf(seeker.firstName) >= 0 || seeker.firstName.indexOf(scraped.firstName) >= 0;
-        const lastNamesGoodEnough = scraped.lastName.indexOf(seeker.lastName) >= 0 || seeker.lastName.indexOf(scraped.lastName) >= 0;
-
-        return firstNamesGoodEnough && lastNamesGoodEnough;
-    }
-
-    const _getJobSeekersJobHistoryDetail = async(listOfJobSeekersJson) => {
-        if (!listOfJobSeekersJson || listOfJobSeekersJson.length === 0){
-            return;
-        }
-
-        let listOfJobSeekers = typeof listOfJobSeekersJson === "string" ? JSON.parse(listOfJobSeekersJson) : listOfJobSeekersJson;
-        let successCount = 0;
-
-        for (let i=0; i<listOfJobSeekers.length; i++){
-            const seeker = listOfJobSeekers[i];
-            const sendConnectionRequest = "Mike Joe".indexOf(linkedInApp.alisonUserName) === -1;
-
-            // eslint-disable-next-line no-await-in-loop
-            const scrapedProfile = await linkedInPublicProfileScraper.searchForPublicProfile(seeker, sendConnectionRequest);
-            if (scrapedProfile) {
-                const wasTheRightOneScraped = _doesScrapedCandidateMatchAlisonSeeker(scrapedProfile, seeker);
-                if (wasTheRightOneScraped){
-                    scrapedProfile.memberId = seeker.linkedInMemberId ? seeker.linkedInMemberId : seeker.memberId;
-                    
-                    // eslint-disable-next-line no-await-in-loop
-                    await _upsertContact(scrapedProfile, false);
-                    successCount+=1;
-
-                    if (i < listOfJobSeekers.length-1){
-                        // eslint-disable-next-line no-await-in-loop
-                        await tsCommon.randomSleep(50000, 90000);
-                    }
-                }
-            }  
-            else {
-                seeker.positionsLastScraped = (new Date()).getTime();
-                seeker.unableToSearchFromPublicLinkedIn = true;
-                // eslint-disable-next-line no-await-in-loop
-                await _upsertContact(seeker, false);
-            }         
-        }
-
-        tsCommon.log(`Retrieved ${listOfJobSeekers.length} job seekers from Alison, successfully scraped ${successCount} and saved.`)
+    const _getNextJobSeekerResult = async(seeker) => {
+       await tsJobHistoryScrapeManager.scrapeThisJobSeeker(seeker);
     }
 
     class LinkedInApp {
@@ -279,7 +236,7 @@
         getAlisonContact = _getAlisonContact;
         getAlisonContactResult = _getAlisonContactResult;
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
-        getJobSeekersJobHistoryDetail = _getJobSeekersJobHistoryDetail;
+        getNextJobSeekerResult = _getNextJobSeekerResult;
         recordMessageWasSent = _recordMessageWasSent;
         recordConnectionRequestMade = _recordConnectionRequestMade;
         getActiveOpportunity = _getActiveOpportunity;

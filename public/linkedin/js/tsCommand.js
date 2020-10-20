@@ -1,6 +1,6 @@
 (() => {
-    _runJobHistoryScraperJob = async (howMany = 5, tagsFilter = null) => {
-        await linkedInCommon.callAlisonHookWindow('runJobHistoryScraperJob', {howMany, tagsFilter});
+    const _runJobHistoryScraperJob = async(howMany) => {
+        tsJobHistoryScrapeManager.begin(howMany);
     }
 
     class TSCommand {
