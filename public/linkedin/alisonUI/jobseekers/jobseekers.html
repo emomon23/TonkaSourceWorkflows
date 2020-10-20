@@ -1,10 +1,33 @@
 <html>
+     <!-- SKILL FILTER ROW TEMPLATE -->
      <template id='skillFilterRowTemplate'>
           <div class="flex-table row skillFilterRow" role="rowgroup">
                <div class="flex-row first" role="cell"><input class='skillName'></div>
                <div class="flex-row" role="cell"><input class='yearsExperience'> </div>
                <div class="flex-row" role="cell"><input class='lastUsedMonths'></div>
                <div class="flex-row" role="cell"><input class='isRequired' type='checkbox'></div>
+          </div>
+     </template>
+
+     <!-- SEARCH RESULTS TEMPLATES ("table" and "row") -->
+     <template id='searchResultTableTemplate'>
+          <div class='table-container' role='table'>
+               <div class="flex-table header" role="rowgroup"></div>
+               <div class="flex-row first" role="columnheader">Contact</div>
+               <div class="flex-row" role="columnheader">Companies</div>
+               <div class="flex-row" role="columnheader">Email</div>
+               <div class="flex-row" role="columnheader">Phone</div>
+          </div>   
+     </template>
+
+     <template id='searchResultRowTemplate'>
+          <div class="flex-table row searchResultRow" role="rowgroup">
+               <div class="flex-row first" role="cell">
+                    <a class='linkToProfile' href=''></a>
+               </div>
+               <div class="flex-row companyNames" role="cell"></div>
+               <div class="flex-row email" role="cell"></div>
+               <div class="flex-row phone" role="cell"></div>
           </div>
      </template>
 
@@ -51,16 +74,16 @@
                    Raw Exp. Text <input id='rawExperienceText' class='contactContainsFilter' style='width:100%'>
                </div>
                <div>
-                   Linked in Summary <input id='linkedInSummary' class='contactContainsFilter' style='width:100%'>
+                   Linked in Summary <input id='inLinkedInSummary' class='contactContainsFilter' style='width:100%'>
                </div>
                <div>
-                   Tags <input id='tags' style='width:100%'>
+                   Tags <input id='inTags' style='width:100%'>
                </div>
                <div>
-                  Linked In Skills  <input id='linkedInSkills' class='contactContainsFilter' style='width:100%'>
+                  Linked In Skills  <input id='inLinkedInSkills' class='contactContainsFilter' style='width:100%'>
                </div>
                <div>
-                  Dev Defined Skills  <input id='devSkills' class='contactContainsFilter' style='width:100%'>
+                  Dev Defined Skills  <input id='inSelfAssessedSkills' class='contactContainsFilter' style='width:100%'>
                </div>
           </div>
           <div>

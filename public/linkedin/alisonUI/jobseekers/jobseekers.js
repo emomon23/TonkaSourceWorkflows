@@ -84,6 +84,29 @@ const appendGPAFilters = (search) => {
 }
 const renderSearchResults = (results) => {
     const msg = `There are ${result && result.length? result.length : "0"} results that match your search.`
+
+    const mainContact = $('#mainContent')[0];
+    const clonedTable = $('#searchResultTableTemplate')[0].content.cloneNode(true);
+
+    mainContact.innerHTML = '';
+    $(mainContact).append(clonedTable);
+
+    if (results && results.length && results.forEach){
+        results.forEach((contact) => {
+            const clonedRow = $('#searchResultRowTemplate')[0].content.cloneNode(true);
+            const anchor = $(clonedRow).find('.linkToProfile')[0];
+            const companyNamesDiv = $(clonedRow).find('.companyNames')[0];
+            const emailDiv = $(clonedRow).find('.email');
+            const phoneDiv = $(clonedRow).find('.phone')[0];
+
+            $(anchor).attr('href', contact.linkedIn).text(`${contact.firstName} ${contact.lastName}`);
+            $(companyNamesDiv).text(`${contact.positions.join(', ')}`);
+            $(emailDiv).text(`${contact.email && contact.email.length ? contact.email : 'unknown'}`);
+            $(phoneDiv).text(`${contact.phone && contact.phone.length ? contact.phone : 'unknown'}`);
+
+            $(clonedTable).append(clonedRow);
+        })
+    }
 }
 
 addStatsFilterRow_click = (e) => {
