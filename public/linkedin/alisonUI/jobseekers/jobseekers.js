@@ -82,8 +82,9 @@ const appendGPAFilters = (search) => {
         }
     });
 }
+
 const renderSearchResults = (results) => {
-    const msg = `There are ${result && result.length? result.length : "0"} results that match your search.`
+    const msg = `There are ${results && results.length? results.length : "0"} results that match your search.`
 
     const mainContact = $('#mainContent')[0];
     const clonedTable = $('#searchResultTableTemplate')[0].content.cloneNode(true);
@@ -91,21 +92,31 @@ const renderSearchResults = (results) => {
     mainContact.innerHTML = '';
     $(mainContact).append(clonedTable);
 
+    //Add all the divs and rows to the DOM 1st.
     if (results && results.length && results.forEach){
         results.forEach((contact) => {
             const clonedRow = $('#searchResultRowTemplate')[0].content.cloneNode(true);
-            const anchor = $(clonedRow).find('.linkToProfile')[0];
-            const companyNamesDiv = $(clonedRow).find('.companyNames')[0];
-            const emailDiv = $(clonedRow).find('.email');
-            const phoneDiv = $(clonedRow).find('.phone')[0];
+            $(mainContact).append(clonedRow);
+        });
+    }
 
-            $(anchor).attr('href', contact.linkedIn).text(`${contact.firstName} ${contact.lastName}`);
-            $(companyNamesDiv).text(`${contact.positions.join(', ')}`);
-            $(emailDiv).text(`${contact.email && contact.email.length ? contact.email : 'unknown'}`);
-            $(phoneDiv).text(`${contact.phone && contact.phone.length ? contact.phone : 'unknown'}`);
+    const anchors = $('.linkToProfile');
+    const companyNamesDivs = $('.companyNames');
+    const emailDivs = $('.email');
+    const phoneDivs = $('.phone');
 
-            $(clonedTable).append(clonedRow);
-        })
+    for(let i=0; i<results.length; i++){
+        const c = results[i];
+        const href = c.linkedIn && c.linkedIn.length > 0 ? c.linkedIn : '';
+        const name = `${c.firstName} ${c.lastName}`;
+        const email = c.email && c.email.length > 0 ? c.email : 'email: unknown';
+        const phone = c.phone && c.phone.length > 0 ? c.phone : 'phone: unknown';
+        const companyNames = Array.isArray(c.positions) && c.positions.length ? c.positions.join(', ') : 'positions: none'
+
+        $(anchors[i]).attr('href', href).text(name);
+        $(companyNamesDivs[i]).text(companyNames);
+        $(emailDivs[i]).text(email);
+        $(phoneDivs[i]).text(phone);
     }
 }
 
@@ -119,11 +130,12 @@ searchForCandidates_click = async (e) => {
     search.skills = getSkillsFilters();
     appendGPAFilters(search);
 
+    console.log(search);
+
     if (search.skills){
         const results = await alisonContactService.submitSkillsSearch(search);
         renderSearchResults(results);
     }
-    console.log(search);
 }
 
 $(document).ready(() => {

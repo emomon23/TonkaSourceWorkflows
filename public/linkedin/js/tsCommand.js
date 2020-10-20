@@ -5,7 +5,7 @@
 
     const _launchDashboard = async () => {
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/dashboard/dashboard.html`;
-        const dashboardWindow = window.open(url, "Dashboard", "scrollbars=yes,resizable=yes,width=1000,height=1000,top=0,left=0");
+        const dashboardWindow = window.open(url, "Dashboard", "scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,width=1000,height=1000,top=0,left=0");
 
         await tsCommon.sleep(10000);
 
