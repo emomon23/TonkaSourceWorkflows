@@ -1,4 +1,13 @@
 <html>
+     <template id='skillFilterRowTemplate'>
+          <div class="flex-table row skillFilterRow" role="rowgroup">
+               <div class="flex-row first" role="cell"><input class='skillName'></div>
+               <div class="flex-row" role="cell"><input class='yearsExperience'> </div>
+               <div class="flex-row" role="cell"><input class='lastUsedMonths'></div>
+               <div class="flex-row" role="cell"><input class='isRequired' type='checkbox'></div>
+          </div>
+     </template>
+
     <head>
         <script src='https://code.jquery.com/jquery-latest.js'></script>
         <script src='http://localhost:5001/js/tsConstants.js'></script>
@@ -10,7 +19,52 @@
    </head>
 
    <div id='mainContent'>
-        Job Seekers
-   </div>
+          <div>
+               Only job seekers <input id='onlyJobSeekers' type='checkbox' checked='true'>
+          </div>
+          <div id='skillsFilterContainer' >
+
+               <span>
+                    Skill Stats Filter(s)
+                    <button onclick='addStatsFilterRow_click()'>Add Row</button>
+               </span>
+
+               <div class='table-container' role='table'>
+                         <div class="flex-table header" role="rowgroup"></div>
+                         <div class="flex-row first" role="columnheader">Skill</div>
+                         <div class="flex-row" role="columnheader">Year Exp.</div>
+                         <div class="flex-row" role="columnheader">Last Used Months(0: current)</div>
+                         <div class="flex-row" role="columnheader">Required</div>
+               </div>     
+          </div>
+
+          <div>
+               <span>Accum. GPA's.</span>
+               <input id='minWithinMonthsGpa' class='gpaFilter' value='4'/>
+               <input id='minMonthsUsingGpa' class='gpaFilter' value='4'/>
+          </div>
+
+          <div id='contactFieldsContainFilters'>
+               <hr/>
+               <div>fields contain:</span>
+               <div>
+                   Raw Exp. Text <input id='rawExperienceText' class='contactContainsFilter' style='width:100%'>
+               </div>
+               <div>
+                   Linked in Summary <input id='linkedInSummary' class='contactContainsFilter' style='width:100%'>
+               </div>
+               <div>
+                   Tags <input id='tags' style='width:100%'>
+               </div>
+               <div>
+                  Linked In Skills  <input id='linkedInSkills' class='contactContainsFilter' style='width:100%'>
+               </div>
+               <div>
+                  Dev Defined Skills  <input id='devSkills' class='contactContainsFilter' style='width:100%'>
+               </div>
+          </div>
+          <div>
+               <button onclick='searchForCandidates_click()'>Go</button>
+          </div>
    <div id="message-container"></div>
 </html>

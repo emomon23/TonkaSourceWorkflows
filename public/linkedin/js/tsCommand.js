@@ -16,8 +16,7 @@
 
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
-        _launchDashboard
-
+        launchDashboard = _launchDashboard;
     }
 
     window.tsCommand = new TSCommand();

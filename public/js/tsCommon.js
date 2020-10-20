@@ -144,6 +144,14 @@
         });
     }
 
+    const _httpPostJson = (url, input) => {
+        return new Promise((resolve, reject) => {
+            $.post(url, input, (data) => {
+                resolve(data);
+            }, "json");
+         });
+    }
+
     const _httpGetText = (url) => {
         return new Promise((resolve, reject) => {
             $.get(url, (response) => {
@@ -251,6 +259,7 @@
         log = _log;
         sleep = _sleep;
         httpGetJson = _httpGetJson;
+        httpPostJson = _httpPostJson;
         httpGetText = _httpGetText;
         httpGetTemplate = _httpGetTemplate;
         randomSleep = _randomSleep;
