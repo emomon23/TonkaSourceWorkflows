@@ -97,8 +97,8 @@ searchForCandidates_click = async (e) => {
     appendGPAFilters(search);
 
     if (search.skills){
-        //const results = await alisonContactService.submitSkillsSearch(search);
-        //renderSearchResults(result);
+        const results = await alisonContactService.submitSkillsSearch(search);
+        renderSearchResults(results);
     }
     console.log(search);
 }
