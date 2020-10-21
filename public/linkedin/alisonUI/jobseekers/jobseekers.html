@@ -1,37 +1,40 @@
 <html>
      <!-- SKILL FILTER ROW TEMPLATE -->
      <template id='skillFilterRowTemplate'>
-          <div class="flex-table row skillFilterRow" role="rowgroup">
-               <div class="flex-row first" role="cell"><input class='skillName'></div>
-               <div class="flex-row" role="cell"><input class='yearsExperience'> </div>
-               <div class="flex-row" role="cell"><input class='lastUsedMonths'></div>
-               <div class="flex-row" role="cell"><input class='isRequired' type='checkbox'></div>
+          <div class="tr skillFilterRow" role="rowgroup">
+               <div class="td"><input class='skillName'></div>
+               <div class="td"><input class='yearsExperience'> </div>
+               <div class="td"><input class='lastUsedMonths'></div>
+               <div class="td"><input class='isRequired' type='checkbox'></div>
+               <div class="td"><button class='margin-left-a-bit' onclick='removeSkillFilter_click(this)'>-</button></div>
           </div>
      </template>
 
      <!-- SEARCH RESULTS TEMPLATES ("table" and "row") -->
      <template id='searchResultTableTemplate'>
-          <div class='table-container' role='table'>
-               <div class="flex-table header" role="rowgroup"></div>
-               <div class="flex-row first" role="columnheader">Contact</div>
-               <div class="flex-row" role="columnheader">Companies</div>
-               <div class="flex-row" role="columnheader">Email</div>
-               <div class="flex-row" role="columnheader">Phone</div>
+          <div class='table'>
+               <div class='tr th'>
+                    <div class="td" role="columnheader">Contact</div>
+                    <div class="td" role="columnheader">Companies</div>
+                    <div class="td" role="columnheader">Email</div>
+                    <div class="td" role="columnheader">Phone</div>
+               </div>
           </div>   
      </template>
 
      <template id='searchResultRowTemplate'>
-          <div class="flex-table row searchResultRow" role="rowgroup">
-               <div class="flex-row first" role="cell">
+          <div class="tr searchResultRow">
+               <div class="td" role="cell">
                     <a class='linkToProfile' target='_blank' href=''></a>
                </div>
-               <div class="flex-row companyNames" role="cell"></div>
-               <div class="flex-row email" role="cell"></div>
-               <div class="flex-row phone" role="cell"></div>
+               <div class="td companyNames" role="cell"></div>
+               <div class="td email" role="cell"></div>
+               <div class="td phone" role="cell"></div>
           </div>
      </template>
 
      <head>
+        <link rel="stylesheet" href="../alison.css">
         <script src='https://code.jquery.com/jquery-latest.js'></script>
         <script src='http://localhost:5001/js/tsConstants.js'></script>
         <script src='http://localhost:5001/js/tsCommon.js'></script>
@@ -46,23 +49,22 @@
                Only job seekers <input id='onlyJobSeekers' type='checkbox' checked='true'>
           </div>
 
-          <!-- good -->
           <div id='skillsFilterContainer' >
-               <span>
-                    Skill Stats Filter(s)
-                    <button onclick='addStatsFilterRow_click()'>Add Row</button>
-               </span>
-
-               <div class='table-container' role='table'>
-                    <div class="flex-table header" role="rowgroup"></div>
-                    <div class="flex-row first" role="columnheader">Skill</div>
-                    <div class="flex-row" role="columnheader">Year Exp.</div>
-                    <div class="flex-row" role="columnheader">Last Used Months(0: current)</div>
-                    <div class="flex-row" role="columnheader">Required</div>
+               <div class='table' id='skillsFilterTable'>
+                    <div class='tr th'>
+                         <div class="td">Skill</div>
+                         <div class="td">Year Exp.</div>
+                         <div class="td">Last Used Months(0: current)</div>
+                         <div class="td">
+                              Required
+                         </div>
+                         <div class="td">
+                              <button class='margin-left-a-bit' onclick='addStatsFilterRow_click()'>+</button>
+                         </div>
+                    </div>
                </div>     
           </div>
 
-          <!-- good -->
           <div>
                <span>Accum. GPA's.</span>
                <input id='minWithinMonthsGpa' class='gpaFilter' value='4'/>
@@ -71,25 +73,31 @@
 
           <div id='contactFieldsContainFilters'>
                <hr/>
-               <div>fields contain:</div>
+               <div class='section'>Fields contain:</div>
+              
                <div>
-                    Raw Exp. Text <input id='rawExperienceText' class='contactContainsFilter' style='width:100%' />
+                    Raw Exp. Text  <br/>
+                    <input id='rawExperienceText' class='contactContainsFilter' />
                </div>
                <div>
-                    Linked in Summary <input id='inLinkedInSummary' class='contactContainsFilter' style='width:100%' />
+                    Linked in Summary  <br/>
+                    <input id='inLinkedInSummary' class='contactContainsFilter' />
                </div>
                <div>
-                    Tags <input id='inTags' style='width:100%' />
+                    Tags <br/>
+                    <input id='inTags' class='contactContainsFilter' />
                </div>
                <div>
-                    Linked In Skills  <input id='inLinkedInSkills' class='contactContainsFilter' style='width:100%' />
+                    Linked In Skills   <br/>
+                    <input id='inLinkedInSkills' class='contactContainsFilter' />
                </div>
                <div>
-                    Dev Defined Skills  <input id='inSelfAssessedSkills' class='contactContainsFilter' style='width:100%' />
+                    Dev Defined Skills   <br/>
+                    <input id='inSelfAssessedSkills' class='contactContainsFilter' />
                </div>
           </div>
 
-          <div>
+          <div class='section'>
                <button onclick='searchForCandidates_click()'>Go</button>
           </div>
      </div>

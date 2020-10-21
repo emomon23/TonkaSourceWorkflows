@@ -1,5 +1,6 @@
 //a reference to the <template...></template> element in jobSeekers.html (see doc.ready below)
 let skillFilterTemplate = null;
+let feedBackInterval = null;
 
 const highlightError = (element) => {
     $(element).attr('style', 'border:1px solid red');
@@ -27,12 +28,12 @@ const getSkillsFilters = () => {
                     isValid = false;
                 }
 
-                if (isNaN(years)){
+                if (years.length === 0 || isNaN(years)){
                     highlightError(yearsInput);
                     isValid = false;
                 }
 
-                if (isNaN(withinMonths)){
+                if (withInMonths.length === 0 || isNaN(withinMonths)){
                     highlightError(withinMonthsInput);
                     isValid = false;
                 }
@@ -69,7 +70,7 @@ const getContactContainsFilters = () => {
 
 const appendSkillFilterRow = () => {
     const clone = skillFilterTemplate.content.cloneNode(true);
-    const container = $('#skillsFilterContainer')[0];
+    const container = $('#skillsFilterTable')[0];
     container.appendChild(clone); 
 }
 
@@ -83,7 +84,38 @@ const appendGPAFilters = (search) => {
     });
 }
 
+const showMessage = (message) => {
+    mElement = $('#message-container')[0];
+    $(mElement).text(message);
+}
+
+const showFeedBackInterval = (baseMessage) => {
+    mElement = $('#message-container')[0];
+    $(mElement).text(baseMessage);
+
+    if (feedBackInterval){
+        clearInterval(feedBackInterval);
+    }
+
+    feedBackInterval = setInterval(() => {
+        const text = mElement.textContent + '.';
+        mElement.textContent = text;
+    }, 1000);
+}
+
+const stopFeedback = () => {
+    if (feedBackInterval){
+        clearInterval(feedBackInterval);
+        feedBackInterval = null;
+    }
+    showMessage('');
+}
+
 const renderSearchResults = (results) => {
+    stopFeedback();
+
+    console.log(`renderSearchResults: ${results.length}`);
+
     const numberOfResultsLabel = $('#numberOfResults')[0];
     const searchFilters = $('#searchFilters')[0];
     $(searchFilters).attr('style', 'display:none');
@@ -136,17 +168,26 @@ addStatsFilterRow_click = (e) => {
     appendSkillFilterRow();
 }
 
+removeSkillFilter_click = (removeButton) => {
+   if (removeButton){
+       $(removeButton).parent().parent().remove();
+   }
+}
+
 searchForCandidates_click = async (e) => {
-    const search = getContactContainsFilters();
-    search.isJobSeeker = $('#onlyJobSeekers')[0].checked;
-    search.skills = getSkillsFilters();
-    appendGPAFilters(search);
+    try {
+        const search = getContactContainsFilters();
+        search.isJobSeeker = $('#onlyJobSeekers')[0].checked;
+        search.skills = getSkillsFilters();
+        appendGPAFilters(search);
 
-    console.log(search);
-
-    if (search.skills){
-        const results = await alisonContactService.submitSkillsSearch(search);
-        renderSearchResults(results);
+        if (search.skills){
+            showFeedBackInterval('searching alison, stand by');
+            const results = await alisonContactService.submitSkillsSearch(search);
+            renderSearchResults(results);
+        }
+    } catch(err) {
+        showMessage(`ERROR: ${err.message}`);
     }
 }
 
