@@ -74,18 +74,27 @@
 
         scrapeThisJobSeeker = async(seeker) => {
             this.scrapeJobSeekerHasBeenCalled = true;
+            let message = `scraped ${seeker.firstName} ${seeker.lastName} `;
 
             if (seeker){
                 this.consecutiveNothingToScrape = 0;
                 const scrapedSuccessfully = await _scrapeAlisonJobSeeker(seeker);
                 if (scrapedSuccessfully){
                     this.success+=1;
+                    message += 'successfully. ';
                     await tsCommon.randomSleep(60000, 90000);
                 }
                 else {
+                    message += 'unsuccessfully. ';
                     this.failure+=1;
                 }
+
+                message+= `successfullyScraped: ${this.success}.  failed: ${this.failure}.  howMany: ${this.howMany}`;
+                console.log(message);
+
             } else {
+                console.log('Call to get next candidate to scrape return null, patiently waiting...');
+                
                 this.consecutiveNothingToScrape +=1;
                 //there's no one to scrape, sleep for 5 mins and try again
                 await tsCommon.sleep(60000 * 5);
