@@ -25,6 +25,42 @@
         email: 'DevinZappier16@outlook.com',
         password: 'Executive90200!',
         phone: '612 230-8942'
+    },
+    {
+        userNameTrigger: 'eric',
+        email: 'EricSeperLi23@outlook.com',
+        password: 'Executive90211!',
+        phone: ''
+    },
+    {
+        userNameTrigger: 'frank',
+        email: 'FrankLeahie878i@outlook.com',
+        password: 'Executive90212!',
+        phone: '612 230-8942'
+    },
+    {
+        userNameTrigger: 'greg',
+        email: 'GregEstes6j@outlook.com',
+        password: 'Executive90213!',
+        phone: '612 230-8942'
+    },
+    {
+        userNameTrigger: 'harry',
+        email: 'HarryCarron67z@outlook.com',
+        password: 'Executive90214!',
+        phone: '612 230-8942'
+    },
+    {
+        userNameTrigger: 'james',
+        email: 'CalicoCat7812i@outlook.com',
+        password: 'Executive90215!',
+        phone: '612 230-8942'
+    },
+    {
+        userNameTrigger: 'kevin',
+        email: 'HarleyManFL16k@outlook.com',
+        password: 'Executive90216!',
+        phone: '612 230-8942'
     }];
 
     const _fillInLoginFormWithFakeCredentials = () => {
