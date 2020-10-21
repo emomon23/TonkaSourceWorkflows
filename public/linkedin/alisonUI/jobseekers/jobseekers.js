@@ -33,7 +33,7 @@ const getSkillsFilters = () => {
                     isValid = false;
                 }
 
-                if (withInMonths.length === 0 || isNaN(withinMonths)){
+                if (withinMonths.length === 0 || isNaN(withinMonths)){
                     highlightError(withinMonthsInput);
                     isValid = false;
                 }
