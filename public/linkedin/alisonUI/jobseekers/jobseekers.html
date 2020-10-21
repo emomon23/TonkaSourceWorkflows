@@ -31,7 +31,7 @@
           </div>
      </template>
 
-    <head>
+     <head>
         <script src='https://code.jquery.com/jquery-latest.js'></script>
         <script src='http://localhost:5001/js/tsConstants.js'></script>
         <script src='http://localhost:5001/js/tsCommon.js'></script>
@@ -39,28 +39,30 @@
         <script src='http://localhost:5001/js/alisonContactService.js'></script>
         <script src='jobseekers.js'></script>
         <title>Job Seekers</title>
-   </head>
+     </head>
 
-   <div id='mainContent'>
+     <div id='searchFilters'>
           <div>
                Only job seekers <input id='onlyJobSeekers' type='checkbox' checked='true'>
           </div>
-          <div id='skillsFilterContainer' >
 
+          <!-- good -->
+          <div id='skillsFilterContainer' >
                <span>
                     Skill Stats Filter(s)
                     <button onclick='addStatsFilterRow_click()'>Add Row</button>
                </span>
 
                <div class='table-container' role='table'>
-                         <div class="flex-table header" role="rowgroup"></div>
-                         <div class="flex-row first" role="columnheader">Skill</div>
-                         <div class="flex-row" role="columnheader">Year Exp.</div>
-                         <div class="flex-row" role="columnheader">Last Used Months(0: current)</div>
-                         <div class="flex-row" role="columnheader">Required</div>
+                    <div class="flex-table header" role="rowgroup"></div>
+                    <div class="flex-row first" role="columnheader">Skill</div>
+                    <div class="flex-row" role="columnheader">Year Exp.</div>
+                    <div class="flex-row" role="columnheader">Last Used Months(0: current)</div>
+                    <div class="flex-row" role="columnheader">Required</div>
                </div>     
           </div>
 
+          <!-- good -->
           <div>
                <span>Accum. GPA's.</span>
                <input id='minWithinMonthsGpa' class='gpaFilter' value='4'/>
@@ -69,25 +71,32 @@
 
           <div id='contactFieldsContainFilters'>
                <hr/>
-               <div>fields contain:</span>
+               <div>fields contain:</div>
                <div>
-                   Raw Exp. Text <input id='rawExperienceText' class='contactContainsFilter' style='width:100%'>
+                    Raw Exp. Text <input id='rawExperienceText' class='contactContainsFilter' style='width:100%' />
                </div>
                <div>
-                   Linked in Summary <input id='inLinkedInSummary' class='contactContainsFilter' style='width:100%'>
+                    Linked in Summary <input id='inLinkedInSummary' class='contactContainsFilter' style='width:100%' />
                </div>
                <div>
-                   Tags <input id='inTags' style='width:100%'>
+                    Tags <input id='inTags' style='width:100%' />
                </div>
                <div>
-                  Linked In Skills  <input id='inLinkedInSkills' class='contactContainsFilter' style='width:100%'>
+                    Linked In Skills  <input id='inLinkedInSkills' class='contactContainsFilter' style='width:100%' />
                </div>
                <div>
-                  Dev Defined Skills  <input id='inSelfAssessedSkills' class='contactContainsFilter' style='width:100%'>
+                    Dev Defined Skills  <input id='inSelfAssessedSkills' class='contactContainsFilter' style='width:100%' />
                </div>
           </div>
+
           <div>
                <button onclick='searchForCandidates_click()'>Go</button>
           </div>
-   <div id="message-container"></div>
+     </div>
+
+     <div id='resultsDiv' style="display:none">
+          <a href='' onclick="showFilters_click()">back to search</a>
+          <div id='numberOfResults'></div>
+     </div>
+     <div id="message-container"></div>
 </html>

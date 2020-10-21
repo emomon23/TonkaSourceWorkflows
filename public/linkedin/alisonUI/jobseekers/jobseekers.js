@@ -84,19 +84,21 @@ const appendGPAFilters = (search) => {
 }
 
 const renderSearchResults = (results) => {
-    const msg = `There are ${results && results.length? results.length : "0"} results that match your search.`
+    const numberOfResultsLabel = $('#numberOfResults')[0];
+    const searchFilters = $('#searchFilters')[0];
+    $(searchFilters).attr('style', 'display:none');
 
-    const mainContact = $('#mainContent')[0];
     const clonedTable = $('#searchResultTableTemplate')[0].content.cloneNode(true);
+    const resultsDiv = $('#resultsDiv')[0];
+    $(resultsDiv).attr('style', 'display:block');
 
-    mainContact.innerHTML = '';
-    $(mainContact).append(clonedTable);
+    $(resultsDiv).append(clonedTable);
 
     //Add all the divs and rows to the DOM 1st.
     if (results && results.length && results.forEach){
         results.forEach((contact) => {
             const clonedRow = $('#searchResultRowTemplate')[0].content.cloneNode(true);
-            $(mainContact).append(clonedRow);
+            $(resultsDiv).append(clonedRow);
         });
     }
 
@@ -118,6 +120,16 @@ const renderSearchResults = (results) => {
         $(emailDivs[i]).text(email);
         $(phoneDivs[i]).text(phone);
     }
+
+    $(numberOfResultsLabel).text(`Results: ${results.length}`);
+}
+
+showFilters_click = (e) => {
+    const resultsDiv = $('#resultsDiv')[0];
+    $(resultsDiv).attr('style', 'display:none');
+
+    const searchFilters = $('#searchFilters')[0];
+    $(searchFilters).attr('style', 'display:block');
 }
 
 addStatsFilterRow_click = (e) => {
