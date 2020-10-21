@@ -252,7 +252,11 @@
     tsCommon.setUpPostMessageListener('linkedInApp');
 
     tsInterceptor.interceptResponse('get', '/api/smartsearch?', searchResultsScraper.interceptSearchResults);
-   
+    
+    //firefox was 'telling on tonkasource' to linked in, when it found tampermonkey script gets loaded.
+    //try to suppress that method call.
+    tsInterceptor.interceptRequest('post', 'platform-telemetry/csp?', null, true);
+
     window.launchTonkaSource = async () => {
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonHook/alisonHook.html`;
         window.alisonHookWindow = window.open(url, "Linked In Hack", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=10,height=10,top=5000,left=5000");

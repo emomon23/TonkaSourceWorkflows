@@ -16,24 +16,30 @@
         });
         
         const requestListeners = __requestIntercepts.filter(i => i.method.toLowerCase() === method.toLowerCase() && url.toLowerCase().indexOf(i.urlContains.toLowerCase()) >= 0);
+        let suppress = false;
         requestListeners.forEach((rl) => {
-            rl.callBack(method, url);
+            suppress = suppress || rl.suppress;
+            if (rl.callBack){
+                rl.callBack(method, url);
+            }
         });
 
-        return _oldXHROpen.apply(this, arguments);
+        if (!suppress){
+            return _oldXHROpen.apply(this, arguments);
+        }
     };
 
 
     class TsHttpInterceptor {
         constructor(){}
         
-        interceptRequest = (method, urlContains, callBack) => {
-            const intercept = {method: method.toLowerCase(), urlContains: urlContains.toLowerCase(), callBack};
+        interceptRequest = (method, urlContains, callBack, suppress=false) => {
+            const intercept = {method: method.toLowerCase(), urlContains: urlContains.toLowerCase(), callBack, suppress};
             __requestIntercepts.push(intercept);
         }
 
         interceptResponse = (method, urlContains, callBack) => {
-            const intercept = {method: method.toLowerCase(), urlContains: urlContains.toLowerCase(), callBack};
+            const intercept = {method: method.toLowerCase(), urlContains: urlContains.toLowerCase(), callBack, suppress:false};
             __responseIntercepts.push(intercept);
         }
 
