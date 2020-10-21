@@ -12,7 +12,7 @@
         userNameTrigger: 'bobby',
         email: 'bobby12Johnson@outlook.com',
         password: 'Executive90210!',
-        phone: '612 230-8942'
+        phone: ''
     },
     {
         userNameTrigger: 'cindy',
@@ -24,7 +24,7 @@
         userNameTrigger: 'devin',
         email: 'DevinZappier16@outlook.com',
         password: 'Executive90200!',
-        phone: '612 230-8942'
+        phone: ''
     },
     {
         userNameTrigger: 'eric',
@@ -36,31 +36,55 @@
         userNameTrigger: 'frank',
         email: 'FrankLeahie878i@outlook.com',
         password: 'Executive90212!',
-        phone: '612 230-8942'
+        phone: ''
     },
     {
         userNameTrigger: 'greg',
         email: 'GregEstes6j@outlook.com',
         password: 'Executive90213!',
-        phone: '612 230-8942'
+        phone: ''
     },
     {
         userNameTrigger: 'harry',
         email: 'HarryCarron67z@outlook.com',
         password: 'Executive90214!',
-        phone: '612 230-8942'
+        phone: ''
     },
     {
         userNameTrigger: 'james',
         email: 'CalicoCat7812i@outlook.com',
         password: 'Executive90215!',
-        phone: '612 230-8942'
+        phone: ''
     },
     {
         userNameTrigger: 'kevin',
         email: 'HarleyManFL16k@outlook.com',
         password: 'Executive90216!',
-        phone: '612 230-8942'
+        phone: ''
+    },
+    {
+        userNameTrigger: 'larry',
+        email: 'LarryNelsonIL61@outlook.com',
+        password: 'Executive90217!',
+        phone: ''
+    },
+    {
+        userNameTrigger: 'matt',
+        email: 'auburnVictoria50mn@outlook.com',
+        password: 'Executive90218!',
+        phone: ''
+    },
+    {
+        userNameTrigger: 'nathan',
+        email: 'season7finalBurn12@outlook.com',
+        password: 'Executive90219!',
+        phone: ''
+    },
+    {
+        userNameTrigger: 'oscar',
+        email: 'oscarOffice9SPA@outlook.com',
+        password: 'Executive90220!',
+        phone: ''
     }];
 
     const _fillInLoginFormWithFakeCredentials = () => {
