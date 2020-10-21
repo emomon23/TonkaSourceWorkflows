@@ -41,7 +41,12 @@
     }
     
     const _keepSessionAlive = async () => {
-        await linkedInPublicProfileScraper.goHome();
+        try {
+            console.log("_keepSessionAlive called");
+            await linkedInPublicProfileScraper.goHome();
+        } catch (e){
+            console.log(`Error in _keepSessionAlive. ${e.message}`);
+        }
     }
 
     class TsJobHistoryScrapeManager {
@@ -76,7 +81,7 @@
             this.scrapeJobSeekerHasBeenCalled = true;
             let message = `scraped ${seeker.firstName} ${seeker.lastName} `;
 
-            if (seeker){
+            if (seeker && seeker.firstName && seeker.lastName){
                 this.consecutiveNothingToScrape = 0;
                 const scrapedSuccessfully = await _scrapeAlisonJobSeeker(seeker);
                 if (scrapedSuccessfully){
@@ -93,7 +98,7 @@
                 console.log(message);
 
             } else {
-                console.log('Call to get next candidate to scrape return null, patiently waiting...');
+                console.log('Call to get next candidate to scrape return null, patiently waiting (5 minutes)...');
                 
                 this.consecutiveNothingToScrape +=1;
                 //there's no one to scrape, sleep for 5 mins and try again
