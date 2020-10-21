@@ -105,7 +105,7 @@
             }
 
             if (this.success >= this.howMany){
-                console.log(`DONE. success: ${this.success}. failuer: ${this.failure}.`);
+                console.log(`DONE. success: ${this.success}. failure: ${this.failure}.`);
             }
             else {
                 await _getNextCandidateToScrape();
