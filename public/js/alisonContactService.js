@@ -23,7 +23,7 @@
             opportunitiesPresented: AS_IS,
             referencesReceived: AS_IS,
             summary: 'linkedInSummary', 
-            isJobSeeker:'isLinkedInJobSeeker',
+            isJobSeeker:'linkedInIsJobSeeker',
             memberId: 'linkedInMemberId', 
             headline: 'title', 
             industry: 'industryGroup' 
@@ -86,10 +86,17 @@
         return result.length > 100 ? JSON.parse(result) : null;
     }
 
+    const _submitSkillsSearch = async (search) => {
+        const url = `${_baseUrl}/statsSearch`;
+        const result = await tsCommon.httpPostJson(url, search);
+        return result;
+    }
+
     class AlisonContactService {
         saveLinkedInContact = _saveLinkedInContact;
         getAlisonContact = _getAlisonContact;
         getNextJobSeeker = _getNextJobSeeker;
+        submitSkillsSearch = _submitSkillsSearch;
     }
 
     window.alisonContactService = new AlisonContactService();

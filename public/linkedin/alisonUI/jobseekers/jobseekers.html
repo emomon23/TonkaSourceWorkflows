@@ -1,0 +1,110 @@
+<html>
+     <!-- SKILL FILTER ROW TEMPLATE -->
+     <template id='skillFilterRowTemplate'>
+          <div class="tr skillFilterRow">
+               <div class="td"><input class='skillName'></div>
+               <div class="td"><input class='yearsExperience'> </div>
+               <div class="td"><input class='lastUsedMonths'></div>
+               <div class="td"><input class='isRequired' type='checkbox'></div>
+               <div class="td"><button class='margin-left-a-bit' onclick='removeSkillFilter_click(this)'>-</button></div>
+          </div>
+     </template>
+
+     <!-- SEARCH RESULTS TEMPLATES ("table" and "row") -->
+     <template id='searchResultTableTemplate'>
+          <div class='table'>
+               <div class='tr th'>
+                    <div class="td">Contact</div>
+                    <div class="td">Companies</div>
+                    <div class="td">Email</div>
+                    <div class="td">Phone</div>
+               </div>
+          </div>   
+     </template>
+
+     <template id='searchResultRowTemplate'>
+          <div class="tr searchResultRow">
+               <div class="td">
+                    <a class='linkToProfile' target='_blank' href=''></a>
+               </div>
+               <div class="td companyNames"></div>
+               <div class="td email"></div>
+               <div class="td phone"></div>
+          </div>
+     </template>
+
+     <head>
+        <link rel="stylesheet" href="../alison.css">
+        <script src='https://code.jquery.com/jquery-latest.js'></script>
+        <script src='http://localhost:5001/js/tsConstants.js'></script>
+        <script src='http://localhost:5001/js/tsCommon.js'></script>
+        <script src='http://localhost:5001/js/tsUICommon.js'></script>
+        <script src='http://localhost:5001/js/alisonContactService.js'></script>
+        <script src='jobseekers.js'></script>
+        <title>Job Seekers</title>
+     </head>
+
+     <div id='searchFilters'>
+          <div>
+               Only job seekers <input id='onlyJobSeekers' type='checkbox' checked='true'>
+          </div>
+
+          <div id='skillsFilterContainer' >
+               <div class='table' id='skillsFilterTable'>
+                    <div class='tr th'>
+                         <div class="td">Skill</div>
+                         <div class="td">Year Exp.</div>
+                         <div class="td">Last Used Months(0: current)</div>
+                         <div class="td">
+                              Required
+                         </div>
+                         <div class="td">
+                              <button class='margin-left-a-bit' onclick='addStatsFilterRow_click()'>+</button>
+                         </div>
+                    </div>
+               </div>     
+          </div>
+
+          <div>
+               <span>Accum. GPA's.</span>
+               <input id='minWithinMonthsGpa' class='gpaFilter' value='4'/>
+               <input id='minMonthsUsingGpa' class='gpaFilter' value='4'/>
+          </div>
+
+          <div id='contactFieldsContainFilters'>
+               <hr/>
+               <div class='section'>Fields contain:</div>
+              
+               <div>
+                    Raw Exp. Text  <br/>
+                    <input id='rawExperienceText' class='contactContainsFilter' />
+               </div>
+               <div>
+                    Linked in Summary  <br/>
+                    <input id='inLinkedInSummary' class='contactContainsFilter' />
+               </div>
+               <div>
+                    Tags <br/>
+                    <input id='inTags' class='contactContainsFilter' />
+               </div>
+               <div>
+                    Linked In Skills   <br/>
+                    <input id='inLinkedInSkills' class='contactContainsFilter' />
+               </div>
+               <div>
+                    Dev Defined Skills   <br/>
+                    <input id='inSelfAssessedSkills' class='contactContainsFilter' />
+               </div>
+          </div>
+
+          <div class='section'>
+               <button onclick='searchForCandidates_click()'>Go</button>
+          </div>
+     </div>
+
+     <div id='resultsDiv' style="display:none">
+          <a href='' onclick="showFilters_click()">back to search</a>
+          <div id='numberOfResults'></div>
+     </div>
+     <div id="message-container"></div>
+</html>
