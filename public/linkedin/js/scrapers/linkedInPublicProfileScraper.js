@@ -291,6 +291,7 @@
         if (length > 2){
             return KEEP_TRYING;
         }
+        return STOP_TRYING;
     }
 
     const _getCompanyNames = (seeker) => {
