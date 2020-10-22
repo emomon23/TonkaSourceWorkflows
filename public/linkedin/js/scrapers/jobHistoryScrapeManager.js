@@ -80,7 +80,7 @@
         scrapeThisJobSeeker = async(seeker) => {
             this.scrapeJobSeekerHasBeenCalled = true;
             let message = `scraped ${seeker.firstName} ${seeker.lastName} `;
-
+            
             if (seeker && seeker.firstName && seeker.lastName){
                 this.consecutiveNothingToScrape = 0;
                 const scrapedSuccessfully = await _scrapeAlisonJobSeeker(seeker);
@@ -102,11 +102,9 @@
                 
                 this.consecutiveNothingToScrape +=1;
                 //there's no one to scrape, sleep for 5 mins and try again
-                await tsCommon.sleep(60000 * 5);
-                if (this.consecutiveNothingToScrape > 3){
-                    await _keepSessionAlive();
-                    this.consecutiveNothingToScrape = 0;
-                }
+                const from = 60000 * 3;
+                const to = 60000 * 6
+                await tsCommon.randomSleep(from, to);
             }
 
             if (this.success >= this.howMany){

@@ -6,6 +6,7 @@
     let _keepGatheringJobSeekerExperience = true;
     let _keepWalkingResultsPages = true;
     let _jobsGathered = {};
+    let _user = null;
     
     const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
@@ -33,20 +34,40 @@
                 candidate.alisonConnections = {};
             }
 
-            const loggedInAlisonUserName = await linkedInApp.getAlisonLoggedInUser();
-            if (loggedInAlisonUserName !== null){
-                candidate.alisonConnections[loggedInAlisonUserName] = networkConnection;
+            if (_user !== null){
+                candidate.alisonConnections[_user] = networkConnection;
+            }
+        }        
+        
+        //just search the headline for 'Actively Looking';
+        if (candidate.headline && candidate.headline.length && !candidate.isJobSeeker){
+            const isJobSeekerTexts = ['seeking new opportunit', 
+                                        'seeking an opportun', 
+                                        'seeking opportunit', 
+                                        'seeking a opportunit', 
+                                        'seeking employment',
+                                        'seeking entry ',
+                                        'currently seeking ', 
+                                        'actively seeking ', 
+                                        'actively looking ', 
+                                        'currently looking ', 
+                                        'opentowork', 
+                                        'open to work', 
+                                        'looking for new']
+
+            for (h=0; h<isJobSeekerTexts.length; h++){
+                const lookFor = isJobSeekerTexts[h];
+                let lookIn = tsUICommon.cleanseTextOfHtml(candidate.headline).toLowerCase();
+                lookIn = tsCommon.stripExcessSpacesFromString(lookIn);
+
+                if (lookIn.indexOf(lookFor) >= 0){
+                    candidate.isActivelyLooking = true;
+                    break;
+                }
             }
         }
 
-        const isJobSeekerTexts = ['seeking new opportunit', 'actively looking', 'opentowork', 'open to work', 'looking for new']
-        if (!candidate.isJobSeeker){
-            isJobSeekerTexts.forEach((text) => {
-                if (liTag.containsText(text)){
-                    candidate.isActivelyLooking = true;
-                }
-            })
-        }
+        _highlightIfCandidateIsJobSeeker(candidate);
     }
 
     const _waitForResultsHTMLToRender = async (lastCandidate) => {
@@ -61,19 +82,15 @@
         }
     }
 
-    const _highlightJobSeekers = (currentPageOfCandidates) => {
-        try {
-            if (currentPageOfCandidates && Array.isArray(currentPageOfCandidates) && currentPageOfCandidates.length > 0){
-                currentPageOfCandidates.forEach((candidate) => {
-                    if (candidate.isJobSeeker || candidate.isActivelyLooking){
-                        const styleColor = candidate.isJobSeeker ? 'color:orange' : 'color:firebrick';
-                        const jobSeekerElement = tsUICommon.findFirstDomElement([`a[href*="${candidate.memberId}"]`, `a:contains("${candidate.fullName}")`]);
-                        if (jobSeekerElement !== null){
-                            const newLabel = '** ' + $(jobSeekerElement).text();
-                            $(jobSeekerElement).attr('style', styleColor).text(newLabel);
-                        }
-                    }
-                });
+    const _highlightIfCandidateIsJobSeeker = (candidate) => {
+        try {         
+            if (candidate.isJobSeeker || candidate.isActivelyLooking){
+                const styleColor = candidate.isJobSeeker ? 'color:orange' : 'color:firebrick';
+                const jobSeekerElement = tsUICommon.findFirstDomElement([`a[href*="${candidate.memberId}"]`, `a:contains("${candidate.fullName}")`]);
+                if (jobSeekerElement !== null){
+                    const newLabel = '** ' + $(jobSeekerElement).text();
+                    $(jobSeekerElement).attr('style', styleColor).text(newLabel);
+                }
             }
         }
         catch(e) {
@@ -324,10 +341,14 @@
     }
 
     const _interceptSearchResults = async (responseObj) => {
+        searchResultsScraper.loadFromLocalStorage();
+        
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
         _pageCandidates = [];
         _pageLiTags = {};
+
+        _user = await linkedInApp.getAlisonLoggedInUser();
 
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length -1]);
@@ -370,8 +391,6 @@
                     }
                 }
             });
-
-            _highlightJobSeekers(candidatesInResults);
 
             $('.badges abbr').bind("click", (e) => {
                 const element = $(e.currentTarget);
@@ -441,10 +460,7 @@
         
         constructor(){
             try {
-                var jsonString = window.localStorage.getItem(_localStorageItemName);
-                if (jsonString !== null && jsonString !== undefined){
-                    this.scrapedCandidates = JSON.parse(jsonString);
-                }
+               this.loadFromLocalStorage();
             }
             catch(e){
                 tsCommon.log(`error loading scaped candidate from local storage. ${e.message}.  jsonString: ${jsonString}`, 'ERROR');
@@ -460,6 +476,16 @@
             }
 
             return result;
+        }
+
+        loadFromLocalStorage = () => {
+            if (!this.alreadyLoaded) {
+                var jsonString = window.localStorage.getItem(_localStorageItemName);
+                if (jsonString !== null && jsonString !== undefined){
+                    this.scrapedCandidates = JSON.parse(jsonString);
+                }
+                this.alreadyLoaded = true;
+            }
         }
 
         getScrapedCandidatesWithJobDetails = () => {
