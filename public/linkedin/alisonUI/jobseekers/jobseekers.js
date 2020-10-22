@@ -180,6 +180,7 @@ searchForCandidates_click = async (e) => {
         search.isJobSeeker = $('#onlyJobSeekers')[0].checked;
         search.skills = getSkillsFilters();
         appendGPAFilters(search);
+        console.log({search});
 
         if (search.skills){
             showFeedBackInterval('searching alison, stand by');
