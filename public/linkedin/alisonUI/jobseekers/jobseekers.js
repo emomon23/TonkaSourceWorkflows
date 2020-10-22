@@ -138,6 +138,7 @@ const renderSearchResults = (results) => {
     const companyNamesDivs = $('.companyNames');
     const emailDivs = $('.email');
     const phoneDivs = $('.phone');
+    const gpaDivs = $('.gpa');
 
     for(let i=0; i<results.length; i++){
         const c = results[i];
@@ -145,12 +146,27 @@ const renderSearchResults = (results) => {
         const name = `${c.firstName} ${c.lastName}`;
         const email = c.email && c.email.length > 0 ? c.email : 'email: unknown';
         const phone = c.phone && c.phone.length > 0 ? c.phone : 'phone: unknown';
-        const companyNames = Array.isArray(c.positions) && c.positions.length ? c.positions.join(', ') : 'positions: none'
+        const companyNames = Array.isArray(c.positions) && c.positions.length ? c.positions.join(', ') : 'positions: none';
+        let grades = [];
+        console.log(c);
+        if (c.skills && c.skills.grades) {
+            if (c.skills.grades.cumulativeMonthsUsing) {
+                grades.push(c.skills.grades.cumulativeMonthsUsing.grade);
+            } else {
+                grades.push("NC");
+            }
+            if (c.skills.grades.cumulativeWithinMonths) {
+                grades.push(c.skills.grades.cumulativeWithinMonths.grade);
+            } else {
+                grades.push("NC");
+            }
+        }
 
         $(anchors[i]).attr('href', href).text(name);
         $(companyNamesDivs[i]).text(companyNames);
         $(emailDivs[i]).text(email);
         $(phoneDivs[i]).text(phone);
+        $(gpaDivs[i]).text(grades.join(", "));
     }
 
     $(numberOfResultsLabel).text(`Results: ${results.length}`);
