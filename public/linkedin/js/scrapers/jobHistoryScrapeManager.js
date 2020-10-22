@@ -80,8 +80,7 @@
         scrapeThisJobSeeker = async(seeker) => {
             this.scrapeJobSeekerHasBeenCalled = true;
             let message = `scraped ${seeker.firstName} ${seeker.lastName} `;
-            let interval = 100;
-
+            
             if (seeker && seeker.firstName && seeker.lastName){
                 this.consecutiveNothingToScrape = 0;
                 const scrapedSuccessfully = await _scrapeAlisonJobSeeker(seeker);
