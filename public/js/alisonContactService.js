@@ -37,6 +37,8 @@
             }
         }
 
+        result.linkedInIsJobSeeker = result.linkedInIsJobSeeker ? result.linkedInIsJobSeeker : lic.isActivelyLooking;
+        
         return result;
     }
 
