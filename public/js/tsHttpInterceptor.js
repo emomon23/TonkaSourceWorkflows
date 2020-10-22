@@ -4,6 +4,7 @@
 
     let _oldXHROpen = window.XMLHttpRequest.prototype.open;
   
+    // eslint-disable-next-line consistent-return
     window.XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
         this.addEventListener('load', function() {
             var responseListeners = __responseIntercepts.filter(rl => rl.method === method.toLowerCase() && url.toLowerCase().indexOf(rl.urlContains) >= 0);
