@@ -42,7 +42,7 @@ const getSkillsFilters = () => {
            
                 result[skill] = {
                     monthsUsing: Number.parseInt(years) * 12,
-                    withinMonths,
+                    withinMonths: Number.parseInt(withinMonths),
                     required
                 };
         });
