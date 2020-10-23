@@ -178,7 +178,7 @@ const saveSearchOnWorkflows = (search) => {
         linkedInConsoleReference.postMessage({action: 'persistSkillsGPASearchFilter', parameter: jsonString}, "*");
     }
     else {
-        showMessage("Unable to save search to linked in winow. not reference to linkedInConsoleReference");
+        showMessage("Unable to save search to linked in window. no reference to linkedInConsoleReference");
     }
 }
 
