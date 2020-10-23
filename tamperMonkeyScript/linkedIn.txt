@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.444
+// @version      0.519
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -21,6 +21,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInConstants.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInSelectors.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
@@ -43,6 +44,7 @@
 // @ignore      http://localhost:5001/linkedin/js/linkedInConstants.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInSelectors.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInCommon.js
+// @ignore      http://localhost:5001/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
