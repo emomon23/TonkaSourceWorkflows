@@ -229,6 +229,16 @@
        await tsJobHistoryScrapeManager.scrapeThisJobSeeker(seeker);
     }
 
+    const _persistSkillsGPASearchFilter = (searchFilter) =>
+    {
+        if (searchFilter) {
+            tsRecruiterSearchFilterRepository.saveSkillsGPASearchFilters(searchFilter);
+        }
+        else {
+            tsRecruiterSearchFilterRepository.clearSkillsGPASearchFilters();
+        }
+    }
+
     class LinkedInApp {
         sendLinkedInMessageOrConnectionRequestToCandidate = linkedInMessageSender.sendLinkedInMessageOrConnectionRequestToCandidate;
         candidateUnselect = _candidateUnselect;
@@ -243,6 +253,7 @@
         getActiveOpportunity = _getActiveOpportunity;
         getActiveRole = _getActiveRole;
         getAlisonTags = _getAlisonTags;
+        persistSkillsGPASearchFilter = _persistSkillsGPASearchFilter;
     }
 
     window.linkedInApp = new LinkedInApp();

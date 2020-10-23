@@ -180,6 +180,65 @@
         }
     }
 
+    const _getFilterKeyFromListItem = (filterLi) => {
+        const text = filterLi.textContent.trim().toLowerCase();
+
+        const keyMap = [{ lookFor: 'job titles', keyName: 'jobTitles' }, 
+            { lookFor: 'geographic', keyName: 'location' },
+            { lookFor: 'skills and experience', keyName: 'skills' },
+            { lookFor: 'companies', keyName: 'companies' },
+            { lookFor: 'graduation', keyName: 'graduation' },
+            { lookFor: 'schools attended', keyName: 'schools' },
+            { lookFor: 'years working in their field', keyName: 'yearsExperience' },
+            { lookFor: "how closely you", keyName: 'connection' },
+            { lookFor: 'industries', keyName: 'industries' },
+            { lookFor: 'keywords', keyName: 'keywords' },
+            { lookFor: 'postal code', keyName: 'postalCode' },
+            { lookFor: 'filter by first names', keyName: 'firstName' },
+            { lookFor: 'filter by last names', keyName: 'lastName' },
+            { lookFor: 'military', keyName: 'military' },
+            { lookFor: 'levels of responsibility', keyName: 'responsibility' },
+            { lookFor: 'current employers', keyName: 'currentEmployers' },
+            { lookFor: 'past employers', keyName: 'pastEmployers' },
+            { lookFor: 'number of employees', keyName: 'numberEmployees' },
+            { lookFor: 'expertise', keyName: 'expertise' },
+            { lookFor: 'associated with your groups', keyName: 'groups' }
+        ];
+    
+        let result = null;
+        for(let i=0; i<keyMap.length; i++){
+            if (text.indexOf(keyMap[i].lookFor) >= 0){
+                result = keyMap[i].keyName;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    const _getSearchResultFilters = () => {
+        const result = {};
+        let filterListItems = $(linkedInSelectors.searchResultsPage.searchFilterCategories);
+        if (filterListItems.length === 0){
+            return null;
+        }
+
+        filterListItems = filterListItems.toArray();
+        filterListItems.forEach((filterLI) => {
+            let valuePills = $(filterLI).find(linkedInSelectors.searchResultsPage.searchFilterValues);
+            if (valuePills.length > 0){
+                const key = _getFilterKeyFromListItem(filterLI);
+                if (key) {
+                    let filterValues = valuePills.toArray().map(n => n.textContent.trim());
+                    filterValues = result[key] ? filterValues.concat(result[key]) : filterValues;
+                    result[key] = [...new Set(filterValues)];
+                }
+            }
+        });
+
+        return result;
+    }
+
     const _recruiterProfileKeyWordsMatchCount = async(candidate, commaSeparatedListOfWords) => {
         //EG.
         //commaSeparatedListOfWords = "C#:3,AWS:4,PostgreSQL"
@@ -392,6 +451,9 @@
                 }
             });
 
+            const searchFilters = _getSearchResultFilters();
+            window.tsRecruiterSearchFilters = tsRecruiterSearchFilterRepository.saveLinkedInRecruiterSearchFilters(searchFilters);
+
             $('.badges abbr').bind("click", (e) => {
                 const element = $(e.currentTarget);
 
@@ -565,7 +627,8 @@
         suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = val ? false : true;}
 
         getCandidateKeywordCount = _getCandidateKeywordCount;
-
+        getSearchResultFilters = _getSearchResultFilters;
+       
         interceptSearchResults = _interceptSearchResults;
     }
 

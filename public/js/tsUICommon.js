@@ -127,6 +127,33 @@
         }
     }
 
+    const _saveItemLocally = (key, item) => {
+        if (item){
+            const json = typeof item === "string" ? item : JSON.stringify(item);
+            window.localStorage.setItem(key, json);
+        }
+
+        return item;
+    }
+
+    const _getItemLocally = (key) => {
+        const json = window.localStorage.getItem(key);
+        let result = null;
+
+        if (json && json.length > 0){
+            try {
+                result = JSON.parse(json);
+            } catch (e) {
+                if (e.message.indexOf("Unexpected token") >= 0){
+                    return json;
+                }
+
+                throw e;
+            }
+        }
+
+        return result;
+    }
     class TsUICommon {
         constructor(){}
 
@@ -141,6 +168,8 @@
         getWordCount = _getWordCount;
         scrollToBottom = _scrollToBottom;
         scrollTilTrue = _scrollTilTrue;
+        saveItemLocally = _saveItemLocally;
+        getItemLocally = _getItemLocally;
     }
 
     window.tsUICommon = new TsUICommon();

@@ -13,12 +13,15 @@
         publicProfileLink: 'a:contains("Public Profile")',
         saveButton: 'div[class*="profile-actions"] button[class*="save-btn"]',
         skillsList: '#profile-skills div ul[class*="skills"]',
-        aboutSummary: '#profile-summary'
+        aboutSummary: '#profile-summary',
+        experienceSection: '#profile-experience'
     }
 
     const _searchResultsPage = {
         BADGES: 'div[class*="badges"]',
-        addToProjectButton: (memberId) => { return `#search-result-${memberId} button:contains("Save profile to current project")`; }
+        addToProjectButton: (memberId) => { return `#search-result-${memberId} button:contains("Save profile to current project")`; },
+        searchFilterCategories: 'ul[class*="pill"]',
+        searchFilterValues: 'span[class*="pill-text"]'
     }
     
     const _publicProfilePage = {

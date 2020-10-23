@@ -8,11 +8,15 @@
         return $(linkedInSelectors.recruiterProfilePage.profileId).val();
     }
 
+    const _getSearchKeywordMatch = () => {
+        const linkedInFilters = tsRecruiterSearchFilterRepository.getLinkedInRecruiterSearchFilters();
+    }
+
     const _scrapeProfile = async (tagString = null) => {
         await tsCommon.sleep(3000);
         const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
         const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
-        
+       
         // If we've scraped this candidate, proceed
         if (candidateContainer) {
             const candidate = candidateContainer.candidate;
@@ -24,7 +28,8 @@
 
             // Scrape Public Profile
             candidate.linkedIn = _scrapePublicProfileLink();
-
+            candidate.rawExperienceText = $(linkedInSelectors.recruiterProfilePage.experienceSection).text().replace('Experience', '');
+       
             const summaryElement = $(linkedInSelectors.recruiterProfilePage.aboutSummary);
             if (summaryElement && summaryElement.length > 0){
                 candidate.summary = $(summaryElement).text().replace('Summary', '').trim();
@@ -39,6 +44,8 @@
                 candidate.tags+= `,${tagString}`;
             }
             
+            candidate.lastKeywordMatch = _getSearchKeywordMatch();
+
             await linkedInApp.upsertContact(candidate);
             searchResultsScraper.scrapedCandidates[candidate.memberId] = candidateContainer;
         }
