@@ -27,6 +27,7 @@
             RECRUITER_SEARCH_RESULTS: "/recruiter/smartsearch",
             RECRUITER_PROFILE: "/recruiter/profile/",
             PUBLIC_PROFILE: "linkedin.com/in/",
+            PROJECT_PIPELINE: ".com/recruiter/projects/",
             LOGIN: "login",
             FEED: 'feed'
         };

@@ -59,7 +59,7 @@
         try {
             const experienceSection = $(_expSelectors.experienceSection)[0];
             let text = $(experienceSection).text().split('\n').join(' ').trim();
-            result = tsCommon.stripExcessSpacesFromString(text);
+            result = tsString.stripExcessSpacesFromString(text);
         } catch (e){
             console.log(`Error in linkedInPublicProfileScraper._scrapeRawExperienceText. ${e.message}`);
         }

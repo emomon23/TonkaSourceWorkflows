@@ -15,6 +15,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsConstants.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsString.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsQueryStringParser.js
@@ -38,6 +39,7 @@
 // @ignore      http://localhost:5001/js/promiseLoop.js
 // @ignore      http://localhost:5001/js/tsConstants.js
 // @ignore      http://localhost:5001/js/tsCommon.js
+// @ignore      http://localhost:5001/js/tsString.js
 // @ignore      http://localhost:5001/js/tsUICommon.js
 // @ignore      http://localhost:5001/js/tsHacking.js
 // @ignore      http://localhost:5001/js/tsQueryStringParser.js
