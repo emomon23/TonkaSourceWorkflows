@@ -82,7 +82,7 @@
     const _projectPipeLinePage = {
         candidateRow: 'div[class*="row-inner"]',
         memberIdCheckbox: 'input[class*="prospect"]',
-        candidateName: 'h3[class*="name"]'
+        candidateName: 'h3[class*="name"] a'
     }
     
     class LinkedInSelectors {

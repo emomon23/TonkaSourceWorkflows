@@ -25,7 +25,7 @@
 
                 $(candidateLink)
                     .attr('title', toolTip)
-                    .attr('style', 'color:red');
+                    .attr('style', 'color:green');
             }
         }
     }
