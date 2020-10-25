@@ -110,10 +110,20 @@
                 wordMatch: wordGroupArray.map(l => l.toLowerCase().replace(/"/g, ''))
             }
         
+            //sort by length descending (eg. '.Net core', then '.Net')
+            globalListOfWordsToStrip.sort((a, b) => {
+                if (typeof a === "string" && typeof b === "string") {
+                  return a.length > b.length ? -1 : a.length === b.length ? 0 : 1;
+                }
+             
+                return 0;
+            });
+
             globalListOfWordsToStrip = globalListOfWordsToStrip.concat(wordGroupArray);
             keywordMatchSearch.push(doTheyHave);
         });
     
+
         globalListOfWordsToStrip.forEach((s) => {
                 keywordsCopy = keywordsCopy.replace(new RegExp(s, 'g'), '');
         });
@@ -213,7 +223,8 @@
 
     class LinkedInRecruiterFilter {
         scrapeLinkedSearchFilters = _scrapeLinkedSearchFilters;
-        analyzeCandidateProfile = _analyzeCandidateProfile
+        analyzeCandidateProfile = _analyzeCandidateProfile;
+        ___buildKeywordMatchStructure = _buildKeywordMatchStructure;
     }
 
     window.linkedInRecruiterFilter = new LinkedInRecruiterFilter()
