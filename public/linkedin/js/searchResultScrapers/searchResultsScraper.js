@@ -214,7 +214,12 @@
         return result;
     }
 
-    const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProject, tagString = null) => {
+    const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProjectConfiguration) => {
+        const addToProject = addToProjectConfiguration ? true : false;
+        const minPercentMatch = addToProjectConfiguration ? addToProjectConfiguration.minPercentMatch || 49 : 100;
+        const tagString = addToProjectConfiguration ? addToProjectConfiguration.tagString || null : null;
+
+        //addToProject, minPercentMatch, tagString = null
         const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
         let totalAdded = 0;
 
@@ -270,7 +275,7 @@
                     if (addToProject){
                         const keywordMatch = expandedCandidate.lastSearchFilterMatch;
 
-                        if (keywordMatch && keywordMatch.percentMatch > 49){
+                        if (keywordMatch && keywordMatch.percentMatch > minPercentMatch){
                             const saveToProjectButton = $(candidateWindow.document).find(linkedInSelectors.recruiterProfilePage.saveButton);
                             if (saveToProjectButton){
                                 saveToProjectButton.click();
@@ -288,17 +293,14 @@
         return totalAdded;
     }
 
-    const _gatherAllJobSeekersExperienceData = async (addToProject = false, totalPages = 100, tagString=null) => {
-        if (!totalPages || isNaN(totalPages)){
-            tsCommon.log("** YOU MUST provide a totalDesiredNumber parameter", "ERROR");
-            return 0;
-        }
-
+    const _gatherAllJobSeekersExperienceData = async (addToProjectConfiguration = null) => {
+        const totalPages = addToProjectConfiguration.totalPages || 41;
+        console.log(`Will gather data for the for the next ${totalPages} number of pages`);
         let currentPage = 0;
         
         while(currentPage < totalPages && _keepGatheringJobSeekerExperience){
             // eslint-disable-next-line no-await-in-loop
-            await _gatherCurrentPageOfJobSeekersExperienceData(addToProject, tagString);
+            await _gatherCurrentPageOfJobSeekersExperienceData(addToProjectConfiguration);
 
             if (!linkedInCommon.advanceToNextLinkedInResultPage()){
                 break;
