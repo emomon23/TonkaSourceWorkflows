@@ -2,6 +2,7 @@
     const _technicalTitleWords = ['developer', 'programmer', 'engineer', 'engr ', ' edi ', ' (edi) ', 'software ', 'architect', 'qa ', 'ios ', 'android ']
     const _eliminationWords = ['student', 'prime digital', 'recruit', 'sales'];
     const _managementWords = ['manager', 'director', 'vice pres', 'vp ', ' vp', 'exec.', 'executive', 'president', 'ceo', 'founder'];
+    const _internWords = ['intern '];
 
     const _analyzeASingleCandidatesPositions = (candidate) => {
         if (!(candidate && candidate.positions)){
@@ -11,6 +12,7 @@
         candidate.positions.forEach((p) => {
             p.isTechnicallyRelevant = _checkIfTechnicallyRelevant(p);
             p.isManagement = _checkIfManagement(p);
+            p.isInternship = _checkIfInternship(p);
         });
     }
 
@@ -24,6 +26,13 @@
                 jobJumper
             };
         })
+    }
+
+    const _checkIfInternship = (position) => {
+        const searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
+        const intern = _internWords.filter(w => searchText.indexOf(w) >= 0).length >= 0;
+    
+        return intern ? true : false;
     }
 
     const _checkIfManagement = (position) => {
@@ -63,20 +72,6 @@
 
     const _createDateFromStartDate = (p) => {
         return new Date(`${p.startDateMonth}/1/${p.startDateYear}`);
-    }
-
-    const  _calculateDuration = (p) => {
-        const endDate = _createDateFromEndDate(p);
-        const startDate = _createDateFromStartDate(p);
-
-        const difference = endDate.getTime() - startDate.getTime();
-        const secondsDiff =  Math.round(difference / 1000);
-        const minutes = secondsDiff / 60;
-        const hours = minutes / 60;
-        const days = hours / 24;
-        
-        p.durationMonths = days / 30.4;
-        p.durationYears = days / 365.25;
     }
 
     const _getOrCreateCompanyAverageDoc = (companyAverages, position) => {
