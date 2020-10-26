@@ -64,7 +64,7 @@
     
         if (current && !isNaN(current)) {
             // Convert to months
-            const months = (current / 0.08333).toPrecision(0);
+            const months = (current / 0.08333).toPrecision(1);
     
             let grade = 'F';
             switch (true) {
@@ -86,7 +86,7 @@
             }
             grades = {
                 grade,
-                gpa: gradUtil.getGpa(grade)
+                gpa: gradeUtil.getGpa(grade)
             };
         }
         return grades;

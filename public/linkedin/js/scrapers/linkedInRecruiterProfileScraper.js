@@ -44,7 +44,10 @@
             linkedInRecruiterFilter.analyzeCandidateProfile(candidate);
             
             await linkedInApp.upsertContact(candidate);
-            searchResultsScraper.scrapedCandidates[candidate.memberId].candidate = candidate;
+            const container = searchResultsScraper.scrapedCandidates[candidate.memberId] || {};
+            container.candidate = candidate;
+            searchResultsScraper.scrapedCandidates[candidate.memberId] = container;
+
         }
 
         return candidate;

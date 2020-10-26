@@ -8,6 +8,30 @@
     let _jobsGathered = {};
     let _user = null;
     
+    const  _displayJobJumperAnalysis = (candidate) => {
+        if (candidate 
+            && candidate.grades 
+            && candidate.grades.jobJumper
+            && candidate.grades.jobJumper.gpa > 2.5){
+
+                const jumperGrade = candidate.grades.jobJumper.gpa;
+                let badge = $(`#search-result-${candidate.memberId}`).find(linkedInSelectors.searchResultsPage.BADGES);
+                if (!badge || badge.length === 0){
+                    tsCommon.log(`Unable to find badge for ${candidate.firstName} ${candidate.lastName}`, 'WARN');
+                    return;
+                }
+
+                badge = badge[0];
+                const style = jumperGrade > 3 ? 'color:blue; font-weight:bold' : 'color:green';
+
+                const span = $(document.createElement('span'))
+                                .text(`JGrade: ${jumperGrade}`)
+                                .attr('style', style);
+
+                $(badge).append(span);
+        }
+    }
+
     const _scrapeCandidateHtml = async (candidate) => {
         //Get data from HTML, not found in JSON.
         const liTag = $(`#search-result-${candidate.memberId}`);
@@ -68,6 +92,7 @@
         }
 
         _highlightIfCandidateIsJobSeeker(candidate);
+        _displayJobJumperAnalysis(candidate);
     }
 
     const _waitForResultsHTMLToRender = async (lastCandidate) => {
