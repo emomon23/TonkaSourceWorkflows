@@ -2,6 +2,7 @@
     const _technicalTitleWords = ['developer', 'programmer', 'engineer', 'engr ', ' edi ', ' (edi) ', 'software ', 'architect', 'qa ', 'ios ', 'android ']
     const _eliminationWords = ['student', 'prime digital', 'recruit', 'sales'];
     const _managementWords = ['manager', 'director', 'vice pres', 'vp ', ' vp', 'exec.', 'executive', 'president', 'ceo', 'founder'];
+    const _internWords = ['intern '];
 
     const _checkIfTechnicallyRelevant = (position) => {
         if (!position){
@@ -16,6 +17,13 @@
         }
     
         return  _technicalTitleWords.filter(w => searchText.indexOf(w) >= 0).length >= 0;
+    }
+
+    const _checkIfInternship = (position) => {
+        const searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
+        const intern = _internWords.filter(w => searchText.indexOf(w) >= 0).length >= 0;
+    
+        return intern ? true : false;
     }
 
     const _checkIfManagement = (position) => {
@@ -70,6 +78,7 @@
         candidate.positions.forEach((p) => {
             p.isTechnicallyRelevant = _checkIfTechnicallyRelevant(p);
             p.isManagement = _checkIfManagement(p);
+            p.isInternship = _checkIfInternship(p);
 
             _calculateDuration(p);
         });
