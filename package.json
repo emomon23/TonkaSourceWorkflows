@@ -20,6 +20,7 @@
     "gulp-exec": "^4.0.0",
     "gulp-if": "^3.0.0",
     "gulp-replace": "^1.0.0",
+    "gulp-shell": "^0.8.0",
     "gulp-uglify": "^3.0.2",
     "gulp-useref": "^4.0.0",
     "jasmine": "^3.5.0"

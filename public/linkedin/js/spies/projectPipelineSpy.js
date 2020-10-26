@@ -1,6 +1,5 @@
 (() => {
-
-    _initializeKeywordMatchVisualIndicators = async () => {
+    const _initializeKeywordMatchVisualIndicators = async () => {
         await tsCommon.sleep(2000);
 
         let memberIdCheckboxes = $(linkedInSelectors.projectPipeLinePage.memberIdCheckbox);

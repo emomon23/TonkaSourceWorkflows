@@ -173,9 +173,9 @@ const renderSearchResults = (results) => {
 }
 
 const saveSearchOnWorkflows = (search) => {
-    if (linkedInConsoleReference){
+    if (window.linkedInConsoleReference){
         var jsonString = search? JSON.stringify(search): {};
-        linkedInConsoleReference.postMessage({action: 'persistSkillsGPASearchFilter', parameter: jsonString}, "*");
+        window.linkedInConsoleReference.postMessage({action: 'persistSkillsGPASearchFilter', parameter: jsonString}, "*");
     }
     else {
         showMessage("Unable to save search to linked in window. no reference to linkedInConsoleReference");
@@ -210,9 +210,9 @@ searchForCandidates_click = async (e) => {
 
         if (search.skills){
             showFeedBackInterval('searching alison, stand by');
-          //  const results = await alisonContactService.submitSkillsSearch(search);
-          //  renderSearchResults(results);
-          saveSearchOnWorkflows(search);
+            const results = await alisonContactService.submitSkillsSearch(search);
+            renderSearchResults(results);
+            saveSearchOnWorkflows(search);
         }
     } catch(err) {
         showMessage(`ERROR: ${err.message}`);
@@ -225,6 +225,6 @@ $(document).ready(() => {
     window.addEventListener('message', (e) => {
         window.linkedInConsoleReference = e.source;
         const action = e.data.action;
-        console.log(`post message recieved from parent.  action: ${action}`);
+        console.log(`post message received from parent.  action: ${action}`);
     });
 });

@@ -216,9 +216,8 @@
                 candidate.lastSearchFilterMatch = result;
                 candidateKeywordMatchRepository.saveCandidateKeywordMatch(candidate);
             }
-
-            return result;
         }
+        return result;
     }
 
     class LinkedInRecruiterFilter {
