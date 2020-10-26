@@ -359,6 +359,7 @@
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length -1]);
 
+            positionAnalyzer.analyzeCandidatePositions(candidatesInResults);
             candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
                 
@@ -400,6 +401,9 @@
 
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
 
+            const companyAnalytics = positionAnalyzer.createCompanyAverageDurationObject(candidatesInResults);
+            linkedInApp.saveCompanyAnalytics(companyAnalytics);
+            
             $('.badges abbr').bind("click", (e) => {
                 const element = $(e.currentTarget);
 

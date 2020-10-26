@@ -166,6 +166,10 @@
         }
     }
 
+    const _saveCompanyAnalytics = async(analytics) => {
+        
+    }
+
     const _getAlisonContact = async(searchFor) => {
         await linkedInCommon.callAlisonHookWindow('getAlisonContact', searchFor);
     }
@@ -244,6 +248,7 @@
         candidateUnselect = _candidateUnselect;
         changeBadgeColor = _changeBadgeColor;
         upsertContact = _upsertContact;
+        saveCompanyAnalytics = _saveCompanyAnalytics;
         getAlisonContact = _getAlisonContact;
         getAlisonContactResult = _getAlisonContactResult;
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
