@@ -19,6 +19,8 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsQueryStringParser.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/skillStats.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/statistician.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInConstants.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInSelectors.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
@@ -46,6 +48,8 @@
 // @ignore      http://localhost:5001/js/tsUICommon.js
 // @ignore      http://localhost:5001/js/tsHacking.js
 // @ignore      http://localhost:5001/js/tsQueryStringParser.js
+// @ignore      http://localhost:5001/js/skillStats.js
+// @ignore      http://localhost:5001/js/statistician.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInConstants.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInSelectors.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInCommon.js
