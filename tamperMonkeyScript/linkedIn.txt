@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.519
+// @version      0.549
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -15,6 +15,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsConstants.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsString.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsQueryStringParser.js
@@ -22,11 +23,14 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInSelectors.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/candidateKeywordMatchRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterFilter.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/jobHistoryScrapeManager.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInSearchResultsSpy.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/projectPipelineSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInLoginSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSender.js
@@ -38,6 +42,7 @@
 // @ignore      http://localhost:5001/js/promiseLoop.js
 // @ignore      http://localhost:5001/js/tsConstants.js
 // @ignore      http://localhost:5001/js/tsCommon.js
+// @ignore      http://localhost:5001/js/tsString.js
 // @ignore      http://localhost:5001/js/tsUICommon.js
 // @ignore      http://localhost:5001/js/tsHacking.js
 // @ignore      http://localhost:5001/js/tsQueryStringParser.js
@@ -45,12 +50,15 @@
 // @ignore      http://localhost:5001/linkedin/js/linkedInSelectors.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInCommon.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
+// @ignore      http://localhost:5001/linkedin/js/repositories/candidateKeywordMatchRepository.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInPublicProfileScraper.js
+// @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterFilter.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
 // @require     http://localhost:5001/linkedin/js/scrapers/jobHistoryScrapeManager.js
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
+// @ignore      http://localhost:5001/linkedin/js/spies/projectPipelineSpy.js
 // @ignore      http://localhost:5001/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInMessageSender.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInApp.js

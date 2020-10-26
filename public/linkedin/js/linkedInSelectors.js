@@ -78,12 +78,20 @@
         password: 'input[autocomplete*="current-password"], #password',
         sendButton: 'button[class*="submit-button"], button[aria-label*="Sign in"]'
     }
+
+    const _projectPipeLinePage = {
+        candidateRow: 'div[class*="row-inner"]',
+        memberIdCheckbox: 'input[class*="prospect"]',
+        candidateName: 'h3[class*="name"] a',
+        tab: 'li[role*="presentation"] button[role*="tab"]'
+    }
     
     class LinkedInSelectors {
         contactInfoPage = _contactInfoPage;
         recruiterProfilePage = _recruiterProfilePage;
         searchResultsPage = _searchResultsPage;
         publicProfilePage = _publicProfilePage;
+        projectPipeLinePage = _projectPipeLinePage;
         loginPage = _loginPage;
     }
 

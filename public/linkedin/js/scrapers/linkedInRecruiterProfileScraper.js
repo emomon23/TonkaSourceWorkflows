@@ -8,18 +8,15 @@
         return $(linkedInSelectors.recruiterProfilePage.profileId).val();
     }
 
-    const _getSearchKeywordMatch = () => {
-        const linkedInFilters = tsRecruiterSearchFilterRepository.getLinkedInRecruiterSearchFilters();
-    }
-
     const _scrapeProfile = async (tagString = null) => {
         await tsCommon.sleep(3000);
         const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
         const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
-       
+        let candidate = null;
+
         // If we've scraped this candidate, proceed
         if (candidateContainer) {
-            const candidate = candidateContainer.candidate;
+            candidate = candidateContainer.candidate;
 
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
@@ -44,13 +41,13 @@
                 candidate.tags+= `,${tagString}`;
             }
             
-            candidate.lastKeywordMatch = _getSearchKeywordMatch();
-
+            linkedInRecruiterFilter.analyzeCandidateProfile(candidate);
+            
             await linkedInApp.upsertContact(candidate);
-            searchResultsScraper.scrapedCandidates[candidate.memberId] = candidateContainer;
+            searchResultsScraper.scrapedCandidates[candidate.memberId].candidate = candidate;
         }
 
-        return null;
+        return candidate;
     }
 
     const _scrapeOutDurationFromHtmlElement = (element) => {
@@ -121,20 +118,6 @@
         });
 
         return result;
-    }
-
-    const _scoreASkillString = (skillString, jobExperiances) => {
-        let score = 0;
-        skillString = skillString.toLowerCase();
-
-        jobExperiances.forEach((job) => {
-            const jd = job.description.toLowerCase();
-            if (jd.indexOf(skillString) >= 0){
-                score += (job.totalMonthsOnJob * job.weight);
-            }
-        });
-
-        return score;
     }
 
     const _mergeCandidatePositionsWithScrapedJobExperience = (candidate) => {
