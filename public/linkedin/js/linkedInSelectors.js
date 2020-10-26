@@ -82,7 +82,8 @@
     const _projectPipeLinePage = {
         candidateRow: 'div[class*="row-inner"]',
         memberIdCheckbox: 'input[class*="prospect"]',
-        candidateName: 'h3[class*="name"] a'
+        candidateName: 'h3[class*="name"] a',
+        tab: 'li[role*="presentation"] button[role*="tab"]'
     }
     
     class LinkedInSelectors {

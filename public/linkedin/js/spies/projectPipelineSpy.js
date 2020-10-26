@@ -36,6 +36,11 @@
     $(document).ready(() => {
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PROJECT_PIPELINE) {
             _initializeKeywordMatchVisualIndicators();
+
+            $(linkedInSelectors.projectPipeLinePage.tab).click(async () => {
+                tsCommon.sleep(1500);
+                _initializeKeywordMatchVisualIndicators();
+            });
         }
     });
 })();

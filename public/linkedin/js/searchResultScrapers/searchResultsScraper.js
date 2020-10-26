@@ -272,7 +272,7 @@
                     // wait 30 to 45 seconds to proceed
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(22000, 45000);
-                    if (addToProject){
+                    if (addToProject && expandedCandidate && expandedCandidate.lastSearchFilterMatch){
                         const keywordMatch = expandedCandidate.lastSearchFilterMatch;
 
                         if (keywordMatch && keywordMatch.percentMatch > minPercentMatch){
