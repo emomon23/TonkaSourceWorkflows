@@ -1,12 +1,11 @@
 var gulp = require('gulp');
 
-var cp = require('child_process');
 var del = require('del');
-var exec = require('gulp-exec')
 var gulpif = require('gulp-if');
 var eslint = require ('gulp-eslint');
 var minifyCss = require('gulp-clean-css');
 var replace = require('gulp-replace');
+var shell = require('gulp-shell')
 var uglify = require('gulp-uglify');
 var useref = require('gulp-useref');
 
@@ -48,9 +47,7 @@ function root(cb) {
         .pipe(gulp.dest('build/Release'));
 }
 
-function firebaseDeploy(cb) {
-    return cp.execFile('firebase deploy');
-}
+gulp.task('firebase', shell.task(['firebase deploy']));
 
 exports.build = gulp.series(
     clean,
@@ -63,5 +60,5 @@ exports.build = gulp.series(
 );
 exports.deploy = gulp.series(
     exports.build,
-    firebaseDeploy
+    shell.task(['firebase deploy'])
 )
