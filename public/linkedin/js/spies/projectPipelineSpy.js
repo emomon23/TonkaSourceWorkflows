@@ -1,7 +1,7 @@
 (() => {
 
     _initializeKeywordMatchVisualIndicators = async () => {
-        await tsCommon.sleep(5000);
+        await tsCommon.sleep(2000);
 
         let memberIdCheckboxes = $(linkedInSelectors.projectPipeLinePage.memberIdCheckbox);
         let candidateNames = $(linkedInSelectors.projectPipeLinePage.candidateName);
@@ -33,14 +33,23 @@
         }
     }
 
+    const tabClicked = () => {
+        _initializeKeywordMatchVisualIndicators();
+        _rebindToPresentationTabs();
+    }
+
+    const _rebindToPresentationTabs = async() => {
+        await tsCommon.sleep(1000);
+        $(linkedInSelectors.projectPipeLinePage.tab).click(() => {
+            tabClicked();
+        });
+    }
+
     $(document).ready(() => {
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PROJECT_PIPELINE) {
             _initializeKeywordMatchVisualIndicators();
 
-            $(linkedInSelectors.projectPipeLinePage.tab).click(async () => {
-                tsCommon.sleep(1500);
-                _initializeKeywordMatchVisualIndicators();
-            });
+            _rebindToPresentationTabs();            
         }
     });
 })();
