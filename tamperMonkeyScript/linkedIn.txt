@@ -55,7 +55,7 @@
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterFilter.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
-// @require     http://localhost:5001/linkedin/js/scrapers/jobHistoryScrapeManager.js
+// @ignore      http://localhost:5001/linkedin/js/scrapers/jobHistoryScrapeManager.js
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/projectPipelineSpy.js

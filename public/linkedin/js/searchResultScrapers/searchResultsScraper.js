@@ -55,7 +55,7 @@
                                         'open to work', 
                                         'looking for new']
 
-            for (h=0; h<isJobSeekerTexts.length; h++){
+            for (let h=0; h<isJobSeekerTexts.length; h++){
                 const lookFor = isJobSeekerTexts[h];
                 let lookIn = tsUICommon.cleanseTextOfHtml(candidate.headline).toLowerCase();
                 lookIn = tsString.stripExcessSpacesFromString(lookIn);
