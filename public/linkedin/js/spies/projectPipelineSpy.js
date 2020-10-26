@@ -19,8 +19,11 @@
 
             const match = candidateKeywordMatchRepository.getCandidateKeywordMatch(memberId);
             if (match){
+                const candidate = searchResultsScraper.findCandidate(memberId);
+                const city = candidate ? (candidate.city || '') + '\n' : '';
+
                 const toolTip = match.theyHave.map((h) => {
-                    return `${h.title}:${h.foundInJobHistory ? ' Job history. ' : ''}${h.foundInSummary? ' In summary. ': ''}${h.lastUsed? ' LastUsed: ' + h.lastUsed : ''}`;
+                    return `${city}${h.title}:${h.foundInJobHistory ? ' Job history. ' : ''}${h.foundInSummary? ' In summary. ': ''}${h.lastUsed? ' LastUsed: ' + h.lastUsed : ''}`;
                 }).join('\n');
 
                 $(candidateLink)

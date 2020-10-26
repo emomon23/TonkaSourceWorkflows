@@ -319,7 +319,9 @@
         const now = tsCommon.now();
 
         for(var k in scrapedCandidates){
-            const c = scrapedCandidates[k].candidate;
+            const container = scrapedCandidates[k];
+            const c = container ?  container.candidate : null;
+
             if (c && (c.isJobSeeker === true || c.isActivelyLooking === true || c.persistToLocalStorage === true)
                 && (daysOld === null || now.dayDiff(scrapedCandidates[k].dateScraped) < daysOld)){
                     result[k] = scrapedCandidates[k];
