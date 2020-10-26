@@ -3,6 +3,36 @@
     const _eliminationWords = ['student', 'prime digital', 'recruit', 'sales'];
     const _managementWords = ['manager', 'director', 'vice pres', 'vp ', ' vp', 'exec.', 'executive', 'president', 'ceo', 'founder'];
 
+    const _analyzeASingleCandidatesPositions = (candidate) => {
+        if (!(candidate && candidate.positions)){
+            return;
+        }
+
+        candidate.positions.forEach((p) => {
+            p.isTechnicallyRelevant = _checkIfTechnicallyRelevant(p);
+            p.isManagement = _checkIfManagement(p);
+        });
+    }
+
+    const _analyzeCandidatePositions = (arrayOfCandidates) => {
+        arrayOfCandidates.forEach((c) => {
+            _analyzeASingleCandidatesPositions(c);
+            const jobStatistics = statistician.calculateJobStatistics(c.positions);
+            c.jobStatistics = jobStatistics;
+            const jobJumper = statistician.calculateJobJumperGrade(jobStatistics);
+            c.grades = {
+                jobJumper
+            };
+        })
+    }
+
+    const _checkIfManagement = (position) => {
+        const searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
+        const management = _managementWords.filter(w => searchText.indexOf(w) >= 0).length >= 0;
+    
+        return management ? true : false;
+    }
+
     const _checkIfTechnicallyRelevant = (position) => {
         if (!position){
             return null;
@@ -16,13 +46,6 @@
         }
     
         return  _technicalTitleWords.filter(w => searchText.indexOf(w) >= 0).length >= 0;
-    }
-
-    const _checkIfManagement = (position) => {
-        const searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
-        const management = _managementWords.filter(w => searchText.indexOf(w) >= 0).length >= 0;
-    
-        return management ? true : false;
     }
 
     const _createDateFromEndDate = (p) => {
@@ -54,25 +77,6 @@
         
         p.durationMonths = days / 30.4;
         p.durationYears = days / 365.25;
-    }
-
-    const _analyzeCandidatePositions = (arrayOfCandidates) => {
-        arrayOfCandidates.forEach((c) => {
-            _analyzeASingleCandidatesPositions(c);
-        })
-    }
-
-    const _analyzeASingleCandidatesPositions = (candidate) => {
-        if (!(candidate && candidate.positions)){
-            return;
-        }
-
-        candidate.positions.forEach((p) => {
-            p.isTechnicallyRelevant = _checkIfTechnicallyRelevant(p);
-            p.isManagement = _checkIfManagement(p);
-
-            _calculateDuration(p);
-        });
     }
 
     const _getOrCreateCompanyAverageDoc = (companyAverages, position) => {
