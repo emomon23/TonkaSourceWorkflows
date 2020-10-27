@@ -42,8 +42,9 @@
             const startDate = statistician.createDateFromMonthAndYear(p.startDateMonth, p.startDateYear)
             const endDate = statistician.createDateFromMonthAndYear(p.endDateMonth, p.endDateYear);
             const months = statistician.calculateMonthsBetweenDates(startDate, endDate);
-            const years = Number.parseFloat(months / 12).toPrecision(3);
-            result +=  `${years}, `;
+            const years = Number.parseFloat(months / 12).toPrecision(2);
+            
+            result += i === 0 && p.current === true ? `${years} c, ` : `${years}, `;
         }
 
         return result.length > 0 ? result.substr(0, result.length -2) : 'None';
