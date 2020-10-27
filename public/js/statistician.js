@@ -2,23 +2,26 @@
     const url = `${tsConstants.FUNCTIONS_URL}/fs?page=js/statisticianLogic.js`;
     let processedSkillStatistics = {};
 
-    const _adjustForOverlappingPositions = (positions) => {
-        for (let k in positions) {
-            const pos1 = positions[k];
-            for (let l in positions) {
-                const pos2 = positions[l];
-                if (pos1 !== pos2) {
-                    const pos1StartDate = _createDateFromMonthAndYear(pos1.startDateMonth, pos1.startDateYear);
-                    const pos1EndDate = _createDateFromMonthAndYear(pos1.endDateMonth, pos1.endDateYear);
-                    const pos2StartDate = _createDateFromMonthAndYear(pos2.startDateMonth, pos2.startDateYear);
-                    
-                    if (pos2StartDate < pos1EndDate && pos2StartDate > pos1StartDate) {
-                        pos1.endDateMonth = pos2StartDate.getMonth()+1;
-                        pos1.endDateYear = pos2StartDate.getFullYear();
-                    }
+    const _cleanContactPositions = (positions) => {
+        _adjustPositionsWhenRolesChange(positions);
+    }
+
+    const _adjustPositionsWhenRolesChange = (positions) => {
+        if (positions) {
+            for (let k = positions.length - 1; k >= 1; k--) {
+                pos1 = positions[k-1];
+                pos2 = positions[k];
+
+                if (pos1.companyId === pos2.companyId) {
+                    pos1.startDateMonth = pos2.startDateMonth;
+                    pos1.startDateYear = pos2.startDateYear;
+                    pos1.description += ' ' + pos2.description;
+                    pos1.title += ' ' + pos2.title;
+                    positions.splice(k,1);
                 }
             }
         }
+        return true;
     }
     
     const _calculateJobJumperGrade = (contactJobStatistics) => {
@@ -166,7 +169,6 @@
             let monthsUsing = 0;
             
             const positionsWithSkillCopy = JSON.parse(JSON.stringify(positionsWithSkill));
-            _adjustForOverlappingPositions(positionsWithSkillCopy);
     
             positionsWithSkillCopy.forEach((position) => {
                 // Start the End Date as today, for "presently using" skills
@@ -404,6 +406,7 @@
     
     const _processStatistics = (contact) => {
         const result = {};
+        _cleanContactPositions(contact.positions);
         const skillStatistics = _processSkillsStatistics(contact);
         
         result.skillStatistics = skillStatistics;
@@ -430,6 +433,7 @@
         calculateMonthsSinceLastUse = _calculateMonthsSinceLastUse;
         calculateMonthsUsingSkill = _calculateMonthsUsingSkill;
         calculateSkillsStatistics = _calculateSkillsStatistics;
+        cleanContactPositions = _cleanContactPositions;
         createDateFromMonthAndYear = _createDateFromMonthAndYear;
         getPositionsWithSkill = _getPositionsWithSkill;
         getProcessedSkillStatistics = _getProcessedSkillStatistics;
