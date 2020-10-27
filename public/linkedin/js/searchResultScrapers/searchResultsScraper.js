@@ -22,10 +22,12 @@
                 }
 
                 badge = badge[0];
-                const style = jumperGrade > 3 ? 'color:blue; font-weight:bold' : 'color:green';
+                const style = jumperGrade > 3 ? 'color:blue; font-weight:bold; display: inline-block' : 'color:green; display: inline-block';
 
                 const span = $(document.createElement('span'))
                                 .text(`JGrade: ${jumperGrade}`)
+                                .attr('class', 'jGrade')
+                                .attr('memberId', candidate.memberId)
                                 .attr('style', style);
 
                 $(badge).append(span);
@@ -77,7 +79,8 @@
                                         'currently looking ', 
                                         'opentowork', 
                                         'open to work', 
-                                        'looking for new']
+                                        'looking for new',
+                                        'looking for a']
 
             for (let h=0; h<isJobSeekerTexts.length; h++){
                 const lookFor = isJobSeekerTexts[h];
@@ -385,6 +388,7 @@
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length -1]);
 
             positionAnalyzer.analyzeCandidatePositions(candidatesInResults);
+
             candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
                 

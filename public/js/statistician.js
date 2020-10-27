@@ -64,7 +64,7 @@
     
         if (current && !isNaN(current)) {
             // Convert to months
-            const months = (current / 0.08333).toPrecision(1);
+            const months = Number.parseInt((current / 0.08333));
     
             let grade = 'F';
             switch (true) {
