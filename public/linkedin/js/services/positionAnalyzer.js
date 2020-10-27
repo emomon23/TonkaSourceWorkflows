@@ -3,7 +3,7 @@
     const _eliminationWords = ['student', 'prime digital', 'recruit', 'sales'];
     const _managementWords = ['manager', 'director', 'vice pres', 'vp ', ' vp', 'exec.', 'executive', 'president', 'ceo', 'founder'];
     const _internWords = ['intern '];
- 
+
     const _analyzeASingleCandidatesPositions = (candidate) => {
         if (!(candidate && candidate.positions)){
             return;
@@ -22,28 +22,20 @@
     const _analyzeCandidatePositions = (arrayOfCandidates) => {
         arrayOfCandidates.forEach((c) => {
             _analyzeASingleCandidatesPositions(c);
-
-            const jobStatistics = statistician.calculateJobStatistics(c.positions);
-           
-            c.jobStatistics = jobStatistics;
-            const jobJumper = statistician.calculateJobJumperGrade(jobStatistics);
-            c.grades = {
-                jobJumper
-            };
         })
     }
 
     const _buildCandidateTechnicalYearsString = (candidate) => {
         let result = '';
         const technicalPositions = candidate.positions ? candidate.positions.filter(p => p.isTechnicallyRelevant) : [];
-        
+
         for(let i=technicalPositions.length-1; i>=0; i--){
             const p = technicalPositions[i];
             const startDate = statistician.createDateFromMonthAndYear(p.startDateMonth, p.startDateYear)
             const endDate = statistician.createDateFromMonthAndYear(p.endDateMonth, p.endDateYear);
             const months = statistician.calculateMonthsBetweenDates(startDate, endDate);
             const years = Number.parseFloat(months / 12).toPrecision(2);
-            
+
             result += i === 0 && p.current === true ? `${years} c, ` : `${years}, `;
         }
 
@@ -53,14 +45,14 @@
     const _checkIfInternship = (position) => {
         const searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
         const intern = _internWords.filter(w => searchText.indexOf(w) >= 0).length > 0;
-    
+
         return intern ? true : false;
     }
 
     const _checkIfManagement = (position) => {
         const searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
         const management = _managementWords.filter(w => searchText.indexOf(w) >= 0).length > 0;
-    
+
         return management ? true : false;
     }
 
@@ -68,14 +60,14 @@
         if (!position){
             return null;
         }
-      
+
         const searchText =  (`${position.title ? position.title : ''} ${position.description ? position.description : ''}`).toLowerCase();
         const eliminate = _eliminationWords.filter(w => searchText.indexOf(w) >= 0);
-    
+
         if (eliminate.length){
             return false;
         }
-    
+
         const technicalWords =  _technicalTitleWords.filter(w => searchText.indexOf(w) >= 0);
         return technicalWords.length;
 
