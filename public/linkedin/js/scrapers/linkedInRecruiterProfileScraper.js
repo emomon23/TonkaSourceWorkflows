@@ -7,7 +7,7 @@
             const container = $(document.createElement('div'))
                             .attr('class', 'grade-container');
 
-            if (gpa > 3) {
+            if (gpa >= gradeUtil.getGpa('B-')) {
                 $(container).addClass('green');
             } else {
                 $(container).addClass('red');
@@ -48,17 +48,17 @@
             const container = $(document.createElement('div'))
                             .attr('class', 'grade-container');
 
-            if (gpa > 3) {
+            if (gpa >= gradeUtil.getGpa('B-')) {
                 $(container).addClass('green');
             } else {
                 $(container).addClass('red');
             }
             // Append superscript J ... Cuz it looks cool
-            $(container).append($(document.createElement('sup')).text('M'));
+            $(container).append($(document.createElement('sup')).text('W'));
             // Append the grade
             $(container).append($(document.createElement('div')).text(grade).attr('class', 'grade'));
             // Append subscript J ... Cuz it looks cool
-            $(container).append($(document.createElement('sub')).text('U'));
+            $(container).append($(document.createElement('sub')).text('M'));
 
             $(element).append(container);
         }
@@ -116,7 +116,7 @@
             const skillsStatisticsList = [candidate.statistics];
             const skillsFilter = tsUICommon.getItemLocally('TSSkillGPAFilter');
             if (skillsFilter) {
-                statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter);
+                statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter, false);
             }
 
             _displayStatisticGrades(candidate);
