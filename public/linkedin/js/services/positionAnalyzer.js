@@ -22,6 +22,12 @@
     const _analyzeCandidatePositions = (arrayOfCandidates) => {
         arrayOfCandidates.forEach((c) => {
             _analyzeASingleCandidatesPositions(c);
+
+            const jobStatistics = statistician.calculateJobStatistics(c);
+            c.statistics = (c.statistics) ? { ...c.statistics, jobStatistics } : { jobStatistics };
+
+            const jobJumper = statistician.calculateJobJumperGrade(jobStatistics);
+            c.grades = (c.grades) ? { ...c.grades, jobJumper } : { jobJumper };
         })
     }
 
