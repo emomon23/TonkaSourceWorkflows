@@ -119,6 +119,9 @@
                 const totalMonthsOnJob = _calculateMonthsBetweenDates(startDate, endDate);
                 const totalYearsOnJob = Math.round(100*totalMonthsOnJob * 0.08333)/100;
 
+                // Add to our total job years
+                totalJobYears += totalYearsOnJob
+
                 if (isCurrentJob) {
                     // If we have a current job, we don't want to include in average.  We only want to average the
                     // past jobs so that we can compare the current job to the candidates history of jobs
@@ -128,9 +131,6 @@
                         yearsOnJobStatistics.current = totalYearsOnJob;
                     }
                 } else {
-                    // Add to our total job years
-                    totalJobYears += totalYearsOnJob
-
                     // Set max years on job
                     if (yearsOnJobStatistics.max) {
                         if (totalYearsOnJob > yearsOnJobStatistics.max) {
