@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="../alison.css">
+        <script src='https://code.jquery.com/jquery-latest.js'></script>
+        <script src='http://localhost:5001/js/tsConstants.js'></script>
+        <script src='http://localhost:5001/js/tsCommon.js'></script>
+        <script src='http://localhost:5001/js/tsUICommon.js'></script>
+        <script src='http://localhost:5001/js/alisonContactService.js'></script>
+        <script src='inmailBlast.js'></script>
+        <title>Job Seekers</title>
+    </head>
+
+    <body>
+        <div>
+            <div>Subject</div>
+            <input class='maxLenInput' id='subject' name='subject' />
+        </div>
+
+        <div>
+            <div>Body ([first-name])</div>
+            <textarea rows='10' cols='20' id='body' name='body' />
+        </div>
+
+        <div>
+            <button onclick="send_onClick()">Send</button>
+        </div>
+    </body>
+</html>

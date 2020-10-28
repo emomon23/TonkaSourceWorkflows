@@ -34,7 +34,7 @@
 
     const _showTagsVisualIndicator = () => {
         const tags = window.localStorage.getItem(_tagsKey);
-        const selectors = ['a[class*="product-logo"]', 
+        const selectors = ['a[class*="product-logo"]',
                 'span[class*="special-seat"]:contains("Lite")'];
 
         const element = tsUICommon.findFirstDomElement(selectors);
@@ -89,7 +89,7 @@
                                                                     'li[role="menuitem"] a[href*="account-sub-nav"] span[class="text"]',
                                                                     'img[class*="global-nav__me-photo"]'
                                                                     ]);
-           
+
 
             if (loggedInUserPhoto){
                 loggedInUserFirstAndLastName = ($(loggedInUserPhoto).attr('alt') || $(loggedInUserPhoto).text() || '').trim();
@@ -101,7 +101,7 @@
                     case 'Joe Harstad' :
                         scrapedUser = "Joe";
                         break;
-                    default: 
+                    default:
                         scrapedUser = null;
                         break;
                 }
@@ -114,7 +114,7 @@
     }
 
     const _changeBadgeColor = (memberId, color) => {
-        try {     
+        try {
             const query = `#search-result-${memberId} abbr`;
             $($(query)[0]).attr('style', `color:${color}`)
         }
@@ -145,7 +145,7 @@
 
             const tags = linkedInApp.getAlisonTags();
             const activeOpp = linkedInApp.getActiveOpportunity();
-            
+
             if (activeRole){
                 candidate.role = activeRole;
             }
@@ -202,15 +202,15 @@
 
     const _recordMessageWasSent = (recipient, messageSent, type = 'message') => {
         let candidate = searchResultsScraper.findCandidate(recipient);
-        
+
         if (candidate !== null){
             const {firstName, lastName, memberId} = candidate;
             candidate = {firstName, lastName, memberId};  //make a copy of what we need for this save
         }
         else {
             candidate = recipient; //Try and save the message based on just the 1st and last names
-        } 
-        
+        }
+
 
         let messageObject = _createMessageRecordObject(messageSent, type);
         candidate.messagesSent = [messageObject];
@@ -243,10 +243,16 @@
         }
     }
 
+    const _fireInMailBlast = (subjectBody) => {
+        const {subject, body} = subjectBody;
+       // linkedInMessageSender.blastProjectPipeline(subject, body);
+    }
+
     class LinkedInApp {
         sendLinkedInMessageOrConnectionRequestToCandidate = linkedInMessageSender.sendLinkedInMessageOrConnectionRequestToCandidate;
         candidateUnselect = _candidateUnselect;
         changeBadgeColor = _changeBadgeColor;
+        fireInMailBlast = _fireInMailBlast;
         upsertContact = _upsertContact;
         saveCompanyAnalytics = _saveCompanyAnalytics;
         getAlisonContact = _getAlisonContact;
@@ -269,7 +275,7 @@
     tsCommon.setUpPostMessageListener('linkedInApp');
 
     tsInterceptor.interceptResponse('get', '/api/smartsearch?', searchResultsScraper.interceptSearchResults);
-    
+
     //firefox was 'telling on tonkasource' to linked in, when it found tampermonkey script gets loaded.
     //try to suppress that method call.
     tsInterceptor.interceptRequest('post', 'platform-telemetry/csp?', null, true);
@@ -343,7 +349,7 @@
             }
         });
     });
-    
+
 })();
 
 

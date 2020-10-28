@@ -22,7 +22,8 @@
         BADGES: 'div[class*="badges"]',
         addToProjectButton: (memberId) => { return `#search-result-${memberId} button:contains("Save profile to current project")`; },
         searchFilterCategories: 'ul[class*="pill"]',
-        searchFilterValues: 'span[class*="pill-text"]'
+        searchFilterValues: 'span[class*="pill-text"]',
+        sendInMail: 'button[data-action*="inmail"][class*="primary-action"]'
     }
 
     const _publicProfilePage = {
@@ -84,7 +85,19 @@
         candidateRow: 'div[class*="row-inner"]',
         memberIdCheckbox: 'input[class*="prospect"]',
         candidateName: 'h3[class*="name"] a',
-        tab: 'li[role*="presentation"] button[role*="tab"]'
+        tab: 'li[role*="presentation"] button[role*="tab"]',
+        sendInMailButtons: '.cta-send-msg',
+        viewMessageButtons: '.cta-view-msg',
+        pipelineRows: 'div[class*="row-inner"]',
+        sendInmailButton: 'cta-send-msg',
+        navigationPage1: 'a[class*="page-link"][title*="Page 1"]',
+        navigationNextPage: 'a[class*="page-link"][title*="Next Page"]',
+    }
+
+    const _inmailDialog = {
+        subject: 'input[name*="subject"]',
+        body: 'textarea[placeholder*="Type your message"]',
+        sendButton: 'button[class*="inmail-send-btn"]'
     }
 
     class LinkedInSelectors {
@@ -94,6 +107,7 @@
         publicProfilePage = _publicProfilePage;
         projectPipeLinePage = _projectPipeLinePage;
         loginPage = _loginPage;
+        inMailDialog = _inmailDialog;
     }
 
     window.linkedInSelectors = new LinkedInSelectors();

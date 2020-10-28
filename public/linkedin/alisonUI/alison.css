@@ -93,3 +93,7 @@
 .tooltip:hover .tooltiptext {
     visibility: visible;
 }
+
+.maxLenInput {
+    width: 90%;
+}
