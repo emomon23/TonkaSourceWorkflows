@@ -1,14 +1,16 @@
-.job-jumper-container {
+.grade-container {
     border: .5px solid;
-    font-weight:bold;
+    font-size: 15px;
+    font-weight: bold;
     padding: 0px 1px 0px 1px;
     margin: 0px 3px;
     display: inline-block;
 }
 
-.job-jumper-grade {
+.grade {
     padding: 0px 7px 0px 7px;
-    display: inline-block
+    display: inline-block;
+    font-size: 20px;
 }
 
 .blue {
@@ -17,4 +19,8 @@
 
 .green {
     color: green;
+}
+
+.red {
+    color: red;
 }

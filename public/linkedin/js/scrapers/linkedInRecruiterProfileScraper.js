@@ -1,4 +1,69 @@
 (() => {
+    const _displayMonthsUsingGrade = (element, monthsUsing) => {
+        if (monthsUsing) {
+            const grade = monthsUsing.grade;
+            const gpa = monthsUsing.gpa;
+
+            const container = $(document.createElement('div'))
+                            .attr('class', 'grade-container');
+
+            if (gpa > 3) {
+                $(container).addClass('green');
+            } else {
+                $(container).addClass('red');
+            }
+            // Append superscript J ... Cuz it looks cool
+            $(container).append($(document.createElement('sup')).text('M'));
+            // Append the grade
+            $(container).append($(document.createElement('div')).text(grade).attr('class', 'grade'));
+            // Append subscript J ... Cuz it looks cool
+            $(container).append($(document.createElement('sub')).text('U'));
+
+            $(element).append(container);
+        }
+    }
+
+    const  _displayStatisticGrades = (candidate) => {
+        if (candidate
+            && candidate.statistics
+            && candidate.statistics.grades){
+
+                let fullNameElement = $(linkedInSelectors.recruiterProfilePage.fullName);
+                if (!fullNameElement || fullNameElement.length === 0){
+                    tsCommon.log(`Unable to find Full Name Element for ${candidate.firstName} ${candidate.lastName}`, 'WARN');
+                    return;
+                }
+
+                fullNameElement = fullNameElement[0];
+                _displayMonthsUsingGrade(fullNameElement, candidate.statistics.grades.cumulativeMonthsUsing);
+                _displayWithinMonthsGrade(fullNameElement, candidate.statistics.grades.cumulativeWithinMonths);
+        }
+    }
+
+    const _displayWithinMonthsGrade = (element, withinMonths) => {
+        if (withinMonths) {
+            const grade = withinMonths.grade;
+            const gpa = withinMonths.gpa;
+
+            const container = $(document.createElement('div'))
+                            .attr('class', 'grade-container');
+
+            if (gpa > 3) {
+                $(container).addClass('green');
+            } else {
+                $(container).addClass('red');
+            }
+            // Append superscript J ... Cuz it looks cool
+            $(container).append($(document.createElement('sup')).text('M'));
+            // Append the grade
+            $(container).append($(document.createElement('div')).text(grade).attr('class', 'grade'));
+            // Append subscript J ... Cuz it looks cool
+            $(container).append($(document.createElement('sub')).text('U'));
+
+            $(element).append(container);
+        }
+    }
+
     const _getMemberId = () => {
         const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
         if (candidateContainer && candidateContainer.candidate){
@@ -53,6 +118,8 @@
             if (skillsFilter) {
                 statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter);
             }
+
+            _displayStatisticGrades(candidate);
 
             const container = searchResultsScraper.scrapedCandidates[candidate.memberId] || {};
             container.candidate = candidate;
