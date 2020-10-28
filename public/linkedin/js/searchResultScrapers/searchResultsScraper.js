@@ -7,10 +7,10 @@
     let _keepWalkingResultsPages = true;
     let _jobsGathered = {};
     let _user = null;
-    
+
     const  _displayJobJumperAnalysis = (candidate) => {
-        if (candidate 
-            && candidate.grades 
+        if (candidate
+            && candidate.grades
             && candidate.grades.jobJumper
             && candidate.grades.jobJumper.gpa > 2.5){
 
@@ -22,15 +22,24 @@
                 }
 
                 badge = badge[0];
-                const style = jumperGrade > 3 ? 'color:blue; font-weight:bold; display: inline-block' : 'color:green; display: inline-block';
 
-                const span = $(document.createElement('span'))
-                                .text(`JGrade: ${jumperGrade}`)
-                                .attr('class', 'jGrade')
-                                .attr('memberId', candidate.memberId)
-                                .attr('style', style);
+                const jobJumperContainer = $(document.createElement('div'))
+                                .attr('class', 'jGrade job-jumper-container')
+                                .attr('memberId', candidate.memberId);
 
-                $(badge).append(span);
+                if (jumperGrade > 3) {
+                    $(jobJumperContainer).addClass('blue');
+                } else {
+                    $(jobJumperContainer).addClass('green');
+                }
+                // Append superscript J ... Cuz it looks cool
+                $(jobJumperContainer).append($(document.createElement('sup')).text('J'));
+                // Append the grade
+                $(jobJumperContainer).append($(document.createElement('div')).text(jumperGrade).attr('class', 'job-jumper-grade'));
+                // Append subscript J ... Cuz it looks cool
+                $(jobJumperContainer).append($(document.createElement('sub')).text('J'));
+
+                $(badge).append(jobJumperContainer);
         }
     }
 
@@ -39,13 +48,13 @@
         const liTag = $(`#search-result-${candidate.memberId}`);
         tsCommon.extendWebElement(liTag);
         _pageLiTags[candidate.memberId] = liTag;
- 
+
         const profileLink = liTag.mineElementWhereClassContains('profile-link');
         candidate.linkedInRecruiterUrl = $(profileLink).attr("href");
 
         const imageTag = liTag.mineTag('img');
         candidate.imageUrl = imageTag ? $(imageTag).attr('src') : '';
- 
+
         const cityState = candidate.location ? candidate.location.split(',') : [""];
         candidate.city = cityState[0];
         candidate.state = cityState.length > 1 ? cityState[1].trim() : "";
@@ -63,22 +72,22 @@
             if (_user !== null){
                 candidate.alisonConnections[_user] = networkConnection;
             }
-        }        
-        
+        }
+
         //just search the headline for 'Actively Looking';
         if (candidate.headline && candidate.headline.length && !candidate.isJobSeeker){
-            const isJobSeekerTexts = ['seeking new opportunit', 
-                                        'seeking an opportun', 
-                                        'seeking opportunit', 
-                                        'seeking a opportunit', 
+            const isJobSeekerTexts = ['seeking new opportunit',
+                                        'seeking an opportun',
+                                        'seeking opportunit',
+                                        'seeking a opportunit',
                                         'seeking employment',
                                         'seeking entry ',
-                                        'currently seeking ', 
-                                        'actively seeking ', 
-                                        'actively looking ', 
-                                        'currently looking ', 
-                                        'opentowork', 
-                                        'open to work', 
+                                        'currently seeking ',
+                                        'actively seeking ',
+                                        'actively looking ',
+                                        'currently looking ',
+                                        'opentowork',
+                                        'open to work',
                                         'looking for new',
                                         'looking for a']
 
@@ -111,7 +120,7 @@
     }
 
     const _highlightIfCandidateIsJobSeeker = (candidate) => {
-        try {         
+        try {
             if (candidate.isJobSeeker || candidate.isActivelyLooking){
                 const styleColor = candidate.isJobSeeker ? 'color:orange' : 'color:firebrick';
                 const jobSeekerElement = tsUICommon.findFirstDomElement([`a[href*="${candidate.memberId}"]`, `a:contains("${candidate.fullName}")`]);
@@ -139,8 +148,8 @@
             // Do nothing
         }
 
-        let firstName =  null; 
-        let lastName = null; 
+        let firstName =  null;
+        let lastName = null;
 
         if (typeof searchFor === "string"){
             const firstAndLastName = searchFor.toLowerCase().split(' ');
@@ -156,7 +165,7 @@
 
         if (firstName !== null && firstName !== undefined && lastName !== null && lastName !== undefined){
             let candidateReference = null;
-        
+
              for(let k in scrapedCandidates) {
                 const c = scrapedCandidates[k].candidate;
                 const cFirstName = (c.firstName || '').toLowerCase();
@@ -219,7 +228,7 @@
 
         const justSkillNamesArray = commaSeparatedListOfWords.split(",").map(i => i.split(":")[0].trim())
         const keywordsCount = await _getCandidateKeywordCount(candidate, justSkillNamesArray.join());
-       
+
         const desiredCounts = commaSeparatedListOfWords.split(",").map(i => i.split(":").length > 1 ?  i.split(":")[1].trim() : 1)
         let result = true;
 
@@ -254,7 +263,7 @@
         if (seekers.length > 0){
             let names = seekers.map(s => `${s.firstName} ${s.lastName}`).join(', ');
             tsCommon.log(`# of seekers on this page ${seekers.length}. (${names})`);
-            
+
             for (let i=0; i<seekers.length; i++){
                 const candidate = seekers[i];
                 let alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
@@ -264,7 +273,7 @@
                     if (addToProject){
                         const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
                         const saveToProjectProjectButton = tsUICommon.findFirstDomElement([selector]);
-                        
+
                         if (saveToProjectProjectButton) {
                             saveToProjectProjectButton.click();
                             // eslint-disable-next-line no-await-in-loop
@@ -278,10 +287,10 @@
 
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(2000, 3000);
-                    
+
                     var href = "https://www.linkedin.com" + $(`#search-result-${candidate.memberId} a`).attr('href');
                     const candidateWindow = window.open(href);
-                   
+
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.waitTilTrue(() => {
                         //wait for linkedInRecruiterProfileScraper to exist.
@@ -325,7 +334,7 @@
         const totalPages = addToProjectConfiguration.totalPages || 41;
         console.log(`Will gather data for the for the next ${totalPages} number of pages`);
         let currentPage = 0;
-        
+
         while(currentPage < totalPages && _keepGatheringJobSeekerExperience){
             // eslint-disable-next-line no-await-in-loop
             await _gatherCurrentPageOfJobSeekersExperienceData(addToProjectConfiguration);
@@ -376,7 +385,7 @@
 
     const _interceptSearchResults = async (responseObj) => {
         searchResultsScraper.loadFromLocalStorage();
-        
+
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
         _pageCandidates = [];
@@ -391,7 +400,7 @@
 
             candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
-                
+
                 const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
                 const trimmedCandidate = _.omit(candidate, omitFields);
 
@@ -399,13 +408,13 @@
                 _cleanJobHistoryCompanyNames(trimmedCandidate);
 
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
-                
+
                 _pageCandidates.push(candidate);
 
                 if (!existingCachedCandidate){
                     trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
-                    
+
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
                     if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
                         trimmedCandidate.source = "RESULT_LIST";
@@ -432,7 +441,7 @@
 
             const companyAnalytics = positionAnalyzer.createCompanyAverageDurationObject(candidatesInResults);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
-            
+
             $('.badges abbr').bind("click", (e) => {
                 const element = $(e.currentTarget);
 
@@ -444,7 +453,7 @@
 
                 const candidateMemberId = $('li').has(element).attr('id').replace('search-result-', '')
                 const container = searchResultsScraper.scrapedCandidates[candidateMemberId];
-                
+
                 if (container !== undefined){
                     const candidate = container.candidate;
                     container.isSelected = !isRed;
@@ -498,7 +507,7 @@
 
     class SearchResultsScraper {
         scrapedCandidates = {};
-        
+
         constructor(){
             try {
                this.loadFromLocalStorage();
@@ -509,7 +518,7 @@
         }
 
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
-        
+
         getScrapedCandidateCount = () => {
             let result = 0;
             for (let k in this.scrapedCandidates){
@@ -559,8 +568,8 @@
             }
             else {
                 window.localStorage.setItem(_localStorageLastCandidateProfile, '{}');
-            }        
-            
+            }
+
             return candidateContainer;
         }
 
@@ -582,7 +591,7 @@
 
             let onlyJobSeekers = _filterDefaultCandidatesToPersistToLocalStorage(this.scrapedCandidates, daysOld);
             const jsonString = JSON.stringify(onlyJobSeekers);
-            
+
             try {
                 window.localStorage.setItem(_localStorageItemName, jsonString);
             }
