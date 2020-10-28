@@ -229,26 +229,30 @@
                         skillStatistics.grades = {};
                         const filterSkill = filter.skills[skill];
 
-                        // Set a default if missing or value is undefined
-                        if (filterSkill.monthsUsing === undefined) {
-                            filterSkill.monthsUsing = 0;
-                        }
-                        const monthsUsingGpa = gradeUtil.calculateGpa(filterSkill.monthsUsing, skillStatistics.monthsOfUse);
-                        allMonthsUsingGpas.push(monthsUsingGpa);
-                        skillStatistics.grades.monthsUsing  = {
-                            gpa: monthsUsingGpa,
-                            grade: gradeUtil.getGrade(monthsUsingGpa)
+                        if (skillStatistics.monthsOfUse !== undefined && !isNaN(skillStatistics.monthsOfUse)) {
+                            // Set a default if missing or value is undefined
+                            if (filterSkill.monthsUsing === undefined) {
+                                filterSkill.monthsUsing = 0;
+                            }
+                            const monthsUsingGpa = gradeUtil.calculateGpa(filterSkill.monthsUsing, skillStatistics.monthsOfUse);
+                            allMonthsUsingGpas.push(monthsUsingGpa);
+                            skillStatistics.grades.monthsUsing  = {
+                                gpa: monthsUsingGpa,
+                                grade: gradeUtil.getGrade(monthsUsingGpa)
+                            }
                         }
 
-                        // Set a default if missing or value is undefined
-                        if (filterSkill.withinMonths === undefined) {
-                            filterSkill.withinMonths = 0;
-                        }
-                        const withinMonthsGpa = gradeUtil.calculateGpa(filterSkill.withinMonths, skillStatistics.monthsSinceLastUse, true);
-                        allWithinMonthsGpas.push(withinMonthsGpa);
-                        skillStatistics.grades.withinMonths = {
-                            gpa: withinMonthsGpa,
-                            grade: gradeUtil.getGrade(withinMonthsGpa)
+                        if (skillStatistics.monthsSinceLastUse !== undefined && !isNaN(skillStatistics.monthsSinceLastUse)) {
+                            // Set a default if missing or value is undefined
+                            if (filterSkill.withinMonths === undefined) {
+                                filterSkill.withinMonths = 0;
+                            }
+                            const withinMonthsGpa = gradeUtil.calculateGpa(filterSkill.withinMonths, skillStatistics.monthsSinceLastUse, true);
+                            allWithinMonthsGpas.push(withinMonthsGpa);
+                            skillStatistics.grades.withinMonths = {
+                                gpa: withinMonthsGpa,
+                                grade: gradeUtil.getGrade(withinMonthsGpa)
+                            }
                         }
                     }
                 }

@@ -47,6 +47,13 @@
             // Process Statistics
             candidate.statistics = statistician.processStatistics(candidate);
 
+            // Calculate Skill Statistics Grades
+            const skillsStatisticsList = [candidate.statistics];
+            const skillsFilter = tsUICommon.getItemLocally('TSSkillGPAFilter');
+            if (skillsFilter) {
+                statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter);
+            }
+
             const container = searchResultsScraper.scrapedCandidates[candidate.memberId] || {};
             container.candidate = candidate;
             searchResultsScraper.scrapedCandidates[candidate.memberId] = container;
