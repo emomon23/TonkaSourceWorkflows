@@ -16,7 +16,8 @@
             } else if (actualValue === 0) {
                 return 4.00;
             } else {
-                return _getWeightedGpa(((targetValue ===0) ? 1 : targetValue / actualValue) * 100);
+                targetValue = (targetValue === 0) ? 1: targetValue
+                return _getWeightedGpa((targetValue / actualValue) * 100);
             }
         } else {
             if (actualValue >= targetValue) {
