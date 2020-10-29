@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.582
+// @version      0.626
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -10,9 +10,7 @@
 // @include      https://linkedin.com/*
 // @require      http://code.jquery.com/jquery-latest.js
 
-// @ignore       --- TONKA SOURCE WORKFLOWS ---
-// @resource     LINKEDIN_CSS https://tonkasourceworkflows.firebaseapp.com/linkedin/css/linkedIn.css
-
+//               --- TONKA SOURCE WORKFLOWS ---
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsConstants.js
@@ -44,8 +42,6 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/tsCommand.js
 
-// @ignore      LINKEDIN_CSS https://localhost:5001/linkedin/css/linkedIn.css
-
 // @ignore      http://localhost:5001/js/tsHttpInterceptor.js
 // @ignore      http://localhost:5001/js/promiseLoop.js
 // @ignore      http://localhost:5001/js/tsConstants.js
@@ -76,17 +72,53 @@
 // @ignore      http://localhost:5001/linkedin/js/linkedInApp.js
 // @ignore      http://localhost:5001/linkedin/js/tsCommand.js
 
-// @grant       GM_getResourceText
-// @grant       GM_addStyle
-
+// @grant       none
 // ==/UserScript==
 
 (() => {
     'use strict';
 
-    const my_css = GM_getResourceText("LINKEDIN_CSS");
-    GM_addStyle(my_css);
+    // ADD CSS
+    const css = `
+.profile-grade-container {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.grade-container {
+    border: .5px solid;
+    font-size: 15px;
+    font-weight: bold;
+    padding: 0px 1px 0px 1px;
+    margin: 0px 3px;
+    display: inline-block;
+}
+
+.grade {
+    padding: 0px 7px 0px 7px;
+    display: inline-block;
+    font-size: 20px;
+}
+
+.blue {
+    color: blue;
+}
+
+.green {
+    color: green;
+}
+
+.red {
+    color: red;
+}
+`;
+
+    var newNode = document.createElement('style');
+    newNode.textContent = css;
+    var targ = document.getElementsByTagName ('head')[0] || D.body || D.documentElement;
+    targ.appendChild (newNode);
+    // END CSS
 
     console.log("Tamper Monkey: LinkedIn Recruiter Parser user script running...");
-
 })();

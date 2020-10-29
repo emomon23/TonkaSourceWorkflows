@@ -29,14 +29,20 @@
             && candidate.statistics.grades){
 
                 let fullNameElement = $(linkedInSelectors.recruiterProfilePage.fullName);
+                fullNameElement = $('div[class*="primary-module"]');
                 if (!fullNameElement || fullNameElement.length === 0){
                     tsCommon.log(`Unable to find Full Name Element for ${candidate.firstName} ${candidate.lastName}`, 'WARN');
                     return;
                 }
 
                 fullNameElement = fullNameElement[0];
-                _displayMonthsUsingGrade(fullNameElement, candidate.statistics.grades.cumulativeMonthsUsing);
-                _displayWithinMonthsGrade(fullNameElement, candidate.statistics.grades.cumulativeWithinMonths);
+                const newDiv = document.createElement("div");
+                $(newDiv).attr('class', "profile-grade-container");
+
+                _displayMonthsUsingGrade(newDiv, candidate.statistics.grades.cumulativeMonthsUsing);
+                _displayWithinMonthsGrade(newDiv, candidate.statistics.grades.cumulativeWithinMonths);
+
+                fullNameElement.append(newDiv);
         }
     }
 
