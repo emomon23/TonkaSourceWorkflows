@@ -31,6 +31,7 @@
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
+        launchInMailBlaster = _launchInMailBlaster;
     }
 
     window.tsCommand = new TSCommand();

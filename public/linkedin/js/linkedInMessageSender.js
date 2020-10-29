@@ -162,7 +162,7 @@
             const sendMessageDialog = await _getSendInmailModalControls();
             $(sendMessageDialog.subject).text(subject);
             $(sendMessageDialog.body).text(bodyString);
-            $(sendMessageDialog.send).click();
+           // $(sendMessageDialog.send).click();
         }
     }
 
@@ -185,18 +185,15 @@
         return __navigateToPage(linkedInSelectors.projectPipeLinePage.navigation);
     }
 
-    const _navigateToPageOne = () => {
-        return __navigateToPage(linkedInSelectors.projectPipeLinePage.navigationPage1);
-    }
-
     const _getSendInMailMemberIdsForThisProjectPipelinePage = () => {
         const rows = $(linkedInSelectors.projectPipeLinePage.pipelineRows);
+        const result = [];
 
         for (let i=0; i<rows.length; i++){
             const rowBtns = $(linkedInSelectors.projectPipeLinePage.sendInMailButtons);
             if (rowBtns && rowBtns.length){
-                const isVisible = $(rowBtns[0]).is(':visible');
-                const isEnabled = !$(rowBtns[0]).is(':disabled');
+                const isVisible = $(rowBtns[i]).is(':visible');
+                const isEnabled = !$(rowBtns[i]).is(':disabled');
 
                 if (isVisible && isEnabled){
                     const memberId = $(rowBtns[i]).attr('data-prospect-id');
@@ -204,7 +201,7 @@
                         tsCommon.log(`memberId is not numeric for data-prospect-id as expected.  memberId: ${memberId}`, 'ERROR');
                     }
                     else {
-                        const h3 = $(rowBtns[0]).find('h3[class*="name"]')[0];
+                        const h3 = $(rows[i]).find('h3[class*="name"]')[0];
                         let name = '';
                         if (h3){
                             name = $(h3).attr('title');
@@ -240,9 +237,9 @@
 
         for(let i=0; i<memberIdsAndNames.length; i++) {
             try {
-                const memberId = memberIdsAndNames.memberId;
+                const memberId = memberIdsAndNames[i].memberId;
 
-                const msg = _replaceNameOnBody(body, memberIdsAndNames.name);
+                const msg = _replaceNameOnBody(body, memberIdsAndNames[i].name);
                 _sendInMail(memberId, subject, msg);
 
                 // eslint-disable-next-line no-await-in-loop
@@ -254,8 +251,8 @@
     }
 
     const _blastProjectPipeline = async(subject, body) => {
-        //linkedInSelectors.projectPipeLinePage.navigationNextPage
-        let navigationSuccess = _navigateToPageOne();
+
+        let navigationSuccess = true;
         while (navigationSuccess){
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.sleep(3000);

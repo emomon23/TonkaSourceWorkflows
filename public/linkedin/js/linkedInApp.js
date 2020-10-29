@@ -245,7 +245,7 @@
 
     const _fireInMailBlast = (subjectBody) => {
         const {subject, body} = subjectBody;
-       // linkedInMessageSender.blastProjectPipeline(subject, body);
+        linkedInMessageSender.blastProjectPipeline(subject, body);
     }
 
     class LinkedInApp {
