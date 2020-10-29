@@ -223,10 +223,9 @@
         if (flName){
             const firstName = flName[0];
             let result = body;
-            firstNameTags = ['\[firstname\]','\[first_name\]','\[first-name\]'];
+            regExArray = [/\[firstname\]/gi, /\[first_name\]/gi, /\[first-name\]/gi];
 
-            firstNameTags.forEach((tag) => {
-                const regEx = new RegExp(tag, 'gi');
+            regExArray.forEach((regEx) => {
                 result = result.replace(regEx, firstName);
             });
 
