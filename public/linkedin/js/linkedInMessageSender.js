@@ -249,7 +249,8 @@
                 const memberId = memberIdsAndNames[i].memberId;
 
                 const msg = _replaceNameOnBody(body, memberIdsAndNames[i].name);
-                _sendInMail(memberId, subject, msg);
+                // eslint-disable-next-line no-await-in-loop
+                await _sendInMail(memberId, subject, msg);
 
                 // eslint-disable-next-line no-await-in-loop
                 await tsCommon.randomSleep(8000, 12000);
