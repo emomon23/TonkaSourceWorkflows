@@ -165,8 +165,12 @@
                 await tsCommon.sleep(2000);
                 $(sendMessageDialog.send).click();
                 await tsCommon.sleep(4000);
+
+                return true;
             }
         }
+
+        return false;
     }
 
     const __navigateToPage = (selector) => {
@@ -239,21 +243,28 @@
         const whatPageAmIOn = linkedInCommon.whatPageAmIOn();
         if (whatPageAmIOn !== linkedInConstants.pages.PROJECT_PIPELINE){
             console.log("*** CAN'T Blast pipline from this page");
-            return false;
+            return;
         }
 
         const memberIdsAndNames = _getSendInMailMemberIdsForThisProjectPipelinePage();
+        const count = memberIdsAndNames ? memberIdsAndNames.length : 0;
+
+        console.log(`There are ${count} candidates on this pipeline page to send blasts to`);
 
         for(let i=0; i<memberIdsAndNames.length; i++) {
             try {
                 const memberId = memberIdsAndNames[i].memberId;
+                const name = memberIdsAndNames[i].name;
 
-                const msg = _replaceNameOnBody(body, memberIdsAndNames[i].name);
+                const msg = _replaceNameOnBody(body, name);
                 // eslint-disable-next-line no-await-in-loop
-                await _sendInMail(memberId, subject, msg);
+                if (await _sendInMail(memberId, subject, msg)){
+                    console.log(`sent in mail to ${name}`);
+                }
 
                 // eslint-disable-next-line no-await-in-loop
                 await tsCommon.randomSleep(8000, 12000);
+
             } catch(e) {
                 tsCommon.log(`_blastCurrentProjectPipeline. memberId: ${memberId}.  error: ${e.message}`);
             }
@@ -270,6 +281,8 @@
             await _blastCurrentProjectPipelinePage(subject, body);
             navigationSuccess = _navigateToNextPage();
         }
+
+        console.log(`DONE - Blasting Project Pipeline`);
     }
 
     class LinkedInMessageSender {
