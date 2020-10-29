@@ -1,5 +1,4 @@
 (() => {
-    const url = `${tsConstants.FUNCTIONS_URL}/fs?page=js/statisticianLogic.js`;
     let processedSkillStatistics = {};
 
     const _assumptionForMonthsOfUse = (jobStatistics, skillStatistics) => {
@@ -257,13 +256,14 @@
                         skillStatistics.grades = {};
                         const filterSkill = filter.skills[skill];
 
-                        if (!skillStatistics.monthsOfUse || !isNaN(skillStatistics.monthsOfUse)) {
+                        if (!skillStatistics.monthsOfUse || isNaN(skillStatistics.monthsOfUse)) {
                             skillStatistics.monthsOfUse = _assumptionForMonthsOfUse(contactStatisticsList[i].jobStatistics, skillStatistics);
                         }
                         // Set a default if missing or value is undefined
                         if (filterSkill.monthsUsing === undefined) {
                             filterSkill.monthsUsing = 0;
                         }
+
                         const monthsUsingGpa = gradeUtil.calculateGpa(filterSkill.monthsUsing, skillStatistics.monthsOfUse);
                         allMonthsUsingGpas.push(monthsUsingGpa);
                         skillStatistics.grades.monthsUsing  = {
@@ -271,10 +271,9 @@
                             grade: gradeUtil.getGrade(monthsUsingGpa)
                         }
 
-                        if (skillStatistics.monthsSinceLastUse === undefined || !isNaN(skillStatistics.monthsSinceLastUse)) {
+                        if (skillStatistics.monthsSinceLastUse === undefined || isNaN(skillStatistics.monthsSinceLastUse)) {
                             skillStatistics.monthsSinceLastUse = _assumptionForMonthsSinceLastUse(contactStatisticsList[i].jobStatistics, skillStatistics);
                         }
-
                         // Set a default if missing or value is undefined
                         if (filterSkill.withinMonths === undefined) {
                             filterSkill.withinMonths = 0;
@@ -286,14 +285,16 @@
                             grade: gradeUtil.getGrade(withinMonthsGpa)
                         }
                     } else {
-                        skillStatistics.grades = {
-                            monthsUsing: {
-                                gpa: 0,
-                                grade: 'F'
-                            },
-                            withinMonths: {
-                                gpa: 0,
-                                grade: 'F'
+                        contactSkillsStatistics[skill] = {
+                            grades: {
+                                monthsUsing: {
+                                    gpa: 0,
+                                    grade: 'F'
+                                },
+                                withinMonths: {
+                                    gpa: 0,
+                                    grade: 'F'
+                                }
                             }
                         };
                     }
