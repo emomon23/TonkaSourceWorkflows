@@ -14,7 +14,8 @@
         saveButton: 'div[class*="profile-actions"] button[class*="save-btn"]',
         skillsList: '#profile-skills div ul[class*="skills"]',
         aboutSummary: '#profile-summary',
-        experienceSection: '#profile-experience'
+        experienceSection: '#profile-experience',
+        topCard: 'div[class*="primary-module"]'
     }
 
     const _searchResultsPage = {
@@ -23,7 +24,7 @@
         searchFilterCategories: 'ul[class*="pill"]',
         searchFilterValues: 'span[class*="pill-text"]'
     }
-    
+
     const _publicProfilePage = {
         CONTACT_INFO_LINK: 'a[data-control-name*="contact_see_more"]',
         connectionRequestModal : {
@@ -41,7 +42,7 @@
             leftActionSection: 'div[class*="msg-form__left-actions"]',
             activeMessageModalHeader: 'h4 span',
             memberProfileFullNameSelectors: ['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")'],
-            multipleMessageRecipientPills: 'span[class*="artdeco-pill__text"]',      
+            multipleMessageRecipientPills: 'span[class*="artdeco-pill__text"]',
         },
 
         experience: {
@@ -85,7 +86,7 @@
         candidateName: 'h3[class*="name"] a',
         tab: 'li[role*="presentation"] button[role*="tab"]'
     }
-    
+
     class LinkedInSelectors {
         contactInfoPage = _contactInfoPage;
         recruiterProfilePage = _recruiterProfilePage;

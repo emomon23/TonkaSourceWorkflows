@@ -1,72 +1,18 @@
 (() => {
-    const _displayMonthsUsingGrade = (element, monthsUsing) => {
-        if (monthsUsing) {
-            const grade = monthsUsing.grade;
-            const gpa = monthsUsing.gpa;
-
-            const container = $(document.createElement('div'))
-                            .attr('class', 'grade-container');
-
-            if (gpa >= gradeUtil.getGpa('B-')) {
-                $(container).addClass('green');
-            } else {
-                $(container).addClass('red');
-            }
-            // Append superscript J ... Cuz it looks cool
-            $(container).append($(document.createElement('sup')).text('M'));
-            // Append the grade
-            $(container).append($(document.createElement('div')).text(grade).attr('class', 'grade'));
-            // Append subscript J ... Cuz it looks cool
-            $(container).append($(document.createElement('sub')).text('U'));
-
-            $(element).append(container);
-        }
-    }
-
     const  _displayStatisticGrades = (candidate) => {
         if (candidate
             && candidate.statistics
             && candidate.statistics.grades){
 
-                let fullNameElement = $(linkedInSelectors.recruiterProfilePage.fullName);
-                fullNameElement = $('div[class*="primary-module"]');
-                if (!fullNameElement || fullNameElement.length === 0){
-                    tsCommon.log(`Unable to find Full Name Element for ${candidate.firstName} ${candidate.lastName}`, 'WARN');
-                    return;
-                }
+                const topCardElement = $(linkedInSelectors.recruiterProfilePage.topCard)[0];
 
-                fullNameElement = fullNameElement[0];
                 const newDiv = document.createElement("div");
                 $(newDiv).attr('class', "profile-grade-container");
 
-                _displayMonthsUsingGrade(newDiv, candidate.statistics.grades.cumulativeMonthsUsing);
-                _displayWithinMonthsGrade(newDiv, candidate.statistics.grades.cumulativeWithinMonths);
+                linkedInCommon.displayGrade('Months Using', newDiv, candidate.statistics.grades.cumulativeMonthsUsing);
+                linkedInCommon.displayGrade('Within Months', newDiv, candidate.statistics.grades.cumulativeWithinMonths);
 
-                fullNameElement.append(newDiv);
-        }
-    }
-
-    const _displayWithinMonthsGrade = (element, withinMonths) => {
-        if (withinMonths) {
-            const grade = withinMonths.grade;
-            const gpa = withinMonths.gpa;
-
-            const container = $(document.createElement('div'))
-                            .attr('class', 'grade-container');
-
-            if (gpa >= gradeUtil.getGpa('B-')) {
-                $(container).addClass('green');
-            } else {
-                $(container).addClass('red');
-            }
-            // Append superscript J ... Cuz it looks cool
-            $(container).append($(document.createElement('sup')).text('W'));
-            // Append the grade
-            $(container).append($(document.createElement('div')).text(grade).attr('class', 'grade'));
-            // Append subscript J ... Cuz it looks cool
-            $(container).append($(document.createElement('sub')).text('M'));
-
-            $(element).append(container);
+                topCardElement.append(newDiv);
         }
     }
 

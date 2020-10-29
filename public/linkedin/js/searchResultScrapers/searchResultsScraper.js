@@ -14,33 +14,15 @@
             && candidate.grades.jobJumper
             && candidate.grades.jobJumper.gpa > 2.5){
 
-                const jumperGpa = candidate.grades.jobJumper.gpa;
-                const jumperGrade = candidate.grades.jobJumper.grade;
-                let badge = $(`#search-result-${candidate.memberId}`).find(linkedInSelectors.searchResultsPage.BADGES);
-                if (!badge || badge.length === 0){
-                    tsCommon.log(`Unable to find badge for ${candidate.firstName} ${candidate.lastName}`, 'WARN');
-                    return;
-                }
+                let searchResult = $(`#search-result-${candidate.memberId}`);
 
-                badge = badge[0];
+                searchResult = searchResult[0];
 
-                const jobJumperContainer = $(document.createElement('div'))
-                                .attr('class', 'jGrade grade-container')
-                                .attr('memberId', candidate.memberId);
+                const newDiv = document.createElement("div");
+                $(newDiv).attr('class', "profile-grade-container");
+                linkedInCommon.displayGrade('Job Jumper', newDiv, candidate.grades.jobJumper, [ { name: 'memberId', value: candidate.memberId }]);
 
-                if (jumperGpa > 3) {
-                    $(jobJumperContainer).addClass('green');
-                } else {
-                    $(jobJumperContainer).addClass('red');
-                }
-                // Append superscript J ... Cuz it looks cool
-                $(jobJumperContainer).append($(document.createElement('sup')).text('J'));
-                // Append the grade
-                $(jobJumperContainer).append($(document.createElement('div')).text(jumperGrade).attr('class', 'grade'));
-                // Append subscript J ... Cuz it looks cool
-                $(jobJumperContainer).append($(document.createElement('sub')).text('J'));
-
-                $(badge).append(jobJumperContainer);
+                $(searchResult).prepend(newDiv);
         }
     }
 

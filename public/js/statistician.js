@@ -3,7 +3,6 @@
     let processedSkillStatistics = {};
 
     const _assumptionForMonthsOfUse = (jobStatistics, skillStatistics) => {
-
         if (skillStatistics.isInSummary) {
             // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within their current position
             if (jobStatistics && jobStatistics.current) {

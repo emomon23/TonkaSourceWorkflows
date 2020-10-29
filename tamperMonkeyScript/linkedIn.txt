@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.626
+// @version      0.635
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -84,21 +84,28 @@
     width: 100%;
     margin: 0 auto;
     text-align: center;
+    line-height: 13px;
+    padding: 3px;
 }
 
 .grade-container {
     border: .5px solid;
     font-size: 15px;
     font-weight: bold;
-    padding: 0px 1px 0px 1px;
+    padding: 1px;
     margin: 0px 3px;
     display: inline-block;
+    text-align: center;
 }
 
 .grade {
     padding: 0px 7px 0px 7px;
     display: inline-block;
     font-size: 20px;
+}
+
+.grade-label {
+    font-size: 7px;
 }
 
 .blue {
