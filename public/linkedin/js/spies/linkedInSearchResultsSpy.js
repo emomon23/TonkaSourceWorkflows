@@ -1,6 +1,38 @@
 (() => {
-    const _bindToRecruiterProfileLinks = async() => {
+    const _bindToElements = async() => {
         await tsCommon.sleep(1000);
+        _bindToRecruiterProfileLinks();
+
+        _bindToJumperGradeRollOver();
+    }
+
+    const _bindToJumperGradeRollOver = async () => {
+        //wait for the jGrades to render
+        let jGrades = null;
+        for(let i=0; i<20; i++){
+            jGrades = $('.jGrade');
+            if (jGrades.length > 0){
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(1000);
+                break;
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(500);
+        }
+
+        if (jGrades.length > 0){
+            jGrades = jGrades.toArray();
+            jGrades.forEach((jg) => {
+                const memberId = $(jg).attr('memberId');
+                const candidate = searchResultsScraper.findCandidate(memberId);
+                const title = candidate && candidate.technicalYearString ? candidate.technicalYearString : 'none';
+                $(jg).attr('title', title);
+            })
+        }
+    }
+
+    const _bindToRecruiterProfileLinks = async() => {
         const profileLinks = $('a[href*="/recruiter/profile/"]');
 
         $(profileLinks).bind('click', (e) => {
@@ -25,7 +57,7 @@
 
     $(document).ready(() => {
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS) {
-            _bindToRecruiterProfileLinks();
+           _bindToElements();    
         }
     })
 })();

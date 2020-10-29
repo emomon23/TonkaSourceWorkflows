@@ -1,4 +1,21 @@
 (() => {
+    const  _displayStatisticGrades = (candidate) => {
+        if (candidate
+            && candidate.statistics
+            && candidate.statistics.grades){
+
+                const topCardElement = $(linkedInSelectors.recruiterProfilePage.topCard)[0];
+
+                const newDiv = document.createElement("div");
+                $(newDiv).attr('class', "profile-grade-container");
+
+                linkedInCommon.displayGrade('Months Using', newDiv, candidate.statistics.grades.cumulativeMonthsUsing);
+                linkedInCommon.displayGrade('Within Months', newDiv, candidate.statistics.grades.cumulativeWithinMonths);
+
+                topCardElement.append(newDiv);
+        }
+    }
+
     const _getMemberId = () => {
         const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
         if (candidateContainer && candidateContainer.candidate){
@@ -26,12 +43,12 @@
             // Scrape Public Profile
             candidate.linkedIn = _scrapePublicProfileLink();
             candidate.rawExperienceText = $(linkedInSelectors.recruiterProfilePage.experienceSection).text().replace('Experience', '');
-       
+
             const summaryElement = $(linkedInSelectors.recruiterProfilePage.aboutSummary);
             if (summaryElement && summaryElement.length > 0){
                 candidate.summary = $(summaryElement).text().replace('Summary', '').trim();
             }
-            
+
             // Scrape skills
             candidate.linkedInSkills = _scrapeSkills();
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
@@ -40,11 +57,26 @@
             if (tagString && tagString.length > 0){
                 candidate.tags+= `,${tagString}`;
             }
-            
+
             linkedInRecruiterFilter.analyzeCandidateProfile(candidate);
-            
             await linkedInApp.upsertContact(candidate);
-            searchResultsScraper.scrapedCandidates[candidate.memberId].candidate = candidate;
+
+            // Process Statistics
+            candidate.statistics = statistician.processStatistics(candidate);
+
+            // Calculate Skill Statistics Grades
+            const skillsStatisticsList = [candidate.statistics];
+            const skillsFilter = tsUICommon.getItemLocally('TSSkillGPAFilter');
+            if (skillsFilter) {
+                statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter, false);
+            }
+
+            _displayStatisticGrades(candidate);
+
+            const container = searchResultsScraper.scrapedCandidates[candidate.memberId] || {};
+            container.candidate = candidate;
+            searchResultsScraper.scrapedCandidates[candidate.memberId] = container;
+
         }
 
         return candidate;
@@ -57,13 +89,13 @@
         let rawDuration = $(element).text().split('(').join('').split(')').join('');
 
         let years = rawDuration.indexOf('year') >= 0 ? rawDuration.split('year')[0].trim() : 0;
-        
+
         let months = 0;
         if (rawDuration.indexOf('month') >= 0){
             const parts = rawDuration.split(' ');
             months = parts[parts.length -2].trim();
         }
-      
+
         const result = {
             years: Number.parseInt(years),
             months: Number.parseInt(months),
@@ -84,16 +116,16 @@
         dateParts[1] = dateParts[1].trim();
         durationData.isPresent = dateParts[1] === 'Present';
         durationData.endDate = durationData.isPresent === true ? new Date() : new Date(dateParts[1]);
-        
+
         const dateTo = new Date();
-        durationData.ageOfPositionInMonths = dateTo.getMonth() - durationData.endDate.getMonth() + 
+        durationData.ageOfPositionInMonths = dateTo.getMonth() - durationData.endDate.getMonth() +
         (12 * (dateTo.getFullYear() - durationData.endDate.getFullYear()));
     }
 
     const _scrapeOutJobExperiences = () => {
         const professionalExperienceListItems = $('#profile-experience li[class*="position"]').toArray();
         const result = [];
-        
+
         professionalExperienceListItems.forEach((li) => {
             const job = {};
             job.title = $(li).find("h4").text();
@@ -104,10 +136,10 @@
             const durationData = _scrapeOutDurationFromHtmlElement(durationElement);
             const dateRangeElement = $(li).find('p[class*="date-range"]');
             _scrapeOutAndAppendStartDateAndEndDate(dateRangeElement, durationData);
-            
+
             job.startDateMonth = durationData.startDateMonth;
             job.startDateYear = durationData.startDateYear;
-            
+
             if (!durationData.isPresent){
                 job.endDateMonth = durationData.endDateMonth;
                 job.endDateYear = durationData.endDateYear;
@@ -122,19 +154,19 @@
 
     const _mergeCandidatePositionsWithScrapedJobExperience = (candidate) => {
         /* [{
-            title, 
-            companyName, 
-            description: (open text), 
+            title,
+            companyName,
+            description: (open text),
             durationData: { years: months: totalMonthsOnJob: startDate, endDate, startDateMonth, startDateYear, ageOfPositionInMonths: (0 = present)}
             }]
         */
         const jobExperiences = _scrapeOutJobExperiences();
         jobExperiences.forEach((scrapedExperience) => {
             const jobPosition = candidate.positions.find((p) => {
-                return p.companyName === scrapedExperience.companyName 
-                        && p.startDateMonth === scrapedExperience.startDateMonth 
+                return p.companyName === scrapedExperience.companyName
+                        && p.startDateMonth === scrapedExperience.startDateMonth
                 });
-                
+
             if (jobPosition){
                 jobPosition.description = scrapedExperience.description;
             }

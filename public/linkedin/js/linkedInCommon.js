@@ -28,6 +28,31 @@
         }
     }
 
+    const _displayGrade = (label, element, gradeObj, attrs = []) => {
+        if (gradeObj) {
+            const grade = gradeObj.grade;
+            const gpa = gradeObj.gpa;
+
+            const container = $(document.createElement('div'))
+                            .attr('class', 'grade-container');
+
+            // Add additional attributes to the container
+            attrs.forEach(attr => $(container).attr(attr.name, attr.value))
+
+            if (gpa >= gradeUtil.getGpa('B-')) {
+                $(container).addClass('green');
+            } else {
+                $(container).addClass('red');
+            }
+            // Append superscript J ... Cuz it looks cool
+            $(container).append($(document.createElement('div')).text(label).attr('class','grade-label'));
+            // Append the grade
+            $(container).append($(document.createElement('div')).text(grade).attr('class', 'grade'));
+
+            $(element).append(container);
+        }
+    }
+
     const _getRoleName = (roleName) => {
         if (linkedInConstants.roles[roleName.toUpperCase()]) {
             return linkedInConstants.roles[roleName.toUpperCase()];
@@ -89,10 +114,11 @@
         constructor() {}
 
         advanceToNextLinkedInResultPage = _advanceToNextLinkedInResultPage;
-        getRoleName = _getRoleName;
         callAlisonHookWindow = _callAlisonHookWindow;
-        whatPageAmIOn = _whatPageAmIOn;
+        displayGrade = _displayGrade;
+        getRoleName = _getRoleName;
         parseJobDurationDateRangeString = _parseJobDurationDateRangeString;
+        whatPageAmIOn = _whatPageAmIOn;
     }
 
     window.linkedInCommon = new LinkedInCommon();

@@ -2,36 +2,206 @@
     const url = `${tsConstants.FUNCTIONS_URL}/fs?page=js/statisticianLogic.js`;
     let processedSkillStatistics = {};
 
-    const _adjustForOverlappingPositions = (positions) => {
-        for (let k in positions) {
-            const pos1 = positions[k];
-            for (let l in positions) {
-                const pos2 = positions[l];
-                if (pos1 !== pos2) {
-                    const pos1StartDate = _createDateFromMonthAndYear(pos1.startDateMonth, pos1.startDateYear);
-                    const pos1EndDate = _createDateFromMonthAndYear(pos1.endDateMonth, pos1.endDateYear);
-                    const pos2StartDate = _createDateFromMonthAndYear(pos2.startDateMonth, pos2.startDateYear);
-                    
-                    if (pos2StartDate < pos1EndDate && pos2StartDate > pos1StartDate) {
-                        pos1.endDateMonth = pos2StartDate.getMonth()+1;
-                        pos1.endDateYear = pos2StartDate.getFullYear();
-                    }
+    const _assumptionForMonthsOfUse = (jobStatistics, skillStatistics) => {
+        if (skillStatistics.isInSummary) {
+            // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within their current position
+            if (jobStatistics && jobStatistics.current) {
+                return Number.parseInt(jobStatistics.current / 0.083);
+            }
+            // Don't have a current position, so lets then default this skill to 24 months of use
+            return 24;
+        } else if (skillStatistics.isInSelfAssessedSkills) {
+            // Candidate has made claims they have this skill, we'll give them 12 months for this
+            // Should update stats so this returns "Years of Use" that we collect, then we can just set it to that value
+            return 12;
+        } else if (skillStatistics.isInLinkedInSkills) {
+            // Candidate has this listed in their Linked IN skills section, maybe they've used it a ton, maybe they've read about it or have dabbled,  Let's only give them credit for 6 months.
+            return 6;
+        }
+        return 0;
+    }
+
+    const _assumptionForMonthsSinceLastUse = (jobStatistics, skillStatistics) => {
+        if (skillStatistics.isInSummary) {
+            // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within 3 months, just so it's not an A grade
+            return 3;
+        } else if (skillStatistics.isInSelfAssessedSkills) {
+            // Candidate has made claims they have this skill, we'll say they've used it within the last 5 years
+            // Should update stats so this returns "Years of Use" that we collect, then we can just set it to that value
+            return 60;
+        } else if (skillStatistics.isInLinkedInSkills) {
+            // Candidate has this listed in their Linked IN skills section, maybe they've used it a ton, maybe they've read about it or have dabbled,  Let's say within 5 years
+            return 60;
+        }
+        return 9999;
+    }
+
+    const _cleanContactPositions = (positions) => {
+        _adjustPositionsWhenRolesChange(positions);
+    }
+
+    const _adjustPositionsWhenRolesChange = (positions) => {
+        if (positions) {
+            for (let k = positions.length - 1; k >= 1; k--) {
+                const pos1 = positions[k-1];
+                const pos2 = positions[k];
+
+                if (pos1.companyId === pos2.companyId) {
+                    pos1.startDateMonth = pos2.startDateMonth;
+                    pos1.startDateYear = pos2.startDateYear;
+                    pos1.description += ' ' + pos2.description;
+                    pos1.title += ' ' + pos2.title;
+                    positions.splice(k,1);
                 }
+            }
+        }
+        return true;
+    }
+
+    const _calculateJobJumperGrade = (contactJobStatistics) => {
+        let jobJumper = {
+            gpa: 0,
+            grade: gradeUtil.getGrade(0)
+        };
+
+        if (contactJobStatistics) {
+            if (contactJobStatistics.average) {
+                // If we have an average, lets compare current to it
+                jobJumper.gpa = gradeUtil.calculateGpa(contactJobStatistics.average, contactJobStatistics.current);
+                jobJumper.grade = gradeUtil.getGrade(jobJumper.gpa);
+            } else if (contactJobStatistics.current) {
+                // We don't have an average but we have current, lets use our logic to determine if we think he's a jumper
+                jobJumper = _calculateJobJumperGradeFromOnlyCurrentPosition(contactJobStatistics.current);
+            }
+        }
+        return jobJumper;
+    }
+
+    const _calculateJobJumperGrades = (contactStatisticsList) => {
+        if (contactStatisticsList && contactStatisticsList.length) {
+            for (let i = contactStatisticsList.length-1; i >= 0; i--) {
+                const jobJumper = _calculateJobJumperGrade(contactStatisticsList[i].jobStatistics)
+                contactStatisticsList[i].grades = (contactStatisticsList[i].grades) ? { ...contactStatisticsList[i].grades, jobJumper } : { jobJumper }
             }
         }
     }
 
+    const _calculateJobJumperGradeFromOnlyCurrentPosition = (current) => {
+        let grades = {
+            gpa: 0,
+            grade: 'F'
+        };
+
+        if (current && !isNaN(current)) {
+            // Convert to months
+            const months = Number.parseInt((current / 0.08333));
+
+            let grade = 'F';
+            switch (true) {
+                case months >=11 && months < 18:
+                    // Using 11 months, as if they are "waiting for 1 year to move" we should talk to them now!
+                    grade = 'A';
+                    break;
+                case months >=18 && months < 24:
+                    grade = 'B';
+                    break;
+                case months > 6 || (months >=24 && months < 36):
+                    grade = 'C';
+                    break;
+                case months >=36:
+                    grade = 'D';
+                    break;
+                default:
+                    grade = 'F';
+            }
+            grades = {
+                grade,
+                gpa: gradeUtil.getGpa(grade)
+            };
+        }
+        return grades;
+    }
+
+    const _calculateJobStatistics = (contact) => {
+        if (contact && contact.positions && contact.positions.length) {
+            const copyOfPositions = JSON.parse(JSON.stringify(contact.positions));
+            _cleanContactPositions(copyOfPositions);
+            let totalJobs = copyOfPositions.length;
+            const yearsOnJobStatistics = {
+                numberOfJobs: totalJobs
+            };
+            let totalJobYears = 0;
+
+            copyOfPositions.forEach((position) => {
+                let isCurrentJob = true;
+                const startDate = _createDateFromMonthAndYear(position.startDateMonth, position.startDateYear);
+
+                // If no end date, calculate from today
+                let endDate = _createDateFromMonthAndYear(new Date().getMonth(), new Date().getFullYear());
+                if (position.endDateYear) {
+                    endDate = _createDateFromMonthAndYear(position.endDateMonth, position.endDateYear);
+                    isCurrentJob = false;
+                }
+
+                const totalMonthsOnJob = _calculateMonthsBetweenDates(startDate, endDate);
+                const totalYearsOnJob = Math.round(100*totalMonthsOnJob * 0.08333)/100;
+
+                // Add to our total job years
+                totalJobYears += totalYearsOnJob
+
+                if (isCurrentJob) {
+                    // If we have a current job, we don't want to include in average.  We only want to average the
+                    // past jobs so that we can compare the current job to the candidates history of jobs
+                    totalJobs--;
+                    if (!yearsOnJobStatistics.current
+                        || (yearsOnJobStatistics.current && totalYearsOnJob > yearsOnJobStatistics.current)) {
+                        yearsOnJobStatistics.current = totalYearsOnJob;
+                    }
+                } else {
+                    // Set max years on job
+                    if (yearsOnJobStatistics.max) {
+                        if (totalYearsOnJob > yearsOnJobStatistics.max) {
+                            yearsOnJobStatistics.max = totalYearsOnJob;
+                        }
+                    } else {
+                        yearsOnJobStatistics.max = totalYearsOnJob;
+                    }
+
+                    // Set min years on job
+                    // Don't use current Job for min calculation
+                    if (yearsOnJobStatistics.min) {
+                        if (totalYearsOnJob < yearsOnJobStatistics.min) {
+                            yearsOnJobStatistics.min = totalYearsOnJob;
+                        }
+                    } else {
+                        yearsOnJobStatistics.min = totalYearsOnJob;
+                    }
+                }
+            });
+
+            if (totalJobYears) {
+                // Set average years on job
+                yearsOnJobStatistics.average = Math.round(100*totalJobYears / totalJobs)/100;
+                yearsOnJobStatistics.yearsOfExperience = totalJobYears;
+            }
+            const jobJumper = _calculateJobJumperGrade(yearsOnJobStatistics);
+            contact.grades = (contact.grades) ? { ...contact.grades, jobJumper } : { jobJumper };
+            return yearsOnJobStatistics;
+        }
+
+        return {};
+    }
+
     const _calculateMonthsBetweenDates = (dateFrom, dateTo) => {
-        return dateTo.getMonth() - dateFrom.getMonth() + 
+        return dateTo.getMonth() - dateFrom.getMonth() +
             (12 * (dateTo.getFullYear() - dateFrom.getFullYear()));
     }
 
     const _calculateMonthsUsingSkill = (positionsWithSkill) => {
         if (positionsWithSkill && positionsWithSkill.length) {
             let monthsUsing = 0;
-            
+
             const positionsWithSkillCopy = JSON.parse(JSON.stringify(positionsWithSkill));
-            _adjustForOverlappingPositions(positionsWithSkillCopy);
 
             positionsWithSkillCopy.forEach((position) => {
                 // Start the End Date as today, for "presently using" skills
@@ -60,7 +230,7 @@
 
             const currentDate = _createDateFromMonthAndYear(new Date().getMonth(), new Date().getFullYear());
             const lastEndDate = _createDateFromMonthAndYear(mostRecentPosition.endDateMonth, mostRecentPosition.endDateYear);
-            
+
             const monthsSinceLastUse = _calculateMonthsBetweenDates(lastEndDate, currentDate);
 
             return monthsSinceLastUse;
@@ -69,68 +239,108 @@
         return null;
     }
 
-    const _calculateJobStatistics = (positions) => {
-        if (positions && positions.length) {
-            const yearsOnJobStatistics = {};
-            let totalJobs = positions.length;
-            let totalJobYears = 0;
+    const _calculateSkillsStatistics = (contactStatisticsList, filter, spliceIfMinNotMet = true) => {
+        if (contactStatisticsList && contactStatisticsList.length) {
+            for (let i = contactStatisticsList.length-1; i >= 0; i--) {
+                const allMonthsUsingGpas = [];
+                const allWithinMonthsGpas = [];
+                const contactSkillsStatistics = contactStatisticsList[i].skillStatistics;
+                const grades = {}
 
-            positions.forEach((position) => {
-                let isCurrentJob = true;
-                const startDate = _createDateFromMonthAndYear(position.startDateMonth, position.startDateYear);
-                
-                // If no end date, calculate from today
-                let endDate = _createDateFromMonthAndYear(new Date().getMonth(), new Date().getFullYear());
-                if (position.endDateYear) {
-                    endDate = _createDateFromMonthAndYear(position.endDateMonth, position.endDateYear);
-                    isCurrentJob = false;
+                let foundAtLeastOneMatchingSkill = false;
+                for (let skill in filter.skills) {
+                    const skillStatistics = contactSkillsStatistics[skill];
+
+                    if (skillStatistics) {
+                        // Contact has statistics for this skill
+                        foundAtLeastOneMatchingSkill = true;
+                        skillStatistics.grades = {};
+                        const filterSkill = filter.skills[skill];
+
+                        if (!skillStatistics.monthsOfUse || !isNaN(skillStatistics.monthsOfUse)) {
+                            skillStatistics.monthsOfUse = _assumptionForMonthsOfUse(contactStatisticsList[i].jobStatistics, skillStatistics);
+                        }
+                        // Set a default if missing or value is undefined
+                        if (filterSkill.monthsUsing === undefined) {
+                            filterSkill.monthsUsing = 0;
+                        }
+                        const monthsUsingGpa = gradeUtil.calculateGpa(filterSkill.monthsUsing, skillStatistics.monthsOfUse);
+                        allMonthsUsingGpas.push(monthsUsingGpa);
+                        skillStatistics.grades.monthsUsing  = {
+                            gpa: monthsUsingGpa,
+                            grade: gradeUtil.getGrade(monthsUsingGpa)
+                        }
+
+                        if (skillStatistics.monthsSinceLastUse === undefined || !isNaN(skillStatistics.monthsSinceLastUse)) {
+                            skillStatistics.monthsSinceLastUse = _assumptionForMonthsSinceLastUse(contactStatisticsList[i].jobStatistics, skillStatistics);
+                        }
+
+                        // Set a default if missing or value is undefined
+                        if (filterSkill.withinMonths === undefined) {
+                            filterSkill.withinMonths = 0;
+                        }
+                        const withinMonthsGpa = gradeUtil.calculateGpa(filterSkill.withinMonths, skillStatistics.monthsSinceLastUse, true);
+                        allWithinMonthsGpas.push(withinMonthsGpa);
+                        skillStatistics.grades.withinMonths = {
+                            gpa: withinMonthsGpa,
+                            grade: gradeUtil.getGrade(withinMonthsGpa)
+                        }
+                    } else {
+                        skillStatistics.grades = {
+                            monthsUsing: {
+                                gpa: 0,
+                                grade: 'F'
+                            },
+                            withinMonths: {
+                                gpa: 0,
+                                grade: 'F'
+                            }
+                        };
+                    }
                 }
 
-                const totalMonthsOnJob = _calculateMonthsBetweenDates(startDate, endDate);
-                const totalYearsOnJob = Math.round(100*totalMonthsOnJob * 0.08333)/100;
-
-                if (isCurrentJob) {
-                    // If we have a current job, we don't want to include in average.  We only want to average the 
-                    // past jobs so that we can compare the current job to the candidates history of jobs
-                    totalJobs--;
-                    if (!yearsOnJobStatistics.current 
-                        || (yearsOnJobStatistics.current && totalYearsOnJob > yearsOnJobStatistics.current)) {
-                        yearsOnJobStatistics.current = totalYearsOnJob;
-                    }
+                if (!foundAtLeastOneMatchingSkill && spliceIfMinNotMet) {
+                    contactStatisticsList.splice(i,1);
                 } else {
-                    // Add to our total job years
-                    totalJobYears += totalYearsOnJob
-
-                    // Set max years on job
-                    if (yearsOnJobStatistics.max) {
-                        if (totalYearsOnJob > yearsOnJobStatistics.max) {
-                            yearsOnJobStatistics.max = totalYearsOnJob;
+                    contactStatisticsList[i].grades = {};
+                    if (allMonthsUsingGpas.length) {
+                        const cumulativeMonthsUsingGpa = gradeUtil.calculateCumulativeGpa(allMonthsUsingGpas);
+                        if (spliceIfMinNotMet && filter.minMonthsUsingGpa !== undefined
+                            && (cumulativeMonthsUsingGpa === undefined || cumulativeMonthsUsingGpa < filter.minMonthsUsingGpa)) {
+                                contactStatisticsList.splice(i,1);
+                        } else {
+                            if (contactStatisticsList[i] && contactStatisticsList[i].grades) {
+                                contactStatisticsList[i].grades.cumulativeMonthsUsing = {
+                                    gpa: cumulativeMonthsUsingGpa,
+                                    grade: gradeUtil.getGrade(cumulativeMonthsUsingGpa)
+                                }
+                            }
                         }
-                    } else {
-                        yearsOnJobStatistics.max = totalYearsOnJob;
+                    }
+                    if (allWithinMonthsGpas.length) {
+                        const cumulativeWithinMonthsGpa = gradeUtil.calculateCumulativeGpa(allWithinMonthsGpas);
+                        if (spliceIfMinNotMet && filter.minWithinMonthsGpa && cumulativeWithinMonthsGpa < filter.minWithinMonthsGpa) {
+                            contactStatisticsList.splice(i,1);
+                        } else {
+                            if (contactStatisticsList[i] && contactStatisticsList[i].grades) {
+                                contactStatisticsList[i].grades.cumulativeWithinMonths = {
+                                    gpa: cumulativeWithinMonthsGpa,
+                                    grade: gradeUtil.getGrade(cumulativeWithinMonthsGpa)
+                                }
+                            }
+                        }
                     }
 
-                    // Set min years on job
-                    // Don't use current Job for min calculation
-                    if (yearsOnJobStatistics.min) {
-                        if (totalYearsOnJob < yearsOnJobStatistics.min) {
-                            yearsOnJobStatistics.min = totalYearsOnJob;
-                        }
-                    } else {
-                        yearsOnJobStatistics.min = totalYearsOnJob;
-                    }
                 }
-            });
-
-            if (totalJobYears) {
-                // Set average years on job
-                yearsOnJobStatistics.average = Math.round(100*totalJobYears / totalJobs)/100;
             }
-
-            return yearsOnJobStatistics;
+            // Leaving this in here as it's a helpful debug routine
+            // for (let contactId in contactStatisticsList) {
+            //     console.log({cumulativeGrades: contactStatisticsList[contactId].skillStatistics.grades});
+            //     for (let skill in contactStatisticsList[contactId].skillStatistics) {
+            //         console.log({skill, grades: contactStatisticsList[contactId].skillStatistics[skill].grades});
+            //     }
+            // };
         }
-
-        return {};
     }
 
     const _createDateFromMonthAndYear = (month, year) => {
@@ -143,15 +353,6 @@
             const currentYear = new Date().getFullYear();
             return new Date(currentMonth + "/01/" + currentYear);
         }
-    }
-
-    const _stringContains = (string, substrings = []) => {
-        return substrings.some((substring) => {
-            if (string.toLowerCase().includes(substring.toLowerCase())) {
-                return true;
-            }
-            return false;
-        });
     }
 
     const _findSkillInSelfAssessedSkills = (searchPhrases, contact) => {
@@ -168,11 +369,7 @@
 
     const _flattenSkillSearchPhrases = (skillObj, contact) => {
         let flattenedSkills = [];
-        
-        if (skillObj.searchPhrases) {
-            flattenedSkills = flattenedSkills.concat(skillObj.searchPhrases);
-        }
-        
+
         // If we have childSkills, recursively call
         if (skillObj.childSkills && skillObj.childSkills.length > 0) {
             skillObj.childSkills.forEach((childSkill) => {
@@ -185,8 +382,13 @@
                     // Also append the childSkill so that the parent is properly searched as well
                     flattenedSkills.push(childSkill);
                 }
-            })
+            });
         }
+
+        if (skillObj.searchPhrases) {
+            flattenedSkills = flattenedSkills.concat(skillObj.searchPhrases);
+        }
+
         return flattenedSkills;
     }
 
@@ -210,45 +412,50 @@
     }
 
     const _processSkillStats = (skill, skillSearchPhrases, contact) => {
-        const positionsWithSkill = _getPositionsWithSkill(skillSearchPhrases, contact.positions);
-        
-        if (!positionsWithSkill || positionsWithSkill.length === 0) {
-            // If the skill is not matched in any position, we can exit early
-            return null;
-        }
-
         // Does contact have it in their LinkedIn About/Summary?
-        const isInLinkedInSummary = tsString.containsAny(contact.linkedInSummary, skillSearchPhrases);
+        const isInSummary = tsString.containsAny(contact.linkedInSummary + ' ' + contact.summary, skillSearchPhrases);
 
         // Does contact have it in their LinkedIn Skills Section?
-        const isInLinkedInSkills = (contact.linkedInSkills && contact.linkedInSkills.length) 
+        const isInLinkedInSkills = (contact.linkedInSkills && contact.linkedInSkills.length)
             ? tsString.containsAny(contact.linkedInSkills.join(","), skillSearchPhrases)
             : false;
-        
+
         // Does contact have it in their tags that we purposefully set?
         const isInTags = tsString.containsAny(contact.tags, skillSearchPhrases);
 
         // Does contact have it in their skills assessment?
         const isInSelfAssessedSkills = _findSkillInSelfAssessedSkills(skillSearchPhrases, contact);
 
-        // Breadth: The number of different companies or roles using the same skill; makes you a potential lead.
-        processedSkillStatistics[skill] = {
-            breadth: positionsWithSkill.length,
-            isInLinkedInSkills,
-            isInLinkedInSummary,
-            isInSelfAssessedSkills,
-            isInTags,
-            monthsOfUse: _calculateMonthsUsingSkill(positionsWithSkill),
-            monthsSinceLastUse: _calculateMonthsSinceLastUse(positionsWithSkill)
-            
+        // Get the positions with skill
+        const positionsWithSkill = _getPositionsWithSkill(skillSearchPhrases, contact.positions);
+        if (positionsWithSkill && positionsWithSkill.length) {
+            // Breadth: The number of different companies or roles using the same skill; makes you a potential lead.
+            processedSkillStatistics[skill] = {
+                breadth: positionsWithSkill.length,
+                isInLinkedInSkills,
+                isInSummary,
+                isInSelfAssessedSkills,
+                isInTags,
+                monthsOfUse: _calculateMonthsUsingSkill(positionsWithSkill),
+                monthsSinceLastUse: _calculateMonthsSinceLastUse(positionsWithSkill)
+            };
+        } else if (isInSummary || isInLinkedInSkills || isInTags || isInSelfAssessedSkills) {
+            processedSkillStatistics[skill] = {
+                isInLinkedInSkills,
+                isInSummary,
+                isInSelfAssessedSkills,
+                isInTags,
+            };
         }
+
         return true;
     }
 
     const _processSkillsStatistics = (contact) => {
+        const contactCopy = JSON.parse(JSON.stringify(contact));
+        _cleanContactPositions(contactCopy.positions);
         for (let key in skillStats.skillStatsList) {
             const skill = skillStats.skillStatsList[key];
-            const contactCopy = JSON.parse(JSON.stringify(contact));
             const flattenedSkillSearchPhrases = _flattenSkillSearchPhrases(skill, contactCopy);
             _processSkillStats(key, flattenedSkillSearchPhrases, contactCopy);
         }
@@ -257,11 +464,12 @@
 
     const _processStatistics = (contact) => {
         const result = {};
+
         const skillStatistics = _processSkillsStatistics(contact);
-        
+
         result.skillStatistics = skillStatistics;
         result.skillsList = Object.keys(skillStatistics);
-        result.jobStatistics = _calculateJobStatistics(contact.positions);
+        result.jobStatistics = _calculateJobStatistics(contact);
 
         return result;
     }
@@ -269,16 +477,21 @@
     const _resetProcessedSkills = () => {
         processedSkillStatistics = {};
     };
-    
+
     const _setSkillsList = (skillsList) => {
         skillStats.skillStatsList = skillsList;
     }
 
     class Statistician {
+        calculateJobJumperGrade = _calculateJobJumperGrade;
+        calculateJobJumperGradeFromOnlyCurrentPosition = _calculateJobJumperGradeFromOnlyCurrentPosition;
+        calculateJobJumperGrades = _calculateJobJumperGrades;
         calculateJobStatistics = _calculateJobStatistics;
         calculateMonthsBetweenDates = _calculateMonthsBetweenDates;
         calculateMonthsSinceLastUse = _calculateMonthsSinceLastUse;
         calculateMonthsUsingSkill = _calculateMonthsUsingSkill;
+        calculateSkillsStatistics = _calculateSkillsStatistics;
+        cleanContactPositions = _cleanContactPositions;
         createDateFromMonthAndYear = _createDateFromMonthAndYear;
         getPositionsWithSkill = _getPositionsWithSkill;
         getProcessedSkillStatistics = _getProcessedSkillStatistics;

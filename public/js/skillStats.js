@@ -61,6 +61,9 @@
             "AWS Lambda": {
                 searchPhrases: ["AWS Lambda", "Lambda"]
             },
+            "ASP.NET": {
+                searchPhrases: ["Classic ASP", "ASP.NET,"]
+            },
             "Azure CI/CD": {
                 childSkills: [
                     "Azure Kubernetes Service",
@@ -120,6 +123,9 @@
                     "Azure File Storage"
                 ]
             },
+            "COM": {
+                searchPhrases: ["Component Object Model", " COM ", " COM,"]
+            },
             "DevOps": {
                 childSkills: [
                     "Ansible",
@@ -133,7 +139,11 @@
                     "Terraform"
                 ]
             },
+            "Diagrams.net": {
+                searchPhrases: ["Draw.io", "Drawio", "Draw io", "Diagrams.net"]
+            },
             "Java": {
+                searchPhrases: ["Java"],
                 childSkills: [
                     "Android",
                     "Groovy",
@@ -146,6 +156,7 @@
                 childSkills: [
                     "AngularJS",
                     "Angular",
+                    "Backbone",
                     "Bootstrap",
                     "Express",
                     "JQuery",
@@ -178,17 +189,25 @@
             "Mobile": {
                 childSkills: ["Xamarin Native", "Xamarin Forms", "Xamarin", "iOS", "Android", "Swift", "React Native", "Unity", "Flutter"]
             },
-            ".NET Framework": {
+            ".NET": {
+                searchPhrases: [".NET"],
                 childSkills: [
                     "ASP.NET Core",
                     "ASP.NET Identity",
                     "ASP.NET MVC",
                     "ASP.NET Web API",
+                    "ASP.NET Web Forms",
                     "ASP.NET",
                     "Entity Framework",
                     "NServiceBus",
                     "C#",
-                    ".NET"]
+                    "WCF",
+                    "WPF",
+                    "COM",
+                    "UWP",
+                    "Windows Forms",
+
+                ]
             },
             "NoSQL": {
                 childSkills: ["Cassandra", "CouchDB", "CosmosDB", "DynamoDB", "Elasticsearch", "MongoDB", "Redis"]
@@ -241,6 +260,9 @@
             },
             "ASP.NET Web API": {
                 searchPhrases: ["ASP.NET WebAPI", "ASP.NET Web API", ".NET WebAPI", ".NET Web API"]
+            },
+            "ASP.NET Web Forms": {
+                searchPhrases: ["Web Forms", "WebForms"]
             },
             "Azure Queue Storage": {
                 searchPhrases: ["Azure Queue Storage", "Azure Queues", "Queue Storage"]
@@ -302,6 +324,14 @@
             "Python": {
                 searchPhrases: ["Python"]
             },
+            "QA Automation": {
+                searchPhrases: ["Test Automation", "QA Automation", "automation framework", "QA Engineer"],
+                childSkills: ["Selenium", "JMeter", "TestNG", "Cucumber", "Maven", "SoapUI"]
+            },
+            "QA Manual": {
+                searchPhrases: ["QA Analyst", "Manual QA", "Quality Assurance Analyst", "Test Script", "Test Suite", "Test Case"],
+                childSkills: ["Test Plan Creation", "Test Case Design", ]
+            },
             "RabbitMQ": {
                 searchPhrases: ["RabbitMQ", "Rabbit MQ"]
             },
@@ -314,23 +344,45 @@
             "Scala": {
                 searchPhrases: ["Scala"]
             },
+            "Selenium": {
+                searchPhrases: ["Selenium"],
+                childSkills: ["Selenium WebDriver", "Selenium IDE", "Selenium RC", "Selenium Grid"]
+            },
             "SQL Server": {
-                searchPhrases: ["Microsoft SQL Server", "SQL Server"]
+                searchPhrases: ["Microsoft SQL Server", "SQL Server", "MS SQL"]
             },
             "SVN": {
                 searchPhrases: ["Subversion", "SVN"]
             },
+            "TestNG": {
+                searchPhrases: ["TestNG", "Test NG"]
+            },
             "TFS": {
                 searchPhrases: ["Team Foundation Server", "TFS"]
+            },
+            "Unit Testing": {
+                searchPhrases: ["Unit Testing"],
+                childSkills: ["Karma", "Jasmine", "Jest", "MSTest", "NUnit", "XUnit", "JUnit", "Mocha", "TestNG", "JTest", "Parasoft", "Cantata", "Unity Test", "JMockit", "Emma", "HtmlUnit", "SimpleTest"]
+            },
+            "UI/UX": {
+                searchPhrases: ["UI/UX", "Visual Communication", "Interaction Design", "Interactive Design", "Web Design"],
+                childSkills: ["HTML", "CSS", "SASS", "LESS", "JavaScript", "jQuery", "Bootstrap", "UX Research", "UX Design", "UX Writing", "Wireframing", "UI Prototyping", "Analytics"]
             },
             "Visual Basic": {
                 searchPhrases: ["Visual Basic", "VB5", "VB6"]
             },
+            "Windows Forms": {
+                searchPhrases: ["Windows Forms", "WinForms", "Win Forms"]
+            },
+            "Wireframing": {
+                searchPhrases: ["Wirefram", "Mockups"],
+                childSkills: ["Balsamiq", "Moqups", "LucidChart", "Diagrams.net", "Visio", "Cacoo", "Sketch", "Omnigraffle", "Axure", "Terrastruct", "Mockplus", "Miro", " Xd ", "Justinmind", "ProtoPie"]
+            },
             "Xamarin Forms": {
-                searchPhrases: ["Xamarin.Forms", "Xamarin Forms"]
+                searchPhrases: ["Xamarin.Forms", "XamarinForms", "Xamarin Forms"]
             },
             "Xamarin Native": {
-                searchPhrases: ["Xamarin.iOS", "Xamarin iOS", "Xamarin.Android", "Xamarin Android"]
+                searchPhrases: ["Xamarin.iOS", "XamarinIos", "Xamarin iOS", "Xamarin.Android", "XamarinAndroid", "Xamarin Android"]
             }
         }
     }

@@ -3,7 +3,7 @@
     const _getFilterKeyFromListItem = (filterLi) => {
         const text = filterLi.textContent.trim().toLowerCase();
 
-        const keyMap = [{ lookFor: 'job titles', keyName: 'jobTitles' }, 
+        const keyMap = [{ lookFor: 'job titles', keyName: 'jobTitles' },
             { lookFor: 'geographic', keyName: 'location' },
             { lookFor: 'skills and experience', keyName: 'skills' },
             { lookFor: 'companies', keyName: 'companies' },
@@ -24,7 +24,7 @@
             { lookFor: 'expertise', keyName: 'expertise' },
             { lookFor: 'associated with your groups', keyName: 'groups' }
         ];
-    
+
         let result = null;
         for(let i=0; i<keyMap.length; i++){
             if (text.indexOf(keyMap[i].lookFor) >= 0){
@@ -61,9 +61,9 @@
 
     const _keywordStringToArray = (words) => {
 		return words.split(' ').filter((w) => {
-                lw = w.toLowerCase();  
-                    return lw.length > 0 && lw.indexOf('recruit') === -1 && lw !== 'or' && lw !== 'and' && lw !== 'not'
-    			});
+            const lw = w.toLowerCase();
+            return lw.length > 0 && lw.indexOf('recruit') === -1 && lw !== 'or' && lw !== 'and' && lw !== 'not'
+        });
     }
 
     const _breakUpStringIntoDistinctWords = (stringOfWords) => {
@@ -77,7 +77,7 @@
 
         result = _keywordStringToArray(copy).concat(delimitedWords)
         result = [...new Set(result)];
-    
+
         return result
     }
 
@@ -101,43 +101,43 @@
         const keywordMatchSearch = [];
         let globalListOfWordsToStrip = [/\(/, /\)/];
         let keywordsCopy = keywords;
-    
+
         const grouped = tsString.findPrecedenceWithinString(keywordsCopy);
-        grouped.forEach((groupedWordsString) => { 
+        grouped.forEach((groupedWordsString) => {
             const wordGroupArray = _breakUpStringIntoDistinctWords(groupedWordsString);
             const doTheyHave = {
                 title: wordGroupArray[0],
                 wordMatch: wordGroupArray.map(l => l.toLowerCase().replace(/"/g, ''))
             }
-        
+
             //sort by length descending (eg. '.Net core', then '.Net')
             globalListOfWordsToStrip.sort((a, b) => {
                 if (typeof a === "string" && typeof b === "string") {
                   return a.length > b.length ? -1 : a.length === b.length ? 0 : 1;
                 }
-             
+
                 return 0;
             });
 
             globalListOfWordsToStrip = globalListOfWordsToStrip.concat(wordGroupArray);
             keywordMatchSearch.push(doTheyHave);
         });
-    
+
 
         globalListOfWordsToStrip.forEach((s) => {
                 keywordsCopy = keywordsCopy.replace(new RegExp(s, 'g'), '');
         });
-    
+
         const standAloneKeywords = _keywordStringToArray(keywordsCopy);
         standAloneKeywords.forEach((k) => {
             const doTheyHave = {
                 title: k.trim(),
                 wordMatch:[ k.trim().toLowerCase()]
             }
-            
+
             keywordMatchSearch.push(doTheyHave);
         })
-        
+
         console.log({keywordMatchSearch})
         return keywordMatchSearch;
     }
@@ -187,7 +187,7 @@
             const listOfWhatTheyHave = []
             const summary = candidate.summary ? candidate.summary.toLowerCase() : '';
             const raw = candidate.rawExperienceText ? candidate.rawExperienceText.toLowerCase() : '';
-    
+
             doTheyHavesArray.forEach((doTheyHave) => {
                 const matchWords = doTheyHave.wordMatch;
                 const foundInSummary = tsString.containsAny(summary, matchWords);
@@ -204,10 +204,10 @@
                     listOfWhatTheyHave.push(theyHave);
                 }
             });
-        
+
             if (listOfWhatTheyHave.length){
                 const percentMatch = (listOfWhatTheyHave.length / doTheyHavesArray.length) * 100;
-            
+
                 result = {
                     percentMatch: Number.parseInt(percentMatch),
                     theyHave: listOfWhatTheyHave
