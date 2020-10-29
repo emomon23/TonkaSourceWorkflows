@@ -89,7 +89,7 @@
         sendInMailButtons: '.cta-send-msg',
         viewMessageButtons: '.cta-view-msg',
         pipelineRows: 'div[class*="row-inner"]',
-        sendInmailButton: 'cta-send-msg',
+        sendInMailButton: 'cta-send-msg',
         navigationPage1: 'a[class*="page-link"][title*="Page 1"]',
         navigationNextPage: 'a[class*="page-link"][title*="Next Page"]',
     }
@@ -97,7 +97,8 @@
     const _inmailDialog = {
         subject: 'input[name*="subject"]',
         body: 'textarea[placeholder*="Type your message"]',
-        sendButton: 'button[class*="inmail-send-btn"]'
+        sendButton: 'button[class*="inmail-send-btn"]',
+        sendInMailCloseModal: 'button[class*="icon-close"]',
     }
 
     class LinkedInSelectors {

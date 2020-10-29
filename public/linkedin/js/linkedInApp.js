@@ -244,6 +244,7 @@
     }
 
     const _fireInMailBlast = (subjectBody) => {
+        console.log(`_fireInMailBlast called from another window via PostMessage`)
         const {subject, body} = subjectBody;
         linkedInMessageSender.blastProjectPipeline(subject, body);
     }

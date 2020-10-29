@@ -140,29 +140,32 @@
 
     const _getSendInmailModalControls = async () => {
         tsCommon.sleep(800);
-        const sendButtons = $(linkedInSelectors.inMailDialog.sendButton);
-        const subjects = $(linkedInSelectors.inMailDialog.subject);
-        const bodies = $(linkedInSelectors.inMailDialog.body);
+        const send = $(linkedInSelectors.inMailDialog.sendButton)[0];
+        const subject = $(linkedInSelectors.inMailDialog.subject)[0];
+        const body = $(linkedInSelectors.inMailDialog.body)[0];
+        const closeModal = $(linkedInSelectors.inMailDialog.sendInMailCloseModal)[0];
 
-        if (sendButtons && sendButtons.length){
-            return {
-                send: sendButtons[0],
-                subject: subjects[0],
-                body : bodies[0]
-            }
-        }
-
-        return null;
+        return {
+            send,
+            subject,
+            body,
+            closeModal
+        };
     }
 
     const _sendInMail = async (memberId, subject, bodyString) => {
         await tsCommon.sleep(300);
 
         if (_clickSendInMail(memberId)){
+            await tsCommon.sleep(4000);
             const sendMessageDialog = await _getSendInmailModalControls();
-            $(sendMessageDialog.subject).text(subject);
-            $(sendMessageDialog.body).text(bodyString);
-           // $(sendMessageDialog.send).click();
+            if (sendMessageDialog.subject){
+                $(sendMessageDialog.subject).val(subject);
+                $(sendMessageDialog.body).val(bodyString);
+                await tsCommon.sleep(2000);
+                $(sendMessageDialog.send).click();
+                await tsCommon.sleep(4000);
+            }
         }
     }
 
@@ -233,6 +236,12 @@
     }
 
     const _blastCurrentProjectPipelinePage = async(subject, body) => {
+        const whatPageAmIOn = linkedInCommon.whatPageAmIOn();
+        if (whatPageAmIOn !== linkedInConstants.pages.PROJECT_PIPELINE){
+            console.log("*** CAN'T Blast pipline from this page");
+            return false;
+        }
+
         const memberIdsAndNames = _getSendInMailMemberIdsForThisProjectPipelinePage();
 
         for(let i=0; i<memberIdsAndNames.length; i++) {

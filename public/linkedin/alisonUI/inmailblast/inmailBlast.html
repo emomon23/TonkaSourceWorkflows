@@ -7,7 +7,7 @@
         <script src='http://localhost:5001/js/tsUICommon.js'></script>
         <script src='http://localhost:5001/js/alisonContactService.js'></script>
         <script src='inmailBlast.js'></script>
-        <title>Job Seekers</title>
+        <title>Pipleline InMail Blaster</title>
     </head>
 
     <body>
@@ -18,11 +18,17 @@
 
         <div>
             <div>Body ([first-name])</div>
-            <textarea rows='40' cols='80' id='body' name='body' ></textarea>
+<!-- Need to put textarea here and initial value here or it diplays f'ed up-->
+<textarea rows='40' cols='80' id='body' name='body' >Hello [first-name]
+
+</textarea>
         </div>
 
         <div>
             <button onclick="send_onClick()">Send</button>
+        </div>
+        <div id='msg'>
+            NOT READY - waiting for a reference to linked in 'window' object...should be a few seconds
         </div>
     </body>
 </html>
