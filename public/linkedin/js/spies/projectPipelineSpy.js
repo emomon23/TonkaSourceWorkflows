@@ -1,4 +1,10 @@
 (() => {
+    const _initializeAsyncCalls = async () => {
+        await searchResultsScraper.loadFromLocalStorage();
+        await _initializeKeywordMatchVisualIndicators();
+        await _rebindToPresentationTabs();
+    }
+
     const _initializeKeywordMatchVisualIndicators = async () => {
         await tsCommon.sleep(2000);
 
@@ -46,9 +52,7 @@
 
     $(document).ready(() => {
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PROJECT_PIPELINE) {
-            _initializeKeywordMatchVisualIndicators();
-
-            _rebindToPresentationTabs();            
+            _initializeAsyncCalls();
         }
     });
 })();

@@ -200,40 +200,6 @@
         }
     }
 
-    const _recruiterProfileKeyWordsMatchCount = async(candidate, commaSeparatedListOfWords) => {
-        //EG.
-        //commaSeparatedListOfWords = "C#:3,AWS:4,PostgreSQL"
-        //we want C# mentioned 3+ times,  AWS mentioned 4+ times, and PostgreSQL at least once
-
-        if (!commaSeparatedListOfWords || commaSeparatedListOfWords.trim().length === 0){
-            return true;
-        }
-
-        const justSkillNamesArray = commaSeparatedListOfWords.split(",").map(i => i.split(":")[0].trim())
-        const keywordsCount = await _getCandidateKeywordCount(candidate, justSkillNamesArray.join());
-
-        const desiredCounts = commaSeparatedListOfWords.split(",").map(i => i.split(":").length > 1 ?  i.split(":")[1].trim() : 1)
-        let result = true;
-
-        for (let i=0; i<justSkillNamesArray.length; i++){
-            const minCount = desiredCounts[i];
-            if (isNaN(minCount)){
-                tsCommon.log(`${commaSeparatedListOfWords[i]} doesn't make sense`, "WARN");
-                break;
-            }
-
-            count = keywordsCount.find(k => k.key === justSkillNamesArray[i]).count;
-            if (count < minCount){
-                result = false;
-                break;
-            }
-        }
-
-        tsCommon.log(`Just keyword verified ${candidate.firstName} ${candidate.lastName} (keyword counts do ${result === false ? "not " : ""} match), need to pause for a bit...`);
-        await tsCommon.randomSleep(6000, 11000);
-        return result;
-    }
-
     const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProjectConfiguration) => {
         const addToProject = addToProjectConfiguration ? true : false;
         const minPercentMatch = addToProjectConfiguration ? addToProjectConfiguration.minPercentMatch || 49 : 100;
@@ -266,7 +232,8 @@
                 }
                 else {
                     searchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
-                    searchResultsScraper.persistToLocalStorage();
+                    // eslint-disable-next-line no-await-in-loop
+                    await searchResultsScraper.persistToLocalStorage();
 
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(2000, 3000);
@@ -286,7 +253,10 @@
                     // eslint-disable-next-line no-await-in-loop
                     const expandedCandidate =  await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile(tagString);
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = expandedCandidate;
-                    searchResultsScraper.persistToLocalStorage();
+
+                    // eslint-disable-next-line no-await-in-loop
+                    await searchResultsScraper.persistToLocalStorage();
+
                     _jobsGathered[candidate.memberId] = true;
 
                     // wait 30 to 45 seconds to proceed
@@ -334,23 +304,6 @@
         return null;
     }
 
-    const _filterDefaultCandidatesToPersistToLocalStorage = (scrapedCandidates, daysOld) => {
-        const result = {};
-        const now = tsCommon.now();
-
-        for(var k in scrapedCandidates){
-            const container = scrapedCandidates[k];
-            const c = container ?  container.candidate : null;
-
-            if (c && (c.isJobSeeker === true || c.isActivelyLooking === true || c.persistToLocalStorage === true)
-                && (daysOld === null || now.dayDiff(scrapedCandidates[k].dateScraped) < daysOld)){
-                    result[k] = scrapedCandidates[k];
-            }
-        }
-
-        return result;
-    }
-
     const _cleanJobHistoryCompanyNames = (candidate) => {
         const findAndReplace = [{find: '&#x2F;', replace: '/'}, {find: '&amp;', replace: '&'}];
 
@@ -364,6 +317,11 @@
                 p.companyName = companyName;
             });
         }
+    }
+
+    const _trimScrapedCandidate = (scraped) => {
+        const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
+        return _.omit(scraped, omitFields);
     }
 
     const _interceptSearchResults = async (responseObj) => {
@@ -383,26 +341,24 @@
 
             candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
+                _pageCandidates.push(candidate);
 
-                const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
-                const trimmedCandidate = _.omit(candidate, omitFields);
-
-                //clean position company names
+                const trimmedCandidate = _trimScrapedCandidate(candidate);
                 _cleanJobHistoryCompanyNames(trimmedCandidate);
 
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
-
-                _pageCandidates.push(candidate);
-
                 if (!existingCachedCandidate){
                     trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
                     trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
 
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
+
                     if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
                         trimmedCandidate.source = "RESULT_LIST";
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
+
+                    candidateRepository.saveCandidate(trimmedCandidate);
                 }
                 else {
                     if (existingCachedCandidate.isSelected === true) {
@@ -411,6 +367,7 @@
 
                     const existingIsJobSeeker = existingCachedCandidate.candidate.isJobSeeker || existingCachedCandidate.candidate.isActivelyLooking;
                     const scrapedIsJobSeeker = candidate.isJobSeeker || candidate.isActivelyLooking;
+
                     if ((existingIsJobSeeker === true && scrapedIsJobSeeker !== true)
                         || (existingIsJobSeeker !== true && scrapedIsJobSeeker === true)){
                         searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
@@ -421,7 +378,6 @@
             });
 
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
-
             const companyAnalytics = positionAnalyzer.createCompanyAverageDurationObject(candidatesInResults);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
 
@@ -511,12 +467,16 @@
             return result;
         }
 
-        loadFromLocalStorage = () => {
+        loadFromLocalStorage = async () => {
             if (!this.alreadyLoaded) {
-                var jsonString = window.localStorage.getItem(_localStorageItemName);
-                if (jsonString !== null && jsonString !== undefined){
-                    this.scrapedCandidates = JSON.parse(jsonString);
+                this.scrapedCandidates = {};
+                const candidatesArray = await candidateRepository.getCandidateList()
+                if (candidatesArray){
+                    candidatesArray.forEach((c) => {
+                        this.scrapedCandidates[c.memberId] = {candidate: c};
+                    });
                 }
+
                 this.alreadyLoaded = true;
             }
         }
@@ -566,28 +526,15 @@
             }
         }
 
-        persistToLocalStorage = (daysOld = null) => {
-            if (daysOld === 0){
-                searchResultsScraper.clearLocalStorage();
-                return;
-            }
+        persistToLocalStorage = async () => {
+           const array = [];
+           for(let key in this.scrapedCandidates){
+               if (this.scrapedCandidates[key].candidate){
+                   array.push(this.scrapedCandidates[k].candidate);
+               }
+           }
 
-            let onlyJobSeekers = _filterDefaultCandidatesToPersistToLocalStorage(this.scrapedCandidates, daysOld);
-            const jsonString = JSON.stringify(onlyJobSeekers);
-
-            try {
-                window.localStorage.setItem(_localStorageItemName, jsonString);
-            }
-            catch(e) {
-                onlyJobSeekers = null; // free up this memory before making a recursive call
-                const onlyRecentDays = dayDiff === null ? 1 : 0;
-                this.persistToLocalStorage(onlyRecentDays);
-            }
-        }
-
-        clearLocalStorage = () => {
-            window.localStorage.removeItem(_localStorageItemName);
-            this.scrapedCandidates = {};
+           await candidateRepository.saveCandidates()
         }
 
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
