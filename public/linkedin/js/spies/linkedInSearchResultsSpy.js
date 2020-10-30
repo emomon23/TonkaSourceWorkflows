@@ -10,7 +10,7 @@
         //wait for the jGrades to render
         let jGrades = null;
         for(let i=0; i<20; i++){
-            jGrades = $('.jGrade');
+            jGrades = $('div.grade-container');
             if (jGrades.length > 0){
                 // eslint-disable-next-line no-await-in-loop
                 await tsCommon.sleep(1000);
@@ -26,8 +26,10 @@
             jGrades.forEach((jg) => {
                 const memberId = $(jg).attr('memberId');
                 const candidate = searchResultsScraper.findCandidate(memberId);
-                const title = candidate && candidate.technicalYearString ? candidate.technicalYearString : 'none';
-                $(jg).attr('title', title);
+                const tooltipText = candidate && candidate.technicalYearString ? candidate.technicalYearString : 'none';
+                const tooltip = document.createElement("span");
+                $(tooltip).attr("class", "tooltiptext").html(tooltipText);
+                $(jg).append(tooltip);
             })
         }
     }
@@ -57,7 +59,7 @@
 
     $(document).ready(() => {
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS) {
-           _bindToElements();    
+           _bindToElements();
         }
     })
 })();
