@@ -26,7 +26,7 @@
             if (match){
                 const candidate = searchResultsScraper.findCandidate(memberId);
                 const city = candidate ? (candidate.city || '') + '\n' : '';
-                const technicalYearString = candidate && candidate.technicalYearString ? `${candidate.technicalYearString}\n\n` : '';
+                const technicalYearString = candidate && candidate.technicalYearString ? `${candidate.technicalYearString}\n` : '';
 
                 const toolTip = match.theyHave.map((h) => {
                     return `${technicalYearString}${city}${h.title}:${h.foundInJobHistory ? ' Job history. ' : ''}${h.foundInSummary? ' In summary. ': ''}${h.lastUsed? ' LastUsed: ' + h.lastUsed : ''}`;
