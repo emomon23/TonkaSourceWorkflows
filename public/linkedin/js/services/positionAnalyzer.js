@@ -32,20 +32,22 @@
     }
 
     const _buildCandidateTechnicalYearsString = (candidate) => {
-        let result = '';
+        let results = [];
         const technicalPositions = candidate.positions ? candidate.positions.filter(p => p.isTechnicallyRelevant) : [];
 
-        for(let i=technicalPositions.length-1; i>=0; i--){
+        for(let i=0; i < technicalPositions.length; i++){
             const p = technicalPositions[i];
             const startDate = statistician.createDateFromMonthAndYear(p.startDateMonth, p.startDateYear)
             const endDate = statistician.createDateFromMonthAndYear(p.endDateMonth, p.endDateYear);
             const months = statistician.calculateMonthsBetweenDates(startDate, endDate);
-            const years = Number.parseFloat(months / 12).toPrecision(2);
+            const years = Number.parseInt(months / 12);
+            const monthsRemaining = months % 12;
 
-            result += i === 0 && p.current === true ? `${years} c, ` : `${years}, `;
+            const result = (p.current === true) ? `${years}y${monthsRemaining}m c --- "${p.title}"` : `${years}y${monthsRemaining}m --- "${p.title}"`;
+            results.push(result);
         }
 
-        return result.length > 0 ? result.substr(0, result.length -2) : 'None';
+        return (results.length > 0) ? results.join("<br/>") : 'None';
     }
 
     const _checkIfInternship = (position) => {

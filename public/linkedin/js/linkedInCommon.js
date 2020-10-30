@@ -34,7 +34,7 @@
             const gpa = gradeObj.gpa;
 
             const container = $(document.createElement('div'))
-                            .attr('class', 'grade-container');
+                            .attr('class', 'grade-container tooltip');
 
             // Add additional attributes to the container
             attrs.forEach(attr => $(container).attr(attr.name, attr.value))
