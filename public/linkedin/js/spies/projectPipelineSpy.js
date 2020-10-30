@@ -26,9 +26,10 @@
             if (match){
                 const candidate = searchResultsScraper.findCandidate(memberId);
                 const city = candidate ? (candidate.city || '') + '\n' : '';
+                const technicalYearString = candidate && candidate.technicalYearString ? `${candidate.technicalYearString}\n\n` : '';
 
                 const toolTip = match.theyHave.map((h) => {
-                    return `${city}${h.title}:${h.foundInJobHistory ? ' Job history. ' : ''}${h.foundInSummary? ' In summary. ': ''}${h.lastUsed? ' LastUsed: ' + h.lastUsed : ''}`;
+                    return `${technicalYearString}${city}${h.title}:${h.foundInJobHistory ? ' Job history. ' : ''}${h.foundInSummary? ' In summary. ': ''}${h.lastUsed? ' LastUsed: ' + h.lastUsed : ''}`;
                 }).join('\n');
 
                 $(candidateLink)
