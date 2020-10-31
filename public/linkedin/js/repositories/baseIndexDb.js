@@ -60,6 +60,7 @@
             const transaction = _db.transaction(storeName, "readwrite");
             const store = transaction.objectStore(storeName);
 
+            data.dateCreated = (new Date()).getTime();
             const request = store.add(data);
 
             request.onsuccess = () => {
@@ -76,6 +77,8 @@
         return new Promise((resolve, reject) => {
             const transaction = _db.transaction(storeName, "readwrite");
             const store = transaction.objectStore(storeName);
+
+            data.dateLastUpdated = (new Date()).getTime();
 
             const request = store.put(data);
 
@@ -187,6 +190,25 @@
         });
     }
 
+    const _deleteOldData = async(objectStoreName, objectKeyProperty, daysStale = 90) => {
+        const minutesPerDay = 1440;
+        const list = await _getAll(objectStoreName);
+
+        for (let i=0; i<list.length; i++){
+            const obj = list[i];
+            if (obj[objectKeyProperty]) {
+                const lastUpdated = obj.dateLastUpdated ? obj.dateLastUpdated : 1;
+                const differenceInMinutes = ((new Date()).getTime() - lastUpdated / 1000) / 60;
+                const differenceInDays = differenceInMinutes / minutesPerDay;
+
+                if (differenceInDays >= daysStale) {
+                    // eslint-disable-next-line no-await-in-loop
+                    await _deleteObject(objectStoreName, obj[objectKeyProperty]);
+                }
+            }
+        }
+    }
+
     class BaseIndexDb {
         saveObject = _saveObject;
         insertObject = _insertObject;
@@ -194,6 +216,7 @@
         getObject = _getObject;
         getAll = _getAll;
         deleteObject = _deleteObject;
+        deleteOldData = _deleteOldData;
     }
 
     window.baseIndexDb = new BaseIndexDb();

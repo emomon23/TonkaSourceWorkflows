@@ -46,7 +46,6 @@
             if (parent){
                 const memberId = $(parent).attr('id').replace('search-result-', '');
                 searchResultsScraper.persistLastRecruiterProfile(memberId);
-                searchResultsScraper.persistToLocalStorage()
             }
         });
     }

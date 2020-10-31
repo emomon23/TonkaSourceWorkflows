@@ -13,6 +13,8 @@
             isJobSeeker,
             isActivelyLooking,
             memberId,
+            lastInMailed,
+            lastMessaged,
             grades,
             technicalYearString
         } = candidate;
@@ -27,6 +29,8 @@
             isJobSeeker,
             isActivelyLooking,
             memberId,
+            lastInMailed,
+            lastMessaged,
             grades: grades || [],
             technicalYearString: technicalYearString || ''
         };
@@ -62,11 +66,30 @@
         return await baseIndexDb.getAll(_objectStoreName);
     }
 
+    const _loadLotsOfData = async (basedOnContact, fromId, toId) => {
+        let counter = 0;
+        let c = {...basedOnContact};
+
+        for (let i=fromId; i<toId; i++) {
+            c.memberId = i;
+            counter+=1;
+
+            // eslint-disable-next-line no-await-in-loop
+            await baseIndexDb.insertObject(_objectStoreName, c, 'memberId');
+            if (counter >= 100){
+                console.log('saved another 100');
+                counter = 0;
+            }
+        }
+    }
+
     class CandidateRepository {
         saveCandidate = _saveCandidate;
         saveCandidates = _saveCandidates;
         getCandidateList = _getCandidateList;
         getCandidate = _getCandidate;
+
+        //loadLotsOfData = _loadLotsOfData;
     }
 
     window.candidateRepository = new CandidateRepository();

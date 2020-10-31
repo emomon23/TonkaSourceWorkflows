@@ -232,8 +232,6 @@
                 }
                 else {
                     searchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
-                    // eslint-disable-next-line no-await-in-loop
-                    await searchResultsScraper.persistToLocalStorage();
 
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(2000, 3000);
@@ -254,10 +252,7 @@
                     const expandedCandidate =  await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile(tagString);
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = expandedCandidate;
 
-                    // eslint-disable-next-line no-await-in-loop
-                    await searchResultsScraper.persistToLocalStorage();
-
-                    _jobsGathered[candidate.memberId] = true;
+                     _jobsGathered[candidate.memberId] = true;
 
                     // wait 30 to 45 seconds to proceed
                     // eslint-disable-next-line no-await-in-loop
@@ -524,17 +519,6 @@
             catch {
                 return null;
             }
-        }
-
-        persistToLocalStorage = async () => {
-           const array = [];
-           for(let key in this.scrapedCandidates){
-               if (this.scrapedCandidates[key].candidate){
-                   array.push(this.scrapedCandidates[k].candidate);
-               }
-           }
-
-           await candidateRepository.saveCandidates()
         }
 
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
