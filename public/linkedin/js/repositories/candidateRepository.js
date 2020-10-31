@@ -44,7 +44,8 @@
                 companyId: p.companyId,
                 companyName: p.companyName,
                 displayText: p.displayText,
-                title: p.title
+                title: p.title,
+                description: p.description || ''
             }
         }) : [];
 
