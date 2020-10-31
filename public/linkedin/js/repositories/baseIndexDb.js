@@ -15,11 +15,18 @@
 
     let _db = null;
 
-    const _createStore = (storeName, keyId) => {
+    const _createStore = (storeName, keyId, indexNamesArray) => {
         const keyOptions = {keyPath: keyId};
 
+        indexNamesArray = indexNamesArray ? indexNamesArray : [];
+        indexNamesArray.push('dateLastUpdated');
+        indexNamesArray.push('dateCreated');
+
         if (!_db.objectStoreNames.contains(storeName)){
-            _db.createObjectStore(storeName, keyOptions);
+            const store = _db.createObjectStore(storeName, keyOptions);
+            indexNamesArray.forEach((indexName) => {
+                store.createIndex(indexName, indexName, { unique: false });
+            });
         }
     }
 
@@ -36,7 +43,8 @@
 
             request.onupgradeneeded = (e) => {
                 _db = e.target.result
-                _createStore('candidate', 'memberId');
+
+                _createStore('candidate', 'memberId', ['lastName', 'isJobSeeker']);
                 _createStore('company', 'companyId');
                 _createStore('job', 'jobId');
                 _createStore('statistics', 'memberId');
@@ -114,6 +122,37 @@
         });
     }
 
+    const _transactionGetObjectKeysByIndex = (storeObject, indexName, searchFor) => {
+        return new Promise((resolve, reject) => {
+            const results = [];
+
+            const index = storeObject.index(indexName);
+            const request = index.get(searchFor);
+
+            request.onsuccess = (e) => {
+                cursorRequest = index.openKeyCursor();
+
+                cursorRequest.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) {
+                        results.push(cursor.primaryKey);
+                        cursor.continue();
+                    } else {
+                        resolve(results);
+                    }
+                }
+
+                cursorRequest.onerror = (e) => {
+                    reject(e);
+                }
+            }
+
+            request.onerror = (e) => {
+                reject(e);
+            }
+        });
+    }
+
     const _transactionGetAll = (storeName) => {
         return new Promise((resolve, reject) => {
             const transaction = _db.transaction(storeName, "readwrite");
@@ -135,7 +174,7 @@
         await _getObjectStore(objectStoreName);
 
         const keyValue = data[dataIdProperty];
-        const existing = await _getObject(objectStoreName, keyValue);
+        const existing = await _getObjectById(objectStoreName, keyValue);
 
         if (existing){
             await _updateObject(objectStoreName, data);
@@ -156,6 +195,7 @@
 
     const _updateObject = async (objectStoreName, data, dataIdProperty='id') => {
         const store = await _getObjectStore(objectStoreName, dataIdProperty);
+
         if (!store){
             throw new Error(`Unable update '${objectStoreName}' data`);
         }
@@ -163,9 +203,29 @@
         return await _transactionUpdate(objectStoreName, data);
     }
 
-    const _getObject = async (objectStoreName, key) => {
+    const _getObjectById = async (objectStoreName, key) => {
         await _getObjectStore(objectStoreName);
         return await _transactionGetObject(objectStoreName, key);
+    }
+
+    const _getObjectsByListOfKeys = (objectStoreName, primaryKeys) => {
+        const promises = [];
+        primaryKeys.forEach((pk) => {
+            promises.push(_transactionGetObject(objectStoreName, pk));
+        })
+
+        return Promise.all(promises);
+    }
+
+    const _getObjectsByIndex = async(objectStoreName, indexName, searchFor) => {
+        const objectStore = await _getObjectStore(objectStoreName);
+        const primaryKeys = await _transactionGetObjectKeysByIndex(objectStore, indexName, searchFor);
+
+        if (!(primaryKeys && primaryKeys.length)){
+            return [];
+        }
+
+        return await _getObjectsByListOfKeys(objectStoreName, primaryKeys);
     }
 
     const _getAll = async(objectStoreName) => {
@@ -213,7 +273,9 @@
         saveObject = _saveObject;
         insertObject = _insertObject;
         updateObject = _updateObject;
-        getObject = _getObject;
+        getObjectById = _getObjectById;
+        getObjectsByIndex = _getObjectsByIndex;
+        getObjectsByListOfKeys = _getObjectsByListOfKeys;
         getAll = _getAll;
         deleteObject = _deleteObject;
         deleteOldData = _deleteOldData;

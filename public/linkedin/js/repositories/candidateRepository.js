@@ -11,7 +11,6 @@
             state,
             headline,
             isJobSeeker,
-            isActivelyLooking,
             memberId,
             lastInMailed,
             lastMessaged,
@@ -27,13 +26,14 @@
             state,
             headline,
             isJobSeeker,
-            isActivelyLooking,
             memberId,
             lastInMailed,
             lastMessaged,
             grades: grades || [],
             technicalYearString: technicalYearString || ''
         };
+
+        slimmedCandidate.isJobSeeker = slimmedCandidate.isJobSeeker || candidate.isActivelyLooking;
 
         slimmedCandidate.positions = candidate.positions ? candidate.positions.map((p) => {
             return {
@@ -60,11 +60,21 @@
     }
 
     const _getCandidate = async (memberId) => {
-        return await baseIndexDb.getObject(_objectStoreName, memberId);
+        return await baseIndexDb.getObjectById(_objectStoreName, memberId);
     }
 
-    const _getCandidateList = async() => {
+    const _getEntireCandidateList = async() => {
         return await baseIndexDb.getAll(_objectStoreName);
+    }
+
+    const _getSpecificListOfLinkedInMembers = async(memberIdArray) => {
+        return await baseIndexDb.getObjectsByListOfKeys(_objectStoreName, memberIdArray);
+    }
+
+    const _getCandidateList = async(memberIdArray = null) => {
+        return memberIdArray ?
+            await _getSpecificListOfLinkedInMembers(memberIdArray) :
+            await _getEntireCandidateList();
     }
 
     const _loadLotsOfData = async (basedOnContact, fromId, toId) => {
@@ -84,11 +94,21 @@
         }
     }
 
+    const _searchOnLastName = async (lastName) => {
+        return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'lastName', lastName);
+    }
+
+    const _getJobSeekers = async () => {
+        return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'isJobSeeker', 'true');
+    }
+
     class CandidateRepository {
         saveCandidate = _saveCandidate;
         saveCandidates = _saveCandidates;
         getCandidateList = _getCandidateList;
         getCandidate = _getCandidate;
+        searchOnLastName = _searchOnLastName;
+        getJobSeekers = _getJobSeekers;
 
         //loadLotsOfData = _loadLotsOfData;
     }

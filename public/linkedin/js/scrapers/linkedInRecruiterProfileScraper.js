@@ -60,6 +60,7 @@
 
             linkedInRecruiterFilter.analyzeCandidateProfile(candidate);
             await linkedInApp.upsertContact(candidate);
+            candidateRepository.saveCandidate(candidate);
 
             // Process Statistics
             candidate.statistics = statistician.processStatistics(candidate);

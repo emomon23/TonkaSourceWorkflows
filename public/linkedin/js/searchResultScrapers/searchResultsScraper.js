@@ -316,7 +316,14 @@
 
     const _trimScrapedCandidate = (scraped) => {
         const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
-        return _.omit(scraped, omitFields);
+        const result = _.omit(scraped, omitFields);
+
+        result.firstName = tsUICommon.cleanseTextOfHtml(result.firstName);
+        result.lastName = tsUICommon.cleanseTextOfHtml(result.lastName);
+
+        _cleanJobHistoryCompanyNames(result);
+
+        return result;
     }
 
     const _interceptSearchResults = async (responseObj) => {
@@ -339,12 +346,10 @@
                 _pageCandidates.push(candidate);
 
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
-                _cleanJobHistoryCompanyNames(trimmedCandidate);
+                candidateRepository.saveCandidate(trimmedCandidate);
 
                 const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
                 if (!existingCachedCandidate){
-                    trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
-                    trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
 
                     searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
 
@@ -352,8 +357,6 @@
                         trimmedCandidate.source = "RESULT_LIST";
                         await linkedInApp.upsertContact(trimmedCandidate);
                     }
-
-                    candidateRepository.saveCandidate(trimmedCandidate);
                 }
                 else {
                     if (existingCachedCandidate.isSelected === true) {
