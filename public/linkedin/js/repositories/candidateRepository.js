@@ -2,54 +2,81 @@
     const _objectStoreName = 'candidate';
     const _keyPropertyName = 'memberId';
 
-    const _saveCandidate = async (candidate) => {
-         const {
-            alisonConnections,
-            firstName,
-            lastName,
-            city,
-            state,
-            headline,
-            isJobSeeker,
-            memberId,
-            lastInMailed,
-            lastMessaged,
-            grades,
-            technicalYearString
-        } = candidate;
+    const _mergePositions = (existingPositions, incomingPositions) => {
+        const result = existingPositions ? existingPositions : [];
+        if (!incomingPositions){
+            return result;
+        }
 
-        const slimmedCandidate =  {
-            alisonConnections,
-            firstName,
-            lastName,
-            city,
-            state,
-            headline,
-            isJobSeeker,
-            memberId,
-            lastInMailed,
-            lastMessaged,
-            grades: grades || [],
-            technicalYearString: technicalYearString || ''
-        };
+        incomingPositions.forEach((ip) => {
+            const match = existingPositions.find((ep) => {
+                return ep.companyId === ip.companyId
+                && ep.startDateMonth === ip.startDateMonth
+                && ep.startDateYear === ip.startDateYear;
+            });
 
-        slimmedCandidate.isJobSeeker = slimmedCandidate.isJobSeeker || candidate.isActivelyLooking;
+            if (match){
+                if (ip.description && ip.description.length){
+                    //eg. This will happend when a 'lite candidate' has their profile scraped
+                    match.description = ip.description;
+                }
+            } else {
+                result.push(ip);
+            }
+        });
 
-        slimmedCandidate.positions = candidate.positions ? candidate.positions.map((p) => {
-            return {
+        return result;
+    }
+
+    const _trimDownPositions = (positions) => {
+        return positions ? positions.map((p) => {
+            const mappedPosition = {
                 startDateMonth: p.startDateMonth,
                 startDateYear: p.startDateYear,
-                endDateMonth: p.endDateMonth ? p.endDateMonth : null,
-                endDateYear: p.endDateYear ? p.endDateYear : null,
                 companyId: p.companyId,
                 companyName: p.companyName,
                 displayText: p.displayText,
                 title: p.title,
-                description: p.description || ''
-            }
-        }) : [];
+            };
 
-        return await baseIndexDb.saveObject(_objectStoreName, slimmedCandidate, _keyPropertyName);
+            if (p.endDateMonth) {
+                mappedPosition.endDateMonth = p.endDateMonth;
+                mappedPosition.endDateYear = p.endDateYear;
+            }
+
+            if (p.description && p.description.length){
+                mappedPosition.description = p.description;
+            }
+
+            return mappedPosition;
+        }) : [];
+    }
+
+    const _saveCandidate = async (candidate) => {
+        if (!(candidate && candidate.memberId)){
+            throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
+        }
+
+        const fieldsNotToBeOverridden = ['positions', 'dateCreated']
+        let existingCandidate = await baseIndexDb.getObjectById(_objectStoreName, candidate.memberId);
+
+        //Trim positions to minimal data for storage
+        candidate.positions  = _trimDownPositions(candidate.positions);
+
+        if (existingCandidate){
+            for (let k in candidate){
+                if (fieldsNotToBeOverridden.indexOf(k) === -1){
+                    existingCandidate[k] = candidate[k];
+                }
+            }
+
+            existingCandidate.positions = _mergePositions(existingCandidate.positions, candidate.positions);
+            return await baseIndexDb.updateObject(_objectStoreName, existingCandidate, _keyPropertyName);
+        }
+        else {
+            return await baseIndexDb.insertObject(_objectStoreName, candidate, _keyPropertyName);
+        }
+
     }
 
     const _saveCandidates = async (candidatesArray) => {
@@ -94,8 +121,14 @@
         }
     }
 
-    const _searchOnLastName = async (lastName) => {
-        return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'lastName', lastName);
+    const _searchOnName = async (lastName, firstName = null) => {
+        const results = await baseIndexDb.getObjectsByIndex(_objectStoreName, 'lastName', lastName);
+
+        if (results && results.length){
+            return firstName ? results.filter(c => c.firstName === firstName) : results;
+        }
+
+        return [];
     }
 
     const _getJobSeekers = async () => {
@@ -107,7 +140,7 @@
         saveCandidates = _saveCandidates;
         getCandidateList = _getCandidateList;
         getCandidate = _getCandidate;
-        searchOnLastName = _searchOnLastName;
+        searchOnName = _searchOnName;
         getJobSeekers = _getJobSeekers;
 
         //loadLotsOfData = _loadLotsOfData;

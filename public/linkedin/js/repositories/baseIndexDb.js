@@ -68,7 +68,11 @@
             const transaction = _db.transaction(storeName, "readwrite");
             const store = transaction.objectStore(storeName);
 
-            data.dateCreated = (new Date()).getTime();
+            const now = (new Date()).getTime();
+
+            data.dateCreated = now;
+            data.dateLastUpdated = now;
+
             const request = store.add(data);
 
             request.onsuccess = () => {
