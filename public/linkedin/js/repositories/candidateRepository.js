@@ -78,7 +78,7 @@
             return await baseIndexDb.updateObject(_objectStoreName, existingCandidate, _keyPropertyName);
         }
         else {
-            candidate.isJobSeekerString = candidate.isJobSeekerString ? 'yes' : 'no';
+            candidate.isJobSeekerString = candidate.isJobSeeker ? 'yes' : 'no';
             return await baseIndexDb.insertObject(_objectStoreName, candidate, _keyPropertyName);
         }
 
