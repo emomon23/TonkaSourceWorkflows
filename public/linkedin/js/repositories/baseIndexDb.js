@@ -1,8 +1,12 @@
 (() => {
     const TONKA_SOURCE_DATABASE = "TonkaSourceDB";
 
-    window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB ||
-    window.msIndexedDB;
+    if (!window.indexedDB) {
+        window.indexedDB = window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    }
+    if (!window.indexedDB) {
+        tsCommon.log("Your browser doesn't support a stable version of IndexedDB.", 'ERROR');
+    }
 
     window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction ||
     window.msIDBTransaction;

@@ -4,10 +4,10 @@
         li.id = `${id}_listItem`;
         li.innerHTML = text;
         $(`#${containerId}`).append(li);
-        
+
         return $(li);
     }
-    
+
     const _removeListItem = (id) => {
         let li = $(`#${id}_listItem`);
         if (li){
@@ -51,11 +51,11 @@
                 break;
             }
         }
-   
+
         if (result !== null || $(startElement).parent().length === 0){
           return result;
         }
-   
+
         return _findPreviousElement($(startElement).parent()[0], selector);
      }
 
@@ -96,14 +96,14 @@
     const _getWordCount = (baseElement, word) => {
         let count = 0;
         let index = 0;
-    
+
         index = $(baseElement).text().indexOf(word);
         while(index >= 0){
           count+=1;
           index+= word.length;
           index = $(baseElement).text().indexOf(word, index);
         }
-      
+
         return count;
     }
 
@@ -128,8 +128,8 @@
     }
 
     const _saveItemLocally = (key, item) => {
-        if (item){
-            const json = typeof item === "string" ? item : JSON.stringify(item);
+        if (item !== null && item !== undefined){
+            const json = (typeof item === "string" || typeof item === "boolean") ? item : JSON.stringify(item);
             window.localStorage.setItem(key, json);
         }
 

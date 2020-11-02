@@ -4,7 +4,7 @@
 
     const _mapContact = (lic) => {
         const renameMap = {
-            city: AS_IS, 
+            city: AS_IS,
             state: AS_IS,
             positions: AS_IS,
             scrapedBy: AS_IS,
@@ -18,15 +18,16 @@
             rawExperienceText: AS_IS,
             role: AS_IS,
             linkedInSkills: AS_IS,
+            lastViewedBy: AS_IS,
             messagesSent: AS_IS,
             tags: AS_IS,
             opportunitiesPresented: AS_IS,
             referencesReceived: AS_IS,
-            summary: 'linkedInSummary', 
+            summary: 'linkedInSummary',
             isJobSeeker:'linkedInIsJobSeeker',
-            memberId: 'linkedInMemberId', 
-            headline: 'title', 
-            industry: 'industryGroup' 
+            memberId: 'linkedInMemberId',
+            headline: 'title',
+            industry: 'industryGroup'
         };
 
         const result = {}
@@ -38,7 +39,7 @@
         }
 
         result.linkedInIsJobSeeker = result.linkedInIsJobSeeker ? result.linkedInIsJobSeeker : lic.isActivelyLooking;
-        
+
         return result;
     }
 
@@ -64,8 +65,8 @@
                 .show()
                 .attr("style", "background-color: green; width: 100%; height: 25px;")
                 .html(`${contact.firstName} ${contact.lastName} has been saved.`);
-            
-                setTimeout(() => { 
+
+                setTimeout(() => {
                     $("#message-container").hide();
                 }, 4000);
         }
@@ -75,7 +76,7 @@
                 .attr("style", "background-color: red;")
                 .html('Error saving LinkedIN contact.  Check the console.')
                 .show();
-            
+
         }
     }
 
