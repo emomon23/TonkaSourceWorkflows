@@ -1,5 +1,5 @@
 (() => {
-    const TONKA_SOURCE_DATABASE = "TonkaSourceDB3";
+    const TONKA_SOURCE_DATABASE = "TonkaSourceDB";
 
     window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB ||
     window.msIndexedDB;
@@ -128,33 +128,13 @@
             const results = [];
 
             const myIndex = storeObject.index(indexName);
-            const getRequest = myIndex.get(searchFor);
-
+            const getRequest = myIndex.getAll(searchFor);
 
             getRequest.onsuccess = (e) => {
-                console.log({request_result: getRequest.result});
+                resolve(getRequest.result);
             }
 
-            myIndexOpenRequest = myIndex.openCursor();
-
-            myIndexOpenRequest.onsuccess = (ce) => {
-                const cursor = ce.target.result;
-
-                if (cursor) {
-                    if (cursor.key === searchFor) {
-                        results.push(cursor.value);
-                    }
-                    cursor.continue();
-                } else {
-                    resolve(results);
-                }
-            }
-
-            myIndexOpenRequest.onerror = (e) => {
-                reject(e);
-            }
-
-            myIndex.onerror = (e) => {
+            getRequest.onerror = (e) => {
                 reject(e);
             }
         });
