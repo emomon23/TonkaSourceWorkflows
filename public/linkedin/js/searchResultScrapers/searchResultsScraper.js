@@ -239,7 +239,7 @@
     }
 
     const _gatherAllJobSeekersExperienceData = async (addToProjectConfiguration = null) => {
-        const totalPages = addToProjectConfiguration.totalPages || 41;
+        const totalPages = addToProjectConfiguration ? addToProjectConfiguration.totalPages || 41 : 41;
         console.log(`Will gather data for the for the next ${totalPages} number of pages`);
         let currentPage = 0;
 

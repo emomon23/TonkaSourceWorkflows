@@ -28,18 +28,35 @@
         }
     }
 
-    const _startJobAlisonContactString = async () => {
-        await window.launchTonkaSource();
+    const _launchDashboard = async () => {
+        const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/dashboard/dashboard.html`;
+        const jobSeekers = await candidateRepository.getJobSeekers();
+        console.log(`There are ${jobSeekers.length} current job seekers`);
 
-        await tsCommon.sleep(5000);
-        tsCommon.postMessageToWindow(window.alisonHookWindow, 'startAlisonContactSync');
+
+        const dashboardWindow = window.open(url, "Dashboard", "scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,width=1000,height=1000,top=0,left=0");
+        await tsCommon.sleep(4000);
+
+        if (dashboardWindow) {
+            for (let i=0; i<jobSeekers.length; i++){
+                tsCommon.postMessageToWindow(dashboardWindow, 'acceptJobSeeker', jobSeekers[i]);
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(100);
+            }
+
+            tsCommon.postMessageToWindow(dashboardWindow, 'jobSeekersDone');
+        }
+        else {
+            tsCommon.log("Unable to open dashboard.  CHECK POP UP BLOCKER?", "WARN");
+        }
     }
 
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
         launchInMailBlaster = _launchInMailBlaster;
-        startJobAlisonContactString = _startJobAlisonContactString;
+
+        launchDashboard = _launchDashboard;
     }
 
     window.tsCommand = new TSCommand();
