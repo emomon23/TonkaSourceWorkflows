@@ -73,7 +73,7 @@
                 connectionRequestToSend = messageToSend;
             }
 
-            const candidate = searchResultsScraper.findCandidate(memberIdOrFirstNameAndLastName);
+            const candidate = await candidateRepository.searchForCandidate(memberIdOrFirstNameAndLastName);
 
             if (candidate !== undefined && candidate !== null){
                 messageToSend = _processAnyTemplateText(candidate, messageToSend);

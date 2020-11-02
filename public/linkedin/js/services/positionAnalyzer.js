@@ -4,6 +4,13 @@
     const _managementWords = ['manager', 'director', 'vice pres', 'vp ', ' vp', 'exec.', 'executive', 'president', 'ceo', 'founder'];
     const _internWords = ['intern '];
 
+    const _analyzeCurrentlyWorkingPositions = (candidate) => {
+        const currentPositions = candidate.positions.filter(p => !p.endDateMonth);
+        candidate.isTechnicallyRelevant = currentPositions.filter(p => _checkIfTechnicallyRelevant(p)).length > 0;
+        candidate.isManagement = currentPositions.filter(p => _checkIfManagement(p)).length > 0;
+        candidate.isIntern = currentPositions.filter(p => _checkIfInternship(p)).length > 0;
+    }
+
     const _analyzeASingleCandidatesPositions = (candidate) => {
         if (!(candidate && candidate.positions)){
             return;
@@ -14,6 +21,8 @@
             p.isManagement = _checkIfManagement(p);
             p.isInternship = _checkIfInternship(p);
         });
+
+        _analyzeCurrentlyWorkingPositions(candidate);
 
         //eg '18, 5, 17, 120' (the months they've spent on each technical job)
         candidate.technicalYearString = _buildCandidateTechnicalYearsString(candidate);

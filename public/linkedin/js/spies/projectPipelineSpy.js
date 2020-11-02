@@ -1,6 +1,5 @@
 (() => {
     const _initializeAsyncCalls = async () => {
-        await searchResultsScraper.loadFromLocalStorage();
         await _initializeKeywordMatchVisualIndicators();
         await _rebindToPresentationTabs();
     }
@@ -24,7 +23,7 @@
 
             const match = candidateKeywordMatchRepository.getCandidateKeywordMatch(memberId);
             if (match){
-                const candidate = searchResultsScraper.findCandidate(memberId);
+                const candidate = candidateRepository.searchForCandidate(memberId);
                 const city = candidate ? (candidate.city || '') + '\n' : '';
                 const technicalYearString = candidate && candidate.technicalYearString ? `${candidate.technicalYearString}\n` : '';
 

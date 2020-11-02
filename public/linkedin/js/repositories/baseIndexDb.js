@@ -44,7 +44,7 @@
             request.onupgradeneeded = (e) => {
                 _db = e.target.result
 
-                _createStore('candidate', 'memberId', ['lastName', 'isJobSeeker']);
+                _createStore('candidate', 'memberId', ['lastName', 'isJobSeekerString']);
                 _createStore('company', 'companyId');
                 _createStore('job', 'jobId');
                 _createStore('statistics', 'memberId');

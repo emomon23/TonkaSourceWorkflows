@@ -28,10 +28,18 @@
         }
     }
 
+    const _startJobAlisonContactString = async () => {
+        await window.launchTonkaSource();
+
+        await tsCommon.sleep(5000);
+        tsCommon.postMessageToWindow(window.alisonHookWindow, 'startAlisonContactSync');
+    }
+
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
         launchInMailBlaster = _launchInMailBlaster;
+        startJobAlisonContactString = _startJobAlisonContactString;
     }
 
     window.tsCommand = new TSCommand();
