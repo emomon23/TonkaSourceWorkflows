@@ -153,82 +153,89 @@
     }
 
     const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProjectConfiguration) => {
-        const addToProject = addToProjectConfiguration ? true : false;
-        const minPercentMatch = addToProjectConfiguration ? addToProjectConfiguration.minPercentMatch || 49 : 100;
-        const tagString = addToProjectConfiguration ? addToProjectConfiguration.tagString || null : null;
+        try {
+            tsUICommon.saveItemLocally('tsAutoScrapingInProgress', true);
+            const addToProject = addToProjectConfiguration ? true : false;
+            const minPercentMatch = addToProjectConfiguration ? addToProjectConfiguration.minPercentMatch || 49 : 100;
+            const tagString = addToProjectConfiguration ? addToProjectConfiguration.tagString || null : null;
 
-        //addToProject, minPercentMatch, tagString = null
-        const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
-        let totalAdded = 0;
+            //addToProject, minPercentMatch, tagString = null
+            const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
+            let totalAdded = 0;
 
-        if (seekers.length > 0){
-            let names = seekers.map(s => `${s.firstName} ${s.lastName}`).join(', ');
-            tsCommon.log(`# of seekers on this page ${seekers.length}. (${names})`);
+            if (seekers.length > 0){
+                let names = seekers.map(s => `${s.firstName} ${s.lastName}`).join(', ');
+                tsCommon.log(`# of seekers on this page ${seekers.length}. (${names})`);
 
-            for (let i=0; i<seekers.length; i++){
-                const candidate = seekers[i];
-                let alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
-                alreadyGatheredData = alreadyGatheredData || _jobsGathered[candidate.memberId] === true;
+                for (let i=0; i<seekers.length; i++){
+                    const candidate = seekers[i];
+                    let alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
+                    alreadyGatheredData = alreadyGatheredData || _jobsGathered[candidate.memberId] === true;
 
-                if (alreadyGatheredData){
-                    if (addToProject){
-                        const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
-                        const saveToProjectProjectButton = tsUICommon.findFirstDomElement([selector]);
+                    if (alreadyGatheredData){
+                        if (addToProject){
+                            const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
+                            const saveToProjectProjectButton = tsUICommon.findFirstDomElement([selector]);
 
-                        if (saveToProjectProjectButton) {
-                            saveToProjectProjectButton.click();
-                            // eslint-disable-next-line no-await-in-loop
-                            await tsCommon.randomSleep(5000, 8000);
-                        }
-                    }
-                }
-                else {
-                    searchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
-
-                    // eslint-disable-next-line no-await-in-loop
-                    await tsCommon.randomSleep(2000, 3000);
-
-                    var href = "https://www.linkedin.com" + $(`#search-result-${candidate.memberId} a`).attr('href');
-                    const candidateWindow = window.open(href);
-
-                    // eslint-disable-next-line no-await-in-loop
-                    await tsCommon.waitTilTrue(() => {
-                        //wait for linkedInRecruiterProfileScraper to exist.
-                        return candidateWindow.linkedInRecruiterProfileScraper ? true : false;
-                    }, 15000);
-
-                     // eslint-disable-next-line no-await-in-loop
-                     await tsCommon.sleep(15000);
-
-                    // eslint-disable-next-line no-await-in-loop
-                    const expandedCandidate =  await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile(tagString);
-
-                     _jobsGathered[candidate.memberId] = true;
-
-                    // wait 30 to 45 seconds to proceed
-                    // eslint-disable-next-line no-await-in-loop
-                    await tsCommon.randomSleep(22000, 45000);
-                    if (addToProject && expandedCandidate && expandedCandidate.lastSearchFilterMatch){
-                        const keywordMatch = expandedCandidate.lastSearchFilterMatch;
-
-                        if (keywordMatch && keywordMatch.percentMatch > minPercentMatch){
-                            const saveToProjectButton = $(candidateWindow.document).find(linkedInSelectors.recruiterProfilePage.saveButton);
-                            if (saveToProjectButton){
-                                saveToProjectButton.click();
+                            if (saveToProjectProjectButton) {
+                                saveToProjectProjectButton.click();
                                 // eslint-disable-next-line no-await-in-loop
-                                await tsCommon.randomSleep(3000, 6000);
+                                await tsCommon.randomSleep(5000, 8000);
                             }
                         }
                     }
+                    else {
+                        searchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
 
-                    // eslint-disable-next-line no-await-in-loop
-                    await candidateRepository.saveCandidate(expandedCandidate);
-                    candidateWindow.close();
+                        // eslint-disable-next-line no-await-in-loop
+                        await tsCommon.randomSleep(2000, 3000);
+
+                        var href = "https://www.linkedin.com" + $(`#search-result-${candidate.memberId} a`).attr('href');
+                        const candidateWindow = window.open(href);
+
+                        // eslint-disable-next-line no-await-in-loop
+                        await tsCommon.waitTilTrue(() => {
+                            //wait for linkedInRecruiterProfileScraper to exist.
+                            return candidateWindow.linkedInRecruiterProfileScraper ? true : false;
+                        }, 15000);
+
+                        // eslint-disable-next-line no-await-in-loop
+                        await tsCommon.sleep(15000);
+
+                        // eslint-disable-next-line no-await-in-loop
+                        const expandedCandidate =  await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile(tagString);
+
+                        _jobsGathered[candidate.memberId] = true;
+
+                        // wait 30 to 45 seconds to proceed
+                        // eslint-disable-next-line no-await-in-loop
+                        await tsCommon.randomSleep(22000, 45000);
+                        if (addToProject && expandedCandidate && expandedCandidate.lastSearchFilterMatch){
+                            const keywordMatch = expandedCandidate.lastSearchFilterMatch;
+
+                            if (keywordMatch && keywordMatch.percentMatch > minPercentMatch){
+                                const saveToProjectButton = $(candidateWindow.document).find(linkedInSelectors.recruiterProfilePage.saveButton);
+                                if (saveToProjectButton){
+                                    saveToProjectButton.click();
+                                    // eslint-disable-next-line no-await-in-loop
+                                    await tsCommon.randomSleep(3000, 6000);
+                                }
+                            }
+                        }
+
+                        // eslint-disable-next-line no-await-in-loop
+                        await candidateRepository.saveCandidate(expandedCandidate);
+                        candidateWindow.close();
+                    }
                 }
             }
+            return totalAdded;
+        } catch (e) {
+            tsCommon.log({ error: 'Error gathering experience data', message: e.message });
+        } finally {
+            tsUICommon.saveItemLocally('tsAutoScrapingInProgress', false);
         }
-
-        return totalAdded;
+        return null;
     }
 
     const _gatherAllJobSeekersExperienceData = async (addToProjectConfiguration = null) => {

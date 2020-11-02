@@ -34,6 +34,18 @@
         if (candidate) {
             candidate.lastScrapedBy = linkedInConstants.pages.RECRUITER_PROFILE;
 
+            // If we're not in automation mode, let's track the fact we've viewed their recruiter profile as a human
+            const isAutoScrapingInProgress = tsUICommon.getItemLocally('tsAutoScrapingInProgress');
+            if (!isAutoScrapingInProgress) {
+                const currentUser = await linkedInApp.getAlisonLoggedInUser();
+                if (candidate.lastViewedBy) {
+                    candidate.lastViewedBy[currentUser] = new Date().getTime();
+                } else {
+                    candidate.lastViewedBy = {}
+                    candidate.lastViewedBy[currentUser] = new Date().getTime();
+                }
+            }
+
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
                 return null;
