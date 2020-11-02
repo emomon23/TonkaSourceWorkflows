@@ -1,11 +1,11 @@
 (() => {
     const _expSelectors = linkedInSelectors.publicProfilePage.experience;
 
-    const _findCachedCandidate = (scrapedCandidate) => {
-        return searchResultsScraper ? searchResultsScraper.findCandidate(`${scrapedCandidate.firstName} ${scrapedCandidate.lastName}`) : null;
+    const _findCachedCandidate = async (scrapedCandidate) => {
+        return searchResultsScraper ? await candidateRepository.seaerchForCandidate(`${scrapedCandidate.firstName} ${scrapedCandidate.lastName}`) : null;
     }
 
-    const _expandJobHistory = async () => {   
+    const _expandJobHistory = async () => {
         await tsUICommon.scrollTilTrue(() => {
             return $(_expSelectors.seeMorePositions).length > 0;
         });
@@ -29,7 +29,7 @@
 
     const _parseDateStringsForDurationData = (dateStrings) => {
         const result = {};
-        
+
         const dates = dateStrings.split('–').map(d => d.trim());
         //durationData: { years: months: totalMonthsOnJob: startDate, endDate, startDateMonth, startDateYear, ageOfPositionInMonths: (0 = present)}
 
@@ -40,7 +40,7 @@
         const fromDate = new Date(dates[0]);
         const isPresent = dates[1] === 'Present';
         const toDate = isPresent ? null : new Date(dates[1]);
-        
+
         result.isPresent = isPresent;
         result.startDateMonth = fromDate.getMonth() +1;
         result.startDateYear = fromDate.getFullYear();
@@ -50,7 +50,7 @@
             result.endDateYear = toDate.getFullYear();
         }
 
-        return result;       
+        return result;
     }
 
     const _scrapeRawExperienceText = () => {
@@ -72,7 +72,7 @@
         if (!multipleRoles){
             return null;
         }
-    
+
         const companyName = $(li).find('h3:contains("Company")').text().split('Company Name').join('').split('\n').join('').trim();
         const roleListItems = $(li).find('ul li');
         const result = [];
@@ -93,7 +93,7 @@
                 role.title = title;
                 role.description = description;
                 role.companyName = companyName;
-                
+
                 result.push(role);
             }
             catch(e){
@@ -118,13 +118,13 @@
             try {
                 const li = positionLineItems[i];
                 const multipleRoles =  _scrapeCompanyRoles(li);
-            
+
                 if (multipleRoles && multipleRoles.length > 0){
                     result = result.concat(multipleRoles);
                 }
                 else {
                     const companyName = $(li).find(_expSelectors.employer).next().text().trim().split('\n')[0].trim();
-                
+
                     const job = {};
                     job.title = $(li).find(_expSelectors.positionTitle).text().trim();
                     job.companyName = companyName;
@@ -133,7 +133,7 @@
                     if (!job.description || job.description.length === 0){
                         job.description = "EMPTY";
                     }
-                    
+
                     //eg: Oct 2012 - Nov 2013
                     let dateString = $(li).find(_expSelectors.dates).text().replace('Dates Employed', '').trim();
                     const durationData = _parseDateStringsForDurationData(dateString);
@@ -150,11 +150,11 @@
                     }
                 }
             }
-            catch (e) { 
+            catch (e) {
                 tsCommon.log("unable to get entire job history");
             }
         }
-      
+
         return result;
     }
 
@@ -189,7 +189,7 @@
     const _scrapeNameLocationDegree = () => {
         const selectors = linkedInSelectors.publicProfilePage;
         const flName = _scrapeFirstAndLastNameFromProfile();
-        
+
         //Minneapolis-St. Paul
         const locationAreaElement = $(selectors.location)[0];
         const locationAreaString = $(locationAreaElement).text().trim().replace('Greater', '').replace('Area', '').trim();
@@ -199,7 +199,7 @@
             firstName: flName.firstName,
             lastName: flName.lastName,
             areas: locationAreaString.split('-').map(s => s.trim()),
-            isFirstConnection: isFirstConnection 
+            isFirstConnection: isFirstConnection
         }
 
         const seeMoreSummaryButton = $(selectors.aboutSummarySeeMore);
@@ -223,7 +223,8 @@
     const _scrapeProfile = async () => {
             const fakeUser = _scrapedFakeUser();
             const scrapedCandidate =  _scrapeNameLocationDegree();
-            scrapedCandidate.source = 'PUBLIC_PROFILE';
+            result.lastScrapedBy =  linkedInConstants.pages.PUBLIC_PROFILE;
+
             scrapedCandidate.linkedIn = window.location.href;
 
             if (scrapedCandidate.isFirstConnection){
@@ -237,12 +238,12 @@
             if (fakeUser){
                 scrapedCandidate.scrapedBy = fakeUser;
             }
-            
+
             const cachedCandidate = await _findCachedCandidate(scrapedCandidate);
             if (cachedCandidate){
                 scrapedCandidate.memberId = cachedCandidate.memberId;
             }
-            
+
             return scrapedCandidate;
     }
 
@@ -269,7 +270,7 @@
         const cleaned = _cleanSearchString(appendToSearch);
 
         const selectors = linkedInSelectors.publicProfilePage.search;
-        const searchInput = $(selectors.searchInput); 
+        const searchInput = $(selectors.searchInput);
 
         searchInput.focus()
         await tsCommon.sleep(500);
@@ -313,8 +314,8 @@
 
     const _searchForPublicProfile = async(contact, sendConnectionRequest) => {
         const selectors = linkedInSelectors.publicProfilePage.search;
-        const searchInput = $(selectors.searchInput); 
-        
+        const searchInput = $(selectors.searchInput);
+
         const companyNames = _getCompanyNames(contact);
 
         if (!(contact.firstName && contact.lastName && companyNames.length > 0)){
@@ -340,17 +341,17 @@
             searchListResult = await _addCompanyNameToSearchIsUniqueEnough(appendCompany);
             positionIndex+=1;
         }
-        
+
         if (searchListResult !== FOUND_EM){
             return null;
         }
-       
+
         const searchInputOverlayList = $(selectors.searchInputOverlayList);
         if (searchInputOverlayList && searchInputOverlayList.length > 0 && $(searchInputOverlayList)[0].textContent.trim().indexOf('See all results') === -1){
             ($(searchInputOverlayList)[0]).click();
             await tsCommon.sleep(3000);
         }
-        
+
         const searchResultsListItems = $(selectors.searchResultsListItems);
         if (searchResultsListItems && searchResultsListItems.length > 0){
             const profileLinks = $($(searchResultsListItems)[0]).find(selectors.searchResultListItemProfileLink);
@@ -359,7 +360,7 @@
                 await tsCommon.sleep(2000);
             }
         }
-       
+
         const result = await _scrapeProfile();
         console.log({searchResult: result});
 
@@ -391,8 +392,8 @@
     }
 
     class LinkedInPublicProfileScraper {
-        scrapeProfile = _scrapeProfile; 
-        searchForPublicProfile = _searchForPublicProfile;     
+        scrapeProfile = _scrapeProfile;
+        searchForPublicProfile = _searchForPublicProfile;
         goHome = _goHome;
     }
 

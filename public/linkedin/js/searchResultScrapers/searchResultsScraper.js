@@ -118,54 +118,6 @@
         }
     }
 
-    const _searchCandidates = (searchFor) => {
-        let candidateReference = null;
-        const scrapedCandidates = searchResultsScraper.scrapedCandidates;
-
-        try {
-            candidateReference = scrapedCandidates[searchFor];
-            if (candidateReference !== undefined && candidateReference !== null){
-                return candidateReference.candidate;
-            }
-        } catch {
-            // Do nothing
-        }
-
-        let firstName =  null;
-        let lastName = null;
-
-        if (typeof searchFor === "string"){
-            const firstAndLastName = searchFor.toLowerCase().split(' ');
-            if (firstAndLastName.length === 2){
-                firstName = firstAndLastName[0];
-                lastName = firstAndLastName[1];
-            }
-        }
-        else {
-            firstName = (searchFor.firstName || searchFor.first || '').toLowerCase();
-            lastName = (searchFor.lastName || searchFor.last || '').toLowerCase();
-        }
-
-        if (firstName !== null && firstName !== undefined && lastName !== null && lastName !== undefined){
-            let candidateReference = null;
-
-             for(let k in scrapedCandidates) {
-                const c = scrapedCandidates[k].candidate;
-                const cFirstName = (c.firstName || '').toLowerCase();
-                const cLastName = (c.lastName || '').toLowerCase();
-
-                if (cFirstName === firstName && cLastName === lastName){
-                    candidateReference = c;
-                    break;
-                }
-            }
-
-            return candidateReference;
-        }
-
-        return null;
-    }
-
     const _getCandidateKeywordCount = async (candidateNameOrId, commaSeparatedListOfKeywords) => {
         const candidate = _searchCandidates(candidateNameOrId);
         if (candidate){
@@ -200,40 +152,6 @@
         }
     }
 
-    const _recruiterProfileKeyWordsMatchCount = async(candidate, commaSeparatedListOfWords) => {
-        //EG.
-        //commaSeparatedListOfWords = "C#:3,AWS:4,PostgreSQL"
-        //we want C# mentioned 3+ times,  AWS mentioned 4+ times, and PostgreSQL at least once
-
-        if (!commaSeparatedListOfWords || commaSeparatedListOfWords.trim().length === 0){
-            return true;
-        }
-
-        const justSkillNamesArray = commaSeparatedListOfWords.split(",").map(i => i.split(":")[0].trim())
-        const keywordsCount = await _getCandidateKeywordCount(candidate, justSkillNamesArray.join());
-
-        const desiredCounts = commaSeparatedListOfWords.split(",").map(i => i.split(":").length > 1 ?  i.split(":")[1].trim() : 1)
-        let result = true;
-
-        for (let i=0; i<justSkillNamesArray.length; i++){
-            const minCount = desiredCounts[i];
-            if (isNaN(minCount)){
-                tsCommon.log(`${commaSeparatedListOfWords[i]} doesn't make sense`, "WARN");
-                break;
-            }
-
-            count = keywordsCount.find(k => k.key === justSkillNamesArray[i]).count;
-            if (count < minCount){
-                result = false;
-                break;
-            }
-        }
-
-        tsCommon.log(`Just keyword verified ${candidate.firstName} ${candidate.lastName} (keyword counts do ${result === false ? "not " : ""} match), need to pause for a bit...`);
-        await tsCommon.randomSleep(6000, 11000);
-        return result;
-    }
-
     const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProjectConfiguration) => {
         const addToProject = addToProjectConfiguration ? true : false;
         const minPercentMatch = addToProjectConfiguration ? addToProjectConfiguration.minPercentMatch || 49 : 100;
@@ -266,7 +184,6 @@
                 }
                 else {
                     searchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
-                    searchResultsScraper.persistToLocalStorage();
 
                     // eslint-disable-next-line no-await-in-loop
                     await tsCommon.randomSleep(2000, 3000);
@@ -285,9 +202,8 @@
 
                     // eslint-disable-next-line no-await-in-loop
                     const expandedCandidate =  await candidateWindow.linkedInRecruiterProfileScraper.scrapeProfile(tagString);
-                    searchResultsScraper.scrapedCandidates[candidate.memberId] = expandedCandidate;
-                    searchResultsScraper.persistToLocalStorage();
-                    _jobsGathered[candidate.memberId] = true;
+
+                     _jobsGathered[candidate.memberId] = true;
 
                     // wait 30 to 45 seconds to proceed
                     // eslint-disable-next-line no-await-in-loop
@@ -305,6 +221,8 @@
                         }
                     }
 
+                    // eslint-disable-next-line no-await-in-loop
+                    await candidateRepository.saveCandidate(expandedCandidate);
                     candidateWindow.close();
                 }
             }
@@ -334,23 +252,6 @@
         return null;
     }
 
-    const _filterDefaultCandidatesToPersistToLocalStorage = (scrapedCandidates, daysOld) => {
-        const result = {};
-        const now = tsCommon.now();
-
-        for(var k in scrapedCandidates){
-            const container = scrapedCandidates[k];
-            const c = container ?  container.candidate : null;
-
-            if (c && (c.isJobSeeker === true || c.isActivelyLooking === true || c.persistToLocalStorage === true)
-                && (daysOld === null || now.dayDiff(scrapedCandidates[k].dateScraped) < daysOld)){
-                    result[k] = scrapedCandidates[k];
-            }
-        }
-
-        return result;
-    }
-
     const _cleanJobHistoryCompanyNames = (candidate) => {
         const findAndReplace = [{find: '&#x2F;', replace: '/'}, {find: '&amp;', replace: '&'}];
 
@@ -366,9 +267,29 @@
         }
     }
 
-    const _interceptSearchResults = async (responseObj) => {
-        searchResultsScraper.loadFromLocalStorage();
+    const _persistLastRecruiterProfile = async (memberId) => {
+        window.localStorage.setItem(_localStorageLastCandidateProfile, memberId);
+    }
 
+    const getCurrentRecruiterProfileCandidate = async() => {
+        const memberId = window.localStorage.getItem(_localStorageLastCandidateProfile);
+        return await candidateRepository.getCandidate(memberId);
+    }
+
+    const _trimScrapedCandidate = (scraped) => {
+        const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance', 'companyConnectionsPathNum', 'familiarName', 'fullName', 'isOpenProfile', 'memberInATSInfo', 'passedPrivacyCheck', 'projectStatuses', 'prospectId', 'views'];
+        const result = _.omit(scraped, omitFields);
+
+        result.firstName = tsUICommon.cleanseTextOfHtml(result.firstName);
+        result.lastName = tsUICommon.cleanseTextOfHtml(result.lastName);
+
+        _cleanJobHistoryCompanyNames(result);
+
+        result.lastScrapedBy =  linkedInConstants.pages.RECRUITER_SEARCH_RESULTS;
+        return result;
+    }
+
+    const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
         _pageCandidates = [];
@@ -383,71 +304,19 @@
 
             candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
-
-                const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance'];
-                const trimmedCandidate = _.omit(candidate, omitFields);
-
-                //clean position company names
-                _cleanJobHistoryCompanyNames(trimmedCandidate);
-
-                const existingCachedCandidate = searchResultsScraper.scrapedCandidates[candidate.memberId];
-
                 _pageCandidates.push(candidate);
 
-                if (!existingCachedCandidate){
-                    trimmedCandidate.firstName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.firstName);
-                    trimmedCandidate.lastName = tsUICommon.cleanseTextOfHtml(trimmedCandidate.lastName);
+                const trimmedCandidate = _trimScrapedCandidate(candidate);
 
-                    searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false, dateScraped: new Date()};
-                    if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
-                        trimmedCandidate.source = "RESULT_LIST";
-                        await linkedInApp.upsertContact(trimmedCandidate);
-                    }
-                }
-                else {
-                    if (existingCachedCandidate.isSelected === true) {
-                        linkedInApp.changeBadgeColor(candidate.memberId, 'red');
-                    }
-
-                    const existingIsJobSeeker = existingCachedCandidate.candidate.isJobSeeker || existingCachedCandidate.candidate.isActivelyLooking;
-                    const scrapedIsJobSeeker = candidate.isJobSeeker || candidate.isActivelyLooking;
-                    if ((existingIsJobSeeker === true && scrapedIsJobSeeker !== true)
-                        || (existingIsJobSeeker !== true && scrapedIsJobSeeker === true)){
-                        searchResultsScraper.scrapedCandidates[candidate.memberId] = {candidate: trimmedCandidate, isSelected:false};
-                        trimmedCandidate.source = "RESULT_LIST";
-                        await linkedInApp.upsertContact(trimmedCandidate);
-                    }
+                candidateRepository.saveCandidate(trimmedCandidate);
+                if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
+                    await linkedInApp.upsertContact(trimmedCandidate);
                 }
             });
 
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
-
             const companyAnalytics = positionAnalyzer.createCompanyAverageDurationObject(candidatesInResults);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
-
-            $('.badges abbr').bind("click", (e) => {
-                const element = $(e.currentTarget);
-
-                const style = $(element).attr('style') || '';
-                const isRed = style.indexOf('red') > -1;
-                const changeColor = isRed ? 'black' : 'red';
-
-                $(element).attr('style', 'color:' + changeColor);
-
-                const candidateMemberId = $('li').has(element).attr('id').replace('search-result-', '')
-                const container = searchResultsScraper.scrapedCandidates[candidateMemberId];
-
-                if (container !== undefined){
-                    const candidate = container.candidate;
-                    container.isSelected = !isRed;
-                    const {memberId, firstName, lastName, location, networkConnection, isJobSeeker} = candidate;
-                    linkedInCommon.callAlisonHookWindow('toggleCandidateSelection', {memberId, firstName, lastName, location, networkConnection, isJobSeeker, isSelected: !isRed});
-                }
-                else {
-                    tsCommon.log({msg: 'Unable to find candidate:', helper});
-                }
-
-            });
         }
     }
 
@@ -489,107 +358,9 @@
     }
 
     class SearchResultsScraper {
-        scrapedCandidates = {};
-
-        constructor(){
-            try {
-               this.loadFromLocalStorage();
-            }
-            catch(e){
-                tsCommon.log(`error loading scaped candidate from local storage. ${e.message}.  jsonString: ${jsonString}`, 'ERROR');
-            }
-        }
-
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
-
-        getScrapedCandidateCount = () => {
-            let result = 0;
-            for (let k in this.scrapedCandidates){
-                result+=1;
-            }
-
-            return result;
-        }
-
-        loadFromLocalStorage = () => {
-            if (!this.alreadyLoaded) {
-                var jsonString = window.localStorage.getItem(_localStorageItemName);
-                if (jsonString !== null && jsonString !== undefined){
-                    this.scrapedCandidates = JSON.parse(jsonString);
-                }
-                this.alreadyLoaded = true;
-            }
-        }
-
-        getScrapedCandidatesWithJobDetails = () => {
-            const result = [];
-
-            for (let k in this.scrapedCandidates){
-                const candidate = this.scrapedCandidates[k].candidate;
-
-                if (candidate && candidate.positions && candidate.positions.find(p => p.description && p.description.length > 0)){
-                    result.push(candidate);
-                }
-            }
-
-            return result;
-        }
-
-        deselectCandidate = (memberId) => {
-            if (this.scrapedCandidates[memberId] !== undefined){
-                this.scrapedCandidates[memberId].isSelected = false;
-            }
-        };
-
-        findCandidate = _searchCandidates;
-
-        persistLastRecruiterProfile = (memberId) => {
-            const candidateContainer = this.scrapedCandidates[memberId];
-            if (candidateContainer && candidateContainer.candidate){
-                const jsonString = JSON.stringify(candidateContainer);
-                window.localStorage.setItem(_localStorageLastCandidateProfile, jsonString);
-            }
-            else {
-                window.localStorage.setItem(_localStorageLastCandidateProfile, '{}');
-            }
-
-            return candidateContainer;
-        }
-
-        getCurrentRecruiterProfileCandidate = () => {
-            const jsonString = window.localStorage.getItem(_localStorageLastCandidateProfile);
-            try {
-                return JSON.parse(jsonString);
-            }
-            catch {
-                return null;
-            }
-        }
-
-        persistToLocalStorage = (daysOld = null) => {
-            if (daysOld === 0){
-                searchResultsScraper.clearLocalStorage();
-                return;
-            }
-
-            let onlyJobSeekers = _filterDefaultCandidatesToPersistToLocalStorage(this.scrapedCandidates, daysOld);
-            const jsonString = JSON.stringify(onlyJobSeekers);
-
-            try {
-                window.localStorage.setItem(_localStorageItemName, jsonString);
-            }
-            catch(e) {
-                onlyJobSeekers = null; // free up this memory before making a recursive call
-                const onlyRecentDays = dayDiff === null ? 1 : 0;
-                this.persistToLocalStorage(onlyRecentDays);
-            }
-        }
-
-        clearLocalStorage = () => {
-            window.localStorage.removeItem(_localStorageItemName);
-            this.scrapedCandidates = {};
-        }
-
+        persistLastRecruiterProfile = _persistLastRecruiterProfile;
+        getCurrentRecruiterProfileCandidate = getCurrentRecruiterProfileCandidate;
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
         gatherAllJobSeekersExperienceData = _gatherAllJobSeekersExperienceData;
         suspendGatherJobSeekersExperienceData = (val) => {_keepGatheringJobSeekerExperience = val ? false : true;}
@@ -597,7 +368,6 @@
         touchSearchResultsPages = _touchSearchResultsPages;
         suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = val ? false : true;}
 
-        getCandidateKeywordCount = _getCandidateKeywordCount;
         interceptSearchResults = _interceptSearchResults;
     }
 

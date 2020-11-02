@@ -23,14 +23,17 @@
 
         if (jGrades.length > 0){
             jGrades = jGrades.toArray();
-            jGrades.forEach((jg) => {
+            for (let j = 0; j<jGrades.length; j++) {
+                const jg = jGrades[j];
                 const memberId = $(jg).attr('memberId');
-                const candidate = searchResultsScraper.findCandidate(memberId);
+
+                // eslint-disable-next-line no-await-in-loop
+                const candidate = await candidateRepository.searchForCandidate(memberId);
                 const tooltipText = candidate && candidate.technicalYearString ? candidate.technicalYearString : 'none';
                 const tooltip = document.createElement("span");
                 $(tooltip).attr("class", "tooltiptext").html(tooltipText);
                 $(jg).append(tooltip);
-            })
+            }
         }
     }
 
@@ -46,7 +49,6 @@
             if (parent){
                 const memberId = $(parent).attr('id').replace('search-result-', '');
                 searchResultsScraper.persistLastRecruiterProfile(memberId);
-                searchResultsScraper.persistToLocalStorage()
             }
         });
     }

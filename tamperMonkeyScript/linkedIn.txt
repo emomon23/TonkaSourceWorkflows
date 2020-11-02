@@ -26,6 +26,8 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInSelectors.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInCommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/services/positionAnalyzer.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/candidateRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/candidateKeywordMatchRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
@@ -57,6 +59,8 @@
 // @ignore      http://localhost:5001/linkedin/js/linkedInSelectors.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInCommon.js
 // @ignore      http://localhost:5001/linkedin/js/services/positionAnalyzer.js
+// @ignore      http://localhost:5001/linkedin/js/repositories/baseIndexDb.js
+// @ignore      http://localhost:5001/linkedin/js/repositories/candidateRepository.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/candidateKeywordMatchRepository.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInContactInfoScraper.js

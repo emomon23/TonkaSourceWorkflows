@@ -123,12 +123,6 @@
         }
     }
 
-    const _candidateUnselect = async(data) => {
-        data = typeof data === "string"? JSON.parse(data) : data;
-        const memberId = data.memberId;
-        _changeBadgeColor(memberId, 'black');
-        searchResultsScraper.deselectCandidate(memberId);
-    }
 
     const _upsertContact =  async (candidate, requireRole = true) => {
         try {
@@ -167,7 +161,11 @@
     }
 
     const _saveCompanyAnalytics = async(analytics) => {
-        
+
+    }
+
+    const _alisonContactSyncCallback = async(contact) => {
+        console.log(`_alisonContactSyncCallback fired. ${contact.memberId}`);
     }
 
     const _getAlisonContact = async(searchFor) => {
@@ -175,20 +173,7 @@
     }
 
     const _getAlisonContactResult = async(alisonContact) => {
-        if (alisonContact && alisonContact.linkedInMemberId){
-            const memberId = alisonContact.linkedInMemberId;
-            const localCandidateContainer = searchResultsScraper.scrapedCandidates[memberId];
-
-            if (localCandidateContainer && localCandidateContainer.candidate){
-                if (alisonContact.scrapedSkillGrades){
-                    localCandidateContainer.candidate.scrapedSkillGrades = alisonContact.scrapedSkillGrades
-                }
-
-                if (alisonContact.positions){
-                    localCandidateContainer.candidate.positions = alisonContact.positions;
-                }
-            }
-        }
+        //Not implemented at this time
     }
 
     const _createMessageRecordObject = (text, type) => {
@@ -200,8 +185,8 @@
         };
     }
 
-    const _recordMessageWasSent = (recipient, messageSent, type = 'message') => {
-        let candidate = searchResultsScraper.findCandidate(recipient);
+    const _recordMessageWasSent = async (recipient, messageSent, type = 'message') => {
+        let candidate = await candidateRepository.searchForCandidate(recipient);
 
         if (candidate !== null){
             const {firstName, lastName, memberId} = candidate;
@@ -250,8 +235,8 @@
     }
 
     class LinkedInApp {
+        alisonContactSyncCallback = _alisonContactSyncCallback;
         sendLinkedInMessageOrConnectionRequestToCandidate = linkedInMessageSender.sendLinkedInMessageOrConnectionRequestToCandidate;
-        candidateUnselect = _candidateUnselect;
         changeBadgeColor = _changeBadgeColor;
         fireInMailBlast = _fireInMailBlast;
         upsertContact = _upsertContact;

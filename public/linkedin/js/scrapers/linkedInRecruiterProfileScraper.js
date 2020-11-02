@@ -16,24 +16,23 @@
         }
     }
 
-    const _getMemberId = () => {
-        const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
-        if (candidateContainer && candidateContainer.candidate){
-            return candidateContainer.candidate.memberId;
+    const _getMemberId = async () => {
+        const candidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
+        if (candidate){
+            return candidate.memberId;
         }
 
         return $(linkedInSelectors.recruiterProfilePage.profileId).val();
     }
 
     const _scrapeProfile = async (tagString = null) => {
-        await tsCommon.sleep(3000);
+        await tsCommon.sleep(1000);
         const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
-        const candidateContainer = searchResultsScraper.getCurrentRecruiterProfileCandidate();
-        let candidate = null;
+        candidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
 
         // If we've scraped this candidate, proceed
-        if (candidateContainer) {
-            candidate = candidateContainer.candidate;
+        if (candidate) {
+            candidate.lastScrapedBy = linkedInConstants.pages.RECRUITER_PROFILE;
 
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
@@ -53,13 +52,12 @@
             candidate.linkedInSkills = _scrapeSkills();
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
 
-            candidate.source = "RECRUITER_PROFILE";
             if (tagString && tagString.length > 0){
                 candidate.tags+= `,${tagString}`;
             }
 
             linkedInRecruiterFilter.analyzeCandidateProfile(candidate);
-            await linkedInApp.upsertContact(candidate);
+            linkedInApp.upsertContact(candidate);
 
             // Process Statistics
             candidate.statistics = statistician.processStatistics(candidate);
@@ -72,10 +70,7 @@
             }
 
             _displayStatisticGrades(candidate);
-
-            const container = searchResultsScraper.scrapedCandidates[candidate.memberId] || {};
-            container.candidate = candidate;
-            searchResultsScraper.scrapedCandidates[candidate.memberId] = container;
+            candidateRepository.saveCandidate(candidate);
 
         }
 

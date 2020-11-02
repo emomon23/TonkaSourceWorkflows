@@ -1,18 +1,18 @@
 /* eslint-disable no-eval */
 (() => {
-
     const _displayMessage = (message) => {
         const newLine = document.createElement('div');
         $(newLine).text(`- ${message}`);
 
         $('#message-container').append(newLine);
     }
-    
+
     const __doesMethodExistOnActiveTemplate = (methodName) => {
         try {
             return eval(`alisonHook.activeTemplate && alisonHook.activeTemplate['${methodName}'] != undefined`);
         }
         catch {
+            console.log(`error in __doesMethodExistOnActiveTemplate.  methodName: ${methodName}, ${e.memberId}`);
             return false;
         }
     }
@@ -21,7 +21,8 @@
         try {
             return eval(`alisonHook['${methodName}'] != undefined`);
         }
-        catch {
+        catch (e) {
+            console.log(`error in __doesMethodExistsOnAlisonHook.  methodName: ${methodName}, ${e.memberId}`);
             return false;
         }
     }
@@ -31,6 +32,7 @@
             return eval(`${methodName} != undefined`);
         }
         catch {
+            console.log(`error in __doesMethodExistsOnWindow.  methodName: ${methodName}, ${e.memberId}`);
             return false;
         }
     }
@@ -71,6 +73,16 @@
         }
     }
 
+    const _startAlisonContactSync = async (data) => {
+        console.log('startAlisonContactSync called');
+
+        for(let i=0; i<200; i++){
+            //window.alisonHook.callBackToLinkedIn('alisonContactSyncCallback', {memberId: 123});
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(200);
+        }
+    }
+
     class AlisonHook {
         constructor(){}
 
@@ -90,6 +102,7 @@
         };
 
         saveLinkedInContact = _saveLinkedInContact;
+        startAlisonContactSync = _startAlisonContactSync;
         getAlisonContact = _getAlisonContact;
         getNextJobSeekerToScrape = _getNextJobSeekerToScrape;
     }
@@ -104,7 +117,7 @@
 
             var d = e.data;
             linkedInConsoleReference = e.source;
-    
+
             const action = d.action;
             let data = null;
             try {
@@ -113,28 +126,29 @@
             catch {
                 data = d.parameter;
             }
-    
+
             if (__doesMethodExistOnActiveTemplate(action)){
                 eval(`alisonHook.activeTemplate.${action}(${data});`);
             }
             else if (__doesMethodExistOnAlisonHook(action)){
-                eval(`alisonHook.${action}(${data});`);
+                const aScript = `window.alisonHook.${action}(${data});`;
+                eval(aScript);
             }
             else if(__doesMethodExistOnWindow(action)){
-                eval(`${action}(${data});`);
+                const tScript =`${action}(${data});`
+                eval(tScript);
             }
             else {
                 console.error(`ERROR.  Unable to find action '${action}'`);
             }
-    
+
         });
-        
+
         //alisonHook.loadTemplate('sendLinkedInMessages');
-        
+
     });
-    
+
 })();
 
 
 
-    
