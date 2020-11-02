@@ -123,32 +123,38 @@
         });
     }
 
-    const _transactionGetObjectKeysByIndex = (storeObject, indexName, searchFor) => {
+    const _transactionGetObjectsByIndex = (storeObject, indexName, searchFor) => {
         return new Promise((resolve, reject) => {
             const results = [];
 
-            const index = storeObject.index(indexName);
-            const request = index.get(searchFor);
+            const myIndex = storeObject.index(indexName);
+            const getRequest = myIndex.get(searchFor);
 
-            request.onsuccess = (e) => {
-                cursorRequest = index.openKeyCursor();
 
-                cursorRequest.onsuccess = (e) => {
-                    const cursor = e.target.result;
-                    if (cursor) {
-                        results.push(cursor.primaryKey);
-                        cursor.continue();
-                    } else {
-                        resolve(results);
+            getRequest.onsuccess = (e) => {
+                console.log({request_result: getRequest.result});
+            }
+
+            myIndexOpenRequest = myIndex.openCursor();
+
+            myIndexOpenRequest.onsuccess = (ce) => {
+                const cursor = ce.target.result;
+
+                if (cursor) {
+                    if (cursor.key === searchFor) {
+                        results.push(cursor.value);
                     }
-                }
-
-                cursorRequest.onerror = (e) => {
-                    reject(e);
+                    cursor.continue();
+                } else {
+                    resolve(results);
                 }
             }
 
-            request.onerror = (e) => {
+            myIndexOpenRequest.onerror = (e) => {
+                reject(e);
+            }
+
+            myIndex.onerror = (e) => {
                 reject(e);
             }
         });
@@ -220,13 +226,8 @@
 
     const _getObjectsByIndex = async(objectStoreName, indexName, searchFor) => {
         const objectStore = await _getObjectStore(objectStoreName);
-        const primaryKeys = await _transactionGetObjectKeysByIndex(objectStore, indexName, searchFor);
-
-        if (!(primaryKeys && primaryKeys.length)){
-            return [];
-        }
-
-        return await _getObjectsByListOfKeys(objectStoreName, primaryKeys);
+        const results = await _transactionGetObjectsByIndex(objectStore, indexName, searchFor);
+        return results;
     }
 
     const _getAll = async(objectStoreName) => {
