@@ -74,11 +74,11 @@
             }
 
             existingCandidate.positions = _mergePositions(existingCandidate.positions, candidate.positions);
-            existingCandidate.isJobSeekerString = existingCandidate.isJobSeeker ? existingCandidate.isJobSeeker.toString() : 'false';
+            existingCandidate.isJobSeekerString = existingCandidate.isJobSeeker ? 'yes' : 'no'
             return await baseIndexDb.updateObject(_objectStoreName, existingCandidate, _keyPropertyName);
         }
         else {
-            candidate.isJobSeekerString = candidate.isJobSeekerString ? candidate.isJobSeekerString.toString() : 'false';
+            candidate.isJobSeekerString = candidate.isJobSeekerString ? 'yes' : 'no';
             return await baseIndexDb.insertObject(_objectStoreName, candidate, _keyPropertyName);
         }
 
@@ -162,7 +162,7 @@
     }
 
     const _getJobSeekers = async () => {
-        return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'isJobSeekerString', 'true');
+        return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'isJobSeekerString', 'yes');
     }
 
     const _whoGetsResetOnlyTonkaSourceFirstConnectionsCallbackFunction = (candidate) => {

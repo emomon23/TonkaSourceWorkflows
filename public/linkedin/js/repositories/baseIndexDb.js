@@ -37,7 +37,7 @@
                 return;
             }
 
-            const request = window.indexedDB.open(TONKA_SOURCE_DATABASE, 2);
+            const request = window.indexedDB.open(TONKA_SOURCE_DATABASE, 1);
 
             request.onerror = (error) => { reject(error); };
 
@@ -45,9 +45,6 @@
                 _db = e.target.result
 
                 _createStore('candidate', 'memberId', ['lastName', 'isJobSeekerString']);
-                _createStore('company', 'companyId');
-                _createStore('job', 'jobId');
-                _createStore('statistics', 'memberId');
             };
 
             request.onsuccess = function (e) {
