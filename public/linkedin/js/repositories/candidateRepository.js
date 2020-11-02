@@ -57,7 +57,7 @@
             throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
         }
 
-        const fieldsNotToBeOverridden = ['positions', 'dateCreated', 'isJobSeeker', 'isJobSeekerString', 'isActivelyLooking', 'jobSeekerScrapedDate']
+        const fieldsNotToBeOverridden = ['positions', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate']
         let existingCandidate = await baseIndexDb.getObjectById(_objectStoreName, candidate.memberId);
 
 
@@ -74,11 +74,11 @@
             }
 
             existingCandidate.positions = _mergePositions(existingCandidate.positions, candidate.positions);
-            existingCandidate.isJobSeekerString = existingCandidate.isJobSeeker ? 'yes' : 'no'
+            existingCandidate.isJobSeekerString = existingCandidate.isJobSeeker ? 'true' : 'false';
             return await baseIndexDb.updateObject(_objectStoreName, existingCandidate, _keyPropertyName);
         }
         else {
-            candidate.isJobSeekerString = candidate.isJobSeeker ? 'yes' : 'no';
+            candidate.isJobSeekerString = candidate.isJobSeeker ? 'true' : 'false';
             return await baseIndexDb.insertObject(_objectStoreName, candidate, _keyPropertyName);
         }
 
@@ -162,7 +162,7 @@
     }
 
     const _getJobSeekers = async () => {
-        return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'isJobSeekerString', 'yes');
+        return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'isJobSeekerString', 'true');
     }
 
     const _whoGetsResetOnlyTonkaSourceFirstConnectionsCallbackFunction = (candidate) => {
