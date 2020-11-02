@@ -57,9 +57,8 @@
             throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
         }
 
-        const fieldsNotToBeOverridden = ['positions', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate']
-        let existingCandidate = await baseIndexDb.getObjectById(_objectStoreName, candidate.memberId);
-
+        const fieldsNotToBeOverridden = ['positions', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
+        let existingCandidate = await _getCandidate(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
 
@@ -165,68 +164,31 @@
         return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'isJobSeekerString', 'true');
     }
 
-    const _whoGetsResetOnlyTonkaSourceFirstConnectionsCallbackFunction = (candidate) => {
-        let result = false;
-
-        if (candidate && candidate.alisonConnections){
-            for(let k in candidate.alisonConnections){
-                const connection = candidate.alisonConnections[k];
-                if (connection === "1" || connection === 1){
-                    result = true;
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    const _resetJobSeekers = async (whoGetsResetCallbackFunction = _whoGetsResetOnlyTonkaSourceFirstConnectionsCallbackFunction) => {
-        const candidates = await _getJobSeekers();
-        for (let i=0; i<candidates.length; i++){
-            const c = candidates[i];
-            if (c.isJobSeeker && whoGetsResetCallbackFunction(c)){
-                c.isJobSeeker = false;
-                c.jobSeekerResetDate = (new Date()).getTime();
-
-                // eslint-disable-next-line no-await-in-loop
-                await baseIndexDb.updateObject(_objectStoreName, c, _keyPropertyName);
-            }
-        }
-    }
-
     const _updateJobSeekerScrapedDateAccordingly = (existingCandidate, incomingCandidate) => {
         const icJobSeeker = (incomingCandidate.isJobSeeker || incomingCandidate.isActivelyLooking) || false;
         const ecJobSeeker = (existingCandidate && (existingCandidate.isJobSeeker || existingCandidate.isActivelyLooking)) || false;
+        const nowDate = (new Date()).getTime();
 
-        //isJobSeeker originates from the Recruiter Search Results page, only run this logic if the incomingCandidate
-        //originated from that scraper.
+        // isJobSeeker originates from the Recruiter Search Results page, only run this logic if the incomingCandidate
+        // originated from that scraper.
         if (incomingCandidate.lastScrapedBy === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS){
 
+            // check if the existing candidate does not match what we've scraped
             if (existingCandidate && ecJobSeeker !== icJobSeeker){
-                existingCandidate.isJobSeeker = incomingCandidate.isJobSeeker || incomingCandidate.isActivelyLooking;
-
-                let updateJobSeekerScrapedDate = true;
-
-                //Check if the existing candidate just had it's 'isJobSeeker' reset as part of a daily job
-                if (existingCandidate.jobSeekerResetDate){
-                    const now = tsCommon.now();
-                    const dayDiff = now.dayDiff(existingCandidate.jobSeekerResetDate);
-                    if (dayDiff < 1) {
-                        //the isJobSeeker flag was reset earlier today and is not getting set back
-                        //don't update the jobSeekerScrapedDate, leave it as is.
-                        updateJobSeekerScrapedDate = false;
-                    }
+                existingCandidate.isJobSeeker = icJobSeeker;
+                if (icJobSeeker){
+                    existingCandidate.jobSeekerStartDate = nowDate;
+                    existingCandidate.jobSeekerEndDate = null;
                 }
-
-                if (updateJobSeekerScrapedDate){
-                    existingCandidate.jobSeekerScrapedDate = (new Date()).getTime();
+                else {
+                    existingCandidate.jobSeekerEndDate = nowDate;
                 }
             }
 
-            //Check if saving a NEW candidate and they are a job seeker
+            // Check if saving a NEW candidate and they are a job seeker
             if ((!existingCandidate) && icJobSeeker){
-                incomingCandidate.jobSeekerScrapedDate = (new Date()).getTime();
+                incomingCandidate.jobSeekerStartDate = nowDate;
+                incomingCandidate.jobSeekerScrapedDate = nowDate;
             }
         }
     }
@@ -240,7 +202,6 @@
         searchForCandidate = _searchForCandidate;
         getJobSeekers = _getJobSeekers;
 
-        resetJobSeekers = _resetJobSeekers;
         //loadLotsOfData = _loadLotsOfData;
     }
 
