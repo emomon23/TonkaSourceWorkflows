@@ -82,7 +82,11 @@
             }
 
             _displayStatisticGrades(candidate);
-            candidateRepository.saveCandidate(candidate);
+            try {
+                candidateRepository.saveCandidate(candidate);
+            } catch (e) {
+                tsCommon.log(e.message, 'ERROR');
+            }
 
         }
 

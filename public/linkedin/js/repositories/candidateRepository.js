@@ -52,6 +52,11 @@
         }) : [];
     }
 
+    const _checkIfDataCameFromPublicProfileOrRecruiterProfilePage = (candidate) => {
+        return candidate.lastScrapedBy === linkedInConstants.pages.RECRUITER_PROFILE
+            || candidate.lastScrapedBy === linkedInConstants.pages.PUBLIC_PROFILE
+    }
+
     const _saveCandidate = async (candidate) => {
         if (!(candidate && candidate.memberId)){
             throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
@@ -61,6 +66,10 @@
         let existingCandidate = await _getCandidate(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
+
+        if (_checkIfDataCameFromPublicProfileOrRecruiterProfilePage(candidate)){
+            candidate.detailsLastScrapedDate = (new Date()).getTime();
+        }
 
         //Trim positions to minimal data for storage
         candidate.positions  = _trimDownPositions(candidate.positions);
@@ -172,7 +181,6 @@
         // isJobSeeker originates from the Recruiter Search Results page, only run this logic if the incomingCandidate
         // originated from that scraper.
         if (incomingCandidate.lastScrapedBy === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS){
-
             // check if the existing candidate does not match what we've scraped
             if (existingCandidate && ecJobSeeker !== icJobSeeker){
                 existingCandidate.isJobSeeker = icJobSeeker;

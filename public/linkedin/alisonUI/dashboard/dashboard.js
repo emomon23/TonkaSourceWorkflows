@@ -1,4 +1,5 @@
 let acceptJobSeekerCounter = 0;
+const now = (new Date()).getTime();
 
 const _displayMessage = (msg) => {
     $('#msg').text(msg);
@@ -11,13 +12,15 @@ const acceptJobSeeker = async (jsonString) => {
     console.log(`Accepted ${acceptJobSeekerCounter} job seekers...`);
 
     try {
-        candidateRepo.saveCandidate(candidate);
+        candidate.dashboardSync = now;
+        await candidateRepo.saveCandidate(candidate);
     } catch (e) {
         _displayMessage(e.message);
     }
 }
 
-const displayJobSeekers = () => {
+const displayJobSeekers = async () => {
+    candidateRepo.resetJobSeekers(now);
     _displayMessage("Time to render dashboard");
 }
 

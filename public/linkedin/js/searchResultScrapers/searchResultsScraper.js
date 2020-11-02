@@ -152,6 +152,21 @@
         }
     }
 
+    const _shouldWeSkipGettingDetailsOnThisCandidate = (candidate) => {
+        if (candidate.isTechnicallyRelevant === false){
+            return true;
+        }
+
+        if (!candidate.detailsLastScrapedDate){
+            return false;
+        }
+
+        const nowHelper = tsCommon.now();
+        const daysOld = nowHelper.dayDiff(candidate.detailsLastScrapedDate);
+
+        return daysOld < 30;
+    }
+
     const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProjectConfiguration) => {
         try {
             tsUICommon.saveItemLocally('tsAutoScrapingInProgress', true);
@@ -168,11 +183,12 @@
                 tsCommon.log(`# of seekers on this page ${seekers.length}. (${names})`);
 
                 for (let i=0; i<seekers.length; i++){
-                    const candidate = seekers[i];
-                    let alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
-                    alreadyGatheredData = alreadyGatheredData || _jobsGathered[candidate.memberId] === true;
+                    // eslint-disable-next-line no-await-in-loop
+                    const candidate = await candidateRepository.getCandidate(seekers[i].memberId);
 
-                    if (alreadyGatheredData){
+                    const shouldWeSkipCandidate = _shouldWeSkipGettingDetailsOnThisCandidate(candidate);
+
+                    if (shouldWeSkipCandidate){
                         if (addToProject){
                             const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
                             const saveToProjectProjectButton = tsUICommon.findFirstDomElement([selector]);
@@ -224,17 +240,24 @@
                         }
 
                         // eslint-disable-next-line no-await-in-loop
-                        await candidateRepository.saveCandidate(expandedCandidate);
+                        try {
+                            candidateRepository.saveCandidate(expandedCandidate);
+                        } catch (e) {
+                            tsCommon.log(e.message, 'ERROR');
+                        }
+
                         candidateWindow.close();
                     }
                 }
             }
+
             return totalAdded;
         } catch (e) {
             tsCommon.log({ error: 'Error gathering experience data', message: e.message });
         } finally {
             tsUICommon.saveItemLocally('tsAutoScrapingInProgress', false);
         }
+
         return null;
     }
 
@@ -315,7 +338,12 @@
 
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
 
-                candidateRepository.saveCandidate(trimmedCandidate);
+                try {
+                    candidateRepository.saveCandidate(trimmedCandidate);
+                } catch (e) {
+                    tsCommon.log(e.message, 'ERROR');
+                }
+
                 if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
                     await linkedInApp.upsertContact(trimmedCandidate);
                 }
