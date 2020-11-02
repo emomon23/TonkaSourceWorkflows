@@ -201,12 +201,12 @@
 
         //isJobSeeker originates from the Recruiter Search Results page, only run this logic if the incomingCandidate
         //originated from that scraper.
-        if (incomingCandidate.lastScrappedBy === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS){
+        if (incomingCandidate.lastScrapedBy === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS){
 
             if (existingCandidate && ecJobSeeker !== icJobSeeker){
                 existingCandidate.isJobSeeker = incomingCandidate.isJobSeeker || incomingCandidate.isActivelyLooking;
 
-                let updateJobSeekerScrappedDate = true;
+                let updateJobSeekerScrapedDate = true;
 
                 //Check if the existing candidate just had it's 'isJobSeeker' reset as part of a daily job
                 if (existingCandidate.jobSeekerResetDate){
@@ -214,19 +214,19 @@
                     const dayDiff = now.dayDiff(existingCandidate.jobSeekerResetDate);
                     if (dayDiff < 1) {
                         //the isJobSeeker flag was reset earlier today and is not getting set back
-                        //don't update the jobSeekerScrappedDate, leave it as is.
-                        updateJobSeekerScrappedDate = false;
+                        //don't update the jobSeekerScrapedDate, leave it as is.
+                        updateJobSeekerScrapedDate = false;
                     }
                 }
 
-                if (updateJobSeekerScrappedDate){
-                    existingCandidate.jobSeekerScrappedDate = (new Date()).getTime();
+                if (updateJobSeekerScrapedDate){
+                    existingCandidate.jobSeekerScrapedDate = (new Date()).getTime();
                 }
             }
 
             //Check if saving a NEW candidate and they are a job seeker
             if ((!existingCandidate) && icJobSeeker){
-                incomingCandidate.jobSeekerScrappedDate = (new Date()).getTime();
+                incomingCandidate.jobSeekerScrapedDate = (new Date()).getTime();
             }
         }
     }

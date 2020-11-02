@@ -285,7 +285,7 @@
 
         _cleanJobHistoryCompanyNames(result);
 
-        result.lastScrappedBy =  linkedInConstants.pages.RECRUITER_SEARCH_RESULTS;
+        result.lastScrapedBy =  linkedInConstants.pages.RECRUITER_SEARCH_RESULTS;
         return result;
     }
 

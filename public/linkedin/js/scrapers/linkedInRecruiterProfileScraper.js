@@ -32,7 +32,7 @@
 
         // If we've scraped this candidate, proceed
         if (candidate) {
-            candidate.lastScrappedBy = linkedInConstants.pages.RECRUITER_PROFILE;
+            candidate.lastScrapedBy = linkedInConstants.pages.RECRUITER_PROFILE;
 
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");

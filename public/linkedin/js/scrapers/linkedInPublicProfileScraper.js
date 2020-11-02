@@ -223,7 +223,7 @@
     const _scrapeProfile = async () => {
             const fakeUser = _scrapedFakeUser();
             const scrapedCandidate =  _scrapeNameLocationDegree();
-            result.lastScrappedBy =  linkedInConstants.pages.PUBLIC_PROFILE;
+            result.lastScrapedBy =  linkedInConstants.pages.PUBLIC_PROFILE;
 
             scrapedCandidate.linkedIn = window.location.href;
 
