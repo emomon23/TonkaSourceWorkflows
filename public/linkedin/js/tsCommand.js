@@ -55,10 +55,24 @@
         }
     }
 
+    const _runDailyJobSeekerReport = async () => {
+        $('a[title*="MyConnectionsLooking"]')[0].click()
+        await tsCommon.sleep(3000);
+
+        $('a[class*="talent-pool-link"]')[0].click()
+        await tsCommon.sleep(3000);
+
+        await searchResultsScraper.gatherAllJobSeekersExperienceData();
+        await tsCommon.sleep(2000);
+
+        _launchDashboard();
+    }
+
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
         launchInMailBlaster = _launchInMailBlaster;
+        runDailyJobSeekerReport = _runDailyJobSeekerReport;
 
         launchDashboard = _launchDashboard;
     }
