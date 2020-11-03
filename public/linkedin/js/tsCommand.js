@@ -56,14 +56,26 @@
     }
 
     const _runDailyJobSeekerReport = async () => {
-        $('a[title*="MyConnectionsLooking"]')[0].click()
+        const openUrl = 'https://www.linkedin.com' + $('a[class*="product"]')[0].getAttribute('href');
+        const jobWindow = window.open(openUrl);
         await tsCommon.sleep(3000);
 
-        $('a[class*="talent-pool-link"]')[0].click()
+        $(jobWindow.document).find('a[title*="MyConnectionsLooking"]')[0].click();
         await tsCommon.sleep(3000);
 
-        await searchResultsScraper.gatherAllJobSeekersExperienceData();
+        $(jobWindow.document).find('a[class*="talent-pool-link"]')[0].click()
+        await tsCommon.sleep(8000);
+
+        const pageOneLink = $(jobWindow.document).find('a[title="Page 1"]')[0];
+        if (pageOneLink){
+            pageOneLink.click();
+            await tsCommon.sleep(8000);
+        }
+
+        await jobWindow.searchResultsScraper.gatherAllJobSeekersExperienceData();
         await tsCommon.sleep(2000);
+
+        jobWindow.close();
 
         _launchDashboard();
     }
