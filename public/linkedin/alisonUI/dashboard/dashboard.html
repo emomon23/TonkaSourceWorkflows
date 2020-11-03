@@ -1,5 +1,5 @@
 <html>
-    <head>
+     <head>
         <script src='https://code.jquery.com/jquery-latest.js'></script>
         <script src='http://localhost:5001/js/tsConstants.js'></script>
         <script src='http://localhost:5001/js/tsCommon.js'></script>
@@ -9,16 +9,31 @@
         <script src='http://localhost:5001/js/alisonContactService.js'></script>
         <script src='dashboard.js'></script>
         <title>Dashboard</title>
-   </head>
+     </head>
 
-   <div id='mainContent'>
-        Dashboard
-   </head>
+     <template id='candidateRowTemplate'>
+          <div class="tr candidateRow">
+              <div class="td candidateName">
+                    <a class='linkToProfile' target='_blank' href=''></a>
+              </div>
+          </div>
+      </template>
 
-   <div id='mainContent'>
+     <div id='mainContent'>
+          Actively Looking
+          <div class='table' id='activeSeekers'>
 
-   </div>
-   <div id='msg'>
-     NOT READY - waiting for a reference to linked in 'window' object...should be a few seconds
-  </div>
+
+          </div>
+
+          No Longer Looking
+          <div class='table' id='formerSeekers'>
+
+
+          </div>
+     </div>
+
+     <div id='msg'>
+          NOT READY - waiting for a reference to linked in 'window' object...should be a few seconds
+     </div>
 </html>

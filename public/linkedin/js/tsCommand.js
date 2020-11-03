@@ -31,6 +31,10 @@
     const _launchDashboard = async () => {
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/dashboard/dashboard.html`;
         const jobSeekers = await candidateRepository.getJobSeekers();
+        const contractors = await candidateRepository.getContractors();
+
+        const list = jobSeekers.concat(contractors);
+
         console.log(`There are ${jobSeekers.length} current job seekers`);
 
 
@@ -38,13 +42,13 @@
         await tsCommon.sleep(4000);
 
         if (dashboardWindow) {
-            for (let i=0; i<jobSeekers.length; i++){
-                tsCommon.postMessageToWindow(dashboardWindow, 'acceptJobSeeker', jobSeekers[i]);
+            for (let i=0; i<list.length; i++){
+                tsCommon.postMessageToWindow(dashboardWindow, 'acceptJobSeeker', list[i]);
                 // eslint-disable-next-line no-await-in-loop
                 await tsCommon.sleep(100);
             }
 
-            tsCommon.postMessageToWindow(dashboardWindow, 'jobSeekersDone');
+            tsCommon.postMessageToWindow(dashboardWindow, 'marshallingCandidatesDone');
         }
         else {
             tsCommon.log("Unable to open dashboard.  CHECK POP UP BLOCKER?", "WARN");

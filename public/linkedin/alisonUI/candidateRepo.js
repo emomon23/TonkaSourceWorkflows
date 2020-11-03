@@ -26,6 +26,19 @@
         }
     }
 
+    const _sortCandidates = (candidatesArray) => {
+        candidatesArray.sort((a, b) => {
+            if (a.dateLastUpdated > b.dateLastUpdated){
+                return -1;
+            }
+            else if (a.dateLastUpdated === b.dateLastUpdated){
+                return 0;
+            }
+
+            return 1;
+        });
+    }
+
     const _resetJobSeekers = async (thisDashboardSync) => {
         const candidates = await _getCandidates();
         for (let i=0; i<candidates.legnth; i++){
@@ -38,13 +51,42 @@
     }
 
     const _getCandidates = async () => {
-        await baseIndexDb.getAll(_objectStore);
+        return await baseIndexDb.getAll(_objectStore);
+    }
+
+    const _getCurrentJobSeekers = async () => {
+        let result = await _getCandidates() || [];
+        result = result.filter ? result.filter(c => c.isJobSeeker === true) : [];
+
+        _sortCandidates(result);
+
+        return result;
+    }
+
+    const _getRecentlyHired = async () => {
+        const nowHelper = tsCommon.now();
+
+        let result = await _getCandidates() || []
+        result = result.filter ? result.filter((c) => {
+                if ((!c.jobSeekerEndDate) || c.isJobSeeker) {
+                    return false;
+                }
+
+                const days = nowHelper.dayDiff(c.jobSeekerEndDate);
+                return c.isJobSeeker === false && days < 30;
+            }) : [];
+
+        _sortCandidates(result);
+
+        return result;
     }
 
     class CandidateRepo {
         saveCandidate = _saveCandidate;
         getCandidates = _getCandidates;
         getCandidate = _getCandidate;
+        getCurrentJobSeekers = _getCurrentJobSeekers;
+        getRecentlyHired = _getRecentlyHired;
         resetJobSeekers = _resetJobSeekers;
     }
 

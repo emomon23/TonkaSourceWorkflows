@@ -1,15 +1,41 @@
 let acceptJobSeekerCounter = 0;
 const now = (new Date()).getTime();
+let candidateRowTemplate = null;
 
 const _displayMessage = (msg) => {
     $('#msg').text(msg);
+}
+
+const _createTableRows = (tableRef, howMany) => {
+    for (let i=0; i<howMany; i++) {
+        const clonedRow = candidateRowTemplate.content.cloneNode(true);
+        tableRef.appendChild(clonedRow);
+    }
+}
+
+const _displayCandidateRecord = (row, candidate) => {
+    const link = $(row).find('.linkToProfile')[0];
+    $(link)
+        .attr('href', `https://www.linkedin.com${candidate.linkedInRecruiterUrl}`)
+        .text(`${candidate.firstName} ${candidate.lastName}`);
+}
+
+const _displayRecords = (tableReferenceString, listOfCandidates) => {
+    const tableReference = $(`#${tableReferenceString}`)[0];
+    _createTableRows(tableReference, listOfCandidates.length);
+
+    const rowDivs = $(tableReference).find('.candidateRow');
+    for (let i=0; i<listOfCandidates.length; i++){
+        _displayCandidateRecord(rowDivs[i], listOfCandidates[i]);
+    }
+
 }
 
 const acceptJobSeeker = async (jsonString) => {
     const candidate = JSON.parse(jsonString);
 
     acceptJobSeekerCounter+=1;
-    console.log(`Accepted ${acceptJobSeekerCounter} job seekers...`);
+    _displayMessage(`Accepted ${acceptJobSeekerCounter} job seekers...`);
 
     try {
         candidate.dashboardSync = now;
@@ -19,12 +45,19 @@ const acceptJobSeeker = async (jsonString) => {
     }
 }
 
-const displayJobSeekers = async () => {
+const _displayCandidates = async () => {
     candidateRepo.resetJobSeekers(now);
-    _displayMessage("Time to render dashboard");
+
+    const candidateList = await candidateRepo.getCurrentJobSeekers();
+    const recentlyHiredCandidates = await candidateRepo.getRecentlyHired();
+
+    _displayRecords('activeSeekers', candidateList);
+    _displayRecords('formerSeeker', recentlyHiredCandidates);
 }
 
 $(document).ready(() => {
+    candidateRowTemplate = $('#candidateRowTemplate')[0];
+
     window.addEventListener('message', (e) => {
         window.linkedInConsoleReference = e.source;
         const action = e.data.action;
@@ -33,8 +66,8 @@ $(document).ready(() => {
         if (action === 'acceptJobSeeker'){
             acceptJobSeeker(e.data.parameter);
         }
-        else if (action === 'jobSeekersDone'){
-            displayJobSeekers();
+        else if (action === 'marshallingCandidatesDone'){
+            _displayCandidates();
         }
     });
 

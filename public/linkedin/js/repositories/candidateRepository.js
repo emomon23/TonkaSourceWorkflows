@@ -2,6 +2,9 @@
     const _objectStoreName = 'candidate';
     const _keyPropertyName = 'memberId';
 
+    //need to talk about migrations.
+    let _entireCandidateList = null;
+
     const _mergePositions = (existingPositions, incomingPositions) => {
         const result = existingPositions ? existingPositions : [];
         if (!incomingPositions){
@@ -110,7 +113,11 @@
     }
 
     const _getEntireCandidateList = async() => {
-        return await baseIndexDb.getAll(_objectStoreName);
+        if (_entireCandidateList === null){
+            _entireCandidateList = await baseIndexDb.getAll(_objectStoreName);
+        }
+
+        return _entireCandidateList;
     }
 
     const _getSpecificListOfLinkedInMembers = async(memberIdArray) => {
@@ -169,6 +176,11 @@
         return found && found.length === 1 ? found[0] : null;
     }
 
+    const _getContractors = async () => {
+       await _getEntireCandidateList();
+       return _entireCandidateList.filter(c => c.isContractor);
+    }
+
     const _getJobSeekers = async () => {
         return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'isJobSeekerString', 'true');
     }
@@ -209,6 +221,7 @@
         searchOnName = _searchOnName;
         searchForCandidate = _searchForCandidate;
         getJobSeekers = _getJobSeekers;
+        getContractors = _getContractors;
 
         //loadLotsOfData = _loadLotsOfData;
     }
