@@ -60,11 +60,11 @@ const acceptJobSeeker = async (jsonString) => {
     }
 }
 
-const hideCandidate_Click = async (e) => {
+const hideCandidate_Click = async (hideButton) => {
     try {
-        const memberId = $(e.target).attr('memberId');
+        const memberId = $(hideButton).attr('memberId');
         await candidateRepo.hideCandidate(memberId, true);
-        $(`#candidate-row-${candidate.memberId}`).remove();
+        $(`#candidate-row-${memberId}`).remove();
     }
     catch (err) {
         _displayMessage(`ERROR: ${err.message}`);

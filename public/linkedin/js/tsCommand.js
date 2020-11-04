@@ -58,10 +58,10 @@
     const _runDailyJobSeekerReport = async () => {
         const openUrl = 'https://www.linkedin.com' + $('a[class*="product"]')[0].getAttribute('href');
         const jobWindow = window.open(openUrl);
-        await tsCommon.sleep(3000);
+        await tsCommon.sleep(7000);
 
         $(jobWindow.document).find('a[title*="MyConnectionsLooking"]')[0].click();
-        await tsCommon.sleep(3000);
+        await tsCommon.sleep(7000);
 
         $(jobWindow.document).find('a[class*="talent-pool-link"]')[0].click()
         await tsCommon.sleep(8000);
