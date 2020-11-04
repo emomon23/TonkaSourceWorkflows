@@ -79,7 +79,9 @@
             const years = Number.parseInt(months / 12);
             const monthsRemaining = months % 12;
 
-            const result = (p.current === true) ? `${years}y${monthsRemaining}m c --- "${p.title}"` : `${years}y${monthsRemaining}m --- "${p.title}"`;
+            const coName = p.companyName ? p.companyName.length > 6 ?  p.companyName.substr(0, 6) : p.companyName : '';
+
+            const result = (p.current === true) ? `${years}y${monthsRemaining}m c --- "${p.title} ${coName}"` : `${years}y${monthsRemaining}m --- "${p.title} ${p.coName}"`;
             results.push(result);
         }
 
