@@ -19,6 +19,10 @@
 
         let existingCandidate = await baseIndexDb.getObjectById(_objectStore, candidate.memberId);
         if (existingCandidate){
+            if (existingCandidate.hide){
+                candidate.hide = true;
+            }
+
             await baseIndexDb.updateObject(_objectStore, candidate, _candidateIdKey);
         }
         else {
@@ -56,7 +60,7 @@
 
     const _getCurrentJobSeekers = async () => {
         let result = await _getCandidates() || [];
-        result = result.filter ? result.filter(c => c.isJobSeeker === true) : [];
+        result = result.filter ? result.filter(c => c.isJobSeeker === true && !c.hide) : [];
 
         _sortCandidates(result);
 
@@ -68,7 +72,7 @@
 
         let result = await _getCandidates() || []
         result = result.filter ? result.filter((c) => {
-                if ((!c.jobSeekerEndDate) || c.isJobSeeker) {
+                if (c.hide === true || ((!c.jobSeekerEndDate) || c.isJobSeeker)) {
                     return false;
                 }
 
@@ -81,6 +85,12 @@
         return result;
     }
 
+    const _hideCandidate = async (memberId, value) => {
+        let existingCandidate =  await _getCandidate(memberId);
+        existingCandidate.hide = value;
+        await baseIndexDb.updateObject(_objectStore, existingCandidate, 'memberId');
+    }
+
     class CandidateRepo {
         saveCandidate = _saveCandidate;
         getCandidates = _getCandidates;
@@ -88,6 +98,7 @@
         getCurrentJobSeekers = _getCurrentJobSeekers;
         getRecentlyHired = _getRecentlyHired;
         resetJobSeekers = _resetJobSeekers;
+        hideCandidate = _hideCandidate;
     }
 
     window.candidateRepo = new CandidateRepo()

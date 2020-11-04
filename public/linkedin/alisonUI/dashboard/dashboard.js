@@ -14,10 +14,25 @@ const _createTableRows = (tableRef, howMany) => {
 }
 
 const _displayCandidateRecord = (row, candidate) => {
+    $(row).attr('id', `candidate-row-${candidate.memberId}`);
+
     const link = $(row).find('.linkToProfile')[0];
     $(link)
         .attr('href', `https://www.linkedin.com${candidate.linkedInRecruiterUrl}`)
         .text(`${candidate.firstName} ${candidate.lastName}`);
+
+    //Any elements with .setMemberId as class name want to have a memberId attribute
+    $(row).find('.setMemberId').attr('memberId', candidate.memberId);
+}
+
+const _displayCandidates = async () => {
+    candidateRepo.resetJobSeekers(now);
+
+    const candidateList = await candidateRepo.getCurrentJobSeekers();
+    const recentlyHiredCandidates = await candidateRepo.getRecentlyHired();
+
+    _displayRecords('activeSeekers', candidateList);
+    _displayRecords('formerSeeker', recentlyHiredCandidates);
 }
 
 const _displayRecords = (tableReferenceString, listOfCandidates) => {
@@ -45,14 +60,15 @@ const acceptJobSeeker = async (jsonString) => {
     }
 }
 
-const _displayCandidates = async () => {
-    candidateRepo.resetJobSeekers(now);
-
-    const candidateList = await candidateRepo.getCurrentJobSeekers();
-    const recentlyHiredCandidates = await candidateRepo.getRecentlyHired();
-
-    _displayRecords('activeSeekers', candidateList);
-    _displayRecords('formerSeeker', recentlyHiredCandidates);
+const hideCandidate_Click = async (e) => {
+    try {
+        const memberId = $(e.target).attr('memberId');
+        await candidateRepo.hideCandidate(memberId, true);
+        $(`#candidate-row-${candidate.memberId}`).remove();
+    }
+    catch (err) {
+        _displayMessage(`ERROR: ${err.message}`);
+    }
 }
 
 $(document).ready(() => {
