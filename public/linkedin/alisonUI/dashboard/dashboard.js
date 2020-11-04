@@ -1,5 +1,8 @@
 let acceptJobSeekerCounter = 0;
 const now = (new Date()).getTime();
+const seekersIndex = {};
+const nonSeekersIndex = {};
+
 let candidateRowTemplate = null;
 
 const _displayMessage = (msg) => {
@@ -68,7 +71,16 @@ const acceptJobSeeker = async (jsonString) => {
 
     try {
         candidate.dashboardSync = now;
-        await candidateRepo.saveCandidate(candidate);
+        const saveResult = await candidateRepo.saveCandidate(candidate);
+        if (saveResult.isJobSeeker && !saveResult.notReallySeeking){
+            seekersIndex[saveResult.memberId] = true;
+            nonSeekersIndex[saveResult.memberId] = false;
+        }
+        else {
+            seekersIndex[saveResult.memberId] = false;
+            nonSeekersIndex[saveResult.memberId] = true;
+        }
+
     } catch (e) {
         _displayMessage(e.message);
     }

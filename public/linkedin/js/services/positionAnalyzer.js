@@ -1,5 +1,5 @@
 (() => {
-    const _technicalTitleWords = ['developer', 'programmer', 'engineer', 'engr ', ' edi ', ' (edi) ', 'software ', 'architect', 'qa ', 'ios ', 'android ', 'sdet', 'quality assurance']
+    const _technicalTitleWords = ['developer', 'programmer', 'engineer', 'engr ', ' edi ', ' (edi) ', 'software ', 'architect', 'qa ', 'ios ', 'android ', 'sdet', 'quality assurance', 'user experience', 'ui/ux', 'ui\\ux', 'ux/ui', 'ux\\ui', 'product designer' ]
     const _eliminationWords = ['student', 'prime digital', 'recruit', 'sales', ' hr', 'hr '];
     const _managementWords = ['manager', 'director', 'vice pres', 'vp ', ' vp', 'exec.', 'executive', 'president', 'ceo', 'founder'];
     const _ownerEliminationWords = ['product owner', 'project owner', 'team owner']

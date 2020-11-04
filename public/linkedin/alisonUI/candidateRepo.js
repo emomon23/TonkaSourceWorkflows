@@ -59,6 +59,8 @@
         else {
             await baseIndexDb.insertObject(_objectStore, candidate, _candidateIdKey);
         }
+
+        return candidate;
     }
 
     const _sortCandidates = (candidatesArray) => {
