@@ -11,8 +11,7 @@
     const  _displayJobJumperAnalysis = (candidate) => {
         if (candidate
             && candidate.grades
-            && candidate.grades.jobJumper
-            && candidate.grades.jobJumper.gpa > 2.5){
+            && candidate.grades.jobJumper){
 
                 let searchResult = $(`#search-result-${candidate.memberId}`);
 
