@@ -164,7 +164,10 @@
         const nowHelper = tsCommon.now();
         const daysOld = nowHelper.dayDiff(candidate.detailsLastScrapedDate);
 
-        return daysOld < 30;
+        //If we hard code a number and run this the 1st time, we'll always
+        //get all on the same date.  randomNumber should help break this up
+        const skipIfLessThan = tsCommon.randomNumber(25, 35);
+        return daysOld < skipIfLessThan;
     }
 
     const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProjectConfiguration) => {

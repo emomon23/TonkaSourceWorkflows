@@ -60,10 +60,10 @@ const acceptJobSeeker = async (jsonString) => {
     }
 }
 
-const hideCandidate_Click = async (hideButton) => {
+const notReallySeeking_Click = async (hideButton) => {
     try {
         const memberId = $(hideButton).attr('memberId');
-        await candidateRepo.hideCandidate(memberId, true);
+        await candidateRepo.setNotReallySeeking(memberId, true);
         $(`#candidate-row-${memberId}`).remove();
     }
     catch (err) {

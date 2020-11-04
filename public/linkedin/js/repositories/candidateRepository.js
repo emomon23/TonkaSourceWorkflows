@@ -194,7 +194,7 @@
         // originated from that scraper.
         if (incomingCandidate.lastScrapedBy === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS){
             // check if the existing candidate does not match what we've scraped
-            if (existingCandidate && ecJobSeeker !== icJobSeeker){
+            if ((existingCandidate && ecJobSeeker !== icJobSeeker) || (icJobSeeker && !existingCandidate.jobSeekerStartDate)){
                 existingCandidate.isJobSeeker = icJobSeeker;
                 if (icJobSeeker){
                     existingCandidate.jobSeekerStartDate = nowDate;
