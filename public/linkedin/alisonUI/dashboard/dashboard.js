@@ -25,14 +25,18 @@ const _displayCandidateRecord = (row, candidate) => {
     $(row).find('.setMemberId').attr('memberId', candidate.memberId);
 }
 
-const _displayCandidates = async () => {
+const _reRenderCandidates = async () => {
+    const onlyFirst = $('#firstConnectionFilter')[0].checked ? true : false;
     candidateRepo.resetJobSeekers(now);
 
-    const candidateList = await candidateRepo.getCurrentJobSeekers();
-    const recentlyHiredCandidates = await candidateRepo.getRecentlyHired();
+    const candidateList = await candidateRepo.getCurrentJobSeekers(onlyFirst);
+    const recentlyHiredCandidates = await candidateRepo.getRecentlyHired(onlyFirst);
+
+    _removeAllChildNodes('activeSeekers');
+    _removeAllChildNodes('formerSeekers');
 
     _displayRecords('activeSeekers', candidateList);
-    _displayRecords('formerSeeker', recentlyHiredCandidates);
+    _displayRecords('formerSeekers', recentlyHiredCandidates);
 }
 
 const _displayRecords = (tableReferenceString, listOfCandidates) => {
@@ -44,6 +48,16 @@ const _displayRecords = (tableReferenceString, listOfCandidates) => {
         _displayCandidateRecord(rowDivs[i], listOfCandidates[i]);
     }
 
+}
+
+const _removeAllChildNodes = (idString) => {
+    idString = `#${idString}`;
+
+    const parent = $(idString)[0];
+
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
 }
 
 const acceptJobSeeker = async (jsonString) => {
@@ -58,6 +72,10 @@ const acceptJobSeeker = async (jsonString) => {
     } catch (e) {
         _displayMessage(e.message);
     }
+}
+
+const firstConnectionFilter_OnChange = () => {
+    _reRenderCandidates();
 }
 
 const notReallySeeking_Click = async (hideButton) => {
@@ -83,7 +101,7 @@ $(document).ready(() => {
             acceptJobSeeker(e.data.parameter);
         }
         else if (action === 'marshallingCandidatesDone'){
-            _displayCandidates();
+            _reRenderCandidates();
         }
     });
 

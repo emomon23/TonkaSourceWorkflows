@@ -2,6 +2,26 @@
     const _objectStore = 'candidate';
     const _candidateIdKey = 'memberId';
 
+    const _filterResultsOnFirstConnections = (results, shouldFilter) => {
+        if (!(shouldFilter && results && results.length)){
+            return results;
+        }
+
+        const filteredResults = results.filter((c) => {
+            let isFirst = false;
+            for(let k in c.alisonConnections){
+               if (c.alisonConnections[k] === "1"){
+                   isFirst = true;
+                   break;
+               }
+            }
+
+            return isFirst;
+        });
+
+        return filteredResults;
+    }
+
     const _getCandidate = async (memberId) => {
         const lookFor = !isNaN(memberId) ? Number.parseInt(memberId) : null;
 
@@ -69,16 +89,16 @@
         return await baseIndexDb.getAll(_objectStore);
     }
 
-    const _getCurrentJobSeekers = async () => {
+    const _getCurrentJobSeekers = async (onlyFirst) => {
         let result = await _getCandidates() || [];
         result = result.filter ? result.filter(c => c.isJobSeeker === true && !c.notReallySeeking) : [];
-
+        result = _filterResultsOnFirstConnections(result, onlyFirst);
         _sortCandidates(result);
 
         return result;
     }
 
-    const _getRecentlyHired = async () => {
+    const _getRecentlyHired = async (onlyFirst) => {
         const nowHelper = tsCommon.now();
 
         let result = await _getCandidates() || []
@@ -91,6 +111,7 @@
                 return c.isJobSeeker === false && days < 30;
             }) : [];
 
+        result = _filterResultsOnFirstConnections(result, onlyFirst);
         _sortCandidates(result);
 
         return result;
