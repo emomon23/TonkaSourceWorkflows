@@ -1,45 +1,49 @@
 <html>
-     <head>
-        <script src='https://code.jquery.com/jquery-latest.js'></script>
-        <script src='http://localhost:5001/js/tsConstants.js'></script>
-        <script src='http://localhost:5001/js/tsCommon.js'></script>
-        <script src='http://localhost:5001/js/tsUICommon.js'></script>
-        <script src='https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js'></script>
-        <script src='../candidateRepo.js'></script>
-        <script src='http://localhost:5001/js/alisonContactService.js'></script>
-        <script src='dashboard.js'></script>
-        <title>Dashboard</title>
-     </head>
 
-     <template id='candidateRowTemplate'>
-          <div class="tr candidateRow">
-              <div class="td candidateName">
-                    <a class='linkToProfile setMemberId' target='_blank' href=''></a>
-                    <button class='hideContact setMemberId' onclick='notReallySeeking_Click(this)'>Not Really Seeking</button>
-              </div>
-          </div>
-      </template>
+<head>
+     <script src='https://code.jquery.com/jquery-latest.js'></script>
+     <script src='http://localhost:5001/js/tsConstants.js'></script>
+     <script src='http://localhost:5001/js/tsCommon.js'></script>
+     <script src='http://localhost:5001/js/tsUICommon.js'></script>
+     <script src='https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js'></script>
+     <script src='../candidateRepo.js'></script>
+     <script src='http://localhost:5001/js/alisonContactService.js'></script>
+     <script src='dashboard.js'></script>
+     <title>Dashboard</title>
+</head>
 
-     <div id='mainContent'>
-          <input type='checkbox' checked id='firstConnectionFilter' onchange="firstConnectionFilter_OnChange()"> Only 1st Connections
-
-          <div>
-               Actively Looking
-          </div>
-
-          <div class='table' id='activeSeekers'>
-
-
-          </div>
-
-          No Longer Looking
-          <div class='table' id='formerSeekers'>
-
-
+<template id='candidateRowTemplate'>
+     <div class="tr candidateRow">
+          <div class="td candidateName">
+               <a class='linkToProfile setMemberId' target='_blank' href=''></a>
+               <button class='hideContact setMemberId' onclick='notReallySeeking_Click(this)'>Not Really
+                    Seeking</button>
           </div>
      </div>
+</template>
 
-     <div id='msg'>
-          NOT READY - waiting for a reference to linked in 'window' object...should be a few seconds
+<div id='mainContent'>
+     <input type='checkbox' checked id='firstConnectionFilter' onchange="firstConnectionFilter_OnChange()"> Only 1st
+     Connections
+
+     <div>
+          Actively Looking
      </div>
+
+     <div class='table' id='activeSeekers'>
+
+
+     </div>
+
+     No Longer Looking
+     <div class='table' id='formerSeekers'>
+
+
+     </div>
+</div>
+
+<div id='msg'>
+     NOT READY - waiting for a reference to linked in 'window' object...should be a few seconds
+</div>
+
 </html>
