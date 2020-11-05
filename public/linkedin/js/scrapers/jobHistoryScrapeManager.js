@@ -50,7 +50,7 @@
     }
 
     class TsJobHistoryScrapeManager {
-        begin = async(howMany) => {
+        begin = async (howMany) => {
             if (!howMany || isNaN(howMany)){
                 console.log('*** you MUST specify how many');
                 return;
@@ -62,12 +62,12 @@
             this.consecutiveNothingToScrape = 0;
             await _getNextCandidateToScrape();
 
-            //monitor for the next 5 
+            // monitor for the next 5 
             const self = this;
             let counter = 0;
 
             const interval = setInterval(() => {
-                counter+=1;
+                counter += 1;
                 const isRunningMsg = self.scrapeJobSeekerHasBeenCalled ? ' is ' : ' is NOT '
                 
                 if (counter > 10 || self.scrapeJobSeekerHasBeenCalled){
@@ -77,7 +77,7 @@
             }, 60000);
         }
 
-        scrapeThisJobSeeker = async(seeker) => {
+        scrapeThisJobSeeker = async (seeker) => {
             this.scrapeJobSeekerHasBeenCalled = true;
             let message = `scraped ${seeker.firstName} ${seeker.lastName} `;
             
@@ -85,23 +85,23 @@
                 this.consecutiveNothingToScrape = 0;
                 const scrapedSuccessfully = await _scrapeAlisonJobSeeker(seeker);
                 if (scrapedSuccessfully){
-                    this.success+=1;
+                    this.success += 1;
                     message += 'successfully. ';
                     await tsCommon.randomSleep(60000, 90000);
                 }
                 else {
                     message += 'unsuccessfully. ';
-                    this.failure+=1;
+                    this.failure += 1;
                 }
 
-                message+= `successfullyScraped: ${this.success}.  failed: ${this.failure}.  howMany: ${this.howMany}`;
+                message += `successfullyScraped: ${this.success}.  failed: ${this.failure}.  howMany: ${this.howMany}`;
                 console.log(message);
 
             } else {
                 console.log('Call to get next candidate to scrape return null, patiently waiting (5 minutes)...');
                 
-                this.consecutiveNothingToScrape +=1;
-                //there's no one to scrape, sleep for 5 mins and try again
+                this.consecutiveNothingToScrape += 1;
+                // there's no one to scrape, sleep for 5 mins and try again
                 const from = 60000 * 3;
                 const to = 60000 * 6
                 await tsCommon.randomSleep(from, to);

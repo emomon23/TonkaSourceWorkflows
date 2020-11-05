@@ -1,4 +1,4 @@
-(function() {
+(function () {
     const _activeOpportunityKey = linkedInConstants.localStorageKeys.ACTIVE_OPPORTUNITY;
     const _roleKey = linkedInConstants.localStorageKeys.ROLE;
     const _saveOnRecruiterProfileKey = linkedInConstants.localStorageKeys.SAVE_ON_RECRUITER_PROFILE;
@@ -77,8 +77,8 @@
         }
     }
 
-    //These are High Level 'Commands' that the app supports
-    //that the alisonHook UI (or user) can call.
+    // These are High Level 'Commands' that the app supports
+    // that the alisonHook UI (or user) can call.
     const _getAlisonLoggedInUser = async () => {
         let scrapedUser =  window.linkedInApp.alisonUserName;
         if (scrapedUser === null || scrapedUser === undefined){
@@ -160,20 +160,20 @@
         }
     }
 
-    const _saveCompanyAnalytics = async(analytics) => {
+    const _saveCompanyAnalytics = async (analytics) => {
 
     }
 
-    const _alisonContactSyncCallback = async(contact) => {
+    const _alisonContactSyncCallback = async (contact) => {
         console.log(`_alisonContactSyncCallback fired. ${contact.memberId}`);
     }
 
-    const _getAlisonContact = async(searchFor) => {
+    const _getAlisonContact = async (searchFor) => {
         await linkedInCommon.callAlisonHookWindow('getAlisonContact', searchFor);
     }
 
-    const _getAlisonContactResult = async(alisonContact) => {
-        //Not implemented at this time
+    const _getAlisonContactResult = async (alisonContact) => {
+        // Not implemented at this time
     }
 
     const _createMessageRecordObject = (text, type) => {
@@ -190,10 +190,10 @@
 
         if (candidate !== null){
             const {firstName, lastName, memberId} = candidate;
-            candidate = {firstName, lastName, memberId};  //make a copy of what we need for this save
+            candidate = {firstName, lastName, memberId};  // make a copy of what we need for this save
         }
         else {
-            candidate = recipient; //Try and save the message based on just the 1st and last names
+            candidate = recipient; // Try and save the message based on just the 1st and last names
         }
 
 
@@ -214,7 +214,7 @@
         _recordMessageWasSent(memberIdOrFirstNameAndLastName, note, 'connectionRequest');
     }
 
-    const _getNextJobSeekerResult = async(seeker) => {
+    const _getNextJobSeekerResult = async (seeker) => {
        await tsJobHistoryScrapeManager.scrapeThisJobSeeker(seeker);
     }
 
@@ -256,14 +256,14 @@
     window.linkedInApp = new LinkedInApp();
     _getAlisonLoggedInUser();
 
-    //All messages posted back to the Linked In windows (browser tab) / tamper Monkey
-    //should be routed to the linkedInApp object.
+    // All messages posted back to the Linked In windows (browser tab) / tamper Monkey
+    // should be routed to the linkedInApp object.
     tsCommon.setUpPostMessageListener('linkedInApp');
 
     tsInterceptor.interceptResponse('get', '/api/smartsearch?', searchResultsScraper.interceptSearchResults);
 
-    //firefox was 'telling on tonkasource' to linked in, when it found tampermonkey script gets loaded.
-    //try to suppress that method call.
+    // firefox was 'telling on tonkasource' to linked in, when it found tampermonkey script gets loaded.
+    // try to suppress that method call.
     tsInterceptor.interceptRequest('post', 'platform-telemetry/csp?', null, true);
 
     window.launchTonkaSource = async () => {
@@ -329,7 +329,7 @@
 
         // Extend jQuery
         $.extend($.expr[':'], {
-            containsi: function(elem, index, match) {
+            containsi: function (elem, index, match) {
                 /* For example $(‘#ShowItems li:containsi(“Share”)’), then match[3] will be Share */
                 return (elem.textContent || elem.innerText || '').toLowerCase().indexOf((match[3] || '').toLowerCase()) >= 0;
             }

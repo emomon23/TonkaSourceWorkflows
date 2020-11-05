@@ -9,11 +9,11 @@ var shell = require('gulp-shell')
 var uglify = require('gulp-uglify');
 var useref = require('gulp-useref');
 
-function clean(cb) {
+function clean (cb) {
     return del('build');
 }
 
-function html(cb) {
+function html (cb) {
     return gulp.src('public/**/*.html')
         .pipe(replace(/http:\/\/localhost:5001/g, 'https://tonkasourceworkflows.firebaseapp.com'))
         .pipe(replace(/http:\/\/localhost:5000\/alison-krause\/us-central1/g, 'https://us-central1-alison-krause.cloudfunctions.net'))
@@ -23,26 +23,26 @@ function html(cb) {
         .pipe(gulp.dest('build/Release'));
 }
 
-function lint(cb) {
+function lint (cb) {
     return gulp.src('public/**/*.js')
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
 }
 
-function js(cb) {
+function js (cb) {
     return gulp.src('public/**/*.js')
         .pipe(replace(/http:\/\/localhost:5001/g, 'https://tonkasourceworkflows.firebaseapp.com'))
         .pipe(replace(/http:\/\/localhost:5000\/alison-krause\/us-central1/g, 'https://us-central1-alison-krause.cloudfunctions.net'))
         .pipe(gulp.dest('build/Release'));
 }
 
-function css(cb) {
+function css (cb) {
     return gulp.src('public/**/*.css')
         .pipe(gulp.dest('build/Release'));
 }
 
-function root(cb) {
+function root (cb) {
     return gulp.src(['package.json'])
         .pipe(gulp.dest('build/Release'));
 }

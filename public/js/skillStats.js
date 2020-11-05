@@ -1,4 +1,4 @@
-(function() {
+(function () {
     class skillStats {
         skillStatsList = {
             // Groups

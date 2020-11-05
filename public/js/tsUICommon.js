@@ -1,4 +1,4 @@
-(function() {
+(function () {
     const _createListItem = (containerId, id, text) => {
         const li = document.createElement("li");
         li.id = `${id}_listItem`;
@@ -43,7 +43,7 @@
 
     const _findPreviousElement = (startElement, selector) => {
         let result = null;
-        for(let i=0; i < $(startElement).siblings().length; i++){
+        for(let i = 0; i < $(startElement).siblings().length; i++){
             const sibling = $(startElement).siblings()[i];
             const found = $(sibling).find(selector);
             if (found.length > 0){
@@ -62,7 +62,7 @@
      const _findFirstDomElement = (arrayOfSelectors) => {
          let result = null;
 
-         for (let i=0; i<arrayOfSelectors.length; i++){
+         for (let i = 0; i < arrayOfSelectors.length; i++){
             result = _findDomElements(arrayOfSelectors[i]);
             if (result !== null){
                 break;
@@ -99,8 +99,8 @@
 
         index = $(baseElement).text().indexOf(word);
         while(index >= 0){
-          count+=1;
-          index+= word.length;
+          count += 1;
+          index += word.length;
           index = $(baseElement).text().indexOf(word, index);
         }
 
@@ -117,11 +117,11 @@
         const scrollingElement = (document.scrollingElement || document.body);
         const step = scrollingElement.scrollHeight / stepInterval;
 
-        for(let i=0; i<stepInterval; i++){
+        for(let i = 0; i < stepInterval; i++){
             if (callBack() === true){
                 break;
             }
-            scrollingElement.scrollTop+= step;
+            scrollingElement.scrollTop += step;
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.sleep(300);
         }
@@ -155,7 +155,7 @@
         return result;
     }
     class TsUICommon {
-        constructor(){}
+        constructor (){}
 
         createListItem = _createListItem;
         removeListItem = _removeListItem;

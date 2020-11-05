@@ -33,7 +33,7 @@
         const result = {}
         for(var k in lic){
             if (renameMap[k] && lic[k]){
-                const resultKey = renameMap[k] === AS_IS? k : renameMap[k];
+                const resultKey = renameMap[k] === AS_IS ? k : renameMap[k];
                 result[resultKey] = lic[k];
             }
         }
@@ -43,7 +43,7 @@
         return result;
     }
 
-    const _getAlisonContact = async(searchFor) => {
+    const _getAlisonContact = async (searchFor) => {
         const url = `${_baseUrl}/contactsFullTextSearch?sv=` + searchFor;
         $.get(url, (contactList) => {
             if (contactList && contactList.count === 1){
@@ -80,7 +80,7 @@
         }
     }
 
-    const  _getNextJobSeeker = async() => {
+    const  _getNextJobSeeker = async () => {
         await tsCommon.sleep(2000);
 
         const url = `${_baseUrl}/getNextContactToScrape`;

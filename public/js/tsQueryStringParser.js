@@ -6,7 +6,7 @@
         }
     
         const result = {};
-        const queryString = url.substr(url.indexOf('?')+1);
+        const queryString = url.substr(url.indexOf('?') + 1);
         const nameValuePairs = queryString.split('&');
         nameValuePairs.forEach((nameValuePairString) => {
             const nvp = nameValuePairString.split('=');
@@ -19,13 +19,13 @@
     }
 
     const _parseLinkedInMemberIdIsPresent = () => {
-        //recruiter/profile/16530706,6KCd,CAP?
+        // recruiter/profile/16530706,6KCd,CAP?
         const lookFor = 'recruiter/profile/';
         const href = window.location.href;
         let startIndex = window.location.href.indexOf(lookFor);
 
         if (startIndex > 0){
-            startIndex+= lookFor.length;
+            startIndex += lookFor.length;
             const endIndex = href.indexOf('?', startIndex);
             if (endIndex === -1){
                 return null;

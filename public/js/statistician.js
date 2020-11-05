@@ -42,7 +42,7 @@
     const _adjustPositionsWhenRolesChange = (positions) => {
         if (positions) {
             for (let k = positions.length - 1; k >= 1; k--) {
-                const pos1 = positions[k-1];
+                const pos1 = positions[k - 1];
                 const pos2 = positions[k];
 
                 if (pos1.companyId === pos2.companyId) {
@@ -78,7 +78,7 @@
 
     const _calculateJobJumperGrades = (contactStatisticsList) => {
         if (contactStatisticsList && contactStatisticsList.length) {
-            for (let i = contactStatisticsList.length-1; i >= 0; i--) {
+            for (let i = contactStatisticsList.length - 1; i >= 0; i--) {
                 const jobJumper = _calculateJobJumperGrade(contactStatisticsList[i].jobStatistics)
                 contactStatisticsList[i].grades = (contactStatisticsList[i].grades) ? { ...contactStatisticsList[i].grades, jobJumper } : { jobJumper }
             }
@@ -97,17 +97,17 @@
 
             let grade = 'F';
             switch (true) {
-                case months >=11 && months < 18:
+                case months >= 11 && months < 18:
                     // Using 11 months, as if they are "waiting for 1 year to move" we should talk to them now!
                     grade = 'A';
                     break;
-                case months >=18 && months < 24:
+                case months >= 18 && months < 24:
                     grade = 'B';
                     break;
-                case months > 6 || (months >=24 && months < 36):
+                case months > 6 || (months >= 24 && months < 36):
                     grade = 'C';
                     break;
-                case months >=36:
+                case months >= 36:
                     grade = 'D';
                     break;
                 default:
@@ -143,7 +143,7 @@
                 }
 
                 const totalMonthsOnJob = _calculateMonthsBetweenDates(startDate, endDate);
-                const totalYearsOnJob = Math.round(100*totalMonthsOnJob * 0.08333)/100;
+                const totalYearsOnJob = Math.round(100 * totalMonthsOnJob * 0.08333) / 100;
 
                 // Add to our total job years
                 totalJobYears += totalYearsOnJob
@@ -180,7 +180,7 @@
 
             if (totalJobYears) {
                 // Set average years on job
-                yearsOnJobStatistics.average = Math.round(100*totalJobYears / totalJobs)/100;
+                yearsOnJobStatistics.average = Math.round(100 * totalJobYears / totalJobs) / 100;
                 yearsOnJobStatistics.yearsOfExperience = totalJobYears;
             }
             const jobJumper = _calculateJobJumperGrade(yearsOnJobStatistics);
@@ -240,7 +240,7 @@
 
     const _calculateSkillsStatistics = (contactStatisticsList, filter, spliceIfMinNotMet = true) => {
         if (contactStatisticsList && contactStatisticsList.length) {
-            for (let i = contactStatisticsList.length-1; i >= 0; i--) {
+            for (let i = contactStatisticsList.length - 1; i >= 0; i--) {
                 const allMonthsUsingGpas = [];
                 const allWithinMonthsGpas = [];
                 const contactSkillsStatistics = contactStatisticsList[i].skillStatistics;

@@ -1,6 +1,6 @@
 (() => {
     const _cleanUpArray = (arrayOfItems) => {
-        //.filter should work. wtf!!!
+        // .filter should work. wtf!!!
         let cleanResult = [];
         arrayOfItems.forEach((item) => {
             if (item !== undefined && item !== null){
@@ -29,7 +29,7 @@
             let array = enumerable;
             if(!isNaN(enumerable)){
                 array = [];
-                for(let i=0; i<enumerable; i++){
+                for(let i = 0; i < enumerable; i++){
                     array.push(i);
                 }
             }
@@ -51,7 +51,7 @@
                     if (arrayOfWhateverGotResolvedInFuctionThatTakesArrayItem) {
                         results = arrayOfWhateverGotResolvedInFuctionThatTakesArrayItem;
                         if (results.filter) {
-                            results = results.filter(i => i? true: false);
+                            results = results.filter(i => i ? true : false);
                         }
                     } 
     

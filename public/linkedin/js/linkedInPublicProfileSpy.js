@@ -29,7 +29,7 @@
            
             img.src = 'https://media-exp1.licdn.com/dms/image/C4E0BAQG13PuOrrmXTA/company-logo_100_100/0?e=1608768000&v=beta&t=052qHO34QXIUiOhBPvA9-MkB8byJwNbKiqjSuQ_wmj0';
             
-            const recordingStyle = _suspendedRecording[forWho]? _recordingStyleOff : _recordingStyleOn;
+            const recordingStyle = _suspendedRecording[forWho] ? _recordingStyleOff : _recordingStyleOn;
 
             $(img).attr('who', forWho).attr('style', recordingStyle).attr('class', 'tsMessageRecordButton');
     
@@ -47,13 +47,13 @@
 
     const _getMessageModal_RecipientNameElement = (peerElement) => {
         let headerSpan = tsUICommon.findPreviousElement(peerElement, _messageModalSelectors.activeMessageModalHeader);
-        let text = headerSpan && headerSpan.length > 0? headerSpan[0].textContent.trim() : null;
+        let text = headerSpan && headerSpan.length > 0 ? headerSpan[0].textContent.trim() : null;
 
         if (!headerSpan || headerSpan.length === 0 || text === "New message" || text === "Messaging"){
             headerSpan = tsUICommon.findPreviousElement(peerElement, _messageModalSelectors.multipleMessageRecipientPills);
         }
 
-        return headerSpan && headerSpan.length > 0? headerSpan[0]: null;
+        return headerSpan && headerSpan.length > 0 ? headerSpan[0] : null;
     }
 
     const _getFirstAndLastName = (peerElement = null) => {
@@ -67,7 +67,7 @@
         if (headerSpan !== null){
             const firstAndLastName = headerSpan.textContent.trim().split(' ');
             result.firstName = firstAndLastName[0];
-            result.lastName = firstAndLastName.length > 1? firstAndLastName[1] : '';
+            result.lastName = firstAndLastName.length > 1 ? firstAndLastName[1] : '';
         }
 
         return result;
@@ -101,14 +101,14 @@
         }
 
         const textEntry = tsUICommon.findPreviousElement(document.activeElement, _messageModalSelectors.textEntries);
-        const messageText = textEntry? $(textEntry).text() : 'UNKNOWN';
+        const messageText = textEntry ? $(textEntry).text() : 'UNKNOWN';
 
         linkedInApp.recordMessageWasSent(recipientName, messageText);
     }
 
     const _tsSendConnectionRequestButtonClickSpyHandler = async () => {
         const textArea = tsUICommon.findFirstDomElement(_connectionRequestSelectors.connectionNoteTextEntries);
-        const text = textArea === null? 'NO NOTE IN REQUEST' : $(textArea).val();
+        const text = textArea === null ? 'NO NOTE IN REQUEST' : $(textArea).val();
 
         const publicProfile = await linkedInPublicProfile.scrapeProfile();
         if (!publicProfile){
@@ -120,7 +120,7 @@
     }
 
     const _checkIfConnectionRequestModalIsPresent = () => {
-         //Bind to the Connection Request "Done" button, if present
+         // Bind to the Connection Request "Done" button, if present
          const doneButtonSelectors = _connectionRequestSelectors.connectionRequestDoneButtons;
 
          const doneButton = tsUICommon.findFirstDomElement(doneButtonSelectors)
@@ -145,7 +145,7 @@
     }      
     
     class LinkedInPublicProfileSpy {
-        constructor() {
+        constructor () {
             if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PUBLIC_PROFILE){
                 tsCommon.log("LinkedInPublicProfile spy is spying - good news!");
 
@@ -174,7 +174,7 @@
         }
 
         getNearestFirstAndLastName = (startingSelector = null) => {
-            startingSelector = startingSelector? startingSelector : document.activeElement;
+            startingSelector = startingSelector ? startingSelector : document.activeElement;
 
             return _getFirstAndLastName(startingSelector);
         }

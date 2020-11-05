@@ -26,7 +26,7 @@
         ];
 
         let result = null;
-        for(let i=0; i<keyMap.length; i++){
+        for(let i = 0; i < keyMap.length; i++){
             if (text.indexOf(keyMap[i].lookFor) >= 0){
                 result = keyMap[i].keyName;
                 break;
@@ -110,7 +110,7 @@
                 wordMatch: wordGroupArray.map(l => l.toLowerCase().replace(/"/g, ''))
             }
 
-            //sort by length descending (eg. '.Net core', then '.Net')
+            // sort by length descending (eg. '.Net core', then '.Net')
             globalListOfWordsToStrip.sort((a, b) => {
                 if (typeof a === "string" && typeof b === "string") {
                   return a.length > b.length ? -1 : a.length === b.length ? 0 : 1;
@@ -162,7 +162,7 @@
         }
 
         let result = null;
-        for (let i=0; i<candidate.positions.length; i++){
+        for (let i = 0; i < candidate.positions.length; i++){
             const p = candidate.positions[i];
             const foundOne = tsString.containsAny(p.description, doTheyHave.wordMatch);
             if (foundOne){

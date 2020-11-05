@@ -2,7 +2,7 @@
     const _objectStoreName = 'candidate';
     const _keyPropertyName = 'memberId';
 
-    //need to talk about migrations.
+    // need to talk about migrations.
     let _entireCandidateList = null;
 
     const _mergePositions = (existingPositions, incomingPositions) => {
@@ -20,7 +20,7 @@
 
             if (match){
                 if (ip.description && ip.description.length){
-                    //eg. This will happend when a 'lite candidate' has their profile scraped
+                    // eg. This will happend when a 'lite candidate' has their profile scraped
                     match.description = ip.description;
                 }
             } else {
@@ -74,7 +74,7 @@
             candidate.detailsLastScrapedDate = (new Date()).getTime();
         }
 
-        //Trim positions to minimal data for storage
+        // Trim positions to minimal data for storage
         candidate.positions  = _trimDownPositions(candidate.positions);
 
         if (existingCandidate){
@@ -96,7 +96,7 @@
     }
 
     const _saveCandidates = async (candidatesArray) => {
-        for(let i=0; i<candidatesArray.length; i++){
+        for(let i = 0; i < candidatesArray.length; i++){
             // eslint-disable-next-line no-await-in-loop
             await _saveCandidate(candidatesArray[i]);
         }
@@ -112,7 +112,7 @@
         throw new Error(`${memberId} is not a valid memberId to search on`)
     }
 
-    const _getEntireCandidateList = async() => {
+    const _getEntireCandidateList = async () => {
         if (_entireCandidateList === null){
             _entireCandidateList = await baseIndexDb.getAll(_objectStoreName);
         }
@@ -120,11 +120,11 @@
         return _entireCandidateList;
     }
 
-    const _getSpecificListOfLinkedInMembers = async(memberIdArray) => {
+    const _getSpecificListOfLinkedInMembers = async (memberIdArray) => {
         return await baseIndexDb.getObjectsByListOfKeys(_objectStoreName, memberIdArray);
     }
 
-    const _getCandidateList = async(memberIdArray = null) => {
+    const _getCandidateList = async (memberIdArray = null) => {
         return memberIdArray ?
             await _getSpecificListOfLinkedInMembers(memberIdArray) :
             await _getEntireCandidateList();
@@ -134,9 +134,9 @@
         let counter = 0;
         let c = {...basedOnContact};
 
-        for (let i=fromId; i<toId; i++) {
+        for (let i = fromId; i < toId; i++) {
             c.memberId = i;
-            counter+=1;
+            counter += 1;
 
             // eslint-disable-next-line no-await-in-loop
             await baseIndexDb.insertObject(_objectStoreName, c, 'memberId');
@@ -157,7 +157,7 @@
         return [];
     }
 
-    const _searchForCandidate = async(searchFor) => {
+    const _searchForCandidate = async (searchFor) => {
         if (!isNaN(searchFor)){
             return await _getCandidate(searchFor);
         }
@@ -166,7 +166,7 @@
         let found = null;
 
         if (names.length > 1){
-            found = await _searchOnName(names[names.length-1], names[0]);
+            found = await _searchOnName(names[names.length - 1], names[0]);
 
         }
         else {
@@ -223,7 +223,7 @@
         getJobSeekers = _getJobSeekers;
         getContractors = _getContractors;
 
-        //loadLotsOfData = _loadLotsOfData;
+        // loadLotsOfData = _loadLotsOfData;
     }
 
     window.candidateRepository = new CandidateRepository();

@@ -1,5 +1,5 @@
 (() => {
-    const _runJobHistoryScraperJob = async(howMany) => {
+    const _runJobHistoryScraperJob = async (howMany) => {
         tsJobHistoryScrapeManager.begin(howMany);
     }
 
@@ -42,7 +42,7 @@
         await tsCommon.sleep(4000);
 
         if (dashboardWindow) {
-            for (let i=0; i<list.length; i++){
+            for (let i = 0; i < list.length; i++){
                 tsCommon.postMessageToWindow(dashboardWindow, 'acceptJobSeeker', list[i]);
                 // eslint-disable-next-line no-await-in-loop
                 await tsCommon.sleep(100);

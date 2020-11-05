@@ -24,7 +24,7 @@
     }
 
     class LinkedInProxy {
-        constructor(){
+        constructor (){
             this.error = tsQueryString.error || null;
             if (tsQueryString.error_description){
                 this.error.errorDescription = tsQueryString.error_description;
