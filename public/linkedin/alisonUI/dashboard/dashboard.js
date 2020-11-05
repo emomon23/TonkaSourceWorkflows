@@ -10,7 +10,7 @@ const _displayMessage = (msg) => {
 }
 
 const _createTableRows = (tableRef, howMany) => {
-    for (let i=0; i<howMany; i++) {
+    for (let i = 0; i < howMany; i++) {
         const clonedRow = candidateRowTemplate.content.cloneNode(true);
         tableRef.appendChild(clonedRow);
     }
@@ -24,7 +24,7 @@ const _displayCandidateRecord = (row, candidate) => {
         .attr('href', `https://www.linkedin.com${candidate.linkedInRecruiterUrl}`)
         .text(`${candidate.firstName} ${candidate.lastName}`);
 
-    //Any elements with .setMemberId as class name want to have a memberId attribute
+    // Any elements with .setMemberId as class name want to have a memberId attribute
     $(row).find('.setMemberId').attr('memberId', candidate.memberId);
 }
 
@@ -47,7 +47,7 @@ const _displayRecords = (tableReferenceString, listOfCandidates) => {
     _createTableRows(tableReference, listOfCandidates.length);
 
     const rowDivs = $(tableReference).find('.candidateRow');
-    for (let i=0; i<listOfCandidates.length; i++){
+    for (let i = 0; i < listOfCandidates.length; i++){
         _displayCandidateRecord(rowDivs[i], listOfCandidates[i]);
     }
 
@@ -66,7 +66,7 @@ const _removeAllChildNodes = (idString) => {
 const acceptJobSeeker = async (jsonString) => {
     const candidate = JSON.parse(jsonString);
 
-    acceptJobSeekerCounter+=1;
+    acceptJobSeekerCounter += 1;
     _displayMessage(`Accepted ${acceptJobSeekerCounter} job seekers...`);
 
     try {

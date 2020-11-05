@@ -1,4 +1,4 @@
-(function() {
+(function () {
     const _contactInfoPage = {
         CONTACT_INFO_CONTAINER: 'div[class*="pv-profile-section__section-info"]',
         PHONE_SECTION: 'section[class*="ci-phone"]',

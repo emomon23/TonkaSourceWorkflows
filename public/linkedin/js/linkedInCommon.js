@@ -1,4 +1,4 @@
-(function() {
+(function () {
     const _advanceToNextLinkedInResultPage = () => {
         const buttonExists = $("[type='chevron-right-icon']").length;
         if (buttonExists){
@@ -111,7 +111,7 @@
     }
 
     class LinkedInCommon {
-        constructor() {}
+        constructor () {}
 
         advanceToNextLinkedInResultPage = _advanceToNextLinkedInResultPage;
         callAlisonHookWindow = _callAlisonHookWindow;

@@ -1,4 +1,4 @@
-(function() {
+(function () {
     class LinkedInConstants {
         localStorageKeys = {
             ACTIVE_OPPORTUNITY: 'tsActiveOpportunityKey',

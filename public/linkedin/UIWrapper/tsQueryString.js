@@ -6,7 +6,7 @@
         }
     
         const result = {};
-        const queryString = url.substr(url.indexOf('?')+1);
+        const queryString = url.substr(url.indexOf('?') + 1);
         const nameValuePairs = queryString.split('&');
         nameValuePairs.forEach((nameValuePairString) => {
             const nvp = nameValuePairString.split('=');
@@ -19,7 +19,7 @@
     }
   
     class TSQueryString {
-        constructor(){
+        constructor (){
             const queryObject = _getQueryStringParameters();
             for(let k in queryObject){
                 this[k] = queryObject[k]

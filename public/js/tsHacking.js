@@ -7,9 +7,9 @@
             event = jQuery.Event(theEventName);
 
             if (theEventName.indexOf('key') === 0){
-               event.which=65;
-               event.code=65;
-               event.keyCode=65
+               event.which = 65;
+               event.code = 65;
+               event.keyCode = 65
             }
           window[eventName] = event;
        }
@@ -34,10 +34,10 @@
        window.fireEvent(element, 'keyup');
     }
 
-    window.observeDOM = (function(){
+    window.observeDOM = (function (){
         var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
-        return function( obj, callback ){
+        return function ( obj, callback ){
             if( !obj || obj.nodeType !== 1 ) return; // validation
 
             if( MutationObserver ){

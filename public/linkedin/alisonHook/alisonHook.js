@@ -37,7 +37,7 @@
         }
     }
 
-    const _getNextJobSeekerToScrape = async() => {
+    const _getNextJobSeekerToScrape = async () => {
         _displayMessage("runJobHistoryScraper called");
         const jobSeeker = await alisonContactService.getNextJobSeeker();
         alisonHook.callBackToLinkedIn('getNextJobSeekerResult', jobSeeker);
@@ -51,13 +51,13 @@
         window.close();
     }
 
-    const _getAlisonContact = async(searchFor) => {
+    const _getAlisonContact = async (searchFor) => {
         await alisonContactService.getAlisonContact(searchFor);
         await tsCommon.sleep(1000);
         window.close();
     }
 
-    const _saveLinkedInContact = async(contact) => {
+    const _saveLinkedInContact = async (contact) => {
         try {
             _displayMessage(`saveLinkedInContact: ${contact.firstName} ${contact.lastName} (${contact.memberId})`);
 
@@ -76,15 +76,15 @@
     const _startAlisonContactSync = async (data) => {
         console.log('startAlisonContactSync called');
 
-        for(let i=0; i<200; i++){
-            //window.alisonHook.callBackToLinkedIn('alisonContactSyncCallback', {memberId: 123});
+        for(let i = 0; i < 200; i++){
+            // window.alisonHook.callBackToLinkedIn('alisonContactSyncCallback', {memberId: 123});
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.sleep(200);
         }
     }
 
     class AlisonHook {
-        constructor(){}
+        constructor (){}
 
         activeTemplate = null;
         linkedInConsoleReference = null;
@@ -96,7 +96,7 @@
 
         callBackToLinkedIn = (actionString, data) => {
             if (linkedInConsoleReference){
-                var jsonString = data? JSON.stringify(data): {};
+                var jsonString = data ? JSON.stringify(data) : {};
                 linkedInConsoleReference.postMessage({action: actionString, parameter: jsonString}, "*");
             }
         };
@@ -135,7 +135,7 @@
                 eval(aScript);
             }
             else if(__doesMethodExistOnWindow(action)){
-                const tScript =`${action}(${data});`
+                const tScript = `${action}(${data});`
                 eval(tScript);
             }
             else {
@@ -144,7 +144,7 @@
 
         });
 
-        //alisonHook.loadTemplate('sendLinkedInMessages');
+        // alisonHook.loadTemplate('sendLinkedInMessages');
 
     });
 

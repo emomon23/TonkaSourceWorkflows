@@ -1,4 +1,4 @@
-//a reference to the <template...></template> element in jobSeekers.html (see doc.ready below)
+// a reference to the <template...></template> element in jobSeekers.html (see doc.ready below)
 let skillFilterTemplate = null;
 let feedBackInterval = null;
 
@@ -7,7 +7,7 @@ const highlightError = (element) => {
 }
 
 const getSkillsFilters = () => {
-    //classes: skillName, yearsExperience, lastUsedMonths, isRequired
+    // classes: skillName, yearsExperience, lastUsedMonths, isRequired
     const result = {};
     let isValid = true;
 
@@ -126,7 +126,7 @@ const renderSearchResults = (results) => {
 
     $(resultsDiv).append(clonedTable);
 
-    //Add all the divs and rows to the DOM 1st.
+    // Add all the divs and rows to the DOM 1st.
     if (results && results.length && results.forEach){
         results.forEach((contact) => {
             const clonedRow = $('#searchResultRowTemplate')[0].content.cloneNode(true);
@@ -140,7 +140,7 @@ const renderSearchResults = (results) => {
     const phoneDivs = $('.phone');
     const gpaDivs = $('.gpa');
 
-    for(let i=0; i<results.length; i++){
+    for(let i = 0; i < results.length; i++){
         const c = results[i];
         const href = c.linkedIn && c.linkedIn.length > 0 ? c.linkedIn : '';
         const name = `${c.firstName} ${c.lastName}`;
@@ -174,7 +174,7 @@ const renderSearchResults = (results) => {
 
 const saveSearchOnWorkflows = (search) => {
     if (window.linkedInConsoleReference){
-        var jsonString = search? JSON.stringify(search): {};
+        var jsonString = search ? JSON.stringify(search) : {};
         window.linkedInConsoleReference.postMessage({action: 'persistSkillsGPASearchFilter', parameter: jsonString}, "*");
     }
     else {

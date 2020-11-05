@@ -1,5 +1,5 @@
 (() => {
-    const _bindToElements = async() => {
+    const _bindToElements = async () => {
         await tsCommon.sleep(1000);
         _bindToRecruiterProfileLinks();
 
@@ -7,9 +7,9 @@
     }
 
     const _bindToJumperGradeRollOver = async () => {
-        //wait for the jGrades to render
+        // wait for the jGrades to render
         let jGrades = null;
-        for(let i=0; i<20; i++){
+        for(let i = 0; i < 20; i++){
             jGrades = $('div.grade-container');
             if (jGrades.length > 0){
                 // eslint-disable-next-line no-await-in-loop
@@ -23,7 +23,7 @@
 
         if (jGrades.length > 0){
             jGrades = jGrades.toArray();
-            for (let j = 0; j<jGrades.length; j++) {
+            for (let j = 0; j < jGrades.length; j++) {
                 const jg = jGrades[j];
                 const memberId = $(jg).attr('memberId');
 
@@ -37,7 +37,7 @@
         }
     }
 
-    const _bindToRecruiterProfileLinks = async() => {
+    const _bindToRecruiterProfileLinks = async () => {
         const profileLinks = $('a[href*="/recruiter/profile/"]');
 
         $(profileLinks).bind('click', (e) => {

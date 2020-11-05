@@ -31,7 +31,7 @@
         const result = {};
 
         const dates = dateStrings.split('–').map(d => d.trim());
-        //durationData: { years: months: totalMonthsOnJob: startDate, endDate, startDateMonth, startDateYear, ageOfPositionInMonths: (0 = present)}
+        // durationData: { years: months: totalMonthsOnJob: startDate, endDate, startDateMonth, startDateYear, ageOfPositionInMonths: (0 = present)}
 
         if (dates.length !== 2){
             return null;
@@ -42,11 +42,11 @@
         const toDate = isPresent ? null : new Date(dates[1]);
 
         result.isPresent = isPresent;
-        result.startDateMonth = fromDate.getMonth() +1;
+        result.startDateMonth = fromDate.getMonth() + 1;
         result.startDateYear = fromDate.getFullYear();
 
         if (toDate){
-            result.endDateMonth = toDate.getMonth() +1;
+            result.endDateMonth = toDate.getMonth() + 1;
             result.endDateYear = toDate.getFullYear();
         }
 
@@ -114,7 +114,7 @@
             return null;
         }
 
-        for (var i=0; i<positionLineItems.length; i++) {
+        for (var i = 0; i < positionLineItems.length; i++) {
             try {
                 const li = positionLineItems[i];
                 const multipleRoles =  _scrapeCompanyRoles(li);
@@ -134,7 +134,7 @@
                         job.description = "EMPTY";
                     }
 
-                    //eg: Oct 2012 - Nov 2013
+                    // eg: Oct 2012 - Nov 2013
                     let dateString = $(li).find(_expSelectors.dates).text().replace('Dates Employed', '').trim();
                     const durationData = _parseDateStringsForDurationData(dateString);
                     if (durationData && job.companyName && job.companyName.length > 0){
@@ -169,9 +169,9 @@
             wholeName = wholeName.split(remove).join('');
         })
 
-        wholeName = wholeName.split(',')[0].trim(); //This will handle "Alan Haggerty, MCEE"
+        wholeName = wholeName.split(',')[0].trim(); // This will handle "Alan Haggerty, MCEE"
         if (wholeName.indexOf('(') === 0){
-            wholeName = wholeName.substr(wholeName.indexOf(' ')); //This will handle "(75) Alan Haggerty"
+            wholeName = wholeName.substr(wholeName.indexOf(' ')); // This will handle "(75) Alan Haggerty"
         }
 
         const firstAndLast = wholeName.split(' ');
@@ -190,7 +190,7 @@
         const selectors = linkedInSelectors.publicProfilePage;
         const flName = _scrapeFirstAndLastNameFromProfile();
 
-        //Minneapolis-St. Paul
+        // Minneapolis-St. Paul
         const locationAreaElement = $(selectors.location)[0];
         const locationAreaString = $(locationAreaElement).text().trim().replace('Greater', '').replace('Area', '').trim();
         const isFirstConnection = $(selectors.fullName).find(selectors.degreeConnection).length > 0;
@@ -286,7 +286,7 @@
         }
 
         if (length === 2){
-            return $(searchInputOverlayList)[1].textContent.indexOf('See all result')? FOUND_EM : STOP_TRYING;
+            return $(searchInputOverlayList)[1].textContent.indexOf('See all result') ? FOUND_EM : STOP_TRYING;
         }
 
         if (length > 2){
@@ -312,7 +312,7 @@
         return result.length === 1 && result[0] === '' ? [] : result;
     }
 
-    const _searchForPublicProfile = async(contact, sendConnectionRequest) => {
+    const _searchForPublicProfile = async (contact, sendConnectionRequest) => {
         const selectors = linkedInSelectors.publicProfilePage.search;
         const searchInput = $(selectors.searchInput);
 
@@ -323,7 +323,7 @@
             return null;
         }
 
-        //search with minimal infomation 1st (their name and 1st company name - eg Jon Nelson Hollander)
+        // search with minimal infomation 1st (their name and 1st company name - eg Jon Nelson Hollander)
         let searchString = `${contact.firstName} ${contact.lastName} ${companyNames[0]}`;
         $(searchInput).val('');
         let searchListResult = await _addCompanyNameToSearchIsUniqueEnough(searchString);
@@ -331,7 +331,7 @@
 
         let positionIndex = 1;
         while (searchListResult === KEEP_TRYING){
-            //jon nelson hollander wasn't enough, add 1 company at a time until we find him or should stop looking
+            // jon nelson hollander wasn't enough, add 1 company at a time until we find him or should stop looking
             if (companyNames.length <= positionIndex){
                 break;
             }
@@ -339,7 +339,7 @@
             const appendCompany = companyNames[positionIndex];
             // eslint-disable-next-line no-await-in-loop
             searchListResult = await _addCompanyNameToSearchIsUniqueEnough(appendCompany);
-            positionIndex+=1;
+            positionIndex += 1;
         }
 
         if (searchListResult !== FOUND_EM){
@@ -383,7 +383,7 @@
         return result;
     }
 
-    const _goHome = async() => {
+    const _goHome = async () => {
         const anchors = $('a[href*="/feed/"]:contains("Home")');
         if (anchors.length > 0){
             anchors[0].click();

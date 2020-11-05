@@ -33,7 +33,7 @@
     }
 
     const _reconcileIfCandidateIsJobSeeking = (existingCandidate, incomingCandidate) => {
-        //Check if incomingCandidate isJobSeeker status conflicts with Mike or Joe 'notReallySeeking' status
+        // Check if incomingCandidate isJobSeeker status conflicts with Mike or Joe 'notReallySeeking' status
         if (existingCandidate.notReallySeeking && incomingCandidate.isJobSeeker){
             const notSeekingSetDate = existingCandidate.notReallySeekingSetDate;
             const incomingStartedSeekingOn = incomingCandidate.jobSeekerStartDate ? incomingCandidate.jobSeekerStartDate : 0;
@@ -78,7 +78,7 @@
 
     const _resetJobSeekers = async (thisDashboardSync) => {
         const candidates = await _getCandidates();
-        for (let i=0; i<candidates.legnth; i++){
+        for (let i = 0; i < candidates.legnth; i++){
             if (candidates[i].dashboardSync !== thisDashboardSync)
                 candidates[i].isJobSeeker = false;
                 candidates[i].jobSeekerEndDate = thisDashboardSync;

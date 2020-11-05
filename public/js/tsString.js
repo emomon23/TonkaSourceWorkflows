@@ -49,7 +49,7 @@
         let result = true;
         const lCaseString = string.trim().toLowerCase();
 
-        for(let i=0; i<substrings.length; i++){
+        for(let i = 0; i < substrings.length; i++){
             let lookFor = substrings[i];
             if (lookFor && lookFor.trim && lCaseString.indexOf(lookFor.trim().toLowerCase()) === -1){
                 result = false;

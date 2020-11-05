@@ -1,12 +1,12 @@
-(function() {
+(function () {
     let __requestIntercepts = [];
     let __responseIntercepts = [];
 
     let _oldXHROpen = window.XMLHttpRequest.prototype.open;
   
     // eslint-disable-next-line consistent-return
-    window.XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-        this.addEventListener('load', function() {
+    window.XMLHttpRequest.prototype.open = function (method, url, async, user, password) {
+        this.addEventListener('load', function () {
             var responseListeners = __responseIntercepts.filter(rl => rl.method === method.toLowerCase() && url.toLowerCase().indexOf(rl.urlContains) >= 0);
             responseListeners.forEach((rl) => {
                 if (rl.callBack) {
@@ -32,9 +32,9 @@
 
 
     class TsHttpInterceptor {
-        constructor(){}
+        constructor (){}
         
-        interceptRequest = (method, urlContains, callBack, suppress=false) => {
+        interceptRequest = (method, urlContains, callBack, suppress = false) => {
             const intercept = {method: method.toLowerCase(), urlContains: urlContains.toLowerCase(), callBack, suppress};
             __requestIntercepts.push(intercept);
         }

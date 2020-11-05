@@ -1,6 +1,6 @@
-(function() {
+(function () {
     class LinkedInContactFactory {
-        constructor() {}
+        constructor () {}
 
         newLinkedInContact = (wholeName) => {
             var split = wholeName.split(' ');
@@ -25,9 +25,9 @@
             }
 
             result.setLocation = (location) => {
-                const split = location? location.split(',') : [""];
+                const split = location ? location.split(',') : [""];
                 result.city = split[0];
-                result.state = split.length > 1? split[1].trim() : "";
+                result.state = split.length > 1 ? split[1].trim() : "";
             },
 
             result.setCurrentPosition = (position) => {
@@ -35,7 +35,7 @@
                     return;
                 }
 
-                result.currentPositionDates = position.length > 14? position.substr(position.length - 14).trim() : "";
+                result.currentPositionDates = position.length > 14 ? position.substr(position.length - 14).trim() : "";
                 position = position.replace(result.currentPositionDates, '');
 
                 const split = position.split(" at ");

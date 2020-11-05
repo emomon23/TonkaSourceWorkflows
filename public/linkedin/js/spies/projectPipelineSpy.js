@@ -17,7 +17,7 @@
         memberIdCheckboxes = memberIdCheckboxes.toArray();
         candidateNames = candidateNames.toArray();
 
-        for (let i=0; i<memberIdCheckboxes.length; i++){
+        for (let i = 0; i < memberIdCheckboxes.length; i++){
             const memberId = $(memberIdCheckboxes[i]).attr('data-member-id');
             const candidateLink = candidateNames[i];
 
@@ -28,7 +28,7 @@
                 const technicalYearString = candidate && candidate.technicalYearString ? `${candidate.technicalYearString}\n` : '';
 
                 const toolTip = match.theyHave.map((h) => {
-                    return `${technicalYearString}${city}${h.title}:${h.foundInJobHistory ? ' Job history. ' : ''}${h.foundInSummary? ' In summary. ': ''}${h.lastUsed? ' LastUsed: ' + h.lastUsed : ''}`;
+                    return `${technicalYearString}${city}${h.title}:${h.foundInJobHistory ? ' Job history. ' : ''}${h.foundInSummary ? ' In summary. ' : ''}${h.lastUsed ? ' LastUsed: ' + h.lastUsed : ''}`;
                 }).join('\n');
 
                 $(candidateLink)
@@ -43,7 +43,7 @@
         _rebindToPresentationTabs();
     }
 
-    const _rebindToPresentationTabs = async() => {
+    const _rebindToPresentationTabs = async () => {
         await tsCommon.sleep(1000);
         $(linkedInSelectors.projectPipeLinePage.tab).click(() => {
             tabClicked();

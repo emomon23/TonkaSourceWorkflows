@@ -161,7 +161,7 @@
         });
     }
 
-    const _saveObject = async (objectStoreName, data, dataIdProperty='id') => {
+    const _saveObject = async (objectStoreName, data, dataIdProperty = 'id') => {
         await _getObjectStore(objectStoreName);
 
         const keyValue = data[dataIdProperty];
@@ -175,7 +175,7 @@
         }
     }
 
-    const _insertObject = async (objectStoreName, data, dataIdProperty='id') => {
+    const _insertObject = async (objectStoreName, data, dataIdProperty = 'id') => {
         const store = await _getObjectStore(objectStoreName, dataIdProperty);
         if (!store){
             throw new Error(`Unable create '${objectStoreName}' data`);
@@ -184,7 +184,7 @@
         return await _transactionAdd(objectStoreName, data);
     }
 
-    const _updateObject = async (objectStoreName, data, dataIdProperty='id') => {
+    const _updateObject = async (objectStoreName, data, dataIdProperty = 'id') => {
         const store = await _getObjectStore(objectStoreName, dataIdProperty);
 
         if (!store){
@@ -208,13 +208,13 @@
         return Promise.all(promises);
     }
 
-    const _getObjectsByIndex = async(objectStoreName, indexName, searchFor) => {
+    const _getObjectsByIndex = async (objectStoreName, indexName, searchFor) => {
         const objectStore = await _getObjectStore(objectStoreName);
         const results = await _transactionGetObjectsByIndex(objectStore, indexName, searchFor);
         return results;
     }
 
-    const _getAll = async(objectStoreName) => {
+    const _getAll = async (objectStoreName) => {
         await _getObjectStore(objectStoreName);
         return await _transactionGetAll(objectStoreName);
     }
@@ -236,11 +236,11 @@
         });
     }
 
-    const _deleteOldData = async(objectStoreName, objectKeyProperty, daysStale = 90) => {
+    const _deleteOldData = async (objectStoreName, objectKeyProperty, daysStale = 90) => {
         const minutesPerDay = 1440;
         const list = await _getAll(objectStoreName);
 
-        for (let i=0; i<list.length; i++){
+        for (let i = 0; i < list.length; i++){
             const obj = list[i];
             if (obj[objectKeyProperty]) {
                 const lastUpdated = obj.dateLastUpdated ? obj.dateLastUpdated : 1;

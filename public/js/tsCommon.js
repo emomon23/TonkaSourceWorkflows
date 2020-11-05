@@ -1,4 +1,4 @@
-(function() {
+(function () {
     const _log = (message, type = 'LOG') => {
         switch (type.toUpperCase()) {
             case 'WARN':
@@ -58,20 +58,20 @@
 
         webElement.mineElementWhereClassContains = (classContains) => {
             const list = webElement.mineElementsWhereClassContains(classContains);
-            var result = list && list.length > 0 ? list[0]: null;
+            var result = list && list.length > 0 ? list[0] : null;
 
             return result;
         }
 
         webElement.containsTag = (tagName, attributeName, attributeContainsValue) => {
-            const query =`${tagName}[${attributeName}*="${attributeContainsValue}"]`;
+            const query = `${tagName}[${attributeName}*="${attributeContainsValue}"]`;
             return $(webElement).find(query).length > 0;
         }
 
         webElement.containsText = (searchForText) => {
             if (Array.isArray(searchForText)){
                 let result = false;
-                for (let i=0; i<searchForText.length; i++){
+                for (let i = 0; i < searchForText.length; i++){
                     const query = ":containsi('" + searchForText[i] + "')";
                     result = result || $(webElement).find(query).length > 0;
                     if (result){
@@ -124,7 +124,7 @@
             const action = d.action;
             const data = _jsonParse(d.parameter);
 
-            const fncToCall =  container && container.length? `${container}.${action}` : `${action}`;
+            const fncToCall =  container && container.length ? `${container}.${action}` : `${action}`;
             const script = `if (${fncToCall}){ ${fncToCall}(data); }`
             // eslint-disable-next-line no-eval
             eval(script);
@@ -199,12 +199,12 @@
         }
     }
 
-    const _waitTilTrue = async(callBack, maxMilliseconds) => {
+    const _waitTilTrue = async (callBack, maxMilliseconds) => {
         let currentMs = 0;
         let step = 300;
         return new Promise((resolve, reject) => {
             const intervalRef = window.setInterval(() => {
-                currentMs+=step;
+                currentMs += step;
                 const goodToGo = callBack();
                 if (goodToGo){
                     clearInterval(intervalRef);
@@ -229,7 +229,7 @@
     }
 
     class Now {
-        constructor() {
+        constructor () {
             const d = new Date();
             this.month = d.getMonth() + 1;
             this.day = d.getDate();
@@ -240,7 +240,7 @@
             this.timeString = d.toLocaleTimeString();
         }
 
-        dayDiff(compareToDate) {
+        dayDiff (compareToDate) {
             const compareTo = new Date(compareToDate);
             const difference_In_Time = this.time - compareTo.getTime();
             const difference_In_Days = difference_In_Time / (1000 * 3600 * 24);
@@ -250,7 +250,7 @@
     }
 
     class TSCommon {
-        constructor(){}
+        constructor (){}
 
         log = _log;
         sleep = _sleep;

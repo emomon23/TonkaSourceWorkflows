@@ -17,13 +17,13 @@
             const ownerCompany = currentPositions.find((p) => {
                 const lookIn = `${p.displayText} ${p.description || ''}`;
 
-                //Look for a company containing their last name (eg. Mike Emo -> iEmosoft);
+                // Look for a company containing their last name (eg. Mike Emo -> iEmosoft);
                 const containsLastName = tsString.containsAll(lookIn, [candidate.lastName]);
                 if (containsLastName){
                     return true;
                 }
 
-                //Don't count 'product owner', 'project owner', etc
+                // Don't count 'product owner', 'project owner', etc
                 const containsEliminationWords = tsString.containsAny(lookIn, _ownerEliminationWords);
                 let containsOwnerWords = false;
 
@@ -51,7 +51,7 @@
 
         _analyzeCurrentlyWorkingPositions(candidate);
 
-        //eg '18, 5, 17, 120' (the months they've spent on each technical job)
+        // eg '18, 5, 17, 120' (the months they've spent on each technical job)
         candidate.technicalYearString = _buildCandidateTechnicalYearsString(candidate);
     }
 
@@ -71,7 +71,7 @@
         let results = [];
         const technicalPositions = candidate.positions ? candidate.positions.filter(p => p.isTechnicallyRelevant) : [];
 
-        for(let i=0; i < technicalPositions.length; i++){
+        for (let i = 0; i < technicalPositions.length; i++){
             const p = technicalPositions[i];
             const startDate = statistician.createDateFromMonthAndYear(p.startDateMonth, p.startDateYear)
             const endDate = statistician.createDateFromMonthAndYear(p.endDateMonth, p.endDateYear);

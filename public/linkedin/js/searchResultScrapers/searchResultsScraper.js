@@ -1,4 +1,4 @@
-(function() {
+(function () {
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
     const _localStorageLastCandidateProfile = 'tsLastCandidateProfile';
     let _pageCandidates = [];
@@ -26,7 +26,7 @@
     }
 
     const _scrapeCandidateHtml = async (candidate) => {
-        //Get data from HTML, not found in JSON.
+        // Get data from HTML, not found in JSON.
         const liTag = $(`#search-result-${candidate.memberId}`);
         tsCommon.extendWebElement(liTag);
         _pageLiTags[candidate.memberId] = liTag;
@@ -56,7 +56,7 @@
             }
         }
 
-        //just search the headline for 'Actively Looking';
+        // just search the headline for 'Actively Looking';
         if (candidate.headline && candidate.headline.length && !candidate.isJobSeeker){
             const isJobSeekerTexts = ['seeking new opportunit',
                                         'seeking an opportun',
@@ -73,7 +73,7 @@
                                         'looking for new',
                                         'looking for a']
 
-            for (let h=0; h<isJobSeekerTexts.length; h++){
+            for (let h = 0; h < isJobSeekerTexts.length; h++){
                 const lookFor = isJobSeekerTexts[h];
                 let lookIn = tsUICommon.cleanseTextOfHtml(candidate.headline).toLowerCase();
                 lookIn = tsString.stripExcessSpacesFromString(lookIn);
@@ -163,20 +163,20 @@
         const nowHelper = tsCommon.now();
         const daysOld = nowHelper.dayDiff(candidate.detailsLastScrapedDate);
 
-        //If we hard code a number and run this the 1st time, we'll always
-        //get all on the same date.  randomNumber should help break this up
+        // If we hard code a number and run this the 1st time, we'll always
+        // get all on the same date.  randomNumber should help break this up
         const skipIfLessThan = tsCommon.randomNumber(25, 35);
         return daysOld < skipIfLessThan;
     }
 
-    const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProjectConfiguration) => {
+    const _gatherCurrentPageOfJobSeekersExperienceData = async (addToProjectConfiguration) => {
         try {
             tsUICommon.saveItemLocally('tsAutoScrapingInProgress', true);
             const addToProject = addToProjectConfiguration ? true : false;
             const minPercentMatch = addToProjectConfiguration ? addToProjectConfiguration.minPercentMatch || 49 : 100;
             const tagString = addToProjectConfiguration ? addToProjectConfiguration.tagString || null : null;
 
-            //addToProject, minPercentMatch, tagString = null
+            // addToProject, minPercentMatch, tagString = null
             const seekers = _pageCandidates.filter(c => c.isJobSeeker === true || c.isActivelyLooking === true);
             let totalAdded = 0;
 
@@ -184,7 +184,7 @@
                 let names = seekers.map(s => `${s.firstName} ${s.lastName}`).join(', ');
                 tsCommon.log(`# of seekers on this page ${seekers.length}. (${names})`);
 
-                for (let i=0; i<seekers.length; i++){
+                for (let i = 0; i < seekers.length; i++){
                     // eslint-disable-next-line no-await-in-loop
                     const candidate = await candidateRepository.getCandidate(seekers[i].memberId);
 
@@ -213,7 +213,7 @@
 
                         // eslint-disable-next-line no-await-in-loop
                         await tsCommon.waitTilTrue(() => {
-                            //wait for linkedInRecruiterProfileScraper to exist.
+                            // wait for linkedInRecruiterProfileScraper to exist.
                             return candidateWindow.linkedInRecruiterProfileScraper ? true : false;
                         }, 15000);
 
@@ -278,7 +278,7 @@
 
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.randomSleep(3000, 5000);
-            currentPage+=1;
+            currentPage += 1;
         }
 
         return null;
@@ -303,7 +303,7 @@
         window.localStorage.setItem(_localStorageLastCandidateProfile, memberId);
     }
 
-    const getCurrentRecruiterProfileCandidate = async() => {
+    const getCurrentRecruiterProfileCandidate = async () => {
         const memberId = window.localStorage.getItem(_localStorageLastCandidateProfile);
         return await candidateRepository.getCandidate(memberId);
     }
@@ -330,7 +330,7 @@
         _user = await linkedInApp.getAlisonLoggedInUser();
 
         if (candidatesInResults && candidatesInResults.length > 0){
-            await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length -1]);
+            await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
 
             positionAnalyzer.analyzeCandidatePositions(candidatesInResults);
 
@@ -358,8 +358,8 @@
     }
 
     const _addCurrentPageOfJobSeekersToProject = async () => {
-        //$($('#search-result-690582757')[0]).find('button:contains("Save to a project")').length
-        for (let i=0; i<_pageCandidates.length; i++){
+        // $($('#search-result-690582757')[0]).find('button:contains("Save to a project")').length
+        for (let i = 0; i < _pageCandidates.length; i++){
             const candidate = _pageCandidates[i];
             if (candidate.isJobSeeker || candidate.isActivelyLooking){
                 const memberId = candidate.memberId;
@@ -386,7 +386,7 @@
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.randomSleep(15000, 5000);
             advancedToNextPage = linkedInCommon.advanceToNextLinkedInResultPage();
-            currentPage+=1;
+            currentPage += 1;
         }
 
         if (currentPage > 0){

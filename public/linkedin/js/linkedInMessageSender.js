@@ -1,4 +1,4 @@
-(function() {
+(function () {
     const _getPublicProfile_MessageButtonSelector = (publicProfileWindow) => {
         let linkButton = tsCommon.findAHyperLink('/messaging/thread/', publicProfileWindow.document);
         if (linkButton !== null){
@@ -96,7 +96,7 @@
 
                     if (whatButtonIsAvailable.type === 'MESSAGE'){
                         await _sendMessage(publicProfileWindow, messageToSend);
-                        //linkedInMessageSpy should pick up that a message was sent
+                        // linkedInMessageSpy should pick up that a message was sent
                     }
                     else {
                         await _sendConnectionRequest(publicProfileWindow, connectionRequestToSend);
@@ -196,7 +196,7 @@
         const rows = $(linkedInSelectors.projectPipeLinePage.pipelineRows);
         const result = [];
 
-        for (let i=0; i<rows.length; i++){
+        for (let i = 0; i < rows.length; i++){
             const rowBtns = $(linkedInSelectors.projectPipeLinePage.sendInMailButtons);
             if (rowBtns && rowBtns.length){
                 const isVisible = $(rowBtns[i]).is(':visible');
@@ -239,7 +239,7 @@
         return null;
     }
 
-    const _blastCurrentProjectPipelinePage = async(subject, body) => {
+    const _blastCurrentProjectPipelinePage = async (subject, body) => {
         const whatPageAmIOn = linkedInCommon.whatPageAmIOn();
         if (whatPageAmIOn !== linkedInConstants.pages.PROJECT_PIPELINE){
             console.log("*** CAN'T Blast pipline from this page");
@@ -251,7 +251,7 @@
 
         console.log(`There are ${count} candidates on this pipeline page to send blasts to`);
 
-        for(let i=0; i<memberIdsAndNames.length; i++) {
+        for(let i = 0; i < memberIdsAndNames.length; i++) {
             try {
                 const memberId = memberIdsAndNames[i].memberId;
                 const name = memberIdsAndNames[i].name;
@@ -271,7 +271,7 @@
         }
     }
 
-    const _blastProjectPipeline = async(subject, body) => {
+    const _blastProjectPipeline = async (subject, body) => {
 
         let navigationSuccess = true;
         while (navigationSuccess){
@@ -286,7 +286,7 @@
     }
 
     class LinkedInMessageSender {
-        constructor() {}
+        constructor () {}
 
         sendLinkedInMessageOrConnectionRequestToCandidate = _sendLinkedInMessageOrConnectionRequestToCandidate;
         sendInMail = _sendInMail;

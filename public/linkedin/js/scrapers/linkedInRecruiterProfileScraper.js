@@ -65,7 +65,7 @@
             _mergeCandidatePositionsWithScrapedJobExperience(candidate);
 
             if (tagString && tagString.length > 0){
-                candidate.tags+= `,${tagString}`;
+                candidate.tags += `,${tagString}`;
             }
 
             linkedInRecruiterFilter.analyzeCandidateProfile(candidate);
@@ -94,9 +94,9 @@
     }
 
     const _scrapeOutDurationFromHtmlElement = (element) => {
-        //(2 years 1 month)
-        //(5 months)
-        //(1 year 5 months)
+        // (2 years 1 month)
+        // (5 months)
+        // (1 year 5 months)
         let rawDuration = $(element).text().split('(').join('').split(')').join('');
 
         let years = rawDuration.indexOf('year') >= 0 ? rawDuration.split('year')[0].trim() : 0;
@@ -104,7 +104,7 @@
         let months = 0;
         if (rawDuration.indexOf('month') >= 0){
             const parts = rawDuration.split(' ');
-            months = parts[parts.length -2].trim();
+            months = parts[parts.length - 2].trim();
         }
 
         const result = {
@@ -117,11 +117,11 @@
     }
 
     const _scrapeOutAndAppendStartDateAndEndDate = (positionElement, durationData) => {
-        //June 2015 - November 2015(1 Year 5 months)
+        // June 2015 - November 2015(1 Year 5 months)
         const rangeString = $(positionElement).text().split("(")[0].trim();
         const dateParts = rangeString.split('–');
         durationData.startDate = new Date(dateParts[0].trim());
-        durationData.startDateMonth = durationData.startDate.getMonth() +1;
+        durationData.startDateMonth = durationData.startDate.getMonth() + 1;
         durationData.startDateYear = durationData.startDate.getFullYear();
 
         dateParts[1] = dateParts[1].trim();
