@@ -2,6 +2,9 @@
     const _objectStoreName = 'candidate';
     const _keyPropertyName = 'memberId';
 
+    //need to talk about migrations.
+    let _entireCandidateList = null;
+
     const _mergePositions = (existingPositions, incomingPositions) => {
         const result = existingPositions ? existingPositions : [];
         if (!incomingPositions){
@@ -52,6 +55,11 @@
         }) : [];
     }
 
+    const _checkIfDataCameFromPublicProfileOrRecruiterProfilePage = (candidate) => {
+        return candidate.lastScrapedBy === linkedInConstants.pages.RECRUITER_PROFILE
+            || candidate.lastScrapedBy === linkedInConstants.pages.PUBLIC_PROFILE
+    }
+
     const _saveCandidate = async (candidate) => {
         if (!(candidate && candidate.memberId)){
             throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
@@ -61,6 +69,10 @@
         let existingCandidate = await _getCandidate(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
+
+        if (_checkIfDataCameFromPublicProfileOrRecruiterProfilePage(candidate)){
+            candidate.detailsLastScrapedDate = (new Date()).getTime();
+        }
 
         //Trim positions to minimal data for storage
         candidate.positions  = _trimDownPositions(candidate.positions);
@@ -101,7 +113,11 @@
     }
 
     const _getEntireCandidateList = async() => {
-        return await baseIndexDb.getAll(_objectStoreName);
+        if (_entireCandidateList === null){
+            _entireCandidateList = await baseIndexDb.getAll(_objectStoreName);
+        }
+
+        return _entireCandidateList;
     }
 
     const _getSpecificListOfLinkedInMembers = async(memberIdArray) => {
@@ -160,6 +176,11 @@
         return found && found.length === 1 ? found[0] : null;
     }
 
+    const _getContractors = async () => {
+       await _getEntireCandidateList();
+       return _entireCandidateList.filter(c => c.isContractor);
+    }
+
     const _getJobSeekers = async () => {
         return await baseIndexDb.getObjectsByIndex(_objectStoreName, 'isJobSeekerString', 'true');
     }
@@ -172,9 +193,8 @@
         // isJobSeeker originates from the Recruiter Search Results page, only run this logic if the incomingCandidate
         // originated from that scraper.
         if (incomingCandidate.lastScrapedBy === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS){
-
             // check if the existing candidate does not match what we've scraped
-            if (existingCandidate && ecJobSeeker !== icJobSeeker){
+            if ((existingCandidate && ecJobSeeker !== icJobSeeker) || (existingCandidate && icJobSeeker && !existingCandidate.jobSeekerStartDate)){
                 existingCandidate.isJobSeeker = icJobSeeker;
                 if (icJobSeeker){
                     existingCandidate.jobSeekerStartDate = nowDate;
@@ -201,6 +221,7 @@
         searchOnName = _searchOnName;
         searchForCandidate = _searchForCandidate;
         getJobSeekers = _getJobSeekers;
+        getContractors = _getContractors;
 
         //loadLotsOfData = _loadLotsOfData;
     }

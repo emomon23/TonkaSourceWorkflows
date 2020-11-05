@@ -22,6 +22,10 @@
         return _sleep(ms);
     }
 
+    const _randomNumber = (min, max) => {
+        return Math.floor(Math.random() * (max - min) ) + min;
+    }
+
     const _extendWebElements = (webElements) => {
         webElements.forEach((we) => {_extendWebElement(we);});
     }
@@ -109,17 +113,17 @@
                 // Do nothing
             }
         }
-      
+
         return data;
     }
 
     const _setUpPostMessageListener = (container) => {
         window.addEventListener('message', (e) => {
             var d = e.data;
-    
+
             const action = d.action;
             const data = _jsonParse(d.parameter);
-    
+
             const fncToCall =  container && container.length? `${container}.${action}` : `${action}`;
             const script = `if (${fncToCall}){ ${fncToCall}(data); }`
             // eslint-disable-next-line no-eval
@@ -218,9 +222,9 @@
     const _dayDifference = (d1, d2) => {
         const compareFrom = new Date(d1);
         const compareTo = new Date(d2);
-        const difference_In_Time = compareFrom.getTime() - compareTo.getTime(); 
+        const difference_In_Time = compareFrom.getTime() - compareTo.getTime();
         const difference_In_Days = difference_In_Time / (1000 * 3600 * 24);
-    
+
         return difference_In_Days;
     }
 
@@ -235,12 +239,12 @@
             this.dateString = d.toLocaleDateString();
             this.timeString = d.toLocaleTimeString();
         }
-           
+
         dayDiff(compareToDate) {
             const compareTo = new Date(compareToDate);
-            const difference_In_Time = this.time - compareTo.getTime(); 
+            const difference_In_Time = this.time - compareTo.getTime();
             const difference_In_Days = difference_In_Time / (1000 * 3600 * 24);
-        
+
             return difference_In_Days;
         }
     }
@@ -255,6 +259,7 @@
         httpGetText = _httpGetText;
         httpGetTemplate = _httpGetTemplate;
         randomSleep = _randomSleep;
+        randomNumber = _randomNumber;
         extendWebElements = _extendWebElements;
         extendWebElement = _extendWebElement;
         setUpPostMessageListener = _setUpPostMessageListener;

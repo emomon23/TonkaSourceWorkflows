@@ -1,14 +1,41 @@
 (() => {
-    const _technicalTitleWords = ['developer', 'programmer', 'engineer', 'engr ', ' edi ', ' (edi) ', 'software ', 'architect', 'qa ', 'ios ', 'android ']
-    const _eliminationWords = ['student', 'prime digital', 'recruit', 'sales'];
+    const _technicalTitleWords = ['developer', 'programmer', 'engineer', 'engr ', ' edi ', ' (edi) ', 'software ', 'architect', 'qa ', 'ios ', 'android ', 'sdet', 'quality assurance', 'user experience', 'ui/ux', 'ui\\ux', 'ux/ui', 'ux\\ui', 'product designer' ]
+    const _eliminationWords = ['student', 'prime digital', 'recruit', 'sales', ' hr', 'hr '];
     const _managementWords = ['manager', 'director', 'vice pres', 'vp ', ' vp', 'exec.', 'executive', 'president', 'ceo', 'founder'];
+    const _ownerEliminationWords = ['product owner', 'project owner', 'team owner']
+    const _ownerWords = ['owner', 'founder', 'ceo', 'president']
     const _internWords = ['intern '];
 
     const _analyzeCurrentlyWorkingPositions = (candidate) => {
         const currentPositions = candidate.positions.filter(p => !p.endDateMonth);
+
         candidate.isTechnicallyRelevant = currentPositions.filter(p => _checkIfTechnicallyRelevant(p)).length > 0;
         candidate.isManagement = currentPositions.filter(p => _checkIfManagement(p)).length > 0;
         candidate.isIntern = currentPositions.filter(p => _checkIfInternship(p)).length > 0;
+
+        if (candidate.isTechnicallyRelevant && (candidate.isContractorOverride === null || candidate.isContractorOverride === undefined)){
+            const ownerCompany = currentPositions.find((p) => {
+                const lookIn = `${p.displayText} ${p.description || ''}`;
+
+                //Look for a company containing their last name (eg. Mike Emo -> iEmosoft);
+                const containsLastName = tsString.containsAll(lookIn, [candidate.lastName]);
+                if (containsLastName){
+                    return true;
+                }
+
+                //Don't count 'product owner', 'project owner', etc
+                const containsEliminationWords = tsString.containsAny(lookIn, _ownerEliminationWords);
+                let containsOwnerWords = false;
+
+                if (!containsEliminationWords) {
+                    containsOwnerWords = tsString.containsAny(lookIn, _ownerWords);
+                }
+
+                return (containsEliminationWords === false && containsOwnerWords);
+            });
+
+            candidate.isContractor = ownerCompany ? true : false;
+        }
     }
 
     const _analyzeASingleCandidatesPositions = (candidate) => {

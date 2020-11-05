@@ -11,8 +11,7 @@
     const  _displayJobJumperAnalysis = (candidate) => {
         if (candidate
             && candidate.grades
-            && candidate.grades.jobJumper
-            && candidate.grades.jobJumper.gpa > 2.5){
+            && candidate.grades.jobJumper){
 
                 let searchResult = $(`#search-result-${candidate.memberId}`);
 
@@ -152,6 +151,24 @@
         }
     }
 
+    const _shouldWeSkipGettingDetailsOnThisCandidate = (candidate) => {
+        if (candidate.isTechnicallyRelevant === false){
+            return true;
+        }
+
+        if (!candidate.detailsLastScrapedDate){
+            return false;
+        }
+
+        const nowHelper = tsCommon.now();
+        const daysOld = nowHelper.dayDiff(candidate.detailsLastScrapedDate);
+
+        //If we hard code a number and run this the 1st time, we'll always
+        //get all on the same date.  randomNumber should help break this up
+        const skipIfLessThan = tsCommon.randomNumber(25, 35);
+        return daysOld < skipIfLessThan;
+    }
+
     const _gatherCurrentPageOfJobSeekersExperienceData = async(addToProjectConfiguration) => {
         try {
             tsUICommon.saveItemLocally('tsAutoScrapingInProgress', true);
@@ -168,11 +185,12 @@
                 tsCommon.log(`# of seekers on this page ${seekers.length}. (${names})`);
 
                 for (let i=0; i<seekers.length; i++){
-                    const candidate = seekers[i];
-                    let alreadyGatheredData = candidate.positions && candidate.positions.find(p => p.description && p.description.length > 1);
-                    alreadyGatheredData = alreadyGatheredData || _jobsGathered[candidate.memberId] === true;
+                    // eslint-disable-next-line no-await-in-loop
+                    const candidate = await candidateRepository.getCandidate(seekers[i].memberId);
 
-                    if (alreadyGatheredData){
+                    const shouldWeSkipCandidate = _shouldWeSkipGettingDetailsOnThisCandidate(candidate);
+
+                    if (shouldWeSkipCandidate){
                         if (addToProject){
                             const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
                             const saveToProjectProjectButton = tsUICommon.findFirstDomElement([selector]);
@@ -224,22 +242,29 @@
                         }
 
                         // eslint-disable-next-line no-await-in-loop
-                        await candidateRepository.saveCandidate(expandedCandidate);
+                        try {
+                            candidateRepository.saveCandidate(expandedCandidate);
+                        } catch (e) {
+                            tsCommon.log(e.message, 'ERROR');
+                        }
+
                         candidateWindow.close();
                     }
                 }
             }
+
             return totalAdded;
         } catch (e) {
             tsCommon.log({ error: 'Error gathering experience data', message: e.message });
         } finally {
             tsUICommon.saveItemLocally('tsAutoScrapingInProgress', false);
         }
+
         return null;
     }
 
     const _gatherAllJobSeekersExperienceData = async (addToProjectConfiguration = null) => {
-        const totalPages = addToProjectConfiguration.totalPages || 41;
+        const totalPages = addToProjectConfiguration ? addToProjectConfiguration.totalPages || 41 : 41;
         console.log(`Will gather data for the for the next ${totalPages} number of pages`);
         let currentPage = 0;
 
@@ -315,7 +340,12 @@
 
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
 
-                candidateRepository.saveCandidate(trimmedCandidate);
+                try {
+                    candidateRepository.saveCandidate(trimmedCandidate);
+                } catch (e) {
+                    tsCommon.log(e.message, 'ERROR');
+                }
+
                 if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
                     await linkedInApp.upsertContact(trimmedCandidate);
                 }
