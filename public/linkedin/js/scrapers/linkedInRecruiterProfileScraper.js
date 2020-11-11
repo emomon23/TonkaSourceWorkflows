@@ -48,7 +48,11 @@
 
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
-                return null;
+                candidate = await candidateRepository.searchForCandidate(scrapedFullName);
+                if (!candidate) {
+                    tsCommon.log("Also, could not find candidate by name in Candidate Repository (or there are more than 1 name match)", "WARN");
+                    return null;
+                }
             }
 
             // Scrape Public Profile

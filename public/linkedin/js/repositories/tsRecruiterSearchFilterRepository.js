@@ -1,6 +1,6 @@
 (()=> {
     const _linkedInRecruiterFilterKey = "TSLinkedInRecruiterFilter";
-    const _skillGPASearchFilterKey = "TSSkillGPAFilter";
+    const _candidateFilters = tsConstants.localStorageKeys.CANDIDATE_FILTERS;
 
     const _saveItem = (key, item) => {
         return tsUICommon.saveItemLocally(key, item);
@@ -15,22 +15,22 @@
     }
 
     const  _saveSkillsGPASearchFilters = (filterObject) => {
-        return _saveItem(_skillGPASearchFilterKey, filterObject);
+        return _saveItem(_candidateFilters, filterObject);
     }
 
     const _getLinkedInRecruiterSearchFilters = () => {
         return _getItem(_linkedInRecruiterFilterKey);
     }
 
-    const _getSkillsGPASearchFilters = () => {
-        return _getItem(_skillGPASearchFilterKey)
+    const _getCandidateFilters = () => {
+        return _getItem(_candidateFilters)
     }
 
     class TSRecruiterSearchFilterRepository {
         saveLinkedInRecruiterSearchFilters = _saveLinkedInRecruiterSearchFilters;
         getLinkedInRecruiterSearchFilters = _getLinkedInRecruiterSearchFilters;
         saveSkillsGPASearchFilters = _saveSkillsGPASearchFilters;
-        getSkillsGPASearchFilters = _getSkillsGPASearchFilters;
+        getCandidateFilters = _getCandidateFilters;
         clearSkillsGPASearchFilters = () => { window.localStorage.removeItem(_skillGPASearchFilterKey);}
     }
 
