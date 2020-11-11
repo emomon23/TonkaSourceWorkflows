@@ -143,7 +143,7 @@
                 searchPhrases: ["Draw.io", "Drawio", "Draw io", "Diagrams.net"]
             },
             "Java": {
-                searchPhrases: ["Java"],
+                searchPhrases: ["Java ", "Java,"],
                 childSkills: [
                     "Android",
                     "Groovy",
@@ -237,7 +237,8 @@
                     "Angular 7",
                     "Angular8",
                     "Angular 8",
-                    "Angular"
+                    "Angular ",
+                    "Angular,"
                 ]
             },
             "Apache ActiveMQ": {

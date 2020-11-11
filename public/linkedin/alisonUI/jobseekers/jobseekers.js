@@ -18,11 +18,11 @@ const getSkillsFilters = () => {
                 const skillInput = $(skRow).find('.skillName')[0];
                 const yearsInput = $(skRow).find('.yearsExperience')[0];
                 const withinMonthsInput = $(skRow).find('.lastUsedMonths')[0];
-                
+
                 const skill = skillInput.value;
                 const years = yearsInput.value;
                 const withinMonths = withinMonthsInput.value;
-                
+
                 if (skill.length === 0){
                     highlightError(skillInput);
                     isValid = false;
@@ -37,9 +37,9 @@ const getSkillsFilters = () => {
                     highlightError(withinMonthsInput);
                     isValid = false;
                 }
-                
+
                 const required = $(skRow).find('.isRequired')[0].checked;
-           
+
                 result[skill] = {
                     monthsUsing: Number.parseInt(years) * 12,
                     withinMonths: Number.parseInt(withinMonths),
@@ -71,7 +71,7 @@ const getContactContainsFilters = () => {
 const appendSkillFilterRow = () => {
     const clone = skillFilterTemplate.content.cloneNode(true);
     const container = $('#skillsFilterTable')[0];
-    container.appendChild(clone); 
+    container.appendChild(clone);
 }
 
 const appendGPAFilters = (search) => {
@@ -172,7 +172,8 @@ const renderSearchResults = (results) => {
     $(numberOfResultsLabel).text(`Results: ${results.length}`);
 }
 
-const saveSearchOnWorkflows = (search) => {
+const saveSearchFilterToLocalStorage = (search) => {
+    tsUICommon.saveItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS, search);
     if (window.linkedInConsoleReference){
         var jsonString = search ? JSON.stringify(search) : {};
         window.linkedInConsoleReference.postMessage({action: 'persistSkillsGPASearchFilter', parameter: jsonString}, "*");
@@ -212,7 +213,7 @@ searchForCandidates_click = async (e) => {
             showFeedBackInterval('searching alison, stand by');
             const results = await alisonContactService.submitSkillsSearch(search);
             renderSearchResults(results);
-            saveSearchOnWorkflows(search);
+            saveSearchFilterToLocalStorage(search);
         }
     } catch(err) {
         showMessage(`ERROR: ${err.message}`);
@@ -221,6 +222,8 @@ searchForCandidates_click = async (e) => {
 
 $(document).ready(() => {
     skillFilterTemplate = $('#skillFilterRowTemplate')[0];
+
+    const hasFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
 
     window.addEventListener('message', (e) => {
         window.linkedInConsoleReference = e.source;
