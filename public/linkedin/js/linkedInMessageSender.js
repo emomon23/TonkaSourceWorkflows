@@ -83,7 +83,7 @@
                 await _submitConnectionRequestForm(publicProfileWindow, messageToSend);
             }
 
-            await tsCommon.sleep(500);
+            await tsCommon.sleep(2000);
             publicProfileWindow.close();
         }
     }
