@@ -234,11 +234,25 @@
         linkedInMessageSender.blastProjectPipeline(subject, body);
     }
 
+    const _fireConnectionRequestBlast = async (bodyObj) => {
+        const body = bodyObj.body;
+        const currentMemberIdsArray = searchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+
+        for(let i = 0; i < currentMemberIdsArray.length; i++){
+            // eslint-disable-next-line no-await-in-loop
+            await linkedInMessageSender.sendConnectionRequest(currentMemberIdsArray[i], body);
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.randomSleep(8000, 10000);
+        }
+    }
+
     class LinkedInApp {
         alisonContactSyncCallback = _alisonContactSyncCallback;
         sendLinkedInMessageOrConnectionRequestToCandidate = linkedInMessageSender.sendLinkedInMessageOrConnectionRequestToCandidate;
         changeBadgeColor = _changeBadgeColor;
         fireInMailBlast = _fireInMailBlast;
+        fireConnectionRequestBlast = _fireConnectionRequestBlast;
         upsertContact = _upsertContact;
         saveCompanyAnalytics = _saveCompanyAnalytics;
         getAlisonContact = _getAlisonContact;

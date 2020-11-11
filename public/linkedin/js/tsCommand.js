@@ -15,6 +15,24 @@
         }
     }
 
+    const _launchConnectionRequestBlaster = async () => {
+        const memberIds = searchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+        if (!memberIds || memberIds.length === 0){
+            console.log("No member ids available on current page, refresh the result pane");
+            return;
+        }
+
+        const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/connectionRequestBlast/connectionRequestBlast.html`;
+        const win = window.open(url, "InMail", "scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,width=1000,height=1000,top=0,left=0");
+
+        await tsCommon.sleep(5000);
+        tsCommon.postMessageToWindow(win, 'givingYouAReferenceBackToLinkedInWindow', {});
+
+        if (!win){
+            tsCommon.log("Unable to open dashboard.  CHECK POP UP BLOCKER?", "WARN");
+        }
+    }
+
     const _launchSkillsGPASearch = async () => {
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/jobseekers/jobseekers.html`;
         const dashboardWindow = window.open(url, "Dashboard", "scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,width=1000,height=1000,top=0,left=0");
@@ -84,6 +102,7 @@
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
         launchInMailBlaster = _launchInMailBlaster;
+        launchConnectionRequestBlaster = _launchConnectionRequestBlaster;
         runDailyJobSeekerReport = _runDailyJobSeekerReport;
 
         launchDashboard = _launchDashboard;

@@ -34,16 +34,15 @@
         $('button[data-control-name*="close_conversation_window"]').click();
     }
 
-    const _sendConnectionRequest = async (publicProfileWindow, messageToSend) => {
+    const _submitConnectionRequestForm = async (publicProfileWindow, messageToSend) => {
         publicProfileWindow.document.querySelector('button[aria-label*="Add a note"]').click();
         await tsCommon.sleep(800);
-        publicProfileWindow.document.querySelector('textarea[name="message"]').outerText = messageToSend;
 
-        const doneButton = publicProfileWindow.document.querySelector('button[aria-label="Done"]');
-        doneButton.removeAttribute('disabled');
-        doneButton.classList.remove('artdeco-button--disabled');
-        await tsCommon.sleep(200);
-        doneButton.click();
+        $(publicProfileWindow.document).find('[name*="message"]').focus();
+        publicProfileWindow.document.execCommand('insertText', true, messageToSend);
+
+        await tsCommon.sleep(500);
+        $(publicProfileWindow.document).find('button[aria-label*="Send now"]')[0].click();
     }
 
     const _navigateToPublicProfilePage = async (candidate) => {
@@ -60,11 +59,33 @@
     const _processAnyTemplateText = (candidate, messageTemplate) => {
         let message = messageTemplate.split('[firstName]').join(candidate.firstName);
         message = message.split('firstName').join(candidate.firstName);
+        message = message.split('[first-name]').join(candidate.firstName);
 
         message = message.split('[lastName]').join(candidate.lastName);
         message = message.split('lastName').join(candidate.lastName);
+        message = message.split('[last-name]').join(candidate.lastName);
 
         return message;
+    }
+
+    const _sendConnectionRequest = async (memberId, noteToSend) => {
+        const candidate = await candidateRepository.searchForCandidate(memberId);
+        if (candidate){
+            const messageToSend = _processAnyTemplateText(candidate, noteToSend);
+            publicProfileWindow = await _navigateToPublicProfilePage(candidate);
+
+            await tsCommon.sleep(3000);
+
+            const whatButtonIsAvailable = _getPublicProfile_MessageButtonSelector(publicProfileWindow);
+            if (whatButtonIsAvailable && whatButtonIsAvailable.type === 'CONNECTION REQUEST'){
+                whatButtonIsAvailable.clickable.click();
+                await tsCommon.sleep(5000);
+                await _submitConnectionRequestForm(publicProfileWindow, messageToSend);
+            }
+
+            await tsCommon.sleep(500);
+            publicProfileWindow.close();
+        }
     }
 
     const _sendLinkedInMessageOrConnectionRequestToCandidate = async (memberIdOrFirstNameAndLastName, messageToSend, connectionRequestToSend = null) => {
@@ -99,12 +120,14 @@
                         // linkedInMessageSpy should pick up that a message was sent
                     }
                     else {
-                        await _sendConnectionRequest(publicProfileWindow, connectionRequestToSend);
+                        await _submitConnectionRequestForm(publicProfileWindow, connectionRequestToSend);
                         linkedInApp.recordConnectionRequestMade(memberIdOrFirstNameAndLastName, connectionRequestToSend);
                     }
 
 
                 }
+                await tsCommon.sleep(500);
+                publicProfileWindow.close();
             }
     }
 
@@ -290,6 +313,7 @@
 
         sendLinkedInMessageOrConnectionRequestToCandidate = _sendLinkedInMessageOrConnectionRequestToCandidate;
         sendInMail = _sendInMail;
+        sendConnectionRequest = _sendConnectionRequest;
         blastProjectPipeline = _blastProjectPipeline;
     }
 

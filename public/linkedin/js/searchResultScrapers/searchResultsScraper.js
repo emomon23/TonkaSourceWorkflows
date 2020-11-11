@@ -394,6 +394,10 @@
         }
     }
 
+    const _getCurrentSearchResultsPageListOfMemberIds = () => {
+        return _pageCandidates && _pageCandidates.map ? _pageCandidates.map(c => c.memberId) : [];
+    }
+
     class SearchResultsScraper {
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         persistLastRecruiterProfile = _persistLastRecruiterProfile;
@@ -405,6 +409,7 @@
         touchSearchResultsPages = _touchSearchResultsPages;
         suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = val ? false : true;}
 
+        getCurrentSearchResultsPageListOfMemberIds = _getCurrentSearchResultsPageListOfMemberIds;
         interceptSearchResults = _interceptSearchResults;
     }
 
