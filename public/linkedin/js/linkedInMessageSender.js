@@ -197,6 +197,11 @@
     }
 
     const __navigateToPage = (selector) => {
+        if (!selector){
+            tsCommon.log('Error in __navigateToPage, no selector parameter provided!', 'ERR');
+            return false;
+        }
+
         try {
             const pageOneButton = $(selector)[0];
             if (pageOneButton){
@@ -212,7 +217,7 @@
     }
 
     const _navigateToNextPage = () => {
-        return __navigateToPage(linkedInSelectors.projectPipeLinePage.navigation);
+        return __navigateToPage(linkedInSelectors.projectPipeLinePage.navigationNextPage);
     }
 
     const _getSendInMailMemberIdsForThisProjectPipelinePage = () => {
