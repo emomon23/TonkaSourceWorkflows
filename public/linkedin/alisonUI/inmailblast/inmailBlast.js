@@ -1,3 +1,5 @@
+let _bodyTextArea = null;
+
 const _displayMessage = (msg) => {
     $('#msg').text(msg);
 }
@@ -25,6 +27,13 @@ const _postBackToLinkedIn = () => {
     }
 }
 
+const _updateCharCount = () => {
+    const span = $('#charCount')[0];
+    const count = $(_bodyTextArea).val().length;
+
+    $(span).text(`Char Count: ${count}`);
+}
+
 const _validateData = () => {
     if (!($('#subject').val().length && $('#body').val().length)){
         _displayMessage("Both subject and body are required");
@@ -42,10 +51,18 @@ send_onClick = () => {
 }
 
 $(document).ready(() => {
+    _bodyTextArea = $('#body')[0];
+
     window.addEventListener('message', (e) => {
         window.linkedInConsoleReference = e.source;
         _displayMessage('Ready...');
         const action = e.data.action;
         console.log(`post message received from parent.  action: ${action}`);
     });
+
+    $(_bodyTextArea).keyup(() => {
+        _updateCharCount();
+    });
+
+    _updateCharCount();
 });
