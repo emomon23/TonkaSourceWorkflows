@@ -114,6 +114,12 @@
         candidate.technicalYearString = _buildCandidateTechnicalYearsString(candidate);
     }
 
+    const _analyzeCandidatesPositions = (arrayOfCandidates) => {
+        arrayOfCandidates.forEach((c) => {
+            _analyzeCandidatePositions(c);
+        });
+    }
+
     const _analyzeCandidatePositions = (c) => {
         _analyzeASingleCandidatesPositions(c);
 
@@ -305,6 +311,7 @@
 
     class PositionAnalyzer {
         analyzeCandidatePositions = _analyzeCandidatePositions;
+        analyzeCandidatesPositions = _analyzeCandidatesPositions;
         createCompanyAverageDurationObject = _createCompanyAverageDurationObject;
     }
 

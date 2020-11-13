@@ -332,9 +332,10 @@
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
 
+            positionAnalyzer.analyzeCandidatesPositions(candidatesInResults);
+
             candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
-                positionAnalyzer.analyzeCandidatePositions(candidate);
 
                 _pageCandidates.push(candidate);
 
