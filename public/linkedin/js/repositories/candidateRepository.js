@@ -12,8 +12,12 @@
         }
 
         incomingPositions.forEach((ip) => {
+            const ipIdentifier = ip.companyId ? ip.companyId : ip.companyName;
+
             const match = existingPositions.find((ep) => {
-                return ep.companyId === ip.companyId
+                const epIdentifier = ep.companyId ? ep.companyId : ep.companyName;
+
+                return epIdentifier === ipIdentifier
                 && ep.startDateMonth === ip.startDateMonth
                 && ep.startDateYear === ip.startDateYear;
             });
