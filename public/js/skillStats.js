@@ -325,8 +325,11 @@
                 searchPhrases: ["Python"]
             },
             "QA Automation": {
-                searchPhrases: ["Test Automation", "QA Automation", "automation framework", "QA Engineer"],
-                childSkills: ["Selenium", "JMeter", "TestNG", "Cucumber", "Maven", "SoapUI"]
+                searchPhrases: ["Test Automation", "QA Automation", "Quality Assurance Automation",
+                    "SDET", "Software Developer in Test", "Software Development Engineer in Test", "Software Development in Test", "Software Developer Engineer in Test",
+                    "automation framework"
+                ],
+                childSkills: ["Selenium", "JMeter", "TestNG", "Cucumber", "Maven", "SoapUI", "Protractor", "Cypress"]
             },
             "QA Manual": {
                 searchPhrases: ["QA Analyst", "Manual QA", "Quality Assurance Analyst", "Test Script", "Test Suite", "Test Case"],
