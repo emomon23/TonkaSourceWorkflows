@@ -32,10 +32,19 @@ const _updateCharCount = () => {
     const count = $(_bodyTextArea).val().length;
 
     $(span).text(`Char Count: ${count}`);
+
+    if (count > 1900) {
+        $(span).attr('style', "color: red");
+        $('#sendInMailButton').prop('disabled', true);
+    } else {
+        $(span).removeAttr('style');
+        $('#sendInMailButton').prop('disabled', false);
+    }
 }
 
 const _validateData = () => {
-    if (!($('#subject').val().length && $('#body').val().length)){
+    const bodyLength = $('#body').val().length;
+    if (!($('#subject').val().length && bodyLength)){
         _displayMessage("Both subject and body are required");
         return false;
     }

@@ -14,13 +14,15 @@
         <div>
             <div>Body ([first-name])</div>
 <!-- Need to put textarea here and initial value here or it diplays f'ed up-->
-<textarea rows='40' cols='80' id='body' name='body' >Hello [first-name],
+<textarea rows='12' cols='80' id='body' name='body' >Hello [first-name],
 
 </textarea>
         </div>
-
         <div>
-            <button onclick="send_onClick()">Send</button>
+            <span id='charCount'></span>
+        </div>
+        <div>
+            <button id="connectionRequestButton" onclick="send_onClick()">Send</button>
         </div>
         <div id='msg'>
             NOT READY - waiting for a reference to linked in 'window' object...should be a few seconds

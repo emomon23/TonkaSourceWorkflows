@@ -23,11 +23,13 @@
 <textarea rows='40' cols='80' id='body' name='body' >Hello [first-name],
 
 </textarea>
-<div><span id='charCount'></span>&nbsp;</div>
+        </div>
+        <div>
+            <span id='charCount'></span>
         </div>
 
         <div>
-            <button onclick="send_onClick()">Send</button>
+            <button id="sendInMailButton" onclick="send_onClick()">Send</button>
         </div>
         <div id='msg'>
             NOT READY - waiting for a reference to linked in 'window' object...should be a few seconds
