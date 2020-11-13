@@ -80,7 +80,7 @@
 
             // Calculate Skill Statistics Grades
             const skillsStatisticsList = [candidate.statistics];
-            const skillsFilter = tsUICommon.getItemLocally('TSSkillGPAFilter');
+            const skillsFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
             if (skillsFilter) {
                 statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter, false);
             }

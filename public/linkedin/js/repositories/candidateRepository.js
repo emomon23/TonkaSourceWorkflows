@@ -1,4 +1,13 @@
 (() => {
+    const TONKA_SOURCE_DATABASE = "TonkaSourceDB";
+    const VERSION = 1;
+    const SCHEMA = {
+        storeName: 'candidate',
+        idProperty: 'memberId',
+        indexes: ['lastName', 'isJobSeekerString']
+    }
+
+    const baseIndexDb = baseIndexDbFactor.createBaseIndexDb(TONKA_SOURCE_DATABASE, VERSION, SCHEMA);
     const _objectStoreName = 'candidate';
     const _keyPropertyName = 'memberId';
 
@@ -12,8 +21,12 @@
         }
 
         incomingPositions.forEach((ip) => {
+            const ipIdentifier = ip.companyId ? ip.companyId : ip.companyName;
+
             const match = existingPositions.find((ep) => {
-                return ep.companyId === ip.companyId
+                const epIdentifier = ep.companyId ? ep.companyId : ep.companyName;
+
+                return epIdentifier === ipIdentifier
                 && ep.startDateMonth === ip.startDateMonth
                 && ep.startDateYear === ip.startDateYear;
             });
@@ -86,11 +99,11 @@
 
             existingCandidate.positions = _mergePositions(existingCandidate.positions, candidate.positions);
             existingCandidate.isJobSeekerString = existingCandidate.isJobSeeker ? 'true' : 'false';
-            return await baseIndexDb.updateObject(_objectStoreName, existingCandidate, _keyPropertyName);
+            return await baseIndexDb.updateObject(existingCandidate, _objectStoreName, _keyPropertyName);
         }
         else {
             candidate.isJobSeekerString = candidate.isJobSeeker ? 'true' : 'false';
-            return await baseIndexDb.insertObject(_objectStoreName, candidate, _keyPropertyName);
+            return await baseIndexDb.insertObject(candidate, _objectStoreName, _keyPropertyName);
         }
 
     }

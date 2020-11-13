@@ -6,12 +6,70 @@
     const _ownerWords = ['owner', 'founder', 'ceo', 'president']
     const _internWords = ['intern '];
 
+    const _roleAnalysisMatchWords = [
+        {
+            role: 'Dev Manager',
+            titleMatchWords: ['devops manager', 'dev ops manager', 'software manager', 'development manager', 'dev manager', 'cloud manager','engineering manager', 'engineer manager', 'head of software', 'head of engin', 'head of engr', 'devops director', 'dev ops director', 'software director', 'development director', 'dev director', 'cloud director','engineering director', 'engineer director', 'director of software', 'director of dev', 'director of eng', 'director of app', 'director application']
+        },
+        {
+            role: 'Project Manager',
+            titleMatchWords: ['project manager', 'proj manager', 'product owner', 'project owner']
+        },
+        {
+            role: 'DevOps',
+            titleMatchWords: ['devops', 'dev ops']
+        },
+        {
+            role: 'IT Admin',
+            titleMatchWords: []
+        },
+        {
+            role: 'Business Analyst',
+            titleMatchWords: ['business analyst', 'ba ']
+        },
+        {
+            role: 'QA Automation',
+            titleMatchWords: ['automation', 'sdet', 'engineer in test', 'engr in test', 'engr. in test', 'selenium', 'protractor', 'jest', 'cucumber', 'maven', 'appium'],
+        },
+        {
+            role: 'QA Manual',
+            titleMatchWords: ['qa engineer', 'qa engr', 'test engineer', 'test lead', 'qa lead', 'quality lead', 'tester', 'quality assurance', 'quality engineer', 'qa analyst', 'quality analyst'],
+        },
+        {
+            role: 'HR',
+            titleMatchWords: ['hr ', ' hr', 'human resource']
+        },
+        {
+            role: 'Corp Recruiter',
+            titleMatchWords: ['talent acq']
+        },
+        {
+            role: 'Recruiter',
+            titleMatchWords: ['recruiter']
+        },
+        {
+            role: 'Scrum Coach',
+            titleMatchWords: ['scrum', 'agile']
+        },
+        {
+            role: 'Developer',
+            titleMatchWords: ['developer', 'engineer', 'engr', 'architect', 'application consultant', 'software consultant', 'data sci', 'database admin']
+        },
+        {
+            role: 'Executive',
+            titleMatchWords: ['ceo', 'founder', 'owner', 'pres.', 'president', 'vice pres', 'vp ', ' vp', 'cto ', ' cto', 'cio ', ' cio', 'cfo ', 'chief ']
+        },
+    ];
+
     const _analyzeCurrentlyWorkingPositions = (candidate) => {
         const currentPositions = candidate.positions.filter(p => !p.endDateMonth);
 
         candidate.isTechnicallyRelevant = currentPositions.filter(p => _checkIfTechnicallyRelevant(p)).length > 0;
         candidate.isManagement = currentPositions.filter(p => _checkIfManagement(p)).length > 0;
         candidate.isIntern = currentPositions.filter(p => _checkIfInternship(p)).length > 0;
+
+        const titlesString = candidate.positions.map(p => p.title).join('.  ');
+        candidate.roleGuess = _calculateRoleForAPosition({title: titlesString});
 
         if (candidate.isTechnicallyRelevant && (candidate.isContractorOverride === null || candidate.isContractorOverride === undefined)){
             const ownerCompany = currentPositions.find((p) => {
@@ -47,6 +105,7 @@
             p.isTechnicallyRelevant = _checkIfTechnicallyRelevant(p);
             p.isManagement = _checkIfManagement(p);
             p.isInternship = _checkIfInternship(p);
+            p.roleGuess = _calculateRoleForAPosition(p);
         });
 
         _analyzeCurrentlyWorkingPositions(candidate);
@@ -55,16 +114,20 @@
         candidate.technicalYearString = _buildCandidateTechnicalYearsString(candidate);
     }
 
-    const _analyzeCandidatePositions = (arrayOfCandidates) => {
+    const _analyzeCandidatesPositions = (arrayOfCandidates) => {
         arrayOfCandidates.forEach((c) => {
-            _analyzeASingleCandidatesPositions(c);
+            _analyzeCandidatePositions(c);
+        });
+    }
 
-            const jobStatistics = statistician.calculateJobStatistics(c);
-            c.statistics = (c.statistics) ? { ...c.statistics, jobStatistics } : { jobStatistics };
+    const _analyzeCandidatePositions = (c) => {
+        _analyzeASingleCandidatesPositions(c);
 
-            const jobJumper = statistician.calculateJobJumperGrade(jobStatistics);
-            c.grades = (c.grades) ? { ...c.grades, jobJumper } : { jobJumper };
-        })
+        const jobStatistics = statistician.calculateJobStatistics(c);
+        c.statistics = (c.statistics) ? { ...c.statistics, jobStatistics } : { jobStatistics };
+
+        const jobJumper = statistician.calculateJobJumperGrade(jobStatistics);
+        c.grades = (c.grades) ? { ...c.grades, jobJumper } : { jobJumper };
     }
 
     const _buildCandidateTechnicalYearsString = (candidate) => {
@@ -73,9 +136,7 @@
 
         for (let i = 0; i < technicalPositions.length; i++){
             const p = technicalPositions[i];
-            const startDate = statistician.createDateFromMonthAndYear(p.startDateMonth, p.startDateYear)
-            const endDate = statistician.createDateFromMonthAndYear(p.endDateMonth, p.endDateYear);
-            const months = statistician.calculateMonthsBetweenDates(startDate, endDate);
+            const months = _calculatePositionDurationInMonths(p);
             const years = Number.parseInt(months / 12);
             const monthsRemaining = months % 12;
 
@@ -86,15 +147,46 @@
         return (results.length > 0) ? results.join("<br/>") : 'None';
     }
 
+    const _calculatePositionDurationInMonths = (p) => {
+            if (!p){
+                throw new Error("Unable to calculate duration on a null position");
+            }
+
+            const startDate = statistician.createDateFromMonthAndYear(p.startDateMonth, p.startDateYear)
+            const endDate = statistician.createDateFromMonthAndYear(p.endDateMonth, p.endDateYear);
+            return statistician.calculateMonthsBetweenDates(startDate, endDate);
+    }
+
+    const _calculateRoleForAPosition = (position) => {
+        let matchedRole = null;
+        const positionTitle = position.title.toLowerCase();
+
+        for(let i = 0; i < _roleAnalysisMatchWords.length; i++){
+           const roleToCompareAgainst = _roleAnalysisMatchWords[i];
+           let matchedWord = roleToCompareAgainst.titleMatchWords.find(w => positionTitle.indexOf(w) >= 0);
+
+           if (matchedWord){
+               matchedRole = roleToCompareAgainst.role;
+               break;
+           }
+        }
+
+        return matchedRole || 'OTHER';
+    }
+
     const _checkIfInternship = (position) => {
-        const searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
+        let searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
+        searchText = searchText.toLowerCase();
+
         const intern = _internWords.filter(w => searchText.indexOf(w) >= 0).length > 0;
 
         return intern ? true : false;
     }
 
     const _checkIfManagement = (position) => {
-        const searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
+        let searchText =  `${position.title ? position.title : ''} ${position.description ? position.description : ''}`;
+        searchText = searchText.toLowerCase();
+
         const management = _managementWords.filter(w => searchText.indexOf(w) >= 0).length > 0;
 
         return management ? true : false;
@@ -105,7 +197,9 @@
             return null;
         }
 
-        const searchText =  (`${position.title ? position.title : ''} ${position.description ? position.description : ''}`).toLowerCase();
+        let searchText =  (`${position.title ? position.title : ''} ${position.description ? position.description : ''}`);
+        searchText = searchText.toLowerCase();
+
         const eliminate = _eliminationWords.filter(w => searchText.indexOf(w) >= 0);
 
         if (eliminate.length){
@@ -113,7 +207,7 @@
         }
 
         const technicalWords =  _technicalTitleWords.filter(w => searchText.indexOf(w) >= 0);
-        return technicalWords.length;
+        return technicalWords.length > 0;
 
     }
 
@@ -122,13 +216,13 @@
             return null;
         }
 
-        const key = `${position.companyName.toLowerCase()}_${position.companyId}`;
-        if (companyAverages[key]){
-            return companyAverages[key];
+        const companyId = position.companyId;
+        if (companyAverages[companyId]){
+            return companyAverages[companyId];
         }
 
-        const newCompany = {mgmt:{}};
-        companyAverages[key] = newCompany;
+        const newCompany = {id: companyId, name: position.companyName, employmentHistory: []};
+        companyAverages[companyId] = newCompany;
         return newCompany;
     }
 
@@ -138,11 +232,15 @@
         if (postAnalysisCandidatesArray){
             postAnalysisCandidatesArray.forEach((candidate) => {
                 if (candidate.positions){
-                    candidate.positions.forEach((p) => {
-                        const companyDoc = _getOrCreateCompanyAverageDoc(companyAverages, p);
-                        if (companyDoc && p.current === false) {
-                            let appendTo = p.isManagement ? companyDoc.mgmt : companyDoc;
-                            appendTo[candidate] = p.durationYears;
+                    const mergedCandidatePositions = _mergeCandidateSameCompanyPositions(candidate.positions);
+
+                    mergedCandidatePositions.forEach((p) => {
+                        if (p.endDateMonth && p.endDateYear){
+                            const companyDoc = _getOrCreateCompanyAverageDoc(companyAverages, p);
+                            if (companyDoc) {
+                                const positionSummary = _createPositionSummary(candidate, p);
+                                companyDoc.employmentHistory.push(positionSummary)
+                            }
                         }
                     });
                 }
@@ -152,8 +250,68 @@
         return companyAverages;
     }
 
+    const _createPositionSummary = (candidate, position) => {
+        const {memberId} = candidate;
+        const {title: lastTitle} = position;
+        const startDate = statistician.createDateFromMonthAndYear(position.startDateMonth, position.startDateYear);
+        const endDate = statistician.createDateFromMonthAndYear(position.endDateMonth, position.endDateYear);
+        const durationInMonths = statistician.calculateMonthsBetweenDates(startDate, endDate);
+
+        const isContract = position.title.toLowerCase().indexOf('contract') >= 0;
+        const roleGuess = _calculateRoleForAPosition(position);
+        const isTechnicallyRelevant = _checkIfTechnicallyRelevant(position);
+        const isManagement = _checkIfManagement(position);
+        const isInternship = _checkIfInternship(position);
+
+        return {
+            memberId,
+            isTechnicallyRelevant,
+            isManagement,
+            isInternship,
+            isContract,
+            lastTitle,
+            durationInMonths,
+            roleGuess,
+            startDate: startDate.getTime(),
+            endDate: endDate.getTime()
+        }
+    }
+
+    // For the purposes of calculating a companies average retention,
+    // Don't let promotions or short term leave of absences
+    // obscure the average time people stay at a company
+    const _mergeCandidateSameCompanyPositions = (positionList) => {
+        const positionsCopy = [...positionList];
+        const result = [];
+        const oneYearGap = 60000 * 60 * 24 * 365;
+
+        positionsCopy.forEach((p) => {
+            p.startDate = statistician.createDateFromMonthAndYear(p.startDateMonth, p.startDateYear).getTime();
+            p.endDate = statistician.createDateFromMonthAndYear(p.endDateMonth, p.endDateYear).getTime();
+
+            const maxGapDate = p.endDate + oneYearGap;
+            const pIdentifier = p.companyId ? p.companyId : p.companyName;
+            const mergeWithPrior = result.find((ep) => {
+                const epIdentifier = ep.companyId ? ep.companyId : ep.companyName;
+                return epIdentifier === pIdentifier && ep.startDate < maxGapDate
+            });
+
+            if (mergeWithPrior){
+                mergeWithPrior.startDate = p.startDate;
+                mergeWithPrior.startDateMonth = p.startDateMonth;
+                mergeWithPrior.startDateYear = p.startDateYear;
+            }
+            else {
+                result.push(p);
+            }
+        });
+
+        return result;
+    }
+
     class PositionAnalyzer {
         analyzeCandidatePositions = _analyzeCandidatePositions;
+        analyzeCandidatesPositions = _analyzeCandidatesPositions;
         createCompanyAverageDurationObject = _createCompanyAverageDurationObject;
     }
 

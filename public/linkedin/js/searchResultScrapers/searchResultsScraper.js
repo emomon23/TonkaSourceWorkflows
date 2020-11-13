@@ -332,10 +332,11 @@
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
 
-            positionAnalyzer.analyzeCandidatePositions(candidatesInResults);
+            positionAnalyzer.analyzeCandidatesPositions(candidatesInResults);
 
             candidatesInResults.forEach(async (candidate) => {
                 await _scrapeCandidateHtml(candidate);
+
                 _pageCandidates.push(candidate);
 
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
@@ -394,6 +395,10 @@
         }
     }
 
+    const _getCurrentSearchResultsPageListOfMemberIds = () => {
+        return _pageCandidates && _pageCandidates.map ? _pageCandidates.map(c => c.memberId) : [];
+    }
+
     class SearchResultsScraper {
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         persistLastRecruiterProfile = _persistLastRecruiterProfile;
@@ -405,6 +410,7 @@
         touchSearchResultsPages = _touchSearchResultsPages;
         suspendTouchSearchResults = (val) => { _keepWalkingResultsPages = val ? false : true;}
 
+        getCurrentSearchResultsPageListOfMemberIds = _getCurrentSearchResultsPageListOfMemberIds;
         interceptSearchResults = _interceptSearchResults;
     }
 

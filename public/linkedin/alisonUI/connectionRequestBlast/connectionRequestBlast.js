@@ -7,13 +7,12 @@ const _displayMessage = (msg) => {
 const _postBackToLinkedIn = () => {
     try {
         const jsonString = JSON.stringify({
-                subject: $('#subject').val(),
                 body: $('#body').val()
             });
 
         if (window.linkedInConsoleReference) {
-            _displayMessage("posting message back to linked in window - fireInMailBlast");
-            window.linkedInConsoleReference.postMessage({action: 'fireInMailBlast', parameter: jsonString}, "*");
+            _displayMessage("posting message back to linked in window - fireConnectionRequestBlast");
+            window.linkedInConsoleReference.postMessage({action: 'fireConnectionRequestBlast', parameter: jsonString}, "*");
 
             setTimeout(() => {
                 window.close();
@@ -33,24 +32,23 @@ const _updateCharCount = () => {
 
     $(span).text(`Char Count: ${count}`);
 
-    if (count > 1900) {
+    if (count > 300) {
         $(span).attr('style', "color: red");
-        $('#sendInMailButton').prop('disabled', true);
+        $('#connectionRequestButton').prop('disabled', true);
     } else {
         $(span).removeAttr('style');
-        $('#sendInMailButton').prop('disabled', false);
+        $('#connectionRequestButton').prop('disabled', false);
     }
 }
 
 const _validateData = () => {
-    const bodyLength = $('#body').val().length;
-    if (!($('#subject').val().length && bodyLength)){
-        _displayMessage("Both subject and body are required");
+    if (!$('#body').val().length){
+        _displayMessage("Body is required");
         return false;
     }
 
     // eslint-disable-next-line no-alert
-    return confirm("Blast In Mails?  Are you sure?");
+    return confirm("Blast CONNECTION REQUESTS?  Are you sure?");
 }
 
 send_onClick = () => {
@@ -61,7 +59,6 @@ send_onClick = () => {
 
 $(document).ready(() => {
     _bodyTextArea = $('#body')[0];
-
     window.addEventListener('message', (e) => {
         window.linkedInConsoleReference = e.source;
         _displayMessage('Ready...');

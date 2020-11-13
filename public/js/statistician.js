@@ -45,7 +45,10 @@
                 const pos1 = positions[k - 1];
                 const pos2 = positions[k];
 
-                if (pos1.companyId === pos2.companyId) {
+                const p1Identifier = pos1.companyId ? pos1.companyId : pos1.companyName;
+                const p2Identifier = pos2.companyId ? pos2.companyId : pos2.companyName;
+
+                if (p1Identifier === p2Identifier) {
                     pos1.startDateMonth = pos2.startDateMonth;
                     pos1.startDateYear = pos2.startDateYear;
                     pos1.description += ' ' + pos2.description;
@@ -191,7 +194,10 @@
         return {};
     }
 
-    const _calculateMonthsBetweenDates = (dateFrom, dateTo) => {
+    const _calculateMonthsBetweenDates = (dateFromP, dateToP) => {
+        const dateTo = new Date(dateToP);
+        const dateFrom = new Date(dateFromP);
+
         return dateTo.getMonth() - dateFrom.getMonth() +
             (12 * (dateTo.getFullYear() - dateFrom.getFullYear()));
     }
