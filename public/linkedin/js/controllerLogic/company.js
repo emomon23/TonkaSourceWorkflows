@@ -133,7 +133,7 @@
 
     const _saveEmploymentHistory = async (scrapedCompanyAverage, existingEmploymentHistories) => {
         let existing = true;
-        let companyEmploymentHistory = existingEmploymentHistories.find(c => c.companyId === scrapedCompanyAverage.id)
+        let companyEmploymentHistory = existingEmploymentHistories.find(c => c && (c.companyId || c.companyName) === scrapedCompanyAverage.id)
 
         if (!companyEmploymentHistory){
             companyEmploymentHistory = {
@@ -164,7 +164,7 @@
 
     const _saveLiteCompanySummary = async (scrapedCompanyHistory, totalEmploymentHistory, existingCompanySummariesArray) => {
         let existing = true;
-        let companySummary = existingCompanySummariesArray.find(c => c.companyId === scrapedCompanyHistory.id)
+        let companySummary = existingCompanySummariesArray.find(c => c && (c.companyId || c.companyName) === scrapedCompanyHistory.id)
 
         if (!companySummary){
             companySummary = {

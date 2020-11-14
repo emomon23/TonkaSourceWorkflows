@@ -48,7 +48,7 @@
 
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
-                candidate = await candidateRepository.searchForCandidate(scrapedFullName);
+                candidate = await candidateController.searchForCandidate(scrapedFullName);
                 if (!candidate) {
                     tsCommon.log("Also, could not find candidate by name in Candidate Repository (or there are more than 1 name match)", "WARN");
                     return null;
@@ -87,7 +87,7 @@
 
             _displayStatisticGrades(candidate);
             try {
-                candidateRepository.saveCandidate(candidate);
+                candidateController.saveCandidate(candidate);
             } catch (e) {
                 tsCommon.log(e.message, 'ERROR');
             }

@@ -253,68 +253,115 @@
         }
     }
 
-    class BaseIndexDb {
-        constructor (dbName, versionNumber, schema){
+    class BaseIndexDbStoreReference {
+        constructor (dbName, versionNumber, schema, objectStore, idProperty){
             this.dbName = dbName;
             this.versionNumber = versionNumber;
             this.schema = schema
             this.__dbRef = null;
+            this.objectStore = objectStore;
+            this.idProperty = idProperty;
         }
 
-        saveObject = async (obj, storeName, dataIdProperty) => {
+        save = async (obj) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return await _saveObject(storeName, obj, dataIdProperty, this.__dbRef);
+            return await _saveObject(this.objectStore, obj, dataIdProperty, this.__dbRef);
         }
 
-        insertObject = async (obj, storeName, dataIdProperty) => {
+        insert = async (obj) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return await _insertObject(this.__dbRef, storeName, obj, dataIdProperty);
+            return await _insertObject(this.__dbRef, this.objectStore, obj, this.idProperty);
         }
 
-        updateObject = async (obj, storeName, dataIdProperty) => {
+        update = async (obj) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return await _updateObject(this.__dbRef, storeName, obj, dataIdProperty);
+            return await _updateObject(this.__dbRef, this.objectStore, obj, this.idProperty);
         }
 
-        getObjectById = async (storeName, id) => {
+        get = async (id) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return await _getObjectById(this.__dbRef, storeName, id);
+            return await _getObjectById(this.__dbRef, this.objectStore, id);
         }
 
-        getObjectsByIndex = async (storeName, indexName, searchFor) => {
-            this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return await _getObjectsByIndex(this.__dbRef, storeName, indexName, searchFor)
-        }
-            ;
+        getByIndex = async (indexName, searchFor) => {
+            let results = [];
 
-        getObjectsByListOfKeys = async (storeName, primaryKeysArray) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return await _getObjectsByListOfKeys(this.__dbRef, storeName, primaryKeysArray);
+            const tempResults = await _getObjectsByIndex(this.__dbRef, this.objectStore, indexName, searchFor);
 
-        }
+            if (tempResults && tempResults.length){
+                results = tempResults.filter(r => r ? true : false);
+            }
 
-        getAll =   async (storeName) => {
-            this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return _getAll(this.__dbRef, storeName)
-        }
-
-        deleteObject  = async (storeName, key) => {
-            this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return await _deleteObject(this.__dbRef, storeName, key)
+            return results;
         }
 
 
-        deleteOldData  = async (storeName, keyProperty, daysStale) => {
+        getSubset = async (primaryKeysArray) => {
+            let results = [];
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return _deleteOldData(this.__dbRef, storeName, keyProperty, daysStale)
+            const tempResults = await _getObjectsByListOfKeys(this.__dbRef, this.objectStore, primaryKeysArray);
+
+            if (tempResults && tempResults.length){
+                results = tempResults.filter(r => r ? true : false);
+            }
+
+            return results;
+        }
+
+        getAll =   async () => {
+            let results = [];
+
+            this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
+            const tempResults = _getAll(this.__dbRef, this.objectStore);
+
+            if (tempResults && tempResults.length){
+                results = tempResults.filter(r => r ? true : false);
+            }
+
+            return results;
+        }
+
+        deleteObject  = async (key) => {
+            this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
+            return await _deleteObject(this.__dbRef, this.objectStore, key)
+        }
+
+
+        deleteOldData  = async (keyProperty, daysStale) => {
+            this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
+            return _deleteOldData(this.__dbRef, this.objectStore, keyProperty, daysStale)
         } ;
     }
 
-    class BaseIndexDbFactor {
-        createBaseIndexDb = (dbName, dbVersion, schema) => {
-            return new BaseIndexDb(dbName, dbVersion, schema);
+    class IndexDbStoreFactory {
+        constructor (dbName, dbVersion, schema) {
+            this.dbName = dbName,
+            this.dbVersion = dbVersion,
+            this.schema = schema
+            this.stores = {};
+        }
+
+        createStore = (storeName, keyPropertyForStore) => {
+            if (this.stores[storeName]){
+                return this.store[storeName];
+            }
+
+            const result = new BaseIndexDbStoreReference(this.dbName, this.dbVersion, this.schema, storeName, keyPropertyForStore);
+            this.store[storeName] = result;
+            return result;
         }
     }
 
-    window.baseIndexDbFactor = new BaseIndexDbFactor();
+    class BaseIndexDbFactory {
+        createStoreFactory = (dbName, dbVersion, schema) => {
+            return new IndexDbStoreFactory(dbName, dbVersion, schema);
+        }
+    }
+
+    window.baseIndexDbFactory = new BaseIndexDbFactory();
 })();
+
+// const storeFactory = baseIndexDbFactory.createStoreFactory("TonkaSource", 1, schema);
+// const candidateRepository = storeFactory.createStore("candidate");
+// await candidateRepository.getAll();

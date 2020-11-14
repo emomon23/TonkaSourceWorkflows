@@ -48,8 +48,8 @@
 
     const _launchDashboard = async () => {
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/dashboard/dashboard.html`;
-        const jobSeekers = await candidateRepository.getJobSeekers();
-        const contractors = await candidateRepository.getContractors();
+        const jobSeekers = await candidateController.getJobSeekers();
+        const contractors = await candidateController.getContractors();
 
         const list = jobSeekers.concat(contractors);
 

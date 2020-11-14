@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.660
+// @version      0.846
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -28,8 +28,11 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/services/positionAnalyzer.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/candidateRepository.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/companyRepositories.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/candidateKeywordMatchRepository.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/company.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/candidate.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
@@ -61,8 +64,11 @@
 // @ignore      http://localhost:5001/linkedin/js/services/positionAnalyzer.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/baseIndexDb.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/candidateRepository.js
+// @ignore      http://localhost:5001/linkedin/js/repositories/companyRepositories.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/candidateKeywordMatchRepository.js
+// @ignore      http://localhost:5001/linkedin/js/controllerLogic/company.js
+// @ignore      http://localhost:5001/linkedin/js/controllerLogic/candidate.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterFilter.js

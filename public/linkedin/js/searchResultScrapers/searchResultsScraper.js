@@ -186,7 +186,7 @@
 
                 for (let i = 0; i < seekers.length; i++){
                     // eslint-disable-next-line no-await-in-loop
-                    const candidate = await candidateRepository.getCandidate(seekers[i].memberId);
+                    const candidate = await candidateController.getCandidate(seekers[i].memberId);
 
                     const shouldWeSkipCandidate = _shouldWeSkipGettingDetailsOnThisCandidate(candidate);
 
@@ -243,7 +243,7 @@
 
                         // eslint-disable-next-line no-await-in-loop
                         try {
-                            candidateRepository.saveCandidate(expandedCandidate);
+                            candidateController.saveCandidate(expandedCandidate);
                         } catch (e) {
                             tsCommon.log(e.message, 'ERROR');
                         }
@@ -305,7 +305,7 @@
 
     const getCurrentRecruiterProfileCandidate = async () => {
         const memberId = window.localStorage.getItem(_localStorageLastCandidateProfile);
-        return await candidateRepository.getCandidate(memberId);
+        return await candidateController.getCandidate(memberId);
     }
 
     const _trimScrapedCandidate = (scraped) => {
@@ -342,7 +342,7 @@
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
 
                 try {
-                    candidateRepository.saveCandidate(trimmedCandidate);
+                    candidateController.saveCandidate(trimmedCandidate);
                 } catch (e) {
                     tsCommon.log(e.message, 'ERROR');
                 }
