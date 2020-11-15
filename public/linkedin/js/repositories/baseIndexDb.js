@@ -343,7 +343,7 @@
             this.stores = {};
         }
 
-        createStore = (storeName, keyPropertyForStore) => {
+        createStore = (storeName) => {
             if (this.stores[storeName]){
                 return this.store[storeName];
             }
@@ -353,6 +353,7 @@
                 throw new Error(`Error in IndexDbStoreFactory.createStore. No schema exists for a store named '${storeName}'`);
             }
 
+            const keyPropertyForStore = schemaMatch.idProperty;
             const result = new BaseIndexDbStoreReference(this.dbName, this.dbVersion, this.schema, storeName, keyPropertyForStore);
             this.stores[storeName] = result;
             return result;

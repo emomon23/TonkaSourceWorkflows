@@ -34,25 +34,37 @@
         }
     }
 
-    const  _calculateTurnoverAverages = (ACompanyEmploymentHistoryArray) => {
+    const  _calculateTurnoverAverages = (companyEmploymentHistoryIndex) => {
         const result = {};
-        let temp = _calculateAverageHighLow(() => { return ACompanyEmploymentHistoryArray});
-        result.totalEmployeeTurnover = temp;
+        const employmentHistoryArray = _mapEmploymentHistoryIndexToEmploymentHistoryArray(companyEmploymentHistoryIndex.employmentHistory);
 
-        temp = _calculateAverageHighLow(() => { return ACompanyEmploymentHistoryArray.filter(eh => eh.isTechnicallyRelevant)});
-        result.allTechnicalEmployeeTurnover = temp;
+        // all employees (regardless of management or technical)
+        let temp = _calculateAverageHighLow(() => { return employmentHistoryArray});
+        result.allEmployeeTurnover = temp;
 
-        temp = _getTotalMonthsTotalPeople(() => { return ACompanyEmploymentHistoryArray.filter(eh => !eh.isTechnicallyRelevant)});
+        // technical (all managers and staff)
+        temp = _calculateAverageHighLow(() => { return employmentHistoryArray.filter(eh => eh.isTechnicallyRelevant)});
+        result.allTechnicalTurnover = temp;
+
+        // non technical (all mangers and staff)
+        temp = _calculateAverageHighLow(() => { return employmentHistoryArray.filter(eh => !eh.isTechnicallyRelevant)});
         result.allNonTechnicalEmployeeTurnover = temp;
 
-        temp = _getTotalMonthsTotalPeople(() => { return ACompanyEmploymentHistoryArray.filter(eh => eh.isTechnicallyRelevant && eh.isManagement)});
-        result.totalTechnicalManagementTurnover = temp;
+        // technical management
+        temp = _calculateAverageHighLow(() => { return employmentHistoryArray.filter(eh => eh.isTechnicallyRelevant && eh.isManagement)});
+        result.managementTechnicalTurnover = temp;
 
-        temp = _getTotalMonthsTotalPeople(() => { return ACompanyEmploymentHistoryArray.filter(eh => eh.isTechnicallyRelevant && !eh.isManagement)});
-        result.totalTechnicalStaffTurnover = temp;
+        // non technical management
+        temp = _calculateAverageHighLow(() => { return employmentHistoryArray.filter(eh => !eh.isTechnicallyRelevant && eh.isManagement)});
+        result.managementNonTechnicalTurnover = temp;
 
-        temp = _getTotalMonthsTotalPeople(() => { return ACompanyEmploymentHistoryArray.filter(eh => !eh.isTechnicallyRelevant && !eh.isManagement)});
-        result.totalNonTechnicalStaffTurnover = temp;
+        // tech staff (ie. developers)
+        temp = _calculateAverageHighLow(() => { return employmentHistoryArray.filter(eh => eh.isTechnicallyRelevant && !eh.isManagement)});
+        result.technicalStaffNonManagementTurnover = temp;
+
+        // non technical staff (ie. cafe staff)
+        temp = _calculateAverageHighLow(() => { return employmentHistoryArray.filter(eh => !eh.isTechnicallyRelevant && !eh.isManagement)});
+        result.NonTechnicalStaffNonManagementTurnover = temp;
 
         return result;
     }
@@ -64,6 +76,19 @@
         for (let k in companyAverages){
             if (ignoreKeys.indexOf(k) === -1){
                 result.push(k);
+            }
+        }
+
+        return result;
+    }
+
+    const _mapEmploymentHistoryIndexToEmploymentHistoryArray = (companyEmploymentHistoryIndex) => {
+        const result = [];
+        const ignoreKeys = ['id', 'companyId', 'name', 'dateCreated', 'dateLastUpdated'];
+
+        for (let k in companyEmploymentHistoryIndex){
+            if (ignoreKeys.indexOf(k) === -1){
+                result.push(companyEmploymentHistoryIndex[k]);
             }
         }
 
@@ -107,11 +132,12 @@
             }
         });
 
-        return obj;
+        return Object.keys(obj).length ? obj : null;
     }
 
-    const _mergeTitles = (existingTitlesObject, scrapedEmploymentHistoryArray) => {
-        const result = existingTitlesObject || {};
+    const _mergeTitles = (existingTitlesIndexObject, scrapedEmploymentHistoryArray) => {
+
+        const result = existingTitlesIndexObject || {};
         if (scrapedEmploymentHistoryArray && scrapedEmploymentHistoryArray.length) {
             scrapedEmploymentHistoryArray.forEach((eh) => {
                 if (eh.lastTitle){
@@ -160,7 +186,7 @@
         return companyEmploymentHistory;
     }
 
-    const _saveLiteCompanySummary = async (scrapedCompanyHistory, totalEmploymentHistory, existingCompanySummariesArray) => {
+    const _saveLiteCompanySummary = async (scrapedCompanyHistory, existingCompanySummariesArray, companyEmploymentHistories) => {
         let existing = true;
         let companySummary = existingCompanySummariesArray.find(c => c && (c.companyId || c.companyName) === scrapedCompanyHistory.id)
 
@@ -174,9 +200,12 @@
             existing = false;
         }
 
-        companySummary.titles = _mergeTitles(companySummary.titles, scrapedCompanyHistory.employmentHistory);
-        companySummary.skills = _mergeSkills(companySummary.skills, scrapedCompanyHistory.employmentHistory);
-        companySummary.averageTurnover = _calculateTurnoverAverages(totalEmploymentHistory);
+        const skillsAssessment = _mergeSkills(companySummary.skills, scrapedCompanyHistory.employmentHistory);
+        if (skillsAssessment){
+            companySummary.skills = skillsAssessment;
+        }
+
+        companySummary.averageTurnover = _calculateTurnoverAverages(companyEmploymentHistories);
 
         if (existing){
             await companySummaryRepository.update(companySummary);
@@ -188,17 +217,50 @@
         return companySummaryRepository;
     }
 
+    const _saveCompanyTitles = async (scrapedCompanyHistory, existingTitles) => {
+        let existing = true;
+        let companyTitlesDoc = existingTitles.find(c => c && (c.companyId || c.companyName) === scrapedCompanyHistory.id)
+        // {companyId, name, titles:{ 'srDev': 1, 'jrDev: 2 }}
+
+        if (!companyTitlesDoc){
+            companyTitlesDoc = {
+                companyId: scrapedCompanyHistory.id,
+                name: scrapedCompanyHistory.name,
+                titles: {}
+            };
+
+            existingTitles.push(companyTitlesDoc);
+            existing = false;
+        }
+
+        companyTitlesDoc.titles = _mergeTitles(companyTitlesDoc.titles, scrapedCompanyHistory.employmentHistory);
+        if (existing){
+            await companyTitlesRepository.update(companyTitlesDoc);
+        }
+        else {
+            await companyTitlesRepository.insert(companyTitlesDoc);
+        }
+
+        return companyTitlesDoc;
+    }
+
     const _saveScrapedCandidatesPositionAnalysis = async (companyAverages) => {
         const listOfCompanyIds = _mapOutCompanyIdsInCompanyAverages(companyAverages);
         const existingSummaries = await companySummaryRepository.getSubset(listOfCompanyIds);
         const existingEmploymentHistories = await companyEmploymentHistoryRepository.getSubset(listOfCompanyIds);
+        const existingTitles = await companyTitlesRepository.getSubset(listOfCompanyIds);
 
         for (let i = 0; i < listOfCompanyIds.length; i++){
-            // eslint-disable-next-line no-await-in-loop
-            const saveEmploymentHistory = await _saveEmploymentHistory(companyAverages[listOfCompanyIds[i]], existingEmploymentHistories);
+            const scrappedCandidateCompanyAverage = companyAverages[listOfCompanyIds[i]];
 
             // eslint-disable-next-line no-await-in-loop
-            await _saveLiteCompanySummary(companyAverages[listOfCompanyIds[i]], saveEmploymentHistory, existingSummaries);
+            const employmentHistory = await _saveEmploymentHistory(scrappedCandidateCompanyAverage, existingEmploymentHistories);
+
+            // eslint-disable-next-line no-await-in-loop
+            await _saveLiteCompanySummary(scrappedCandidateCompanyAverage, existingSummaries, employmentHistory);
+
+            // eslint-disable-next-line no-await-in-loop
+            await _saveCompanyTitles(scrappedCandidateCompanyAverage, existingTitles)
         }
     }
 
