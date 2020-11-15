@@ -88,11 +88,11 @@
 
             existingCandidate.positions = _mergePositions(existingCandidate.positions, candidate.positions);
             existingCandidate.isJobSeekerString = existingCandidate.isJobSeeker ? 'true' : 'false';
-            return await candidateController.update(existingCandidate);
+            return await candidateRepository.update(existingCandidate);
         }
         else {
             candidate.isJobSeekerString = candidate.isJobSeeker ? 'true' : 'false';
-            return await candidateController.insert(candidate);
+            return await candidateRepository.insert(candidate);
         }
 
     }

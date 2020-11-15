@@ -36,7 +36,7 @@
 
     const  _calculateTurnoverAverages = (ACompanyEmploymentHistoryArray) => {
         const result = {};
-        let temp = _getTotalMonthsTotalPeople(() => { return ACompanyEmploymentHistoryArray});
+        let temp = _calculateAverageHighLow(() => { return ACompanyEmploymentHistoryArray});
         result.totalEmployeeTurnover = temp;
 
         temp = _calculateAverageHighLow(() => { return ACompanyEmploymentHistoryArray.filter(eh => eh.isTechnicallyRelevant)});
@@ -101,10 +101,7 @@
             for(let k in baseSkills) {
                 if (title.indexOf(k) >= 0){
                     if (!obj[k]){
-                        obj[k] = 1;
-                    }
-                    else {
-                        obj[k] = obj[k] + 1;
+                        obj[k] = true;
                     }
                 }
             }
@@ -142,6 +139,7 @@
                 employmentHistory: {}
             }
 
+            existingEmploymentHistories.push(companyEmploymentHistory);
             existing = false;
         }
 
@@ -171,6 +169,8 @@
                 companyId: scrapedCompanyHistory.id,
                 name: scrapedCompanyHistory.name
             };
+
+            existingCompanySummariesArray.push(companySummaryRepository);
             existing = false;
         }
 

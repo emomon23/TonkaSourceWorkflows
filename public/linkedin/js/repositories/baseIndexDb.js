@@ -113,7 +113,8 @@
             const transaction = db.transaction(storeName, "readwrite");
             const store = transaction.objectStore(storeName);
 
-            const request = store.get(key);
+            const keyParameter = !isNaN(key) ? Number.parseInt(key) : key;
+            const request = store.get(keyParameter);
 
             request.onsuccess = () => {
                 resolve(request.result);
@@ -338,7 +339,7 @@
         constructor (dbName, dbVersion, schema) {
             this.dbName = dbName,
             this.dbVersion = dbVersion,
-            this.schema = schema
+            this.schema = Array.isArray(schema) ? schema : [schema];
             this.stores = {};
         }
 
@@ -347,8 +348,13 @@
                 return this.store[storeName];
             }
 
+            const schemaMatch = this.schema.find(s => s.storeName && s.storeName === storeName);
+            if (!schemaMatch){
+                throw new Error(`Error in IndexDbStoreFactory.createStore. No schema exists for a store named '${storeName}'`);
+            }
+
             const result = new BaseIndexDbStoreReference(this.dbName, this.dbVersion, this.schema, storeName, keyPropertyForStore);
-            this.store[storeName] = result;
+            this.stores[storeName] = result;
             return result;
         }
     }
