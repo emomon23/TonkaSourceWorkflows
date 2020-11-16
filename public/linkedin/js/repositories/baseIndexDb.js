@@ -310,11 +310,11 @@
             return results;
         }
 
-        getAll =   async () => {
+        getAll = async () => {
             let results = [];
 
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            const tempResults = _getAll(this.__dbRef, this.objectStore);
+            const tempResults = await _getAll(this.__dbRef, this.objectStore);
 
             if (tempResults && tempResults.length){
                 results = tempResults.filter(r => r ? true : false);

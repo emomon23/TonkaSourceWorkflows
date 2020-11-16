@@ -8,6 +8,15 @@
     let _jobsGathered = {};
     let _user = null;
 
+    const _cleanseCandidateData = (candidatesInResults) => {
+       candidatesInResults.forEach((c) => {
+            c.firstName = tsUICommon.cleanseTextOfHtml(c.firstName);
+            c.lastName = tsUICommon.cleanseTextOfHtml(c.lastName);
+            c.city = tsUICommon.cleanseTextOfHtml(c.city);
+            _cleanJobHistoryCompanyNames(c);
+       })
+    }
+
     const  _displayJobJumperAnalysis = (candidate) => {
         if (candidate
             && candidate.grades
@@ -294,7 +303,7 @@
                     companyName = companyName.split(fr.find).join(fr.replace);
                 });
 
-                p.companyName = companyName;
+                p.companyName = tsUICommon.cleanseTextOfHtml(companyName);
             });
         }
     }
@@ -312,11 +321,6 @@
         const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance', 'companyConnectionsPathNum', 'familiarName', 'fullName', 'isOpenProfile', 'memberInATSInfo', 'passedPrivacyCheck', 'projectStatuses', 'prospectId', 'views'];
         const result = _.omit(scraped, omitFields);
 
-        result.firstName = tsUICommon.cleanseTextOfHtml(result.firstName);
-        result.lastName = tsUICommon.cleanseTextOfHtml(result.lastName);
-
-        _cleanJobHistoryCompanyNames(result);
-
         result.lastScrapedBy =  linkedInConstants.pages.RECRUITER_SEARCH_RESULTS;
         return result;
     }
@@ -331,6 +335,8 @@
 
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
+
+            _cleanseCandidateData(candidatesInResults);
 
             positionAnalyzer.analyzeCandidatesPositions(candidatesInResults);
 

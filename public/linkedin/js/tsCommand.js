@@ -98,6 +98,14 @@
         _launchDashboard();
     }
 
+    const _setTSConfiguration = (key, value) => {
+        tsConfig.set(key,value);
+    }
+
+    const _getTSConfiguration = (key) => {
+       return tsConfig.get(key);
+    }
+
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
@@ -109,4 +117,7 @@
     }
 
     window.tsCommand = new TSCommand();
+
+    window.setTSConfiguration = _setTSConfiguration;
+    window.getTSConfiguration = _getTSConfiguration
 })();
