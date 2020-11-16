@@ -43,10 +43,27 @@
         return _getPhoneNumber(highlightedText) ? true : false;
     }
 
+    const _getFullName = () => {
+        let fullName = '';
+        if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.RECRUITER_INMAIL){
+            const fullNameSelector = $('#mailbox-content h3 a');
+            fullName = $(fullNameSelector).text();
+        } else {
+            const p = document.activeElement;
+            const header = tsUICommon.findPreviousElement(p, 'h4');
+            if (header){
+                fullName = $(header).text();
+                fullName = fullName.split('\n').join('').split('3 people in this conversation').join('');
+                fullName = tsString.stripExcessSpacesFromString(fullName).trim();
+            }
+        }
+
+        return fullName;
+    }
+
     const _copyToClipboard = async (highlightedText) => {
         const phoneNumber = _getPhoneNumber(highlightedText);
-        const fullNameSelector = $('#mailbox-content h3 a');
-        const fullName = $(fullNameSelector).text();
+        const fullName = _getFullName();
         const textToCopy = `${fullName} ${phoneNumber}`;
         await tsUICommon.copyToClipboard(textToCopy);
     }
