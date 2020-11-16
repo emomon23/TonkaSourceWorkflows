@@ -161,7 +161,7 @@
     }
 
     const _saveCompanyAnalytics = async (analytics) => {
-
+        companiesController.saveScrapedCandidatesPositionAnalysis(analytics);
     }
 
     const _alisonContactSyncCallback = async (contact) => {
@@ -186,7 +186,7 @@
     }
 
     const _recordMessageWasSent = async (recipient, messageSent, type = 'message') => {
-        let candidate = await candidateRepository.searchForCandidate(recipient);
+        let candidate = await candidateController.searchForCandidate(recipient);
 
         if (candidate !== null){
             const {firstName, lastName, memberId} = candidate;

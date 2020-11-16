@@ -48,8 +48,8 @@
 
     const _launchDashboard = async () => {
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/dashboard/dashboard.html`;
-        const jobSeekers = await candidateRepository.getJobSeekers();
-        const contractors = await candidateRepository.getContractors();
+        const jobSeekers = await candidateController.getJobSeekers();
+        const contractors = await candidateController.getContractors();
 
         const list = jobSeekers.concat(contractors);
 
@@ -98,6 +98,14 @@
         _launchDashboard();
     }
 
+    const _setTSConfiguration = (key, value) => {
+        tsConfig.set(key,value);
+    }
+
+    const _getTSConfiguration = (key) => {
+       return tsConfig.get(key);
+    }
+
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
@@ -109,4 +117,7 @@
     }
 
     window.tsCommand = new TSCommand();
+
+    window.setTSConfiguration = _setTSConfiguration;
+    window.getTSConfiguration = _getTSConfiguration
 })();

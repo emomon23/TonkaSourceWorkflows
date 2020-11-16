@@ -69,7 +69,7 @@
     }
 
     const _sendConnectionRequest = async (memberId, noteToSend) => {
-        const candidate = await candidateRepository.searchForCandidate(memberId);
+        const candidate = await candidateController.searchForCandidate(memberId);
         if (candidate){
             const messageToSend = _processAnyTemplateText(candidate, noteToSend);
             publicProfileWindow = await _navigateToPublicProfilePage(candidate);
@@ -94,7 +94,7 @@
                 connectionRequestToSend = messageToSend;
             }
 
-            const candidate = await candidateRepository.searchForCandidate(memberIdOrFirstNameAndLastName);
+            const candidate = await candidateController.searchForCandidate(memberIdOrFirstNameAndLastName);
 
             if (candidate !== undefined && candidate !== null){
                 messageToSend = _processAnyTemplateText(candidate, messageToSend);

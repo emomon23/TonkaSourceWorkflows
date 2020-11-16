@@ -61,4 +61,13 @@
             tsCommon.log({element: 'body', e});
          });
     }
+
+    window.convertObjectPropertiesToArray = (obj) => {
+        const result = [];
+        for(let k in obj){
+            result.push(obj[k]);
+        }
+
+        return result;
+    }
 })();

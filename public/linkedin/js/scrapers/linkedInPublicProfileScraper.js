@@ -2,7 +2,7 @@
     const _expSelectors = linkedInSelectors.publicProfilePage.experience;
 
     const _findCachedCandidate = async (scrapedCandidate) => {
-        return searchResultsScraper ? await candidateRepository.seaerchForCandidate(`${scrapedCandidate.firstName} ${scrapedCandidate.lastName}`) : null;
+        return searchResultsScraper ? await candidateController.seaerchForCandidate(`${scrapedCandidate.firstName} ${scrapedCandidate.lastName}`) : null;
     }
 
     const _expandJobHistory = async () => {

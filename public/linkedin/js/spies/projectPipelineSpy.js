@@ -23,7 +23,7 @@
 
             const match = candidateKeywordMatchRepository.getCandidateKeywordMatch(memberId);
             if (match){
-                const candidate = candidateRepository.searchForCandidate(memberId);
+                const candidate = candidateController.searchForCandidate(memberId);
                 const city = candidate ? (candidate.city || '') + '\n' : '';
                 const technicalYearString = candidate && candidate.technicalYearString ? `${candidate.technicalYearString}\n` : '';
 

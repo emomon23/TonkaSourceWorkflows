@@ -212,17 +212,17 @@
     }
 
     const _getOrCreateCompanyAverageDoc = (companyAverages, position) => {
-        if (!(position && position.companyName && position.companyId)){
+        if (!(position && position.companyName)){
             return null;
         }
 
-        const companyId = position.companyId;
-        if (companyAverages[companyId]){
-            return companyAverages[companyId];
+        const companyIdentifier = position.companyId || position.companyName;
+        if (companyAverages[companyIdentifier]){
+            return companyAverages[companyIdentifier];
         }
 
-        const newCompany = {id: companyId, name: position.companyName, employmentHistory: []};
-        companyAverages[companyId] = newCompany;
+        const newCompany = {id: companyIdentifier, name: position.companyName, employmentHistory: []};
+        companyAverages[companyIdentifier] = newCompany;
         return newCompany;
     }
 

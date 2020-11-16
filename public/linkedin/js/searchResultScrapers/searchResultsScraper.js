@@ -8,6 +8,15 @@
     let _jobsGathered = {};
     let _user = null;
 
+    const _cleanseCandidateData = (candidatesInResults) => {
+       candidatesInResults.forEach((c) => {
+            c.firstName = tsUICommon.cleanseTextOfHtml(c.firstName);
+            c.lastName = tsUICommon.cleanseTextOfHtml(c.lastName);
+            c.city = tsUICommon.cleanseTextOfHtml(c.city);
+            _cleanJobHistoryCompanyNames(c);
+       })
+    }
+
     const  _displayJobJumperAnalysis = (candidate) => {
         if (candidate
             && candidate.grades
@@ -186,7 +195,7 @@
 
                 for (let i = 0; i < seekers.length; i++){
                     // eslint-disable-next-line no-await-in-loop
-                    const candidate = await candidateRepository.getCandidate(seekers[i].memberId);
+                    const candidate = await candidateController.getCandidate(seekers[i].memberId);
 
                     const shouldWeSkipCandidate = _shouldWeSkipGettingDetailsOnThisCandidate(candidate);
 
@@ -243,7 +252,7 @@
 
                         // eslint-disable-next-line no-await-in-loop
                         try {
-                            candidateRepository.saveCandidate(expandedCandidate);
+                            candidateController.saveCandidate(expandedCandidate);
                         } catch (e) {
                             tsCommon.log(e.message, 'ERROR');
                         }
@@ -294,7 +303,7 @@
                     companyName = companyName.split(fr.find).join(fr.replace);
                 });
 
-                p.companyName = companyName;
+                p.companyName = tsUICommon.cleanseTextOfHtml(companyName);
             });
         }
     }
@@ -305,17 +314,12 @@
 
     const getCurrentRecruiterProfileCandidate = async () => {
         const memberId = window.localStorage.getItem(_localStorageLastCandidateProfile);
-        return await candidateRepository.getCandidate(memberId);
+        return await candidateController.getCandidate(memberId);
     }
 
     const _trimScrapedCandidate = (scraped) => {
         const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance', 'companyConnectionsPathNum', 'familiarName', 'fullName', 'isOpenProfile', 'memberInATSInfo', 'passedPrivacyCheck', 'projectStatuses', 'prospectId', 'views'];
         const result = _.omit(scraped, omitFields);
-
-        result.firstName = tsUICommon.cleanseTextOfHtml(result.firstName);
-        result.lastName = tsUICommon.cleanseTextOfHtml(result.lastName);
-
-        _cleanJobHistoryCompanyNames(result);
 
         result.lastScrapedBy =  linkedInConstants.pages.RECRUITER_SEARCH_RESULTS;
         return result;
@@ -332,6 +336,8 @@
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
 
+            _cleanseCandidateData(candidatesInResults);
+
             positionAnalyzer.analyzeCandidatesPositions(candidatesInResults);
 
             candidatesInResults.forEach(async (candidate) => {
@@ -342,7 +348,7 @@
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
 
                 try {
-                    candidateRepository.saveCandidate(trimmedCandidate);
+                    candidateController.saveCandidate(trimmedCandidate);
                 } catch (e) {
                     tsCommon.log(e.message, 'ERROR');
                 }
