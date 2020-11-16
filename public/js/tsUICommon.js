@@ -4,9 +4,11 @@
         tempInput.value = value;
         const element = document.activeElement || document.body;
         element.appendChild(tempInput);
+        await tsCommon.sleep(100);
         tempInput.select();
         await tsCommon.sleep(100);
         document.execCommand("copy");
+        await tsCommon.sleep(200);
         $(tempInput).remove();
     }
 

@@ -43,12 +43,12 @@
         return _getPhoneNumber(highlightedText) ? true : false;
     }
 
-    const _copyToClipboard = (highlightedText) => {
+    const _copyToClipboard = async (highlightedText) => {
         const phoneNumber = _getPhoneNumber(highlightedText);
         const fullNameSelector = $('#mailbox-content h3 a');
         const fullName = $(fullNameSelector).text();
         const textToCopy = `${fullName} ${phoneNumber}`;
-        tsUICommon.copyToClipboard(textToCopy);
+        await tsUICommon.copyToClipboard(textToCopy);
     }
 
     const _processMouseUp = async (e) => {
@@ -58,28 +58,20 @@
         }
     }
 
-    inMailAndMessageSpyCreateContactClick = () => {
+    inMailAndMessageSpyCreateContactClick = async () => {
         const text = _getHighlightedText();
 
-        setTimeout(() => {
-            _copyToClipboard(text);
-            window.open('https://contacts.google.com/?hl=en&tab=mC');
-            $(_div).remove();
-        }, 200);
-
-        return false;
+        await _copyToClipboard(text);
+        window.open('https://contacts.google.com/?hl=en&tab=mC');
+        $(_div).remove();
     }
 
-    inMailAndMessageSpySchedulePhoneCallClick = () => {
+    inMailAndMessageSpySchedulePhoneCallClick = async () => {
         const text = _getHighlightedText();
 
-        setTimeout(() => {
-            _copyToClipboard(text);
-            window.open('https://calendar.google.com/calendar/u/0/r?tab=mc')
-            $(_div).remove();
-        }, 200);
-
-        return false;
+        await _copyToClipboard(text);
+        window.open('https://calendar.google.com/calendar/u/0/r?tab=mc')
+        $(_div).remove();
     }
 
     inMailAndMessageSpyHideMenu = () => {
