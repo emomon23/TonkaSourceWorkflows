@@ -1,5 +1,5 @@
 (() => {
-    const _menuHtml = `<ul><li><a class='tsHelper' href='#' onclick="inMailAndMessageSpyCreateContactClick()">Create Contact</a></li><li><a class='tsHelper' href='#' onclick="inMailAndMessageSpySchedulePhoneCallClick">Schedule call</a></li><li><a class='tsHelper' href='#' onclick="inMailAndMessageSpyHideMenu()">Hide<a></li></ul>`;
+    const _menuHtml = `<ul><li><a class='tsHelper' role='createContact' href='#'>Create Contact</a></li><li><a class='tsHelper' role='schedule' href='#'>Schedule call</a></li><li><a class='tsHelper' role='hide' href='#'>Hide<a></li></ul>`;
     let _div = null;
     let _currentPage = '';
 
@@ -8,6 +8,18 @@
 
         if (targetClass.indexOf('tsHelper') === -1){
             $(target).append(_div);
+
+            $('.tsHelper').click((e) => {
+                const role = $(e.target).attr('role');
+                if (role === 'createContact'){
+                    inMailAndMessageSpyCreateContactClick();
+                } else if (role === 'schedule'){
+                    inMailAndMessageSpySchedulePhoneCallClick();
+                } else {
+                    inMailAndMessageSpyHideMenu();
+                }
+
+            });
         }
     }
 
@@ -31,9 +43,12 @@
         return _getPhoneNumber(highlightedText) ? true : false;
     }
 
-    const _scrapeContactNameAndNumber = (highlightedText) => {
-        let fullNameSelector = $('#mailbox-content h3 a');
+    const _copyToClipboard = (highlightedText) => {
         const phoneNumber = _getPhoneNumber(highlightedText);
+        const fullNameSelector = $('#mailbox-content h3 a');
+        const fullName = $(fullNameSelector).text();
+        const textToCopy = `${fullName} ${phoneNumber}`;
+        tsUICommon.copyToClipboard(textToCopy);
     }
 
     const _processMouseUp = async (e) => {
@@ -43,23 +58,31 @@
         }
     }
 
-    window.inMailAndMessageSpyCreateContactClick = () => {
-        console.log('create contact click');
-        document.execCommand('copy');
-        window.open('https://contacts.google.com/?hl=en&tab=mC');
-        $(_div).remove();
+    inMailAndMessageSpyCreateContactClick = () => {
+        const text = _getHighlightedText();
+
+        setTimeout(() => {
+            _copyToClipboard(text);
+            window.open('https://contacts.google.com/?hl=en&tab=mC');
+            $(_div).remove();
+        }, 200);
+
         return false;
     }
 
-    window.inMailAndMessageSpySchedulePhoneCallClick = () => {
-        console.log('schedule click');
-        document.execCommand('copy');
-        window.open('https://calendar.google.com/calendar/u/0/r?tab=mc')
-        $(_div).remove();
+    inMailAndMessageSpySchedulePhoneCallClick = () => {
+        const text = _getHighlightedText();
+
+        setTimeout(() => {
+            _copyToClipboard(text);
+            window.open('https://calendar.google.com/calendar/u/0/r?tab=mc')
+            $(_div).remove();
+        }, 200);
+
         return false;
     }
 
-    window.inMailAndMessageSpyHideMenu = () => {
+    inMailAndMessageSpyHideMenu = () => {
         $(_div).remove();
         return false;
     }

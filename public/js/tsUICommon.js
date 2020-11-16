@@ -1,4 +1,15 @@
 (function () {
+    const _copyToClipboard = async (value) => {
+        const tempInput = document.createElement("input");
+        tempInput.value = value;
+        const element = document.activeElement || document.body;
+        element.appendChild(tempInput);
+        tempInput.select();
+        await tsCommon.sleep(100);
+        document.execCommand("copy");
+        $(tempInput).remove();
+    }
+
     const _createListItem = (containerId, id, text) => {
         const li = document.createElement("li");
         li.id = `${id}_listItem`;
@@ -157,6 +168,7 @@
     class TsUICommon {
         constructor (){}
 
+        copyToClipboard = _copyToClipboard;
         createListItem = _createListItem;
         removeListItem = _removeListItem;
         addButton = _addButton;
