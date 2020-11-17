@@ -1,15 +1,27 @@
 (function () {
     const _copyToClipboard = async (value) => {
-        const tempInput = document.createElement("input");
-        tempInput.value = value;
-        const element = document.activeElement || document.body;
-        element.appendChild(tempInput);
+        const copyInput = document.createElement("input");
+        $(copyInput).val(value)
+
+        const parent = document.body ? document.body : document.activeElement;
+        $(parent).append(copyInput);
+
         await tsCommon.sleep(100);
-        tempInput.select();
+        const v = $(copyInput).val();
+        console.log({aa: 'executingCopy', v});
+
+        $(copyInput).select((e) => {
+            if (e && e.preventDefault) {
+                e.preventDefault();
+            }
+        });
+
+        copyInput.select();
         await tsCommon.sleep(100);
         document.execCommand("copy");
-        await tsCommon.sleep(200);
-        $(tempInput).remove();
+
+        await tsCommon.sleep(100);
+        $(copyInput).remove();
     }
 
     const _createListItem = (containerId, id, text) => {

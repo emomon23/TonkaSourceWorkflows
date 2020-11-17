@@ -1,26 +1,37 @@
 (() => {
-    const _menuHtml = `<ul><li><a class='tsHelper' role='createContact' href='#'>Create Contact</a></li><li><a class='tsHelper' role='schedule' href='#'>Schedule call</a></li><li><a class='tsHelper' role='hide' href='#'>Hide<a></li></ul>`;
-    let _div = null;
-    let _currentPage = '';
+    const _createContactMenu = `<ul><li><a class='tsHelper' role='createContact' href='#'>Create Contact</a></li><li><a class='tsHelper' role='schedule' href='#'>Schedule call</a></li><li><a class='tsHelper' role='hide' href='#'>Hide<a></li></ul>`;
+    const _scheduleMeetingMenu = `<ul><li><a class='tsHelper' role='schedule' href='#'>Schedule item</a></li><li><a class='tsHelper' role='hide' href='#'>Hide<a></li></ul>`;
 
-    const _appendDiv = (target) => {
+    let _createContactDiv = null;
+    let _scheduleItemDiv = null;
+    let _activeMenu = null;
+    let _currentPage = '';
+    let _lastHighlightedText = '';
+
+    const _appendMenuDivToTarget = (target, menuDiv) => {
         const targetClass = $(target).attr('class') || ''
 
         if (targetClass.indexOf('tsHelper') === -1){
-            $(target).append(_div);
+            _lastHighlightedText = _getHighlightedText();
+            $(target).append(menuDiv);
+            _activeMenu = menuDiv;
 
-            $('.tsHelper').click((e) => {
+            $('.tsHelper').click(async (e) => {
+                e.preventDefault();
                 const role = $(e.target).attr('role');
                 if (role === 'createContact'){
-                    inMailAndMessageSpyCreateContactClick();
+                    await inMailAndMessageSpyCreateContactClick();
                 } else if (role === 'schedule'){
-                    inMailAndMessageSpySchedulePhoneCallClick();
+                    await inMailAndMessageSpySchedulePhoneCallClick();
                 } else {
                     inMailAndMessageSpyHideMenu();
                 }
-
             });
         }
+    }
+
+    const _checkIfPublicMessagingIsPresent = () => {
+        return $('button[class*="msg-overlay-bubble-header"] span:contains("Messaging")').length > 0;
     }
 
     const _getHighlightedText = () => {
@@ -35,7 +46,7 @@
         const temp = matchAll.length === 1 ? matchAll[0] : null;
 
         const numbers = temp ? temp.filter(n => n ? true : false).map(n => n.trim()) : null;
-        return numbers && numbers.length === 1 ? numbers[0] : null;
+        return numbers && numbers.length === 1 ? numbers[0] : '';
 }
 
 
@@ -43,7 +54,16 @@
         return _getPhoneNumber(highlightedText) ? true : false;
     }
 
+    const _highlightedTextContainsContactName = (highlightedText) => {
+        return highlightedText && highlightedText.split && highlightedText.split(' ').length === 2;
+    }
+
     const _getFullName = () => {
+        const containsPhoneNumber = _highlightedTextContainsPhoneNumber(_lastHighlightedText);
+        if ((!containsPhoneNumber) && _lastHighlightedText && _lastHighlightedText.split && _lastHighlightedText.split(' ').length === 2){
+            return _lastHighlightedText;
+        }
+
         let fullName = '';
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.RECRUITER_INMAIL){
             const fullNameSelector = $('#mailbox-content h3 a');
@@ -58,7 +78,7 @@
             }
         }
 
-        return fullName;
+        return fullName.toLowerCase() === 'new message' || fullName.split(' ').length > 2 ? '' : fullName;
     }
 
     const _copyToClipboard = async (highlightedText) => {
@@ -71,41 +91,51 @@
     const _processMouseUp = async (e) => {
         const highlightedText = _getHighlightedText();
         if (_highlightedTextContainsPhoneNumber(highlightedText)){
-            _appendDiv(e.target);
+            _appendMenuDivToTarget(e.target, _createContactDiv);
+        }
+        else if (_highlightedTextContainsContactName(highlightedText)){
+            _appendMenuDivToTarget(e.target, _scheduleItemDiv);
         }
     }
 
     inMailAndMessageSpyCreateContactClick = async () => {
-        const text = _getHighlightedText();
-
-        await _copyToClipboard(text);
+        await _copyToClipboard(_lastHighlightedText);
+        $(_activeMenu).remove();
+        _activeMenu = null;
         window.open('https://contacts.google.com/?hl=en&tab=mC');
-        $(_div).remove();
     }
 
     inMailAndMessageSpySchedulePhoneCallClick = async () => {
-        const text = _getHighlightedText();
-
-        await _copyToClipboard(text);
-        window.open('https://calendar.google.com/calendar/u/0/r?tab=mc')
-        $(_div).remove();
+        await _copyToClipboard(_lastHighlightedText);
+        $(_activeMenu).remove();
+        _activeMenu = null;
+        window.open('https://calendar.google.com/calendar/u/0/r?tab=mc');
     }
 
     inMailAndMessageSpyHideMenu = () => {
-        $(_div).remove();
-        return false;
+        $(_activeMenu).remove();
+        _activeMenu = null;
+    }
+
+    const _initializeMenuDivs = () => {
+        _createContactDiv = document.createElement('div');
+        $(_createContactDiv).attr('class', 'ts-menu-div');
+        _createContactDiv.innerHTML = _createContactMenu;
+
+        _scheduleItemDiv = document.createElement('div');
+        $(_scheduleItemDiv).attr('class', 'ts-menu-div');
+        _scheduleItemDiv.innerHTML = _scheduleMeetingMenu;
     }
 
      $(document).ready(() => {
         _currentPage = linkedInCommon.whatPageAmIOn();
-        _div = document.createElement('div');
-        $(_div).attr('class', 'ts-menu-div');
-        _div.innerHTML = _menuHtml;
 
-        if (_currentPage === linkedInConstants.pages.RECRUITER_INMAIL
-            || _currentPage === linkedInConstants.pages.PUBLIC_PROFILE) {
+        const publicMessagingIsPresent = _checkIfPublicMessagingIsPresent();
 
-                document.onmouseup = _processMouseUp;
+        if (_currentPage === linkedInConstants.pages.RECRUITER_INMAIL || publicMessagingIsPresent) {
+            document.onmouseup = _processMouseUp;
+
+            _initializeMenuDivs();
         }
      });
 })();
