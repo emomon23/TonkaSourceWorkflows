@@ -16,6 +16,8 @@
     }
 
     const _launchConnectionRequestBlaster = async () => {
+        const crStats = await connectionLifeCycleLogic.displayStatsConsoleLogMessage();
+
         const memberIds = searchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
         if (!memberIds || memberIds.length === 0){
             console.log("No member ids available on current page, refresh the result pane");
@@ -26,7 +28,7 @@
         const win = window.open(url, "InMail", "scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,width=1000,height=1000,top=0,left=0");
 
         await tsCommon.sleep(5000);
-        tsCommon.postMessageToWindow(win, 'givingYouAReferenceBackToLinkedInWindow', {});
+        tsCommon.postMessageToWindow(win, 'givingYouAReferenceBackToLinkedInWindow', crStats);
 
         if (!win){
             tsCommon.log("Unable to open dashboard.  CHECK POP UP BLOCKER?", "WARN");

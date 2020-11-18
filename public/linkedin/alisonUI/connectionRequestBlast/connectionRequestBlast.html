@@ -12,6 +12,11 @@
 
     <body>
         <div>
+            <div>
+                <select id='previousCRs' onchange='previousCrOnChange()' style='width:90%'>
+                    <option value='' selected>None</option>
+                </select>
+            </div>
             <div>Body ([first-name])</div>
 <!-- Need to put textarea here and initial value here or it diplays f'ed up-->
 <textarea rows='12' cols='80' id='body' name='body' >Hello [first-name],

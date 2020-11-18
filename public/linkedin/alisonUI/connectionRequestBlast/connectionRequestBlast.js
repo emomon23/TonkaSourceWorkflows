@@ -1,7 +1,34 @@
 let _bodyTextArea = null;
+let _crStats = [];
+let _crDropdown = null;
 
 const _displayMessage = (msg) => {
     $('#msg').text(msg);
+}
+
+const _addOptionToDropdown = (value, text) => {
+    const option = document.createElement('option');
+    $(option).attr('value', value).text(text);
+
+    $(_crDropdown).append(option);
+}
+
+const _displayPreviousConnectionRequestNotes = (crStats) => {
+    _crStats = crStats;
+
+    crStats.forEach((cr) => {
+        let dropdownDisplay = cr.note.split('\n').filter(m => m && m.length ? true : false);
+        if (dropdownDisplay.length === 1){
+            dropdownDisplay = dropdownDisplay[0]
+        }
+        else {
+            dropdownDisplay = dropdownDisplay[0].indexOf('[first-name]') >= 0 ? dropdownDisplay[1] : dropdownDisplay[0];
+        }
+
+        dropdownDisplay = dropdownDisplay.length > 50 ? dropdownDisplay.substr(0, 50) : dropdownDisplay
+        dropdownDisplay = `${dropdownDisplay}     - USED: ${cr.totalConnectionRequests}, ACCEPTED: ${cr.acceptedActual}   - (${cr.percentAccepted}%)`;
+        _addOptionToDropdown(cr.id, dropdownDisplay);
+    });
 }
 
 const _postBackToLinkedIn = () => {
@@ -57,12 +84,28 @@ send_onClick = () => {
     }
 }
 
+previousCrOnChange = () => {
+    let selectedCrId = $(_crDropdown).val();
+    selectedCrId = selectedCrId && !isNaN(selectedCrId) ? Number.parseInt(selectedCrId) : selectedCrId;
+
+    const selectedCr = _crStats.find(c => c.id === selectedCrId);
+    const body = selectedCr ? selectedCr.note : '';
+    $(_bodyTextArea).val(body);
+    _updateCharCount();
+}
+
 $(document).ready(() => {
     _bodyTextArea = $('#body')[0];
     window.addEventListener('message', (e) => {
         window.linkedInConsoleReference = e.source;
         _displayMessage('Ready...');
         const action = e.data.action;
+        const data = e.data.parameter;
+
+        if (data && data.length){
+            _displayPreviousConnectionRequestNotes(JSON.parse(data));
+            window.crStats = _crStats; // so I can check it out in the console
+        }
         console.log(`post message received from parent.  action: ${action}`);
     });
 
@@ -71,4 +114,5 @@ $(document).ready(() => {
     });
 
     _updateCharCount();
+    _crDropdown = $('#previousCRs')[0];
 });
