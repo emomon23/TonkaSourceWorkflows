@@ -245,6 +245,8 @@
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.randomSleep(8000, 10000);
         }
+
+        console.log(`fireConnectionRequestBlast DONE.  attempted ${currentMemberIdsArray.length} connection requests`);
     }
 
     class LinkedInApp {
