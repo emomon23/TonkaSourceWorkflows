@@ -89,7 +89,7 @@ previousCrOnChange = () => {
     selectedCrId = selectedCrId && !isNaN(selectedCrId) ? Number.parseInt(selectedCrId) : selectedCrId;
 
     const selectedCr = _crStats.find(c => c.id === selectedCrId);
-    const body = selectedCr ? selectedCr.note : '';
+    const body = selectedCr ? selectedCr.note : 'Hello [first-name],\n\n';
     $(_bodyTextArea).val(body);
     _updateCharCount();
 }
