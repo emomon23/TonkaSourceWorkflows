@@ -29,6 +29,7 @@
             PUBLIC_PROFILE: "linkedin.com/in/",
             RECRUITER_INMAIL: '/recruiter/mailbox/conversation/',
             PROJECT_PIPELINE: ".com/recruiter/projects/",
+            MY_CONNECTIONS_PUBLIC: ".com/mynetwork/invite-connect/connections/",
             LOGIN: "login",
             FEED: 'feed'
         };

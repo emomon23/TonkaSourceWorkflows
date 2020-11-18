@@ -11,6 +11,7 @@
 
             await tsNoteRepo.insert(result);
         }else {
+            result = result[0];
             result.dateLastSent = (new Date()).getTime();
             await tsNoteRepo.update(result);
         }
@@ -64,7 +65,24 @@
         return connectionEntry;
     }
 
+    const _recordConnectionRequestsAccepted = async (connectionsArray) => {
+        for(let i = 0; i < connectionsArray.length; i++){
+            if (connectionsArray[i]){
+                // eslint-disable-next-line no-await-in-loop
+                await _recordConnectionRequestAccepted(connectionsArray[i]);
+            }
+        }
+    }
+
     const _recordCallScheduled = async (connection) => {
+        if (typeof connection === "string"){
+            connection = _splitFirstAndLastNames(connection);
+        }
+
+        if (!connection){
+            return null;
+        }
+
         const connectionEntry = await _findConnection(connection);
         if (connectionEntry) {
             connectionEntry.tookACall = true;
@@ -93,6 +111,21 @@
         return connectionEntry;
     }
 
+    const _splitFirstAndLastNames = (fullName) => {
+        fullName = fullName.replace(/\\n/, '');
+        fullName = tsString.stripExcessSpacesFromString(fullName);
+
+        const parts = fullName.split(' ');
+        if (parts.length < 2){
+            return null;
+        }
+
+        return {
+            firstName: parts[0],
+            lastName: parts[parts.length - 1]
+        };
+    }
+
     const _getConnectionRequestNoteRecipients = async () => {
         const allNotes = await tsNoteRepo.getAll();
         const allHistory = await tsConnectionHistoryRepo.getAll();
@@ -108,10 +141,11 @@
     class ConnectionLifeCycleLogic {
         saveConnectionRequest = _saveConnectionRequest;
         recordConnectionRequestAccepted = _recordConnectionRequestAccepted;
+        recordConnectionRequestsAccepted = _recordConnectionRequestsAccepted;
         recordCallScheduled = _recordCallScheduled;
         recordEventHistoryEntry = _recordEventHistoryEntry;
         getConnectionRequestNoteRecipients = _getConnectionRequestNoteRecipients;
     }
 
-    window.connectionLifeCycleLogic = new connectionLifeCycleLogic();
+    window.connectionLifeCycleLogic = new ConnectionLifeCycleLogic();
 })();

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.896
+// @version      0.931
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -32,8 +32,10 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/companyRepositories.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/candidateKeywordMatchRepository.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/connectionLifeCycleRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/company.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/candidate.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
@@ -43,6 +45,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/projectPipelineSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInLoginSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/inMailAndMessageSpy.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/myPublicNetworkSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInMessageSender.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInPublicProfileSpy.js
@@ -70,8 +73,10 @@
 // @ignore      http://localhost:5001/linkedin/js/repositories/companyRepositories.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/tsRecruiterSearchFilterRepository.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/candidateKeywordMatchRepository.js
+// @ignore      http://localhost:5001/linkedin/js/repositories/connectionLifeCycleRepository.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/company.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/candidate.js
+// @ignore      http://localhost:5001/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterFilter.js
@@ -80,6 +85,7 @@
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/inMailAndMessageSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/projectPipelineSpy.js
+// @ignore      http://localhost:5001/linkedin/js/spies/myPublicNetworkSpy.js
 // @ignore      http://localhost:5001/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInMessageSender.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInApp.js

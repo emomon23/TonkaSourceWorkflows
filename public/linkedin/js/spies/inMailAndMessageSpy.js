@@ -58,7 +58,7 @@
         return highlightedText && highlightedText.split && highlightedText.split(' ').length === 2;
     }
 
-    const _getName = () => {
+    const _getFullName = () => {
         let result = null;
         const containsPhoneNumber = _highlightedTextContainsPhoneNumber(_lastHighlightedText);
         if ((!containsPhoneNumber) && _lastHighlightedText && _lastHighlightedText.split && _lastHighlightedText.split(' ').length === 2){
@@ -79,26 +79,16 @@
             }
         }
 
-        fullName = fullName.toLowerCase() === 'new message' || fullName.split(' ').length > 2 ? '' : fullName;
-        const names = fullName.split(' ');
-        if (names.length === 2){
-            return {
-                firstName: names[0],
-                lastName: names[1]
-            }
-        }
-
-        return null;
+        return fullName.toLowerCase() === 'new message' || fullName.split(' ').length > 2 ? '' : fullName;
     }
 
     const _copyToClipboard = async (highlightedText) => {
         const phoneNumber = _getPhoneNumber(highlightedText);
-        const name = _getName();
-        let fullName = name ? `${name.firstName} ${name.lastName}` : '';
+        const fullName = _getFullName();
         const textToCopy = `${fullName} ${phoneNumber}`;
         await tsUICommon.copyToClipboard(textToCopy);
 
-        return name;
+        return fullName;
     }
 
     const _processMouseUp = async (e) => {

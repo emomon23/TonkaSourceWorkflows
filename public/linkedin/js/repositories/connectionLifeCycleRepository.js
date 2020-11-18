@@ -10,7 +10,7 @@
         {
             storeName: 'connectionHistory',
             idProperty: 'connectionId',
-            indexes: ['memberId', 'lastName', 'noteId', 'connectionAccepted']
+            indexes: ['memberId', 'lastName', 'connectionAccepted']
         }
     ];
 
