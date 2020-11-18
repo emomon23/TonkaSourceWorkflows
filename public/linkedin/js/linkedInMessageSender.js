@@ -85,7 +85,7 @@
                 whatButtonIsAvailable.clickable.click();
                 await tsCommon.sleep(5000);
                 await _submitConnectionRequestForm(publicProfileWindow, messageToSend);
-                await _recordConnectionRequestLocally(messageToSend, candidate);
+                await _recordConnectionRequestLocally(noteToSend, candidate);
             }
 
             await tsCommon.sleep(2000);
@@ -94,7 +94,7 @@
     }
 
     const _sendLinkedInMessageOrConnectionRequestToCandidate = async (memberIdOrFirstNameAndLastName, messageToSend, connectionRequestToSend = null) => {
-
+            const templateText = messageToSend;
             if (connectionRequestToSend === null){
                 connectionRequestToSend = messageToSend;
             }
@@ -126,7 +126,7 @@
                     }
                     else {
                         await _submitConnectionRequestForm(publicProfileWindow, connectionRequestToSend);
-                        await _recordConnectionRequestLocally(messageToSend, candidate);
+                        await _recordConnectionRequestLocally(templateText, candidate);
                     }
 
 
