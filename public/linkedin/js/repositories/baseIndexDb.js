@@ -220,7 +220,7 @@
 
     const _deleteObject = (db, objectStoreName, key) => {
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(objectStoreName);
+            const transaction = db.transaction([objectStoreName], "readwrite");
             const storeRef = transaction.objectStore(objectStoreName);
 
             const deleteRequest = storeRef.delete(key);
@@ -323,7 +323,7 @@
             return results;
         }
 
-        deleteObject  = async (key) => {
+        delete  = async (key) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
             return await _deleteObject(this.__dbRef, this.objectStore, key)
         }

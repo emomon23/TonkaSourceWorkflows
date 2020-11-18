@@ -44,22 +44,27 @@
     }
 
     const _saveConnectionRequest = async (noteSent, inputCandidate) => {
-        const noteObject = await _getOrCreateNoteObject(noteSent);
-        const linkedInProfileData = {
-            memberId: inputCandidate.memberId || null,
-            firstName: inputCandidate.firstName,
-            lastName: inputCandidate.lastName,
-            headline: inputCandidate.headline || null
-        };
+        try {
+            const noteObject = await _getOrCreateNoteObject(noteSent);
+            const linkedInProfileData = {
+                memberId: inputCandidate.memberId || null,
+                firstName: inputCandidate.firstName,
+                lastName: inputCandidate.lastName,
+                headline: inputCandidate.headline || null
+            };
 
-        if (!linkedInProfileData.connectionId){
-            linkedInProfileData.connectionId = linkedInProfileData.memberId || `${linkedInProfileData.firstName}-${linkedInProfileData.lastName}`;
-            linkedInProfileData.noteId = noteObject.noteId;
-            linkedInProfileData.dateConnectionRequestSent = (new Date()).getTime();
+            if (!linkedInProfileData.connectionId){
+                linkedInProfileData.connectionId = linkedInProfileData.memberId || `${linkedInProfileData.firstName}-${linkedInProfileData.lastName}`;
+                linkedInProfileData.noteId = noteObject.noteId;
+                linkedInProfileData.dateConnectionRequestSent = (new Date()).getTime();
+            }
+
+            await tsConnectionHistoryRepo.insert(linkedInProfileData);
+            return {noteObject, linkedInProfileData};
+        } catch (e) {
+            console.log(`Error in _saveConnectionRequest. ${e.message}`);
+            window.lastCrError = e;
         }
-
-        await tsConnectionHistoryRepo.insert(linkedInProfileData);
-        return {noteObject, linkedInProfileData};
     }
 
     const _recordConnectionRequestAccepted = async (connection) => {
@@ -192,6 +197,7 @@
         for (let i = 0; i < connectionBlasts.length; i++){
             const blast = connectionBlasts[i];
             const msgObj = {
+                id: blast.noteId,
                 note: blast.text,
                 totalConnectionRequests: blast.connectionsRequests.length,
                 percentCorrespondence: blast.percentCorrespondence,
@@ -211,6 +217,45 @@
         return result;
     }
 
+    const _mergeMoveRecipientsToAnotherConnectionRequest = async (toNote, fromNote) => {
+        if (!(toNote && toNote.noteId)){
+            console.log("WTF with the note id");
+            return;
+        }
+
+        try {
+            for (let i = 0; i < fromNote.connectionsRequests.length; i++){
+                const cr = fromNote.connectionsRequests[i];
+                cr.noteId = toNote.noteId;
+                // eslint-disable-next-line no-await-in-loop
+                await tsConnectionHistoryRepo.update(cr);
+            }
+
+            await tsConnectionHistoryRepo.delete(fromNote.noteId);
+        } catch (e) {
+            console.log(e.message);
+        }
+    }
+
+    const _mergeRequests = async (commaSeperatedListOfNoteIds) => {
+        let mergeFromIds = commaSeperatedListOfNoteIds.split(',').map(i => i.trim());
+        let mergeIntoId =  mergeFromIds[0] && !isNaN(mergeFromIds[0]) ? Number.parseInt(mergeFromIds[0]) : mergeFromIds[0];
+        mergeFromIds.splice(0, 1);
+
+        const allConnectionRequests = await _getConnectionRequestNoteRecipients();
+        const into = allConnectionRequests.find(a => a.noteId === mergeIntoId);
+        const from = allConnectionRequests.filter((a) => {
+            return mergeFromIds.indexOf(a.noteId.toString()) >= 0;
+        });
+
+        for(let i = 0; i < from.length; i++){
+            // eslint-disable-next-line no-await-in-loop
+            await _mergeMoveRecipientsToAnotherConnectionRequest(into, from[i]);
+        }
+
+        return await _displayStatsConsoleLogMessage();
+    }
+
     class ConnectionLifeCycleLogic {
         saveConnectionRequest = _saveConnectionRequest;
         recordConnectionRequestAccepted = _recordConnectionRequestAccepted;
@@ -220,6 +265,7 @@
         recordEventHistoryEntry = _recordEventHistoryEntry;
         getConnectionRequestNoteRecipients = _getConnectionRequestNoteRecipients;
         displayStatsConsoleLogMessage = _displayStatsConsoleLogMessage;
+        mergeRequests = _mergeRequests;
     }
 
     window.connectionLifeCycleLogic = new ConnectionLifeCycleLogic();
