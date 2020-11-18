@@ -126,6 +126,17 @@
         };
     }
 
+    const _calculatePercent = (note, subList) => {
+        const totalConnectionRequests = note.connectionsRequests.length;
+        const subset = subList.length;
+
+        if (subset === 0){
+            return 0;
+        }
+
+        return (subset / totalConnectionRequests) * 100;
+    }
+
     const _getConnectionRequestNoteRecipients = async () => {
         const allNotes = await tsNoteRepo.getAll();
         const allHistory = await tsConnectionHistoryRepo.getAll();
@@ -133,9 +144,30 @@
         allNotes.forEach((note) => {
             const connectionsRequests = allHistory.filter(r => r.noteId === note.noteId);
             note.connectionsRequests = connectionsRequests;
+            note.percentAccepted = _calculatePercent(note, connectionsRequests.filter(r => r.dateConnectionRequestAcceptanceRecorded && !isNaN(r.dateConnectionRequestAcceptanceRecorded) ? true : false));
+            note.percentWhoTookACall = _calculatePercent(note, connectionsRequests.filter(r => r.tookACall ? true : false))
         });
 
         return allNotes
+    }
+
+    const _displayStatsConsoleLogMessage = async () => {
+        const result = [];
+        const connectionBlasts = await _getConnectionRequestNoteRecipients();
+        for (let i = 0; i < connectionBlasts.length; i++){
+            const blast = connectionBlasts[i];
+            const msgObj = {
+                note: blast.text,
+                totalConnectionRequests: blast.connectionsRequests.length,
+                percentAccepted: blast.percentAccepted,
+                percentWhoTookACall: blast.percentWhoTookACall
+            };
+
+            result.push(msgObj);
+            console.log(msgObj);
+        }
+
+        return result;
     }
 
     class ConnectionLifeCycleLogic {
@@ -145,6 +177,7 @@
         recordCallScheduled = _recordCallScheduled;
         recordEventHistoryEntry = _recordEventHistoryEntry;
         getConnectionRequestNoteRecipients = _getConnectionRequestNoteRecipients;
+        displayStatsConsoleLogMessage = _displayStatsConsoleLogMessage;
     }
 
     window.connectionLifeCycleLogic = new ConnectionLifeCycleLogic();
