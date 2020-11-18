@@ -58,7 +58,8 @@
         return highlightedText && highlightedText.split && highlightedText.split(' ').length === 2;
     }
 
-    const _getFullName = () => {
+    const _getName = () => {
+        let result = null;
         const containsPhoneNumber = _highlightedTextContainsPhoneNumber(_lastHighlightedText);
         if ((!containsPhoneNumber) && _lastHighlightedText && _lastHighlightedText.split && _lastHighlightedText.split(' ').length === 2){
             return _lastHighlightedText;
@@ -78,14 +79,26 @@
             }
         }
 
-        return fullName.toLowerCase() === 'new message' || fullName.split(' ').length > 2 ? '' : fullName;
+        fullName = fullName.toLowerCase() === 'new message' || fullName.split(' ').length > 2 ? '' : fullName;
+        const names = fullName.split(' ');
+        if (names.length === 2){
+            return {
+                firstName: names[0],
+                lastName: names[1]
+            }
+        }
+
+        return null;
     }
 
     const _copyToClipboard = async (highlightedText) => {
         const phoneNumber = _getPhoneNumber(highlightedText);
-        const fullName = _getFullName();
+        const name = _getName();
+        let fullName = name ? `${name.firstName} ${name.lastName}` : '';
         const textToCopy = `${fullName} ${phoneNumber}`;
         await tsUICommon.copyToClipboard(textToCopy);
+
+        return name;
     }
 
     const _processMouseUp = async (e) => {
@@ -106,10 +119,14 @@
     }
 
     inMailAndMessageSpySchedulePhoneCallClick = async () => {
-        await _copyToClipboard(_lastHighlightedText);
+        const contactName = await _copyToClipboard(_lastHighlightedText);
         $(_activeMenu).remove();
         _activeMenu = null;
         window.open('https://calendar.google.com/calendar/u/0/r?tab=mc');
+
+        if (contactName){
+            await connectionLifeCycleLogic.recordCallScheduled(contactName);
+        }
     }
 
     inMailAndMessageSpyHideMenu = () => {

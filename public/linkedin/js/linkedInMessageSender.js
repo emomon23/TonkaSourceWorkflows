@@ -34,6 +34,10 @@
         $('button[data-control-name*="close_conversation_window"]').click();
     }
 
+    const _recordConnectionRequestLocally = async (messageToSend, candidate) => {
+        await connectionLifeCycleLogic.saveConnectionRequest(messageToSend, candidate);
+    }
+
     const _submitConnectionRequestForm = async (publicProfileWindow, messageToSend) => {
         publicProfileWindow.document.querySelector('button[aria-label*="Add a note"]').click();
         await tsCommon.sleep(800);
@@ -81,6 +85,7 @@
                 whatButtonIsAvailable.clickable.click();
                 await tsCommon.sleep(5000);
                 await _submitConnectionRequestForm(publicProfileWindow, messageToSend);
+                await _recordConnectionRequestLocally(messageToSend, candidate);
             }
 
             await tsCommon.sleep(2000);
@@ -121,7 +126,7 @@
                     }
                     else {
                         await _submitConnectionRequestForm(publicProfileWindow, connectionRequestToSend);
-                        linkedInApp.recordConnectionRequestMade(memberIdOrFirstNameAndLastName, connectionRequestToSend);
+                        await _recordConnectionRequestLocally(messageToSend, candidate);
                     }
 
 
