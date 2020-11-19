@@ -89,9 +89,12 @@
             });
         }
 
-        let result = '';
+        let result = obj.id ? `id: ${obj.id}` : '';
+
         keys.forEach((k) => {
-            result += `${k}: ${obj[k]}${newLine}`;
+            if (k !== 'id'){
+                result += `${k}: ${obj[k]}${newLine}`;
+            }
         });
 
         return result;
