@@ -17,6 +17,23 @@
        })
     }
 
+    const _highlightPendingConnectionRequests = async (interceptedCandidates) => {
+        const memberIds = interceptedCandidates.map(c => c.memberId);
+        const pendingRequestCandidatesMemberIds = (await tsConnectionHistoryRepo.getSubset(memberIds))
+                                                        .filter(p => p.memberId && p.dateConnectionRequestAcceptanceRecorded && !isNaN(p.dateConnectionRequestAcceptanceRecorded) ? false : true)
+                                                        .map(c => c.memberId);
+
+
+        for (let i = 0; i < pendingRequestCandidatesMemberIds.length; i++){
+            const memberId = pendingRequestCandidatesMemberIds[i];
+            const element = $(`#search-result-${memberId} h3 a`)[0];
+
+            if (element) {
+                $(element).attr('style', 'border-top: dotted')
+            }
+        }
+    }
+
     const  _displayJobJumperAnalysis = (candidate) => {
         if (candidate
             && candidate.grades
@@ -337,6 +354,7 @@
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
 
             _cleanseCandidateData(candidatesInResults);
+            _highlightPendingConnectionRequests(candidatesInResults);
 
             positionAnalyzer.analyzeCandidatesPositions(candidatesInResults);
 
