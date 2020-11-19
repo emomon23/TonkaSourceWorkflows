@@ -77,6 +77,26 @@
         return null;
     }
 
+    const _toStringify = (obj, sortKeys = true, newLine = '\n') => {
+        let keys = Object.keys(obj);
+        if (sortKeys === true){
+            keys.sort((a, b) => {
+                if (a < b){
+                    return -1;
+                }
+
+                return a > b ? 1 : 0;
+            });
+        }
+
+        let result = '';
+        keys.forEach((k) => {
+            result += `${k}: ${obj[k]}${newLine}`;
+        });
+
+        return result;
+    }
+
     class TSString {
         findDelimitedStrings = _findDelimitedStrings;
         findPrecedenceWithinString = _findPrecedenceWithinString;
@@ -84,6 +104,7 @@
         containsAny = _containsAny;
         containsAll = _containsAll;
         toBoolean = _toBoolean;
+        toStringify = _toStringify;
     }
 
     window.tsString = new TSString();

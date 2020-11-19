@@ -90,6 +90,10 @@ previousCrOnChange = () => {
 
     const selectedCr = _crStats.find(c => c.id === selectedCrId);
     const body = selectedCr ? selectedCr.note : 'Hello [first-name],\n\n';
+
+    const display = tsString.toStringify(_.omit(selectedCr, ['note']), true, "<br/>");
+    $('#crStatsLabel').html(display);
+
     $(_bodyTextArea).val(body);
     _updateCharCount();
 }

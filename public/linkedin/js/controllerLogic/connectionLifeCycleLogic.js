@@ -164,7 +164,8 @@
             return 0;
         }
 
-        return (subset / totalConnectionRequests) * 100;
+        let result = (subset / totalConnectionRequests) * 100;
+        return result.toFixed(2);
     }
 
     const _getConnectionRequestNoteRecipients = async () => {
