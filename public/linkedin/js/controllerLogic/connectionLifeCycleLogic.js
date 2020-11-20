@@ -19,38 +19,80 @@
         return result;
     }
 
-    const _findConnection = async (input) => {
+    const _lastNamesSearch = async (lNamesArray, input) => {
+        let totalFound = [];
+        for (let i = 0; i < lNamesArray.length; i++){
+            // eslint-disable-next-line no-await-in-loop
+            const search = await tsConnectionHistoryRepo.getByIndex('lastName', lNamesArray[i]);
+
+            if (search && search.length > 0){
+                totalFound = totalFound.concat(search);
+            }
+        }
+
+        if (totalFound && totalFound.length){
+            totalFound = totalFound.filter(f => f.firstName === input.firstName);
+        }
+
+        if (totalFound && totalFound.length > 1 && input.headline){
+            totalFound = totalFound.filter(t => t.headline === input.headline);
+        }
+
+        return totalFound && totalFound.length === 1 ? totalFound[0] : null;
+    }
+
+    const _findConnection = async (input, filterOnDateConnectionRequestAcceptanceRecorded = false) => {
         let result = null;
         if (input.memberId) {
-            result = await tsConnectionHistoryRepo.get(input.memberId);
-        }
-
-        if (!result) {
-            result = await tsConnectionHistoryRepo.getByIndex('lastName', input.lastName);
-            if (result && result.length > 0){
-                result = result.filter(c => c.firstName === input.firstName);
+            let search = !isNaN(input.memberId) ? Number.parseInt(input.memberId) : input.memberId;
+            result = await tsConnectionHistoryRepo.get(search);
+            if (result){
+                return result;
             }
-
-            result = result.length === 1 ? result[0] : null;
         }
 
-        if (result && !result.memberId && input.memberId){
-            result.memberId = input.memberId;
-            result.connectionId = input.memberId;
-            await tsConnectionHistoryRepo.update(result);
+        if (input.imageUrl){
+            result = await tsConnectionHistoryRepo.getByIndex('imageUrl', input.imageUrl);
+            if (result && result.length === 1){
+                return result[0];
+            }
         }
 
-        return result;
+        const lNames = input.lastName ? [input.lastName, input.lastName.substr(0, 1), `${input.lastName.substr(0, 1)}.`] : [];
+
+        if (input.headline){
+            result = await tsConnectionHistoryRepo.getByIndex('headline', input.headline);
+            if (result && result.length > 0){
+                result = result.filter(r => r.firstName === input.firstName
+                                    && lNames.length === 0 || lNames.indexOf(r.lastName) >= 0);
+
+                if (result.length > 1 && filterOnDateConnectionRequestAcceptanceRecorded){
+                    result = result.filter(r => r.dateConnectionRequestAcceptanceRecorded ? false : true)
+                }
+
+                if (result.length === 1){
+                    return result[0];
+                }
+            }
+        }
+
+        return await _lastNamesSearch(lNames, input);
     }
 
     const _saveConnectionRequest = async (noteSent, inputCandidate) => {
         try {
             const noteObject = await _getOrCreateNoteObject(noteSent);
+            let memberId = null;
+            if (inputCandidate.memberId){
+                memberId = !isNaN(inputCandidate.memberId) ? Number.parseInt(inputCandidate.memberId) : inputCandidate.memberId;
+            }
+
             const linkedInProfileData = {
-                memberId: inputCandidate.memberId || null,
+                memberId,
                 firstName: inputCandidate.firstName,
                 lastName: inputCandidate.lastName,
-                headline: inputCandidate.headline || null
+                headline: inputCandidate.headline || null,
+                imageUrl: inputCandidate.imageUrl
             };
 
             if (!linkedInProfileData.connectionId){
@@ -64,26 +106,18 @@
         } catch (e) {
             console.log(`Error in _saveConnectionRequest. ${e.message}`);
             window.lastCrError = e;
+            return null;
         }
     }
 
     const _recordConnectionRequestAccepted = async (connection) => {
-        const connectionEntry = await _findConnection(connection);
+        const connectionEntry = await _findConnection(connection, true);
         if (connectionEntry) {
             connectionEntry.dateConnectionRequestAcceptanceRecorded = (new Date()).getTime();
             await tsConnectionHistoryRepo.update(connectionEntry);
         }
 
         return connectionEntry;
-    }
-
-    const _recordConnectionRequestsAccepted = async (connectionsArray) => {
-        for(let i = 0; i < connectionsArray.length; i++){
-            if (connectionsArray[i]){
-                // eslint-disable-next-line no-await-in-loop
-                await _recordConnectionRequestAccepted(connectionsArray[i]);
-            }
-        }
     }
 
     const _recordCorrespondence = async (connection) => {
@@ -260,13 +294,13 @@
     class ConnectionLifeCycleLogic {
         saveConnectionRequest = _saveConnectionRequest;
         recordConnectionRequestAccepted = _recordConnectionRequestAccepted;
-        recordConnectionRequestsAccepted = _recordConnectionRequestsAccepted;
         recordCallScheduled = _recordCallScheduled;
         recordCorrespondence = _recordCorrespondence;
         recordEventHistoryEntry = _recordEventHistoryEntry;
         getConnectionRequestNoteRecipients = _getConnectionRequestNoteRecipients;
         displayStatsConsoleLogMessage = _displayStatsConsoleLogMessage;
         mergeRequests = _mergeRequests;
+        findConnection = _findConnection;
     }
 
     window.connectionLifeCycleLogic = new ConnectionLifeCycleLogic();
