@@ -39,6 +39,11 @@
     }
 
     const _submitConnectionRequestForm = async (publicProfileWindow, messageToSend) => {
+        const emailPromptBlock = $('label:contains("verify this member knows you")');
+        if (emailPromptBlock.length > 0){
+            return false;
+        }
+
         publicProfileWindow.document.querySelector('button[aria-label*="Add a note"]').click();
         await tsCommon.sleep(800);
 
@@ -47,6 +52,7 @@
 
         await tsCommon.sleep(500);
         $(publicProfileWindow.document).find('button[aria-label*="Send now"]')[0].click();
+        return true;
     }
 
     const _navigateToPublicProfilePage = async (candidate) => {
@@ -84,8 +90,10 @@
             if (whatButtonIsAvailable && whatButtonIsAvailable.type === 'CONNECTION REQUEST'){
                 whatButtonIsAvailable.clickable.click();
                 await tsCommon.sleep(5000);
-                await _submitConnectionRequestForm(publicProfileWindow, messageToSend);
-                await _recordConnectionRequestLocally(noteToSend, candidate);
+                const crSubmitted = await _submitConnectionRequestForm(publicProfileWindow, messageToSend);
+                if (crSubmitted){
+                    await _recordConnectionRequestLocally(noteToSend, candidate);
+                }
             }
 
             await tsCommon.sleep(2000);
@@ -125,8 +133,10 @@
                         // linkedInMessageSpy should pick up that a message was sent
                     }
                     else {
-                        await _submitConnectionRequestForm(publicProfileWindow, connectionRequestToSend);
-                        await _recordConnectionRequestLocally(templateText, candidate);
+                        const crSubmitted = await _submitConnectionRequestForm(publicProfileWindow, connectionRequestToSend);
+                        if (crSubmitted){
+                            await _recordConnectionRequestLocally(templateText, candidate);
+                        }
                     }
 
 

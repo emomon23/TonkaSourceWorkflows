@@ -1,6 +1,6 @@
 (() => {
     const _createContactMenu = `<ul><li><a class='tsHelper' role='createContact' href='#'>Create Contact</a></li><li><a class='tsHelper' role='schedule' href='#'>Schedule call</a></li><li><a class='tsHelper' role='hide' href='#'>Hide<a></li></ul>`;
-    const _scheduleMeetingMenu = `<ul><li><a class='tsHelper' role='schedule' href='#'>Schedule item</a></li><li><a class='tsHelper' role='hide' href='#'>Hide<a></li></ul>`;
+    const _scheduleMeetingMenu = `<ul><li><a class='tsHelper' role='schedule' href='#'>Schedule item</a></li><li><a class='tsHelper' role='recordCorrespondence' href='#'>Record Correspondence</a></li><li><a class='tsHelper' role='hide' href='#'>Hide<a></li></ul>`;
 
     let _createContactDiv = null;
     let _scheduleItemDiv = null;
@@ -23,7 +23,10 @@
                     await inMailAndMessageSpyCreateContactClick();
                 } else if (role === 'schedule'){
                     await inMailAndMessageSpySchedulePhoneCallClick();
-                } else {
+                } else if (role === 'recordCorrespondence'){
+                    await inMailAndMessageSpyRecordCorrespondence()
+                }
+                else {
                     inMailAndMessageSpyHideMenu();
                 }
             });
@@ -117,6 +120,14 @@
         if (contactName){
             await connectionLifeCycleLogic.recordCallScheduled(contactName);
         }
+    }
+
+    inMailAndMessageSpyRecordCorrespondence = async () => {
+        if (_lastHighlightedText) {
+            await connectionLifeCycleLogic.recordCorrespondence(_lastHighlightedText);
+        }
+
+        $(_activeMenu).remove();
     }
 
     inMailAndMessageSpyHideMenu = () => {

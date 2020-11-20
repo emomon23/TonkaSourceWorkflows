@@ -1,9 +1,11 @@
 <html>
     <head>
         <link rel="stylesheet" href="../alison.css">
+        <script src='https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js'></script>
         <script src='https://code.jquery.com/jquery-latest.js'></script>
         <script src='http://localhost:5001/js/tsConstants.js'></script>
         <script src='http://localhost:5001/js/tsCommon.js'></script>
+        <script src='http://localhost:5001/js/tsString.js'></script>
         <script src='http://localhost:5001/js/tsUICommon.js'></script>
         <script src='http://localhost:5001/js/alisonContactService.js'></script>
         <script src='connectionRequestBlast.js'></script>
@@ -12,6 +14,11 @@
 
     <body>
         <div>
+            <div>
+                <select id='previousCRs' onchange='previousCrOnChange()' style='width:90%'>
+                    <option value='' selected>None</option>
+                </select>
+            </div>
             <div>Body ([first-name])</div>
 <!-- Need to put textarea here and initial value here or it diplays f'ed up-->
 <textarea rows='12' cols='80' id='body' name='body' >Hello [first-name],
@@ -24,8 +31,10 @@
         <div>
             <button id="connectionRequestButton" onclick="send_onClick()">Send</button>
         </div>
-        <div id='msg'>
+        <div id='msg' style='color:red'>
             NOT READY - waiting for a reference to linked in 'window' object...should be a few seconds
+        </div>
+        <div id='crStatsLabel' style='margin-top:40; margin-left:500'>
         </div>
     </body>
 </html>

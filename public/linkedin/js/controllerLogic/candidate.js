@@ -150,7 +150,7 @@
     }
 
     const _searchOnName = async (lastName, firstName = null) => {
-        const results = await candidateRepository.getSubset('lastName', lastName);
+        const results = await candidateRepository.getByIndex('lastName', lastName);
 
         if (results && results.length){
             return firstName ? results.filter(c => c.firstName === firstName) : results;
@@ -160,11 +160,19 @@
     }
 
     const _searchForCandidate = async (searchFor) => {
+        if (!searchFor){
+            return null;
+        }
+
         if (!isNaN(searchFor)){
             return await _getCandidate(searchFor);
         }
 
-        const names = searchFor.split(' ');
+        const names = searchFor.split ? searchFor.split(' ') : null;
+        if (!names){
+            return null;
+        }
+
         let found = null;
 
         if (names.length > 1){

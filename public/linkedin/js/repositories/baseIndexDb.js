@@ -38,9 +38,14 @@
 
             const request = window.indexedDB.open(dbName, version);
 
-            request.onerror = (error) => { reject(error); };
+            request.onerror = (error) => {
+                reject(error);
+            };
 
             request.onupgradeneeded = (e) => {
+                if (!schemas){
+                    reject(new Error(`${dbName} version: ${version} doesn't exist and no schema has been provided to create it`))
+                }
                 schemas = Array.isArray(schemas) ? schemas : [schemas];
 
                 const db = e.target.result
@@ -220,7 +225,7 @@
 
     const _deleteObject = (db, objectStoreName, key) => {
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(objectStoreName);
+            const transaction = db.transaction([objectStoreName], "readwrite");
             const storeRef = transaction.objectStore(objectStoreName);
 
             const deleteRequest = storeRef.delete(key);
@@ -252,6 +257,67 @@
                 }
             }
         }
+    }
+
+    const _migrate = async (migrateParameters, dbsData) => {
+        // dbsData: {fromDbName: 'Db1', fromVersion: 1, fromStoreName: 'candidate', toStore: candidateRepo}
+        // migrateParameters: {from: 'candidates', beforeSave: (row) => {}, afterSave: (row) => {}};
+
+        const tempSchema = {
+            storeName: dbsData.toStore.storeName,
+            idProperty: dbsData.toStore.keyPropertyForStore
+        };
+
+        const db1StoreFactory = new IndexDbStoreFactory(dbsData.fromDbName, dbsData.fromVersion, tempSchema);
+        const fromStore = db1StoreFactory.createStore(dbsData.fromStoreName);
+        const toStore = dbsData.toStore;
+
+        let fromDocuments = [];
+
+        try {
+            fromDocuments = await fromStore.getAll();
+            const existing = await toStore.getAll(); // force the opening of the "to db", to verify it exists.
+            if (existing && existing.length > 0){
+                console.log(`${toStore.storeName} already populated (already migrated?), existing now`);
+                return false;
+            }
+        } catch (e){
+            if (!e.message.indexOf("doesn't exist and no schema has been provided") >= 0){
+                throw e;
+            }
+            else {
+                console.log(`Unable to migrate. ${e.message}`);
+                return false;
+            }
+        }
+
+        let errorCount = 0;
+        let lastErrorMessage = '';
+
+        for (let i = 0; i < fromDocuments.length; i++){
+            const docToSave = fromDocuments[i];
+
+            try {
+                if (migrateParameters && migrateParameters.beforeSave){
+                    migrateParameters.beforeSave(docToSave);
+                }
+
+                // eslint-disable-next-line no-await-in-loop
+                await toStore.save(docToSave);
+
+                if (migrateParameters && migrateParameters.afterSave){
+                    migrateParameters.afterSave(docToSave);
+                }
+
+            }
+            catch(e){
+                lastErrorMessage = e.message;
+                errorCount += 1;
+            }
+        }
+
+        console.log(`Total records read from ${migrateParameters.from}: ${fromDocuments.length}.  write errors: ${errorCount} (${lastErrorMessage})`);
+        return errorCount > 0 && errorCount === fromDocuments.length ? false : true
     }
 
     class BaseIndexDbStoreReference {
@@ -323,7 +389,7 @@
             return results;
         }
 
-        deleteObject  = async (key) => {
+        delete  = async (key) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
             return await _deleteObject(this.__dbRef, this.objectStore, key)
         }
@@ -348,21 +414,43 @@
                 return this.store[storeName];
             }
 
+
             const schemaMatch = this.schema.find(s => s.storeName && s.storeName === storeName);
             if (!schemaMatch){
                 throw new Error(`Error in IndexDbStoreFactory.createStore. No schema exists for a store named '${storeName}'`);
             }
 
             const keyPropertyForStore = schemaMatch.idProperty;
+
             const result = new BaseIndexDbStoreReference(this.dbName, this.dbVersion, this.schema, storeName, keyPropertyForStore);
+            result.storeName = storeName;
+            result.keyPropertyForStore = keyPropertyForStore;
+
             this.stores[storeName] = result;
             return result;
         }
     }
 
+    class IndexDbMigrator {
+        // var migrator = baseIndexDbFactory.createMigrator({fromDbName: 'Db1', fromVersion: 1, fromStoreName: 'candidate', toStore: candidateRepo});
+        // migrator.migrate()
+        constructor (dbsData){
+            this.dbsData = dbsData;
+        }
+
+        migrate = async (migrateParameters = null) => {
+            return await _migrate(migrateParameters, this.dbsData);
+        }
+    }
+
     class BaseIndexDbFactory {
         createStoreFactory = (dbName, dbVersion, schema) => {
-            return new IndexDbStoreFactory(dbName, dbVersion, schema);
+            const dbNm = dbName === "TonkaSourceDB" ? dbName : `${dbName}__${dbVersion}`;
+            return new IndexDbStoreFactory(dbNm, dbVersion, schema);
+        }
+
+        createMigrator = (dbsData) => {
+            return new IndexDbMigrator(dbsData);
         }
     }
 
