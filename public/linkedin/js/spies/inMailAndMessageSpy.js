@@ -145,15 +145,91 @@
         _scheduleItemDiv.innerHTML = _scheduleMeetingMenu;
     }
 
-     $(document).ready(() => {
+    const _onPublicMessageDialogPopup = (target) => {
+        if ($(target).find('img[class*="tonkaSourceLogo"]').length === 0){
+            const container = $(target).find('header section div h4')[0];
+            const nameElement = $(target).find('header h4')[0]
+
+            if (nameElement && container){
+                const id = nameElement.textContent.split('\n').join('').trim();
+                tonkaSourceLogo.appendLogo(container, 'tiny', id);
+            }
+        }
+    }
+
+    const _onSendMessageModalDialogPopup = (target) => {
+        if ($(target.attr('aria-labelledby')) === 'inmail-header'){
+            const header = $('#inmail-header')[0]
+            let recipientElement = $(target).find('[class*="recipient-name"]')[0];
+
+            if (header && recipientElement) {
+                let recipientName = recipientElement.textContent.replace('Delete recipient', '');
+                tonkaSourceLogo.appendLogo(header, 'tiny', recipientName);
+            }
+        }
+    }
+
+    const _onRecruiterConversationClicked = (target) => {
+        const connectionNameElement = $('article h3 a')[0];
+        const headLineElement = $('article p[class*="headline"]')[0];
+
+        if (connectionNameElement && headLineElement){
+            const alreadyHasLogo = $(headLineElement).find('class[*="tonkaSourceLogo"]').length > 0;
+            if (!alreadyHasLogo){
+                const connectionName = connectionNameElement.textContent;
+                tonkaSourceLogo.appendLogo(headLineElement, 'tiny', connectionName);
+            }
+        }
+    }
+
+    const _setupTonkaSourceLogoButtons = () => {
+        $(document).on('DOMNodeInserted', (e) => {
+            const target = e.target;
+
+            if ($(target).hasClass('msg-overlay-conversation-bubble')) {
+                _onPublicMessageDialogPopup(target);
+            }
+            else if ($(target).hasClass('popup-dialog-wrapper')) {
+                setTimeout(() => {
+                    _onSendMessageModalDialogPopup(target);
+                }, 1200);
+            }
+        });
+
+        setTimeout(() => {
+            $('.conversation-link').click((e) => {
+                setTimeout(() => {
+                    _onRecruiterConversationClicked(e.target);
+                }, 1200);
+
+            });
+        }, 2000);
+    }
+
+    $(document).ready(() => {
         _currentPage = linkedInCommon.whatPageAmIOn();
 
         const publicMessagingIsPresent = _checkIfPublicMessagingIsPresent();
 
-        if (_currentPage === linkedInConstants.pages.RECRUITER_INMAIL || publicMessagingIsPresent) {
-            document.onmouseup = _processMouseUp;
+        if (_currentPage === linkedInConstants.pages.RECRUITER_INMAIL
+                        || _currentPage === linkedInConstants.pages.PROJECT_PIPELINE
+                        || _currentPage === linkedInConstants.pages.RECRUITER_PROFILE
+                        || publicMessagingIsPresent) {
 
+
+            document.onmouseup = _processMouseUp;
             _initializeMenuDivs();
+
+            _setupTonkaSourceLogoButtons();
         }
+
+
+        setTimeout(() => {
+            $('button[data-action*="inmail"]').click(() => {
+                setTimeout(() => {
+                    _onSendMessageModalDialogPopup(target);
+                }, 1000);
+            })
+        }, 2000);
      });
 })();
