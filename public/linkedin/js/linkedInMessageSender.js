@@ -50,7 +50,7 @@
         $(publicProfileWindow.document).find('[name*="message"]').focus();
         publicProfileWindow.document.execCommand('insertText', true, messageToSend);
 
-        await tsCommon.sleep(500);
+        await tsCommon.sleep(1000);
         $(publicProfileWindow.document).find('button[aria-label*="Send now"]')[0].click();
         return true;
     }
@@ -79,7 +79,7 @@
     }
 
     const _sendConnectionRequest = async (memberId, noteToSend) => {
-        const candidate = await candidateController.searchForCandidate(memberId);
+        const candidate = await candidateController.getCandidate(memberId);
         if (candidate){
             const messageToSend = _processAnyTemplateText(candidate, noteToSend);
             publicProfileWindow = await _navigateToPublicProfilePage(candidate);
@@ -99,51 +99,6 @@
             await tsCommon.sleep(2000);
             publicProfileWindow.close();
         }
-    }
-
-    const _sendLinkedInMessageOrConnectionRequestToCandidate = async (memberIdOrFirstNameAndLastName, messageToSend, connectionRequestToSend = null) => {
-            const templateText = messageToSend;
-            if (connectionRequestToSend === null){
-                connectionRequestToSend = messageToSend;
-            }
-
-            const candidate = await candidateController.searchForCandidate(memberIdOrFirstNameAndLastName);
-
-            if (candidate !== undefined && candidate !== null){
-                messageToSend = _processAnyTemplateText(candidate, messageToSend);
-                connectionRequestToSend = _processAnyTemplateText(candidate, connectionRequestToSend);
-
-                publicProfileWindow = await _navigateToPublicProfilePage(candidate);
-                tsInterceptor.copyToAnotherWindow(publicProfileWindow);
-
-                candidate.linkedIn = publicProfileWindow.location.href;
-
-                await linkedInApp.upsertContact(candidate);
-
-                const whatButtonIsAvailable = _getPublicProfile_MessageButtonSelector(publicProfileWindow);
-                if (whatButtonIsAvailable === null){
-                    tsCommon.log(`Unable to send a message to ${candidate.firstName} ${candidate.lastName}`);
-                }
-                else {
-                    whatButtonIsAvailable.clickable.click();
-                    await tsCommon.sleep(5000);
-
-                    if (whatButtonIsAvailable.type === 'MESSAGE'){
-                        await _sendMessage(publicProfileWindow, messageToSend);
-                        // linkedInMessageSpy should pick up that a message was sent
-                    }
-                    else {
-                        const crSubmitted = await _submitConnectionRequestForm(publicProfileWindow, connectionRequestToSend);
-                        if (crSubmitted){
-                            await _recordConnectionRequestLocally(templateText, candidate);
-                        }
-                    }
-
-
-                }
-                await tsCommon.sleep(500);
-                publicProfileWindow.close();
-            }
     }
 
     const _getSendInMailButton = (memberId) => {
@@ -331,7 +286,6 @@
     class LinkedInMessageSender {
         constructor () {}
 
-        sendLinkedInMessageOrConnectionRequestToCandidate = _sendLinkedInMessageOrConnectionRequestToCandidate;
         sendInMail = _sendInMail;
         sendConnectionRequest = _sendConnectionRequest;
         blastProjectPipeline = _blastProjectPipeline;

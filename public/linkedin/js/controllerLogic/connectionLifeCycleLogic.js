@@ -1,5 +1,4 @@
 (() => {
-    // tsConnectionHistoryRepo, tsNoteRepo
 
     const _getOrCreateNoteObject = async (noteSent) => {
         let result = await tsNoteRepo.getByIndex('text', noteSent);
@@ -19,90 +18,57 @@
         return result;
     }
 
-    const _lastNamesSearch = async (lNamesArray, input) => {
-        let totalFound = [];
-        for (let i = 0; i < lNamesArray.length; i++){
-            // eslint-disable-next-line no-await-in-loop
-            const search = await tsConnectionHistoryRepo.getByIndex('lastName', lNamesArray[i]);
-
-            if (search && search.length > 0){
-                totalFound = totalFound.concat(search);
-            }
+    const _getOrFindTheMemberIdFromInput = async (input) => {
+        if (!isNaN(input)){
+            return input;
         }
 
-        if (totalFound && totalFound.length){
-            totalFound = totalFound.filter(f => f.firstName === input.firstName);
+        let memberId = input.memberId ? input.memberId : null;
+
+        if (!memberId){
+            const candidateRecord = await candidateController.searchForCandidate(input);
+            memberId = candidateRecord ? candidateRecord.memberId : null;
         }
 
-        if (totalFound && totalFound.length > 1 && input.headline){
-            totalFound = totalFound.filter(t => t.headline === input.headline);
-        }
-
-        return totalFound && totalFound.length === 1 ? totalFound[0] : null;
+        return memberId;
     }
 
-    const _findConnection = async (input, filterOnDateConnectionRequestAcceptanceRecorded = false) => {
-        let result = null;
-        if (input.memberId) {
-            let search = !isNaN(input.memberId) ? Number.parseInt(input.memberId) : input.memberId;
-            result = await tsConnectionHistoryRepo.get(search);
-            if (result){
-                return result;
-            }
+    const _findConnectionRequest = async (input) => {
+        const memberId = await _getOrFindTheMemberIdFromInput(input);
+        if (!memberId){
+            return null;
         }
 
-        if (input.imageUrl){
-            result = await tsConnectionHistoryRepo.getByIndex('imageUrl', input.imageUrl);
-            if (result && result.length === 1){
-                return result[0];
-            }
+        return await tsConnectionHistoryRepo.get(memberId);
+    }
+
+    const _getFirstAndLastNameFromInput = async (input, memberId) => {
+        if (input.lastName){
+            return input;
         }
 
-        const lNames = input.lastName ? [input.lastName, input.lastName.substr(0, 1), `${input.lastName.substr(0, 1)}.`] : [];
-
-        if (input.headline){
-            result = await tsConnectionHistoryRepo.getByIndex('headline', input.headline);
-            if (result && result.length > 0){
-                result = result.filter(r => r.firstName === input.firstName
-                                    && lNames.length === 0 || lNames.indexOf(r.lastName) >= 0);
-
-                if (result.length > 1 && filterOnDateConnectionRequestAcceptanceRecorded){
-                    result = result.filter(r => r.dateConnectionRequestAcceptanceRecorded ? false : true)
-                }
-
-                if (result.length === 1){
-                    return result[0];
-                }
-            }
-        }
-
-        return await _lastNamesSearch(lNames, input);
+        const candidate = await candidateController.getCandidate(memberId);
     }
 
     const _saveConnectionRequest = async (noteSent, inputCandidate) => {
         try {
-            const noteObject = await _getOrCreateNoteObject(noteSent);
-            let memberId = null;
-            if (inputCandidate.memberId){
-                memberId = !isNaN(inputCandidate.memberId) ? Number.parseInt(inputCandidate.memberId) : inputCandidate.memberId;
+            const memberId = await _getOrFindTheMemberIdFromInput(inputCandidate);
+            const candidateRecord = await _getFirstAndLastNameFromInput(inputCandidate, memberId);
+
+            if (!memberId){
+                return null;
             }
 
+            const noteObject = await _getOrCreateNoteObject(noteSent);
             const linkedInProfileData = {
                 memberId,
-                firstName: inputCandidate.firstName,
-                lastName: inputCandidate.lastName,
-                headline: inputCandidate.headline || null,
-                imageUrl: inputCandidate.imageUrl
-            };
-
-            if (!linkedInProfileData.connectionId){
-                linkedInProfileData.connectionId = linkedInProfileData.memberId || `${linkedInProfileData.firstName}-${linkedInProfileData.lastName}`;
-                linkedInProfileData.noteId = noteObject.noteId;
-                linkedInProfileData.dateConnectionRequestSent = (new Date()).getTime();
+                noteId: noteObject.noteId,
+                dateConnectionRequestSent: (new Date()).getTime()
             }
 
             await tsConnectionHistoryRepo.insert(linkedInProfileData);
             return {noteObject, linkedInProfileData};
+
         } catch (e) {
             console.log(`Error in _saveConnectionRequest. ${e.message}`);
             window.lastCrError = e;
@@ -111,7 +77,7 @@
     }
 
     const _recordConnectionRequestAccepted = async (connection) => {
-        const connectionEntry = await _findConnection(connection, true);
+        const connectionEntry = await _findConnectionRequest(connection);
         if (connectionEntry) {
             connectionEntry.dateConnectionRequestAcceptanceRecorded = (new Date()).getTime();
             await tsConnectionHistoryRepo.update(connectionEntry);
@@ -129,7 +95,7 @@
             return null;
         }
 
-        const connectionEntry = await _findConnection(connection);
+        const connectionEntry = await _findConnectionRequest(connection);
         if (connectionEntry && !connectionEntry.dateConnectionCorresponded) {
             connectionEntry.dateConnectionCorresponded = (new Date()).getTime();
             await tsConnectionHistoryRepo.update(connectionEntry);
@@ -147,7 +113,7 @@
             return null;
         }
 
-        const connectionEntry = await _findConnection(connection);
+        const connectionEntry = await _findConnectionRequest(connection);
         if (connectionEntry) {
             connectionEntry.tookACall = true;
             await tsConnectionHistoryRepo.update(connectionEntry);
@@ -158,7 +124,7 @@
     }
 
     const _recordEventHistoryEntry = async (connection, note) => {
-        const connectionEntry = await _findConnection(connection);
+        const connectionEntry = await _findConnectionRequest(connection);
         if (connectionEntry) {
             if (!connectionEntry.eventHistory){
                 connectionEntry.eventHistory = [];
@@ -300,7 +266,7 @@
         getConnectionRequestNoteRecipients = _getConnectionRequestNoteRecipients;
         displayStatsConsoleLogMessage = _displayStatsConsoleLogMessage;
         mergeRequests = _mergeRequests;
-        findConnection = _findConnection;
+        findConnection = _findConnectionRequest;
     }
 
     window.connectionLifeCycleLogic = new ConnectionLifeCycleLogic();

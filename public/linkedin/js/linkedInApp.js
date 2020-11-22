@@ -125,7 +125,7 @@
 
 
     const _upsertContact =  async (candidate, requireRole = true) => {
-        try {
+       /* try {
             const activeRole = _getActiveRole();
 
             if(requireRole && activeRole === null) {
@@ -158,6 +158,7 @@
             console.log(e.message);
             return null;
         }
+        */
     }
 
     const _saveCompanyAnalytics = async (analytics) => {
@@ -185,34 +186,7 @@
         };
     }
 
-    const _recordMessageWasSent = async (recipient, messageSent, type = 'message') => {
-        let candidate = await candidateController.searchForCandidate(recipient);
 
-        if (candidate !== null){
-            const {firstName, lastName, memberId} = candidate;
-            candidate = {firstName, lastName, memberId};  // make a copy of what we need for this save
-        }
-        else {
-            candidate = recipient; // Try and save the message based on just the 1st and last names
-        }
-
-
-        let messageObject = _createMessageRecordObject(messageSent, type);
-        candidate.messagesSent = [messageObject];
-
-        const opportunity = window.localStorage.getItem(_activeOpportunityKey);
-        if (opportunity) {
-            const opportunityRecord = _createMessageRecordObject(messageSent, type);
-            opportunityRecord.opportunityName = opportunity;
-            candidate.opportunitiesPresented = [opportunityRecord]
-        }
-
-        _upsertContact(candidate, false);
-    }
-
-    const _recordConnectionRequestMade = (memberIdOrFirstNameAndLastName, note) => {
-        _recordMessageWasSent(memberIdOrFirstNameAndLastName, note, 'connectionRequest');
-    }
 
     const _getNextJobSeekerResult = async (seeker) => {
        await tsJobHistoryScrapeManager.scrapeThisJobSeeker(seeker);
@@ -251,7 +225,6 @@
 
     class LinkedInApp {
         alisonContactSyncCallback = _alisonContactSyncCallback;
-        sendLinkedInMessageOrConnectionRequestToCandidate = linkedInMessageSender.sendLinkedInMessageOrConnectionRequestToCandidate;
         changeBadgeColor = _changeBadgeColor;
         fireInMailBlast = _fireInMailBlast;
         fireConnectionRequestBlast = _fireConnectionRequestBlast;
@@ -261,8 +234,6 @@
         getAlisonContactResult = _getAlisonContactResult;
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
         getNextJobSeekerResult = _getNextJobSeekerResult;
-        recordMessageWasSent = _recordMessageWasSent;
-        recordConnectionRequestMade = _recordConnectionRequestMade;
         getActiveOpportunity = _getActiveOpportunity;
         getActiveRole = _getActiveRole;
         getAlisonTags = _getAlisonTags;

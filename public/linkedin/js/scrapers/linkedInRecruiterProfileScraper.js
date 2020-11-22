@@ -26,6 +26,7 @@
     }
 
     const _scrapeProfile = async (tagString = null) => {
+        const memberId = await _getMemberId();
         await tsCommon.sleep(1000);
         const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
         candidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
@@ -47,9 +48,10 @@
             }
 
             if (scrapedFullName.indexOf(candidate.lastName) === -1){
+                let lastName = candidate.lastName;
                 tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
-                candidate = await candidateController.searchForCandidate(scrapedFullName);
-                if (!candidate) {
+                candidate = await candidateController.getCandidate(memberId);
+                if (!(candidate && candidate.lastName.toLowerCase() === lastName)) {
                     tsCommon.log("Also, could not find candidate by name in Candidate Repository (or there are more than 1 name match)", "WARN");
                     return null;
                 }

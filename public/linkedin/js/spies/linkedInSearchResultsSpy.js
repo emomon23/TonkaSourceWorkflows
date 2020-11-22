@@ -28,7 +28,7 @@
                 const memberId = $(jg).attr('memberId');
 
                 // eslint-disable-next-line no-await-in-loop
-                const candidate = await candidateController.searchForCandidate(memberId);
+                const candidate = await candidateController.getCandidate(memberId);
                 const tooltipText = candidate && candidate.technicalYearString ? candidate.technicalYearString : 'none';
                 const tooltip = document.createElement("span");
                 $(tooltip).attr("class", "tooltiptext").html(tooltipText);

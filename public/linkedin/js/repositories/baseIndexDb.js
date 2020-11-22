@@ -1,4 +1,13 @@
 (() => {
+    const MIGRATION_STORE_NAME = `TonkaSource_IndexDB_Migration_History`;
+    const MIGRATION_DATABASE = "TonkaSource_Migrations";
+    const MIGRATION_DATABASE_VERSION = 1;
+    const MIGRATION_DATABASE_SCHEMA = {
+        storeName: MIGRATION_STORE_NAME,
+        idProperty: 'id',
+        indexes: []
+    }
+
     if (!window.indexedDB) {
         window.indexedDB = window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
     }
@@ -165,7 +174,7 @@
         });
     }
 
-    const _saveObject = async (objectStoreName, data, dataIdProperty, db) => {
+    const _saveObject = async (db, objectStoreName, data, dataIdProperty = 'id') => {
         await _getObjectStore(db, objectStoreName);
 
         const keyValue = data[dataIdProperty];
@@ -259,14 +268,44 @@
         }
     }
 
-    const _migrate = async (migrateParameters, dbsData) => {
+    const _hasMigrationCompleted = async (migrationRepository, dbsData) => {
+        if (!(migrationRepository && migrationRepository.getByIndex && dbsData)){
+            return false;
+        }
+
+        const id = `${dbsData.fromDbName}_${dbsData.fromStoreName}_${dbsData.fromVersion}`;
+        const migrationRecord = await migrationRepository.get(id);
+
+        return migrationRecord ? true : false;
+
+    }
+
+    const _createMigrationRecord = async (migrationRepository, dbsData, resultMessage) => {
+        if (!(migrationRepository && migrationRepository.getByIndex && dbsData)){
+            return;
+        }
+
+        const id = `${dbsData.fromDbName}_${dbsData.fromStoreName}_${dbsData.fromVersion}`;
+        const migrationRecord = {id,
+                                migrationDate: (new Date()).getTime(),
+                                resultMessage
+                                };
+
+        await migrationRepository.insert(migrationRecord);
+    }
+
+    const _migrate = async (migrationRepository, dbsData, migrateParameters) => {
         // dbsData: {fromDbName: 'Db1', fromVersion: 1, fromStoreName: 'candidate', toStore: candidateRepo}
-        // migrateParameters: {from: 'candidates', beforeSave: (row) => {}, afterSave: (row) => {}};
 
         const tempSchema = {
             storeName: dbsData.toStore.storeName,
             idProperty: dbsData.toStore.keyPropertyForStore
         };
+
+        const alreadyMigrated = await _hasMigrationCompleted(migrationRepository, dbsData);
+        if (alreadyMigrated){
+            return false;
+        }
 
         const db1StoreFactory = new IndexDbStoreFactory(dbsData.fromDbName, dbsData.fromVersion, tempSchema);
         const fromStore = db1StoreFactory.createStore(dbsData.fromStoreName);
@@ -276,11 +315,7 @@
 
         try {
             fromDocuments = await fromStore.getAll();
-            const existing = await toStore.getAll(); // force the opening of the "to db", to verify it exists.
-            if (existing && existing.length > 0){
-                console.log(`${toStore.storeName} already populated (already migrated?), existing now`);
-                return false;
-            }
+
         } catch (e){
             if (!e.message.indexOf("doesn't exist and no schema has been provided") >= 0){
                 throw e;
@@ -303,7 +338,7 @@
                 }
 
                 // eslint-disable-next-line no-await-in-loop
-                await toStore.save(docToSave);
+                await toStore.insert(docToSave);
 
                 if (migrateParameters && migrateParameters.afterSave){
                     migrateParameters.afterSave(docToSave);
@@ -316,7 +351,10 @@
             }
         }
 
-        console.log(`Total records read from ${migrateParameters.from}: ${fromDocuments.length}.  write errors: ${errorCount} (${lastErrorMessage})`);
+        const resultMessage = `Total records read from ${dbsData.fromStoreName}: ${fromDocuments.length}.  write errors: ${errorCount} (${lastErrorMessage})`;
+        await _createMigrationRecord(migrationRepository, dbsData, resultMessage);
+
+        console.log(resultMessage);
         return errorCount > 0 && errorCount === fromDocuments.length ? false : true
     }
 
@@ -332,7 +370,7 @@
 
         save = async (obj) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
-            return await _saveObject(this.objectStore, obj, dataIdProperty, this.__dbRef);
+            return await _saveObject(this.__dbRef, this.objectStore, obj, this.idProperty);
         }
 
         insert = async (obj) => {
@@ -432,31 +470,62 @@
     }
 
     class IndexDbMigrator {
-        // var migrator = baseIndexDbFactory.createMigrator({fromDbName: 'Db1', fromVersion: 1, fromStoreName: 'candidate', toStore: candidateRepo});
-        // migrator.migrate()
         constructor (dbsData){
             this.dbsData = dbsData;
+
+            const factory = new IndexDbStoreFactory(MIGRATION_DATABASE, MIGRATION_DATABASE_VERSION, MIGRATION_DATABASE_SCHEMA);
+            this.migrationRepository = factory.createStore(MIGRATION_STORE_NAME);
         }
 
         migrate = async (migrateParameters = null) => {
-            return await _migrate(migrateParameters, this.dbsData);
+            if (this.migrationInProgress){
+               // return 'In progress...'
+            }
+
+            this.migrationInProgress = true;
+            const result = await _migrate(this.migrationRepository, this.dbsData, migrateParameters);
+            this.migrationInProgress = false;
+
+            return result;
         }
     }
 
     class BaseIndexDbFactory {
+        constructor () {
+            this.migrators = {};
+        }
+
         createStoreFactory = (dbName, dbVersion, schema) => {
             const dbNm = dbName === "TonkaSourceDB" ? dbName : `${dbName}__${dbVersion}`;
             return new IndexDbStoreFactory(dbNm, dbVersion, schema);
         }
 
         createMigrator = (dbsData) => {
-            return new IndexDbMigrator(dbsData);
+            const key = `{${dbsData.fromDbName}_${dbsData.fromStoreName}+${dbsData.fromVersion}}`;
+
+            if (this.migrators[key]){
+                return this.migrators[key]
+            }
+            else {
+                const result = new IndexDbMigrator(dbsData);
+                this.migrators[key] = result;
+                return result;
+            }
         }
     }
+
+
 
     window.baseIndexDbFactory = new BaseIndexDbFactory();
 })();
 
+// Examples
+
+// ** Repository **
 // const storeFactory = baseIndexDbFactory.createStoreFactory("TonkaSource", 1, schema);
 // const candidateRepository = storeFactory.createStore("candidate");
 // await candidateRepository.getAll();
+
+// ** Migration **
+// var migrator = baseIndexDbFactory.createMigrator({fromDbName: 'Db1', fromVersion: 1, fromStoreName: 'candidate', toStore: candidateRepo});
+// migrator.migrate()
