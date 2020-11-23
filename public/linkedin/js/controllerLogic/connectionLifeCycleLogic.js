@@ -48,6 +48,7 @@
         }
 
         const candidate = await candidateController.getCandidate(memberId);
+        return candidate;
     }
 
     const _saveConnectionRequest = async (noteSent, inputCandidate) => {
@@ -61,6 +62,8 @@
 
             const noteObject = await _getOrCreateNoteObject(noteSent);
             const linkedInProfileData = {
+                lastName: candidateRecord.lastName,
+                firstName: candidateRecord.firstName,
                 memberId,
                 noteId: noteObject.noteId,
                 dateConnectionRequestSent: (new Date()).getTime()
