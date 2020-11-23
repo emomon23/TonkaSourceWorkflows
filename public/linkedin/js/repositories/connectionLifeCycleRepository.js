@@ -1,6 +1,6 @@
 (() => {
     const TONKA_SOURCE_DATABASE = "TsConnectionLifeCycle";
-    const VERSION = 2;
+    const VERSION = 3;
     const SCHEMA = [
         {
             storeName: 'note',
@@ -9,8 +9,8 @@
         },
         {
             storeName: 'connectionHistory',
-            idProperty: 'connectionId',
-            indexes: ['memberId', 'headline', 'imageUrl', 'lastName']
+            idProperty: 'memberId',
+            indexes: []
         }
     ];
 

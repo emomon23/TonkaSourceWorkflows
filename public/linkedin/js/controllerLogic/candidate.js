@@ -62,12 +62,16 @@
             || candidate.lastScrapedBy === linkedInConstants.pages.PUBLIC_PROFILE
     }
 
+    const _determineLastName = (input, existing) => {
+        return input.lastName.lastName >= 3 ? input.lastName : existing ? existing.lastName : input.lastName;
+    }
+
     const _saveCandidate = async (candidate) => {
         if (!(candidate && candidate.memberId)){
             throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
         }
 
-        const fieldsNotToBeOverridden = ['positions', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
+        const fieldsNotToBeOverridden = ['positions', 'lastName', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
         let existingCandidate = await _getCandidate(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
@@ -85,6 +89,8 @@
                     existingCandidate[k] = candidate[k];
                 }
             }
+
+            existingCandidate.lastName = _determineLastName(candidate, existingCandidate);
 
             existingCandidate.positions = _mergePositions(existingCandidate.positions, candidate.positions);
             existingCandidate.isJobSeekerString = existingCandidate.isJobSeeker ? 'true' : 'false';
@@ -149,41 +155,72 @@
         }
     }
 
-    const _searchOnName = async (lastName, firstName = null) => {
-        const results = await candidateRepository.getByIndex('lastName', lastName);
+    const _lastNamesSearch = async (lNamesArray, searchObject) => {
+        let totalFound = [];
+        for (let i = 0; i < lNamesArray.length; i++){
+            // eslint-disable-next-line no-await-in-loop
+            const search = await candidateRepository.getByIndex('lastName', lNamesArray[i]);
 
-        if (results && results.length){
-            return firstName ? results.filter(c => c.firstName === firstName) : results;
+            if (search && search.length > 0){
+                totalFound = totalFound.concat(search);
+            }
         }
 
-        return [];
+        if (totalFound && totalFound.length){
+            totalFound = totalFound.filter(f => f.firstName === searchObject.firstName);
+        }
+
+        if (totalFound && totalFound.length > 1 && searchObject.headline){
+            totalFound = totalFound.filter(t => t.headline.toLowerCase().indexOf(searchObject.headline.toLowerCase()) >= 0);
+        }
+
+        return totalFound && totalFound.length === 1 ? totalFound[0] : null;
     }
 
-    const _searchForCandidate = async (searchFor) => {
-        if (!searchFor){
-            return null;
+    const _findConnection = async (searchObject, filterOnDateConnectionRequestAcceptanceRecorded = false) => {
+        let result = null;
+        if (searchObject.memberId) {
+            let search = searchObject.memberId && !isNaN(searchObject.memberId) ? Number.parseInt(searchObject.memberId) : searchObject.memberId;
+            result = await candidateRepository.get(search);
+            if (result){
+                return result;
+            }
         }
 
+        if (searchObject.imageUrl){
+            result = await searchObject.getByIndex('imageUrl', searchObject.imageUrl);
+            if (result && result.length === 1){
+                return result[0];
+            }
+        }
+
+        const lNames = searchObject.lastName ? [searchObject.lastName, searchObject.lastName.substr(0, 1), `${searchObject.lastName.substr(0, 1)}.`] : [];
+
+        if (searchObject.headline){
+            result = await candidateRepository.getByIndex('headline', searchObject.headline);
+            if (result && result.length > 0){
+                result = result.filter(r => r.firstName === input.firstName
+                                    && lNames.length === 0 || lNames.indexOf(r.lastName) >= 0);
+
+                if (result.length === 1){
+                    return result[0];
+                }
+            }
+        }
+
+        return await _lastNamesSearch(lNames, searchObject);
+    }
+
+    const _searchForCandidate = async (searchFor, forceStringSearchForConsoleDebuggingOnly = false) => {
         if (!isNaN(searchFor)){
             return await _getCandidate(searchFor);
         }
 
-        const names = searchFor.split ? searchFor.split(' ') : null;
-        if (!names){
-            return null;
+        if (typeof searchFor !== "object") {
+            throw new Error('searchForACandidate accepts a number or an object {[memberId:], firstName:"", lastName: "", headline: "", imageUrl:}')
         }
 
-        let found = null;
-
-        if (names.length > 1){
-            found = await _searchOnName(names[names.length - 1], names[0]);
-
-        }
-        else {
-            found = await _searchOnName(names[0]);
-        }
-
-        return found && found.length === 1 ? found[0] : null;
+        return await _findConnection(searchFor);
     }
 
     const _getContractors = async () => {
@@ -228,7 +265,6 @@
         saveCandidates = _saveCandidates;
         getCandidateList = _getCandidateList;
         getCandidate = _getCandidate;
-        searchOnName = _searchOnName;
         searchForCandidate = _searchForCandidate;
         getJobSeekers = _getJobSeekers;
         getContractors = _getContractors;
