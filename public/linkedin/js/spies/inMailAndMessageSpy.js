@@ -146,13 +146,13 @@
     }
 
     const _onPublicMessageDialogPopup = (target) => {
-        if ($(target).find('img[class*="tonkaSourceLogo"]').length === 0){
+        if ($(target).find('img[class*="tonkaSource-image-button"]').length === 0){
             const container = $(target).find('header section div h4')[0];
             const nameElement = $(target).find('header h4')[0]
 
             if (nameElement && container){
                 const id = nameElement.textContent.split('\n').join('').trim();
-                tonkaSourceLogo.appendLogo(container, 'tiny', id);
+                tsToolButton.appendLogo(container, 'tiny', 'hotAlison1', id);
             }
         }
     }
@@ -164,7 +164,7 @@
 
             if (header && recipientElement) {
                 let recipientName = recipientElement.textContent.replace('Delete recipient', '');
-                tonkaSourceLogo.appendLogo(header, 'tiny', recipientName);
+                tsToolButton.appendLogo(header, 'tiny', 'hotAlison1', recipientName);
             }
         }
     }
@@ -174,10 +174,10 @@
         const headLineElement = $('article p[class*="headline"]')[0];
 
         if (connectionNameElement && headLineElement){
-            const alreadyHasLogo = $(headLineElement).find('class[*="tonkaSourceLogo"]').length > 0;
+            const alreadyHasLogo = $(headLineElement).find('class[*="tonkaSource-image-button"]').length > 0;
             if (!alreadyHasLogo){
                 const connectionName = connectionNameElement.textContent;
-                tonkaSourceLogo.appendLogo(headLineElement, 'tiny', connectionName);
+                tsToolButton.appendLogo(headLineElement, 'tiny', 'hotAlison1', connectionName);
             }
         }
     }

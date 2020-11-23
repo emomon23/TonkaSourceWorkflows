@@ -19,7 +19,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsString.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsUICommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsPopup.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/js/tonkaSourceLogo.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsToolButton.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHacking.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsQueryStringParser.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/gradeUtil.js
@@ -64,7 +64,7 @@
 // @ignore      http://localhost:5001/js/tsString.js
 // @ignore      http://localhost:5001/js/tsUIPopup.js
 // @ignore      http://localhost:5001/js/tsUICommon.js
-// @ignore      http://localhost:5001/js/tonkaSourceLogo.js
+// @ignore      http://localhost:5001/js/tsToolButton.js
 // @ignore      http://localhost:5001/js/tsHacking.js
 // @ignore      http://localhost:5001/js/tsQueryStringParser.js
 // @ignore      http://localhost:5001/js/gradeUtil.js

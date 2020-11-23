@@ -1,5 +1,31 @@
 (() => {
     const logoButtons = {}
+    const hotAlison1 = 'https://media-exp1.licdn.com/dms/image/C5603AQGgXPHtgs48iQ/profile-displayphoto-shrink_200_200/0/1601927723954?e=1611792000&v=beta&t=l-_ZlBJTjDeHQueLnXzs6Okpy3Cj38GNbjvQoCt1dT4';
+    const hotAlison2 = "https://media-exp1.licdn.com/dms/image/C5603AQEpqUf8haKy1Q/profile-displayphoto-shrink_200_200/0/1518888986180?e=1611792000&v=beta&t=okYYT6PiJt_A2LJSFKodUd0ntEe260e5van0v5ybHKM";
+    const tonkaSourceLogo = "'https://media-exp1.licdn.com/dms/image/C4E0BAQG13PuOrrmXTA/company-logo_100_100/0?e=1614211200&v=beta&t=mALyacgd2jO4--FlqqeP5ftGmI0FUsCRz6AJwuCq4rw';";
+    const mike = 'https://media-exp1.licdn.com/dms/image/C4E0BAQG13PuOrrmXTA/company-logo_100_100/0?e=1614211200&v=beta&t=mALyacgd2jO4--FlqqeP5ftGmI0FUsCRz6AJwuCq4rw';
+    const joe = 'https://media-exp1.licdn.com/dms/image/C4E03AQHwWIm5Krpblw/profile-displayphoto-shrink_800_800/0/1532035891296?e=1611792000&v=beta&t=iQ_Wt1zfW3-OR6rkjd2wF5uqkWUFlEYCuLLkFtcEDa4';
+
+    const _getButtonImageToUse = (imageName) => {
+        let result = tonkaSourceLogo;
+
+        switch (imageName){
+            case "mike" :
+                result = mike;
+                break;
+            case "joe" :
+                result = joe;
+                break;
+            case "hotAlison1" :
+                result = hotAlison1;
+                break;
+            case "hotAlison2" :
+                result = hotAlison2;
+                break;
+        }
+
+        return result;
+    }
 
     const _determineSizeFromSizeIndicator = (sizeIndicator) => {
         if (!isNaN((sizeIndicator))){
@@ -33,19 +59,19 @@
         return `${result}px`;
     }
 
-    const _createImageElement = (classValue) => {
+    const _createImageElement = (buttonImageName, classValue) => {
         // eg. attrsIndexTypeObject:  {id: '123', 'style': 'width: 15px, height: 19px'}
 
-        const url = 'https://media-exp1.licdn.com/dms/image/C4E0BAQG13PuOrrmXTA/company-logo_100_100/0?e=1614211200&v=beta&t=mALyacgd2jO4--FlqqeP5ftGmI0FUsCRz6AJwuCq4rw';
+        const url = _getButtonImageToUse(buttonImageName);
         const element = document.createElement('img');
-        const classAttribute = (classValue ? classValue + ' ' : '') + 'tonkaSourceLogo';
+        const classAttribute = (classValue ? classValue + ' ' : '') + 'tonkaSource-image-button';
 
         $(element).attr('src', url).attr('class', classAttribute);
         return element;
     }
 
-    _insertLogo = (container, sizeIndicator, id, classValue, toggle, initialOpacityBetweenZeroAndOne, shouldAppendTheLogo) => {
-        const img = _createImageElement(classValue);
+    _insertLogo = (container, sizeIndicator, buttonImage, id, classValue, toggle, initialOpacityBetweenZeroAndOne, shouldAppendTheLogo) => {
+        const img = _createImageElement(buttonImage, classValue);
 
         if (toggle) {
             $(img).bind('click', (e) => {
@@ -97,20 +123,20 @@
         return img;
     }
 
-    _prependLogo = (container, sizeIndicator, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
-        return _insertLogo(container, sizeIndicator, classValue, toggle, initialOpacityBetweenZeroAndOne, false);
+    _prependLogo = (container, sizeIndicator, buttonImage, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
+        return _insertLogo(container, sizeIndicator, buttonImage, id ,classValue, toggle, initialOpacityBetweenZeroAndOne, false);
     }
 
-    _appendLogo = (container, sizeIndicator, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
-        return _insertLogo(container, sizeIndicator, id, classValue, toggle, initialOpacityBetweenZeroAndOne, true);
+    _appendLogo = (container, sizeIndicator, buttonImage, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
+        return _insertLogo(container, sizeIndicator, buttonImage, id, classValue, toggle, initialOpacityBetweenZeroAndOne, true);
     }
 
-    class TonkaSourceLogo {
+    class TsToolButton {
         prependLogo = _prependLogo;
         appendLogo =  _appendLogo;
        // createImageElement = _createImageElement
     }
 
-    window.tonkaSourceLogo = new TonkaSourceLogo();
+    window.tsToolButton = new TsToolButton();
 
 })();
