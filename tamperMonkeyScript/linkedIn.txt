@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.1069
+// @version      0.1074
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -71,6 +71,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/InMailAndMessaging/publicMessaging.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/InMailAndMessaging/recruiterConversations.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/InMailAndMessaging/recruiterInmail.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/InMailAndMessaging/publicInmail.js
 
 // @require     https://tonkasourceworkflows.firebaseapp.com/linkedin/css/jqueryModalCss.js
 // @require     https://tonkasourceworkflows.firebaseapp.com/linkedin/css/tonkaSourceCss.js
@@ -125,6 +126,7 @@
 // @ignore      http://localhost:5001/linkedin/js/spies/InMailAndMessaging/publicMessaging.js
 // @ignore      http://localhost:5001/linkedin/js/spies/InMailAndMessaging/recruiterConversations.js
 // @ignore      http://localhost:5001/linkedin/js/spies/InMailAndMessaging/recruiterInmail.js
+// @ignore      http://localhost:5001/linkedin/js/spies/InMailAndMessaging/publicInmail.js
 
 
 // @ignore      http://localhost:5001/linkedin/js/searchResultScrapers/searchResultsScraper.js
