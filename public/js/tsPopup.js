@@ -96,7 +96,7 @@
     const _bindToClick = (container, popupContent) => {
         const popupContainer = _createPopupContainer(container, popupContent);
         $(popupContainer).mousedown((e) => {
-            if(e.button === 1) {
+            if(e.button === 0) {
                 const popupInstance = $(e.target).find('.popup')[0];
                 _showPopup(popupInstance);
                 $(e).preventDefault;
