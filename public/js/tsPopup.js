@@ -79,11 +79,20 @@
         return container;
     }
 
+    const _findPopupInstance = (target) => {
+        let found = $(target).find('.popup');
+        if ((!(found && found.length)) && $(target).parent()){
+            found = $($(target).parent()).find('.popup');
+        }
+
+        return found && found.length ? found[0] : null;
+    }
+
     const _bindToRightClick = (container, popupContent) => {
         const popupContainer = _createPopupContainer(container, popupContent);
         $(popupContainer).mousedown((e) => {
             if(e.button === 2 ) {
-                const popupInstance = $(e.target).find('.popup')[0];
+                const popupInstance = _findPopupInstance(e.target);
                 _showPopup(popupInstance);
                 $(e).preventDefault;
                 return false;
@@ -97,7 +106,7 @@
         const popupContainer = _createPopupContainer(container, popupContent);
         $(popupContainer).mousedown((e) => {
             if(e.button === 0) {
-                const popupInstance = $(e.target).find('.popup')[0];
+                const popupInstance = _findPopupInstance(e.target);
                 _showPopup(popupInstance);
                 $(e).preventDefault;
                 return false;

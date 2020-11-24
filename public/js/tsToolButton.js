@@ -74,8 +74,11 @@
         const img = _createImageElement(buttonImage, classValue);
         $(img).attr('toggle', toggle ? '1' : '0');
 
-        $(img).bind('click', (e) => {
-            const eImg = e.target;
+        const imgContainer = document.createElement('span');
+        $(imgContainer).append(img);
+
+        $(imgContainer).bind('click', (e) => {
+            const eImg = $(e.target).find('img');
             const toggle = $(eImg).attr('toggle') === '1' ? true : false;
 
             if (toggle){
@@ -98,10 +101,10 @@
 
 
         if (shouldAppendTheLogo){
-            $(container).append(img);
+            $(container).append(imgContainer);
         }
         else {
-            $(container).prepend(img);
+            $(container).prepend(imgContainer);
         }
 
 
@@ -124,7 +127,7 @@
         }
 
         $(img).attr('state', opacity < 1 ? "0" : "1");
-        return img;
+        return imgContainer;
     }
 
     const _prependButton = (container, sizeIndicator, buttonImage, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {

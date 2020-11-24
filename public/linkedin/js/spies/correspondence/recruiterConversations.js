@@ -1,6 +1,6 @@
 (() => {
     const _bindToConversationItems = async () => {
-        tsCommon.sleep(1500);
+        tsCommon.sleep(2500);
         $('a[class*="conversation-link"]').click(async () => {
             await tsCommon.sleep(1000);
             correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi)
