@@ -62,7 +62,7 @@
 // @ignore      http://localhost:5001/js/tsConstants.js
 // @ignore      http://localhost:5001/js/tsCommon.js
 // @ignore      http://localhost:5001/js/tsString.js
-// @ignore      http://localhost:5001/js/tsUIPopup.js
+// @ignore      http://localhost:5001/js/tsPopup.js
 // @ignore      http://localhost:5001/js/tsUICommon.js
 // @ignore      http://localhost:5001/js/tsToolButton.js
 // @ignore      http://localhost:5001/js/tsHacking.js
