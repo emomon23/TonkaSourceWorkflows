@@ -24,7 +24,7 @@
         _createMenuItem(list, 'Scrape Contact Info', 'scrape-info', contactIdentifier);
         _createMenuItem(list, 'Schedule a Call', 'schedule-call', contactIdentifier);
 
-        return li;
+        return list;
     }
 
     class TSContactMenu {
