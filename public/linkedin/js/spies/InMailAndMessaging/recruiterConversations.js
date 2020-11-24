@@ -1,7 +1,7 @@
 (() => {
-    const _bindToConversionItems = async () => {
+    const _bindToConversationItems = async () => {
         tsCommon.sleep(1500);
-        $('li[class*="conversation-item"]').click(async () => {
+        $('a[class*="conversation-link"]').click(async () => {
             await tsCommon.sleep(1000);
             correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi)
         });
@@ -47,7 +47,7 @@
     const _delayDocReady = async () => {
         await tsCommon.sleep(1000);
         correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi)
-        _bindToConversionItems();
+        _bindToConversationItems();
     }
 
     $(document).ready(() => {
