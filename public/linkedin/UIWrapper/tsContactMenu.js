@@ -19,10 +19,10 @@
     }
 
     const _buildContactMenu = (contactIdentifier) => {
-        const li = document.createElement('ol');
-        _createMenuItem(li, 'Record Contact', 'record-contact', contactIdentifier);
-        _createMenuItem(li, 'Scrape Contact Info', 'scrape-info', contactIdentifier);
-        _createMenuItem(li, 'Schedule a Call', 'schedule-call', contactIdentifier);
+        const list = document.createElement('ul');
+        _createMenuItem(list, 'Record Contact', 'record-contact', contactIdentifier);
+        _createMenuItem(list, 'Scrape Contact Info', 'scrape-info', contactIdentifier);
+        _createMenuItem(list, 'Schedule a Call', 'schedule-call', contactIdentifier);
 
         return li;
     }
