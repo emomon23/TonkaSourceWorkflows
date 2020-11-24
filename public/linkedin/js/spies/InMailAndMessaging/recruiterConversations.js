@@ -1,9 +1,9 @@
 (() => {
     const _bindToConversionItems = async () => {
-        tsCommon.sleep(1000);
+        tsCommon.sleep(1500);
         $('li[class*="conversation-item"]').click(async () => {
             await tsCommon.sleep(1000);
-            correspondenceCommon.setupSpy(null, _scrapeActiveInmailContactFromUi)
+            correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi)
         });
     }
 
@@ -30,7 +30,7 @@
         }
     }
 
-    const _scrapeActiveInmailContactFromUi = () => {
+    const _scrapeActiveInmailContactFromUi = async () => {
         const candidate = _scrapeConnectionIdentifiers();
         const sendButton = $('article button[class*="submit-message"][type="submit"]')[0]
         const buttonsContainer = $('article p[class*="headline"]')[0];
@@ -46,7 +46,7 @@
 
     const _delayDocReady = async () => {
         await tsCommon.sleep(1000);
-        correspondenceCommon.setupSpy(null, _scrapeActiveInmailContactFromUi)
+        correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi)
         _bindToConversionItems();
     }
 

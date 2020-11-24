@@ -43,12 +43,11 @@
     }
 
     const _preparePublicMessageDialogForContact = async (messagingDialog) => {
-        await tsCommon.sleep(500);
         correspondenceCommon.setupSpy(messagingDialog, _scrapePublicMessageModalWindow);
     }
 
     const _prepareTheExistingMessagingDialogs = async () => {
-        await tsCommon.sleep(1000);
+        await tsCommon.sleep(500);
         const existingMessageBoxes = $('div[class*="msg-overlay-conversation-bubble--"]');
 
         for (let i = 0; i < existingMessageBoxes.length; i++){
@@ -58,15 +57,20 @@
     }
 
     const _listenForMessageDialogsToBeDisplayed = () => {
-        $('button[data-action*="inmail"]').click((e) => {
-            _preparePublicMessageDialogForContact(e.target);
+        $('div[class*="msg-overlay-list-bubble__convo-card-content--v2"]').click((e) => {
+            _prepareTheExistingMessagingDialogs();
         })
     }
 
-    $(document).ready(() => {
+    const _delayDocReady = async () => {
+        await tsCommon.sleep(1000);
         if (_checkIfPublicMessagingIsPresent()) {
             _listenForMessageDialogsToBeDisplayed();
             _prepareTheExistingMessagingDialogs();
         }
+    }
+
+    $(document).ready(() => {
+        _delayDocReady();
     });
 })();

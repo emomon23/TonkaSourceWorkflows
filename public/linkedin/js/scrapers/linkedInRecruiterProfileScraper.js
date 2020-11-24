@@ -1,4 +1,6 @@
 (() => {
+    let _currentPage = '';
+
     const  _displayStatisticGrades = (candidate) => {
         if (candidate
             && candidate.statistics
@@ -17,6 +19,10 @@
     }
 
     const _getMemberId = async () => {
+        if (_currentPage !== linkedInConstants.pages.RECRUITER_PROFILE){
+            return null;
+        }
+
         const candidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
         if (candidate){
             return candidate.memberId;
@@ -214,9 +220,16 @@
 
     window.linkedInRecruiterProfileScraper = new LinkedInRecruiterProfileScraper();
 
-    $(document).ready(() => {
-        if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.RECRUITER_PROFILE) {
+    const _delayReady = async () => {
+        await tsCommon.sleep(1000);
+
+        _currentPage = linkedInCommon.whatPageAmIOn()
+        if (_currentPage === linkedInConstants.pages.RECRUITER_PROFILE) {
             _scrapeProfile();
         }
+    }
+
+    $(document).ready(() => {
+       _delayReady();
     })
 })();

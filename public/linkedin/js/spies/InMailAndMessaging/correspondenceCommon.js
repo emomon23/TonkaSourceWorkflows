@@ -42,20 +42,33 @@
         return fullName;
     }
 
-    _setupSpy = (messageWindow, messageWindowScraperCallback) => {
-        const messageDialog = messageWindowScraperCallback(messageWindow);
-        const {candidate, header, sendButton, textArea } = messageDialog;
+    _setupSpy = async (messageWindow, messageWindowScraperCallback) => {
+        if (!(messageWindow && messageWindowScraperCallback)){
+            return;
+        }
 
-        const key = `${candidate.firstName}-${candidate.lastName}-${candidate.imageUrl}`;
+        const messageDialog = await messageWindowScraperCallback(messageWindow);
+        if (!(messageDialog && messageDialog.candidate && messageDialog.header)){
+            return;
+        }
 
-        tsToolButton.appendButton(header, "tiny", "tonkaSourceLogo", `${key}-toggle`, 'record-message-switch');
-        const alisonButton = tsToolButton.appendButton(header, "tiny", "hotAlison1", `${key}-popup`, 'message-action-menu-container', false);
-        const menu = tsContactMenu.buildContactMenu(candidate);
+        try {
+            const {candidate, header, sendButton, textArea } = messageDialog;
 
-        tsPopup.bindToClick(alisonButton, menu);
+            const key = `${candidate.firstName}-${candidate.lastName}`;
+
+            const tsLogoKey = `${key}-toggle`;
+            if (!tsToolButton.containsButton(header, tsLogoKey)) {
+                tsToolButton.appendButton(header, "tiny", "tonkaSourceLogo", tsLogoKey, 'record-message-switch');
+                const alisonButton = tsToolButton.appendButton(header, "tiny", "hotAlison1", `${key}-popup`, 'message-action-menu-container', false);
+                const menu = tsContactMenu.buildContactMenu(candidate);
+
+                tsPopup.bindToClick(alisonButton, menu);
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
-
-
 
     class CorrespondenceCommon {
         setupSpy = _setupSpy;

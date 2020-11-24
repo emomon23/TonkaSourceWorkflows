@@ -70,7 +70,7 @@
         return element;
     }
 
-    _insertLogo = (container, sizeIndicator, buttonImage, id, classValue, toggle, initialOpacityBetweenZeroAndOne, shouldAppendTheLogo) => {
+    const _insertButton = (container, sizeIndicator, buttonImage, id, classValue, toggle, initialOpacityBetweenZeroAndOne, shouldAppendTheLogo) => {
         const img = _createImageElement(buttonImage, classValue);
         $(img).attr('toggle', toggle ? '1' : '0');
 
@@ -88,7 +88,7 @@
 
                 const ownerId = $(eImg).attr('owner_id');
                 if (ownerId){
-                    logoButtons[ownerId] = toOpacity;
+                    logoButtons[ownerId] = toOpacity // store the previous opacity;
                 }
             }
 
@@ -127,17 +127,36 @@
         return img;
     }
 
-    _prependButton = (container, sizeIndicator, buttonImage, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
-        return _insertLogo(container, sizeIndicator, buttonImage, id ,classValue, toggle, initialOpacityBetweenZeroAndOne, false);
+    const _prependButton = (container, sizeIndicator, buttonImage, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
+        return _insertButton(container, sizeIndicator, buttonImage, id ,classValue, toggle, initialOpacityBetweenZeroAndOne, false);
     }
 
-    _appendLogo = (container, sizeIndicator, buttonImage, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
-        return _insertLogo(container, sizeIndicator, buttonImage, id, classValue, toggle, initialOpacityBetweenZeroAndOne, true);
+    const _appendButton = (container, sizeIndicator, buttonImage, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
+        return _insertButton(container, sizeIndicator, buttonImage, id, classValue, toggle, initialOpacityBetweenZeroAndOne, true);
     }
 
+    const _containsButton = (container, key) => {
+        if (!(container && key)){
+            return false;
+        }
+
+         const containsClass = $(container).find(`[class*="${key}"]`).length > 0;
+         const containsOwner = $(container).find(`[owner_id*="${key}"]`).length > 0;
+
+         let containsId = null;
+
+         try {
+             containsId = $(container).find(`#${key}`).length > 0;
+         }catch {
+             containsId = false;
+         }
+
+         return (containsClass || containsId || containsOwner);
+    }
     class TsToolButton {
         prependButton = _prependButton;
-        appendButton =  _appendLogo;
+        appendButton =  _appendButton;
+        containsButton = _containsButton;
        // createImageElement = _createImageElement
     }
 
