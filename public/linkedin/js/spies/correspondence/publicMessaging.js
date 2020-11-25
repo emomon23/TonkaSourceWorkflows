@@ -38,7 +38,8 @@
             header,
             candidate,
             textArea,
-            sendButton
+            sendButton,
+            type: 'public-im'
         }
     }
 

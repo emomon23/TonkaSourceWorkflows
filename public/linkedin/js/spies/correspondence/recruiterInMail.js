@@ -72,7 +72,8 @@
             subject,
             textArea,
             sendButton,
-            header: buttonContainer
+            header: buttonContainer,
+            type: 'recruiter-in-mail'
         };
     }
 

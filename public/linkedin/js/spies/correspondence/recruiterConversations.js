@@ -1,10 +1,25 @@
 (() => {
+    const _delayCallingSetupSpy = async () => {
+        await tsCommon.sleep(1500);
+        correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi);
+    }
+
     const _bindToConversationItems = async () => {
-        tsCommon.sleep(2500);
-        $('a[class*="conversation-link"]').click(async () => {
-            await tsCommon.sleep(1000);
-            correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi)
-        });
+        let conversationLinks = $('a[class*="conversation-link"]');
+
+        for (let i = 0; i < 20; i++){
+            if ($(conversationLinks).length > 5) {
+                // eslint-disable-next-line no-loop-func
+                $(conversationLinks).click(() => {
+                    _delayCallingSetupSpy();
+                });
+                break;
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(500);
+        }
+
     }
 
     const _scrapeConnectionIdentifiers = () => {
@@ -40,7 +55,8 @@
             candidate,
             sendButton,
             textArea,
-            header: buttonsContainer
+            header: buttonsContainer,
+            type: 'recruiter-im'
         }
     }
 

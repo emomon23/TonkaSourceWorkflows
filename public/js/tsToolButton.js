@@ -78,8 +78,8 @@
         $(imgContainer).append(img);
 
         $(imgContainer).bind('click', (e) => {
-            const eImg = $(e.target).find('img');
-            const toggle = $(eImg).attr('toggle') === '1' ? true : false;
+            let eImg = e.target.nodeName.toLowerCase() === "img" ? e.target : $(e.target).find('img')[0];
+            const toggle = eImg ? $(eImg).attr('toggle') === '1' ? true : false : false;
 
             if (toggle){
                 let currentOpacity = $(eImg).css("opacity") || 1;

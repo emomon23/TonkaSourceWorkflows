@@ -1,10 +1,6 @@
 (() => {
     const _expSelectors = linkedInSelectors.publicProfilePage.experience;
 
-    const _findCachedCandidate = async (scrapedCandidate) => {
-        return searchResultsScraper ? await candidateController.seaerchForCandidate(`${scrapedCandidate.firstName} ${scrapedCandidate.lastName}`) : null;
-    }
-
     const _expandJobHistory = async () => {
         await tsUICommon.scrollTilTrue(() => {
             return $(_expSelectors.seeMorePositions).length > 0;
@@ -220,28 +216,33 @@
             return null;
         }
     }
-    const _scrapeProfile = async () => {
+
+    const _scrapeHeadline = () => {
+        const h2 = $('section[class*="pv-top-card"] h2')[0];
+        return h2 ? $(h2).text().trim() : '';
+    }
+
+    const _scrapeImageUrl = () => {
+        const img = $('section[class*="pv-top-card"] img[class*="pv-top-card__photo"]')[0];
+        return img ? $(img).attr('src') : '';
+    }
+
+    const _scrapeProfile = async (includeJobHistory = true) => {
             const fakeUser = _scrapedFakeUser();
             const scrapedCandidate =  _scrapeNameLocationDegree();
-            result.lastScrapedBy =  linkedInConstants.pages.PUBLIC_PROFILE;
-
             scrapedCandidate.linkedIn = window.location.href;
 
-            if (scrapedCandidate.isFirstConnection){
-                await linkedInContactInfoScraper.scrapeContactInfo(scrapedCandidate);
-            }
+            scrapedCandidate.headline = _scrapeHeadline();
+            scrapedCandidate.imageUrl = _scrapeImageUrl();
 
-            scrapedCandidate.positions = await _scrapeJobHistory();
-            scrapedCandidate.rawExperienceText = _scrapeRawExperienceText();
-            scrapedCandidate.positionsLastScraped = (new Date()).getTime();
+            if (includeJobHistory) {
+                scrapedCandidate.positions = await _scrapeJobHistory();
+                scrapedCandidate.rawExperienceText = _scrapeRawExperienceText();
+                scrapedCandidate.positionsLastScraped = (new Date()).getTime();
+            }
 
             if (fakeUser){
                 scrapedCandidate.scrapedBy = fakeUser;
-            }
-
-            const cachedCandidate = await _findCachedCandidate(scrapedCandidate);
-            if (cachedCandidate){
-                scrapedCandidate.memberId = cachedCandidate.memberId;
             }
 
             return scrapedCandidate;
@@ -398,4 +399,16 @@
     }
 
     window.linkedInPublicProfileScraper = new LinkedInPublicProfileScraper();
+
+    const _delayReady = async () => {
+        tsCommon.sleep(1000);
+        const currentProfile = await _scrapeProfile(false);
+        linkedInPublicProfileScraper.currentProfileLite = currentProfile;
+    }
+
+    $(document).ready(() => {
+        if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PUBLIC_PROFILE) {
+            _delayReady();
+        }
+    });
 })();

@@ -188,6 +188,16 @@
         _findAHyperLink(hrefContains, documentReference).click();
     }
 
+    const _newGuid = (removeDashes = false, length = 32) => {
+        let result = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+
+        result = removeDashes ? result.replace(/-/gi, '') : result;
+        return length < result.length ? result.substr(0, length) : result;
+    }
+
     const _navigateToHyperLink = (hrefContains, parentWindow = null) => {
         if (parentWindow === null){
             parentWindow = window;
@@ -254,6 +264,7 @@
 
         log = _log;
         sleep = _sleep;
+        newGuid = _newGuid;
         httpGetJson = _httpGetJson;
         httpPostJson = _httpPostJson;
         httpGetText = _httpGetText;

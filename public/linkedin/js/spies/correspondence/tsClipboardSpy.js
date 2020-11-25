@@ -84,7 +84,7 @@
             _numberCurrentlyDown = true;
         }
 
-        _evaluateKeyPressCombinations();
+        return !_evaluateKeyPressCombinations(code);
     }
 
     const _keyUp = (e) => {
@@ -121,10 +121,15 @@
         }
     }
 
-    const _evaluateKeyPressCombinations = () => {
+    const _evaluateKeyPressCombinations = (code) => {
         if (_commandIsDown){
             if (_c_key_isDown || _x_key_isDown){
                 _ctrlCopyEvent();
+            }
+
+            if (_numberCurrentlyDown) {
+                _tsCtrlCopyEvent(String.fromCharCode([code]));
+                return true;
             }
 
             if (_commandIsDown && _v_key_isDown){
@@ -136,10 +141,15 @@
             }
         }
 
+        return false;
     }
 
     const _ctrlCopyEvent = () => {
-        console.log("copy event fired");
+      //  console.log("copy event fired");
+    }
+
+    const _tsCtrlCopyEvent = (number) => {
+        console.log(`tsCopy on index ${number}`);
     }
 
     const _ctrlPasteEvent = () => {
@@ -164,7 +174,7 @@
             .bind('keydown', _keyDown)
             .bind('keyup', _keyUp);
 
-        $(document).bind('mouseup', _getHighlightedText);
+       // $(document).bind('mouseup', _getHighlightedText);
     }
 
     $(document).ready(() => {

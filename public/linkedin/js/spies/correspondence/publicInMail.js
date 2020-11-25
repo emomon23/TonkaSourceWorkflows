@@ -34,7 +34,8 @@
             sendButton,
             textArea,
             subject,
-            header: buttonContainer
+            header: buttonContainer,
+            type: 'public-in-mail'
         }
     }
 
