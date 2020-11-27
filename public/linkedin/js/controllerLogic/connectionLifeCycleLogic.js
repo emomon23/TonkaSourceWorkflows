@@ -19,6 +19,10 @@
     }
 
     const _getOrFindTheMemberIdFromInput = async (input) => {
+        if (!(input.memberId || (input.firstName && input.lastName))){
+            throw new error('ERROR - Unable to record correspondence.  connection is not an object or missing identifiers');
+        }
+
         if (!isNaN(input)){
             return input;
         }
@@ -35,6 +39,7 @@
 
     const _findConnectionRequest = async (input) => {
         const memberId = await _getOrFindTheMemberIdFromInput(input);
+
         if (!memberId){
             return null;
         }
@@ -70,6 +75,15 @@
             }
 
             await tsConnectionHistoryRepo.insert(linkedInProfileData);
+
+            let history = {
+                candidate: candidateRecord,
+                text: note,
+                type: 'CR',
+                recordCorrespondence: true
+            }
+            await _recordCorrespondence(history);
+
             return {noteObject, linkedInProfileData};
 
         } catch (e) {
@@ -89,22 +103,69 @@
         return connectionEntry;
     }
 
-    const _recordCorrespondence = async (connection) => {
-        if (typeof connection === "string"){
-            connection = _splitFirstAndLastNames(connection);
-        }
+    const _recordCorrespondenceOnConnectionRequestRecord = async (candidate) => {
+        try {
+            const connectionEntry = await _findConnectionRequest(candidate);
 
-        if (!connection){
+            if (connectionEntry && !connectionEntry.dateConnectionCorresponded) {
+                connectionEntry.dateConnectionCorresponded = (new Date()).getTime();
+                await tsConnectionHistoryRepo.update(connectionEntry);
+            }
+
+            return connectionEntry;
+        } catch (e){
+            tsCommon.logError(e, '_recordCorrespondenceOnConnectionRequestRecord');
             return null;
         }
+    }
 
-        const connectionEntry = await _findConnectionRequest(connection);
-        if (connectionEntry && !connectionEntry.dateConnectionCorresponded) {
-            connectionEntry.dateConnectionCorresponded = (new Date()).getTime();
-            await tsConnectionHistoryRepo.update(connectionEntry);
+    const _recordCorrespondence = async (correspondenceObject, isConnectionRequest = false) => {
+        const candidate = await candidateController.searchForCandidate(correspondenceObject.candidate);
+        if (!(candidate && candidate.memberId)){
+            tsCommon.log("Unable to find candidate to record correspondence!", 'ERROR');
+            return;
         }
 
-        return connectionEntry;
+        if (!isConnectionRequest){
+            await _recordCorrespondenceOnConnectionRequestRecord(candidate);
+        }
+
+        if (correspondenceObject.recordCorrespondence !== false){
+            let update = true;
+            let snippet = correspondenceObject.text ? correspondenceObject.text : '';
+            snippet = snippet.length > 50 ? snippet.substr(0, 50) : snippet;
+
+            let correspondence = await tsCorrespondenceHistoryRepo.get(candidate.memberId);
+            if (!correspondence){
+                update = false;
+                correspondence = {
+                    memberId: candidate.memberId,
+                    lastName: candidate.lastName,
+                    firstName: candidate.firstName,
+                    history: []
+                }
+            }
+
+            correspondence.lastMessageSentDate = (new Date()).getTime();
+            correspondence.lastMessageType = correspondenceObject.type;
+
+            if (correspondenceObject.subject){
+                correspondence.lastMessageSubject = correspondenceObject.subject;
+            }
+
+            if (snippet && snippet.length > 0){
+                correspondence.lastMessageSnippet = snippet;
+            }
+
+            correspondence.history.push({date: correspondence.lastMessageSentDate, type: correspondence.lastMessageType});
+
+            if (update){
+                await tsCorrespondenceHistoryRepo.update(correspondence);
+            }
+            else {
+                await tsCorrespondenceHistoryRepo.insert(correspondence);
+            }
+        }
     }
 
     const _recordCallScheduled = async (connection) => {
@@ -274,3 +335,4 @@
 
     window.connectionLifeCycleLogic = new ConnectionLifeCycleLogic();
 })();
+

@@ -174,10 +174,13 @@
         let result = {}
 
         if (firstAndLast.length > 1){
-            result.firstName = firstAndLast[0];
+            result.firstName =  firstAndLast[0];
             firstAndLast.splice(0, 1);
             result.lastName = firstAndLast.join(' ');
         }
+
+        result.firstName = tsUICommon.cleanseTextOfHtml(result.firstName);
+        result.lastName = tsUICommon.cleanseTextOfHtml(result.lastName);
 
         return result;
     }
@@ -219,7 +222,9 @@
 
     const _scrapeHeadline = () => {
         const h2 = $('section[class*="pv-top-card"] h2')[0];
-        return h2 ? $(h2).text().trim() : '';
+        let result = h2 ? $(h2).text().trim() : '';
+
+        return tsUICommon.cleanseTextOfHtml(result);
     }
 
     const _scrapeImageUrl = () => {

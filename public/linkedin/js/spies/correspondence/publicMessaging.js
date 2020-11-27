@@ -29,6 +29,7 @@
     }
 
     const _scrapePublicMessageModalWindow = (messagingDialog) => {
+
         const header = $(messagingDialog).find('header section div h4')[0];
         const candidate = _getCandidateFromHeader(messagingDialog);
         const textArea = $(messagingDialog).find('div[class*="msg-form__contenteditable"][role*="textbox"]')[0];

@@ -174,13 +174,24 @@
             totalFound = totalFound.filter(t => t.headline.toLowerCase().indexOf(searchObject.headline.toLowerCase()) >= 0);
         }
 
+        if (totalFound.length > 1 && searchObject.imageUrl){
+            const imageUrls = totalFound.map(f => f.imageUrl);
+            let closestImageMatch = tsString.getClosestMatch(searchObject.imageUrl, imageUrls);
+            if (closestImageMatch && closestImageMatch.resultCompareString){
+                totalFound = totalFound.filter(t => t.imageUrl === closestImageMatch.resultCompareString);
+            }
+        }
         return totalFound && totalFound.length === 1 ? totalFound[0] : null;
     }
 
     const _findConnection = async (searchObject, filterOnDateConnectionRequestAcceptanceRecorded = false) => {
         let result = null;
+        if (!searchObject){
+            return null;
+        }
+
         if (searchObject.memberId) {
-            let search = searchObject.memberId && !isNaN(searchObject.memberId) ? Number.parseInt(searchObject.memberId) : searchObject.memberId;
+            let search = !isNaN(searchObject.memberId) ? Number.parseInt(searchObject.memberId) : searchObject.memberId;
             result = await candidateRepository.get(search);
             if (result){
                 return result;
@@ -188,7 +199,7 @@
         }
 
         if (searchObject.imageUrl){
-            result = await searchObject.getByIndex('imageUrl', searchObject.imageUrl);
+            result = await candidateRepository.getByIndex('imageUrl', searchObject.imageUrl);
             if (result && result.length === 1){
                 return result[0];
             }
@@ -199,7 +210,7 @@
         if (searchObject.headline){
             result = await candidateRepository.getByIndex('headline', searchObject.headline);
             if (result && result.length > 0){
-                result = result.filter(r => r.firstName === input.firstName
+                result = result.filter(r => r.firstName === searchObject.firstName
                                     && lNames.length === 0 || lNames.indexOf(r.lastName) >= 0);
 
                 if (result.length === 1){

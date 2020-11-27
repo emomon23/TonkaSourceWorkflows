@@ -40,17 +40,18 @@
     const _bindToRecruiterProfileLinks = async () => {
         const profileLinks = $('a[href*="/recruiter/profile/"]');
 
-        $(profileLinks).bind('click', (e) => {
-            let parent = e.target.parentElement;
-            while (parent && parent.tagName !== 'LI'){
-                parent = parent.parentElement;
-            }
+        $(profileLinks)
+            .bind('click', (e) => {
+                let parent = e.target.parentElement;
+                while (parent && parent.tagName !== 'LI'){
+                    parent = parent.parentElement;
+                }
 
-            if (parent){
-                const memberId = $(parent).attr('id').replace('search-result-', '');
-                searchResultsScraper.persistLastRecruiterProfile(memberId);
-            }
-        });
+                if (parent){
+                    const memberId = $(parent).attr('id').replace('search-result-', '');
+                    searchResultsScraper.persistLastRecruiterProfile(memberId);
+                }
+            });
     }
 
     class LinkedInSearchResultsSpy {

@@ -20,6 +20,56 @@
         return matches;
     }
 
+    const _getMaxCharIndexMatch = (source, compare) => {
+		if (!(source && compare)){
+    	    return -1;
+        }
+
+		const sArray = [...source];
+        const cArray = [...compare];
+        const toLength = source.length < compare.length ? source.length : compare.length;
+
+        let result = -1;
+
+        for (let i = 0; i < toLength; i++){
+            if (sArray[i] !== cArray[i]){
+                break;
+            }
+
+            result = i;
+        }
+
+        return result;
+    }
+
+    const _getClosestMatch = (source, arrayToCompareTo) => {
+        let resultCompareString = null;
+        let maxCharIndex = -1;
+        let matchFoundOnIndex = -1;
+        const matchCounters =  {};
+
+        for (let i = 0; i < arrayToCompareTo.length; i++){
+            const index = _getMaxCharIndexMatch(source, arrayToCompareTo[i]);
+
+            if (index >= maxCharIndex){
+                maxCharIndex = index;
+                resultCompareString = arrayToCompareTo[i];
+                matchFoundOnIndex = i;
+                matchCounters[index] = matchCounters[index] ? matchCounters[index] + 1 : 1;
+            }
+        }
+
+        if ((!resultCompareString) || matchCounters[maxCharIndex] > 1){
+            return null
+        }
+
+        return {
+            matchFoundOnIndex,
+            resultCompareString,
+            maxCharMatchIndex : maxCharIndex
+        }
+    }
+
     const _stripExcessSpacesFromString = (text) => {
         if (typeof text !== 'string'){
             return null;
@@ -108,6 +158,7 @@
         containsAll = _containsAll;
         toBoolean = _toBoolean;
         toStringify = _toStringify;
+        getClosestMatch = _getClosestMatch;
     }
 
     window.tsString = new TSString();

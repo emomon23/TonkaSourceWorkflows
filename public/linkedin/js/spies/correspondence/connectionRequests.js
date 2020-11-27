@@ -3,25 +3,37 @@
     const sendNowSelector = `button[aria-label*="Send now"]`;
     const sendSelector = `button[aria-label*="Add a note"]`;
 
-    const _handleConnectionRequest =  () => {
-        const textArea = $(`#custom-message`)[0];
-        const note = textArea ? $(textArea).val() : '';
-        const profile = linkedInPublicProfileScraper.currentProfileLite;
+    const _handleConnectionRequest =  async () => {
+        try {
+            const textArea = $(`#custom-message`)[0];
+            const note = textArea ? $(textArea).val() : '';
+            const profile = linkedInPublicProfileScraper.currentProfileLite;
 
+            const noteTemplate = tsTemplateProcessor.convertToTemplate(note, profile);
+            if (await connectionLifeCycleLogic.saveConnectionRequest(noteTemplate, profile)){
+                console.log("Connection Request saved to history")
+            }
+
+        }catch (e) {
+            console.log(e);
+        }
 
     }
     const _listenForSendClick = (e) => {
         const element = e.target;
 
         if ($(element).text().trim() === "Send"){
-            _handleConnectionRequest();
+            const parent = $(element).parent();
+            if (parent && $(parent).attr('aria-label').indexOf('Send now') >= 0) {
+                _handleConnectionRequest();
+            }
         }
     }
 
     const _delayReady = async () => {
         tsCommon.sleep(500);
 
-        $('button[aria-label*="Connect with"][class*="connect"]').click(() => {
+        $('button[aria-label*="Connect with"]').click(() => {
             $(document).click(_listenForSendClick);
         })
     }

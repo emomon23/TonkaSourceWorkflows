@@ -1,5 +1,5 @@
 (() => {
-    const _cardSelector = '[class*="mn-connection-card"]';
+    const _cardSelector = 'li[class*="mn-connection-card"]';
     const _firstNameLastNameListSelector = '[class*="mn-connection-card__name"]';
     const _occupationSelector = '[class*="mn-connection-card__occupation"]';
     const _imageSelector = 'img';

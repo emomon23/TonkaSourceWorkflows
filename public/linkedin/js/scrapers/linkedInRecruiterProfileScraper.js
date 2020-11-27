@@ -221,15 +221,19 @@
     window.linkedInRecruiterProfileScraper = new LinkedInRecruiterProfileScraper();
 
     const _delayReady = async () => {
-        await tsCommon.sleep(1000);
+        await tsCommon.sleep(500);
 
         _currentPage = linkedInCommon.whatPageAmIOn()
         if (_currentPage === linkedInConstants.pages.RECRUITER_PROFILE) {
-            _scrapeProfile();
+            linkedInRecruiterProfileScraper.lastProfileScraped = await _scrapeProfile();
         }
     }
 
     $(document).ready(() => {
+        // Profile pages won't pop up a new window
+        $('li[class*="public-profile"] a')
+            .attr('target', '');
+
        _delayReady();
     })
 })();

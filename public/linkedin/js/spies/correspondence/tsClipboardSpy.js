@@ -1,183 +1,88 @@
 (() => {
-    const SHIFT = 16;
-    const CONTROL = 17;
-    const OPTION = 18;
-    const COMMAND = 91;
-    const SPACE = 32;
-    const A_KEY = 65
-    const C_KEY = 67;
-    const V_KEY = 86;
-    const X_KEY = 88;
-    const DELETE = 8;
-    const BACK_SPACE = 46;
-    const ZERO = 48;
-    const ONE = 49;
+    let _phoneNumberHighlightCallback = null
+    let _onTextCopied = null;
 
-    let _shiftIsDown = null;
-    let _optionIsDown = null;
-    let _commandIsDown = null;
-    let _ctrlIsDown = null;
-    let _a_key_isDown = null;
-    let _c_key_isDown = null;
-    let _v_key_isDown = null;
-    let _x_key_isDown = null;
-    let _numberCurrentlyDown = null;
+    let listeningForCopy = false;
 
     const _getHighlightedText = () => {
-        let text = "";
+        let text = null;
         if (typeof window.getSelection !== "undefined") {
             text = window.getSelection().toString();
         } else if (typeof document.selection !== "undefined") {
             text = document.selection.createRange().text;
         }
 
-        if (text && text.length > 0){
-            _highlightTextEvent(text);
-        }
+        return text;
     }
 
-    const _getPhoneNumber = (input) => {
+    const _getPhoneNumber = (highlightedText) => {
         // eslint-disable-next-line
         const _phoneNumberReg = /(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g;
-        const matchAll = [...input.matchAll(_phoneNumberReg)];
+        const matchAll = [...highlightedText.matchAll(_phoneNumberReg)];
         const temp = matchAll.length === 1 ? matchAll[0] : null;
 
         const numbers = temp ? temp.filter(n => n ? true : false).map(n => n.trim()) : null;
         return numbers && numbers.length === 1 ? numbers[0] : '';
     }
 
-    const _isPhoneNumber = (text) => {
-        const nbr = _getPhoneNumber(text);
-        return nbr && nbr.length > 0;
-    }
+    const _promptForCopyToTsClipboard = async (e, highlightedText) => {
+        if (highlightedText && highlightedText.length > 0 && highlightedText.split(' ').length > 3){
+            // eslint-disable-next-line no-alert
+            const clipboardNameOrNumber = window.prompt("Save to TS Clipboard?  Clipboard Name?");
 
-    const _keyDown = (e) => {
-        const code = e.keyCode;
-        switch (code) {
-            case SHIFT :
-                _shiftIsDown = true;
-                break;
-            case A_KEY :
-                _a_key_isDown = true;
-                break;
-            case OPTION :
-                _optionIsDown = true;
-                break;
-            case CONTROL :
-                _ctrlIsDown = true;
-                break;
-            case COMMAND :
-                _commandIsDown = true;
-                break;
-            case X_KEY :
-                _x_key_isDown = true;
-                break;
-            case C_KEY :
-                _c_key_isDown = true;
-                break;
-            case V_KEY :
-                _v_key_isDown = true;
-                break;
-        }
-
-        if (code >= 48 && code <= 57){
-            _numberCurrentlyDown = true;
-        }
-
-        return !_evaluateKeyPressCombinations(code);
-    }
-
-    const _keyUp = (e) => {
-        const code = e.keyCode;
-        switch (code) {
-            case SHIFT :
-                _shiftIsDown = false;
-                break;
-            case A_KEY :
-                _a_key_isDown = false;
-                break;
-            case OPTION :
-                _optionIsDown = false;
-                break;
-            case CONTROL :
-                _ctrlIsDown = false;
-                break;
-            case COMMAND :
-                _commandIsDown = false;
-                break;
-            case X_KEY :
-                _x_key_isDown = false;
-                break;
-            case C_KEY :
-                _c_key_isDown = false;
-                break;
-            case V_KEY :
-                _v_key_isDown = false;
-                break;
-        }
-
-        if (code >= 48 && code <= 57){
-            _numberCurrentlyDown = false;
-        }
-    }
-
-    const _evaluateKeyPressCombinations = (code) => {
-        if (_commandIsDown){
-            if (_c_key_isDown || _x_key_isDown){
-                _ctrlCopyEvent();
-            }
-
-            if (_numberCurrentlyDown) {
-                _tsCtrlCopyEvent(String.fromCharCode([code]));
-                return true;
-            }
-
-            if (_commandIsDown && _v_key_isDown){
-                _ctrlPasteEvent();
-            }
-
-            if (_a_key_isDown){
-                _getHighlightedText();
+            if (clipboardNameOrNumber && clipboardNameOrNumber.length > 0){
+                if (_onTextCopied){
+                    _onTextCopied(e, {id:clipboardNameOrNumber, text:highlightedText})
+                }
+                else {
+                    await window.tsClipboardRepository.save({id: clipboardNameOrNumber, text:highlightedText});
+                }
             }
         }
-
-        return false;
     }
 
-    const _ctrlCopyEvent = () => {
-      //  console.log("copy event fired");
-    }
+    const _listenForCopy = () => {
+        if (!listeningForCopy) {
+            $(document).bind('mouseup', (e) => {
+                const highlightedText = _getHighlightedText();
+                if (!highlightedText){
+                    return;
+                }
 
-    const _tsCtrlCopyEvent = (number) => {
-        console.log(`tsCopy on index ${number}`);
-    }
+                const phoneNumber = _getPhoneNumber(highlightedText);
 
-    const _ctrlPasteEvent = () => {
-        console.log("paste event fired");
-    }
+                if (phoneNumber && phoneNumber.length){
+                    if (_phoneNumberHighlightCallback){
+                        _phoneNumberHighlightCallback(e, phoneNumber)
+                    }
+                }
+            });
 
-    const _highlightTextEvent = (text) => {
-        console.log('highlight event fired');
-        if (_isPhoneNumber(text)){
-            _phoneNumberHighlightedEvent(_getPhoneNumber(text));
+            $(document).bind('copy', (e) => {
+                const highlightedText = _getHighlightedText();
+               _promptForCopyToTsClipboard(e, highlightedText);
+            });
+
+
+            listeningForCopy = true;
         }
     }
 
-    const _phoneNumberHighlightedEvent = (phoneNumber) => {
-        console.log(`phoneNumber Highlighted: ${phoneNumber}`);
+    const _enable = (onCopyToTSClipboard = null) => {
+        _listenForCopy();
+        _onTextCopied = onCopyToTSClipboard;
+        return this;
     }
 
-    const _delayReady = async () => {
-        await tsCommon.sleep(1000);
-
-        $(document)
-            .bind('keydown', _keyDown)
-            .bind('keyup', _keyUp);
-
-       // $(document).bind('mouseup', _getHighlightedText);
+    const _onPhoneNumberHighlight = (callback) => {
+        _listenForCopy();
+        _phoneNumberHighlightCallback = callback;
+        return this;
+    }
+    class TSClipboard {
+        enable = _enable;
+        onPhoneNumberHighlight = _onPhoneNumberHighlight;
     }
 
-    $(document).ready(() => {
-       _delayReady();
-    })
+    window.tsClipboard = new TSClipboard();
 })();

@@ -1,5 +1,7 @@
 (() => {
     const sendButtonFingerPrints = {};
+    let setupCalled = false;
+
 
     const _createFingerPrint = (button) => {
         const classValue = $(button).attr('class') || '';
@@ -20,6 +22,49 @@
         }
 
         return true;
+    }
+
+    const _findCandidateForHighlightedText = (startElement) => {
+        let element = startElement;
+        let found = $(element).find('[ts-message-id]')[0];
+        let tsMsgId = null;
+
+        while (!found && $(element).parent()){
+            element = $(element).parent();
+            found = element ? $(element).find('[ts-message-id]')[0] : null;
+            if (found){
+                tsMsgId = $(found).attr('ts-message-id');
+            }
+        }
+
+        if (found) {
+            const jsonString = $($(`#${tsMsgId}`)[0]).val();
+            return JSON.parse(jsonString);
+        }
+
+        return found;
+    }
+
+    const _onPhoneNumberHighlighted = (evt , phoneNumber) => {
+        const candidate = _findCandidateForHighlightedText(evt.target);
+        console.log("A phone number has been highlighted");
+    }
+
+    const _onMessagePastedToTsClipboard = (evt, tsClpboardData) => {
+        if (tsClpboardData.id){
+            const candidate = _findCandidateForHighlightedText(evt.target);
+            tsClpboardData.text = tsTemplateProcessor.convertToTemplate(tsClpboardData.text);
+            tsClipboardRepository.save(tsClpboardData);
+        }
+    }
+
+    const _setupTsClipboard = () => {
+        if (!setupCalled){
+            tsClipboard.enable(_onMessagePastedToTsClipboard);
+            tsClipboard.onPhoneNumberHighlight(_onPhoneNumberHighlighted);
+
+            setupCalled = true;
+        }
     }
 
     const _doesTargetFingerPrintMatchASendButton = (target) => {
@@ -79,7 +124,7 @@
 
     const _sendButtonClick = async (element) => {
         const correspondence = await _getMessageSent(element);
-        console.log({correspondence});
+        await connectionLifeCycleLogic.recordCorrespondence(correspondence);
     }
 
     const _onMouseClick = (e) => {
@@ -143,6 +188,8 @@
         } catch (e) {
             console.log(e);
         }
+
+        _setupTsClipboard();
     }
 
     class CorrespondenceCommon {

@@ -12,6 +12,15 @@
         }
     }
 
+    const _logError = (e, deets) => {
+        let msg = `ERROR - ${e.message}.`;
+        if (deets && deets.length){
+            msg += ` (${deets})`;
+        }
+
+        _log(msg, 'ERROR');
+    }
+
     const _sleep = (ms) => {
         _log("Sleeping for " + ms + "ms");
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -263,6 +272,7 @@
         constructor (){}
 
         log = _log;
+        logError = _logError;
         sleep = _sleep;
         newGuid = _newGuid;
         httpGetJson = _httpGetJson;
