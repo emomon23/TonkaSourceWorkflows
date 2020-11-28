@@ -15,7 +15,9 @@
         skillsList: '#profile-skills div ul[class*="skills"]',
         aboutSummary: '#profile-summary',
         experienceSection: '#profile-experience',
-        topCard: 'div[class*="primary-module"]'
+        topCard: 'div[class*="primary-module"]',
+        headline: 'div[class*="info-container"] ul li[class*="title"]',
+        imageUrl: 'div[class*="module-body"] img[alt*="photo"]'
     }
 
     const _searchResultsPage = {

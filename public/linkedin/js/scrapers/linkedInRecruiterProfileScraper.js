@@ -1,5 +1,6 @@
 (() => {
     let _currentPage = '';
+    let _candidateFound = null;
 
     const  _displayStatisticGrades = (candidate) => {
         if (candidate
@@ -18,24 +19,59 @@
         }
     }
 
+    const _findCandidateInDatabase = async () => {
+        const nameElement = $(linkedInSelectors.recruiterProfilePage.fullName)[0];
+        const headlineElement = $(linkedInSelectors.recruiterProfilePage.headline)[0];
+        const imageElement = $(linkedInSelectors.recruiterProfilePage.imageUrl)[0];
+        let candidateSearch = {};
+
+        if (nameElement && (headlineElement || imageElement)){
+            const fullName = tsString.cleanText(nameElement);
+            candidateSearch = tsString.convertFullNameToObject(fullName);
+
+            if (headlineElement){
+                candidateSearch.headline = tsString.cleanText(headlineElement);
+            }
+
+            if (imageElement){
+                candidateSearch.imageUrl = $(imageElement).attr('src');
+            }
+        }
+
+        candidateSearch.linkedIn = _scrapePublicProfileLink();
+
+        if (_candidateFound
+            && _candidateFound.firstName === candidateSearch.firstName
+            && _candidateFound.lastName === candidateSearch.lastName){
+                return _candidateFound;
+        }
+        else {
+            _candidateFound = null;
+        }
+
+        const cachedCandidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
+        if (cachedCandidate
+            && cachedCandidate.firstName === candidateSearch.firstName
+            && cachedCandidate.lastName === candidateSearch.lastName){
+                _candidateFound = cachedCandidate;
+                return _candidateFound;
+        }
+
+        _candidateFound = await candidateController.searchForCandidate(candidateSearch);
+        if (_candidateFound){
+            return _candidateFound;
+        }
+
+        return null;
+    }
+
     const _getMemberId = async () => {
-        if (_currentPage !== linkedInConstants.pages.RECRUITER_PROFILE){
-            return null;
-        }
-
-        const candidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
-        if (candidate){
-            return candidate.memberId;
-        }
-
-        return $(linkedInSelectors.recruiterProfilePage.profileId).val();
+        const candidate = await _findCandidateInDatabase();
+        return candidate ? candidate.memberId : null;
     }
 
     const _scrapeProfile = async (tagString = null) => {
-        const memberId = await _getMemberId();
-        await tsCommon.sleep(1000);
-        const scrapedFullName = $(linkedInSelectors.recruiterProfilePage.fullName).text()
-        candidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
+        const candidate = await _findCandidateInDatabase();
 
         // If we've scraped this candidate, proceed
         if (candidate) {
@@ -50,16 +86,6 @@
                 } else {
                     candidate.lastViewedBy = {}
                     candidate.lastViewedBy[currentUser] = new Date().getTime();
-                }
-            }
-
-            if (scrapedFullName.indexOf(candidate.lastName) === -1){
-                let lastName = candidate.lastName;
-                tsCommon.log("Candidate in local storage does not match what's on the profile page", "WARN");
-                candidate = await candidateController.getCandidate(memberId);
-                if (!(candidate && candidate.lastName.toLowerCase() === lastName)) {
-                    tsCommon.log("Also, could not find candidate by name in Candidate Repository (or there are more than 1 name match)", "WARN");
-                    return null;
                 }
             }
 

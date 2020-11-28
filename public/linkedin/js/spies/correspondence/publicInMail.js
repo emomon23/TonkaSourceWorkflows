@@ -1,5 +1,18 @@
 (() => {
-    const _scrapeContactIdentifer = (messageWindow) => {
+    const publicInMailSelector = 'div[class*="msg-overlay-conversation-bubble--default"]:contains("New message")';
+
+    const _scrapeContactIdentifer = async (messageWindowReference) => {
+        let messageWindow = messageWindowReference ? messageWindowReference : null;
+
+        if (!messageWindow) {
+            messageWindow = $(publicInMailSelector);
+            if (messageWindow.length !== 1){
+                return null;
+            }
+
+            messageWindow = messageWindow[0];
+        }
+
         const imageElement = $(messageWindow).find('img[class*="presences-entity"]')[0];
         const nameElement = $(messageWindow).find('a[href*="/in/"][class*="msg-compose"]')[0];
         const headlineElement = $(messageWindow).find('div[class*="msg-compose__occupation"]')[0];
@@ -27,7 +40,7 @@
         const subject = $(messageWindow).find('input[name*="subject"]')[0];
         const textArea = $(messageWindow).find('textarea[class*="msg-form__contenteditable"][role*="textbox"]')[0];
         const sendButton = $(messageWindow).find('button[class*="msg-form__send-button"][type*="submit"]')[0];
-        const candidate = _scrapeContactIdentifer(messageWindow);
+        const candidate = await _scrapeContactIdentifer(messageWindow);
 
         return {
             candidate,
@@ -42,11 +55,11 @@
 
     const _spyOnPublicMessageWindows = async () => {
         await tsCommon.sleep(1000);
-        const inMailWindows = $('div[class*="msg-overlay-conversation-bubble--default"]:contains("New message")');
+        const inMailWindows = $(publicInMailSelector);
 
         if (inMailWindows.length > 0){
             for (let i = 0; i < inMailWindows.length; i++) {
-                correspondenceCommon.setupSpy(inMailWindows[i], _scapeContactFromPublicMessageWindow);
+                correspondenceCommon.setupSpy(inMailWindows[i], _scapeContactFromPublicMessageWindow, _scrapeContactIdentifer);
             }
         }
     }

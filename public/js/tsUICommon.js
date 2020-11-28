@@ -179,6 +179,14 @@
 
         return result;
     }
+
+    const _executeDelete = async (element, times) => {
+        $(element).focus()
+        for (let i = 0; i < times; i++){
+            document.execCommand('delete');
+            tsCommon.sleep(20);
+        }
+    }
     class TsUICommon {
         constructor (){}
 
@@ -196,6 +204,7 @@
         scrollTilTrue = _scrollTilTrue;
         saveItemLocally = _saveItemLocally;
         getItemLocally = _getItemLocally;
+        executeDelete = _executeDelete;
     }
 
     window.tsUICommon = new TsUICommon();

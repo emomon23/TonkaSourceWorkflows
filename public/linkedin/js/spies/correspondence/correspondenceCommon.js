@@ -1,7 +1,8 @@
 (() => {
     const sendButtonFingerPrints = {};
     let setupCalled = false;
-
+    let customCandidateScraperCallback = null;
+    let customPasteHandlerCallback = null;
 
     const _createFingerPrint = (button) => {
         const classValue = $(button).attr('class') || '';
@@ -24,43 +25,48 @@
         return true;
     }
 
-    const _findCandidateForHighlightedText = (startElement) => {
-        let element = startElement;
-        let found = $(element).find('[ts-message-id]')[0];
-        let tsMsgId = null;
-
-        while (!found && $(element).parent()){
-            element = $(element).parent();
-            found = element ? $(element).find('[ts-message-id]')[0] : null;
-            if (found){
-                tsMsgId = $(found).attr('ts-message-id');
-            }
-        }
-
-        if (found) {
-            const jsonString = $($(`#${tsMsgId}`)[0]).val();
-            return JSON.parse(jsonString);
-        }
-
-        return found;
-    }
-
     const _onPhoneNumberHighlighted = (evt , phoneNumber) => {
         const candidate = _findCandidateForHighlightedText(evt.target);
         console.log("A phone number has been highlighted");
     }
 
-    const _onMessagePastedToTsClipboard = (evt, tsClpboardData) => {
-        if (tsClpboardData.id){
-            const candidate = _findCandidateForHighlightedText(evt.target);
-            tsClpboardData.text = tsTemplateProcessor.convertToTemplate(tsClpboardData.text);
-            tsClipboardRepository.save(tsClpboardData);
+    const _onMessageCopiedToTsClipboard = (evt, tsClipboardData) => {
+        try {
+            if (tsClipboardData.id){
+                const candidate = customCandidateScraperCallback();
+                tsClipboardData.text = tsTemplateProcessor.convertToTemplate(tsClipboardData.text, candidate);
+                tsClipboardRepository.save(tsClipboardData);
+            }
+        } catch (e) {
+            tsCommon.logError(e, '_onMessageCopiedToTsClipboard');
+        }
+    }
+
+    const _onMessagePastedFromTsClipboard = async (evt, osClipboardText, tsClipboardRawText) => {
+        try {
+            const candidate = await customCandidateScraperCallback();
+            const textToPaste = tsTemplateProcessor.processTemplate(tsClipboardRawText, candidate);
+
+            if (tsClipboardRawText && tsClipboardRawText.length) {
+                if (customPasteHandlerCallback){
+                    customPasteHandlerCallback({event: evt, text: textToPaste});
+                    return;
+                }
+                else {
+                    const element = document.activeElement;
+                    await tsUICommon.executeDelete(element, osClipboardText.length);
+                    await tsCommon.sleep(200);
+                    document.execCommand('insertText', true, textToPaste);
+                }
+            }
+        } catch (e) {
+            tsCommon.logError(e, '_onMessagePastedFromTsClipboard');
         }
     }
 
     const _setupTsClipboard = () => {
         if (!setupCalled){
-            tsClipboard.enable(_onMessagePastedToTsClipboard);
+            tsClipboard.enable(_onMessageCopiedToTsClipboard, _onMessagePastedFromTsClipboard);
             tsClipboard.onPhoneNumberHighlight(_onPhoneNumberHighlighted);
 
             setupCalled = true;
@@ -145,30 +151,37 @@
         return input;
     }
 
-    const _setupSpy = async (messageWindow, messageWindowScraperCallback) => {
+    const _setupSpy = async (messageWindow, messageWindowScraperCallback, customCandidateScraper, customPasteHandler = null) => {
+        customCandidateScraperCallback = customCandidateScraper;
+        customPasteHandlerCallback = customPasteHandler;
+        let messageGroupId = null;
+
         if (!(messageWindow && messageWindowScraperCallback)){
-            return;
+            return null;
         }
 
         const messageDialog = await messageWindowScraperCallback(messageWindow);
         if (!(messageDialog && messageDialog.candidate && messageDialog.header)){
-            return;
+            return null;
         }
 
         try {
             const {candidate, header, sendButton, textArea, subject, type } = messageDialog;
             if (!_recordSendButtonFingerPrint(sendButton)){
-                return;
+                return null;
             }
 
             const key = `${candidate.firstName}-${candidate.lastName}`;
 
             const tsLogoKey = `${key}-toggle`;
             if (!tsToolButton.containsButton(header, tsLogoKey)) {
-                const messageGroupId = tsCommon.newGuid(true);
+                messageGroupId = tsCommon.newGuid(true);
 
                 tsToolButton.appendButton(header, "tiny", "tonkaSourceLogo", tsLogoKey, `record-message-switch ${messageGroupId}`, true);
                 const alisonButton = tsToolButton.appendButton(header, "tiny", "hotAlison1", `${key}-popup`, 'message-action-menu-container', false);
+
+                $(alisonButton).addClass('alisonButton').attr('ts-message-id', messageGroupId);
+
                 const menu = tsContactMenu.buildContactMenu(candidate);
 
                 tsPopup.bindToClick(alisonButton, menu);
@@ -190,6 +203,7 @@
         }
 
         _setupTsClipboard();
+        return messageGroupId;
     }
 
     class CorrespondenceCommon {

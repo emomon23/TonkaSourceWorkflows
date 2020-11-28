@@ -22,7 +22,11 @@
 
     }
 
-    const _scrapeConnectionIdentifiers = () => {
+    const _scrapeCurrentCandidate = () => {
+
+    }
+
+    const _scrapeConnectionIdentifiers = async () => {
         const nameElement = $('div[class*="participant-meta"] h3[class*="name"] a[class*="participant-name"]')[0];
         const headlineElement = $('div[class*="participant-meta"] p[class*="headline"]')[0];
         const imageElement = $('div[class*="participant-profile"] div[class*="basic-info"] img')[0];
@@ -46,7 +50,7 @@
     }
 
     const _scrapeActiveInmailContactFromUi = async () => {
-        const candidate = _scrapeConnectionIdentifiers();
+        const candidate = await _scrapeConnectionIdentifiers();
         const sendButton = $('article button[class*="submit-message"][type="submit"]')[0]
         const buttonsContainer = $('article p[class*="headline"]')[0];
         const textArea = $('article textarea[name*="message"]')[0]
@@ -62,7 +66,7 @@
 
     const _delayDocReady = async () => {
         await tsCommon.sleep(1000);
-        correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi)
+        correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi, _scrapeConnectionIdentifiers)
         _bindToConversationItems();
     }
 

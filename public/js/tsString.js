@@ -150,6 +150,51 @@
         return result;
     }
 
+    const _convertFullNameToObject = (fullName) => {
+        if (!fullName || fullName.length === 0){
+            return null;
+        }
+
+        const parts = fullName.split(' ');
+        const result = {
+            firstName: tsUICommon.cleanseTextOfHtml(parts[0])
+        }
+
+        if (parts.length > 1){
+            result.lastName = tsUICommon.cleanseTextOfHtml(parts[parts.length - 1]);
+        }
+
+        return result;
+    }
+
+    const _cleanText = (str) => {
+        if (typeof str === "string") {
+            let result = str;
+            if (str && str.length > 0){
+                result = str.split('\n').join('').trim();
+                result = _stripExcessSpacesFromString(str);
+                result = tsUICommon.cleanseTextOfHtml(result);
+            }
+
+            return result;
+        }
+
+        try {
+            const element = $(str);
+            let text = $(element).text ? $(element).text() : null;
+            if (!text) {
+                text = $(element).val ? $(element).val() : null;
+            }
+
+            if (text){
+                return _cleanText(text);
+            }
+
+            return '';
+        } catch (e) {
+            return '';
+        }
+    }
     class TSString {
         findDelimitedStrings = _findDelimitedStrings;
         findPrecedenceWithinString = _findPrecedenceWithinString;
@@ -159,6 +204,8 @@
         toBoolean = _toBoolean;
         toStringify = _toStringify;
         getClosestMatch = _getClosestMatch;
+        convertFullNameToObject = _convertFullNameToObject;
+        cleanText = _cleanText;
     }
 
     window.tsString = new TSString();

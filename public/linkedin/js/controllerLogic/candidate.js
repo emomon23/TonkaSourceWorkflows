@@ -174,6 +174,13 @@
             totalFound = totalFound.filter(t => t.headline.toLowerCase().indexOf(searchObject.headline.toLowerCase()) >= 0);
         }
 
+        if (totalFound && totalFound.length > 1 && searchObject.linkedIn){
+            const temp = totalFound.filter(t => t.linkedIn === searchObject.linkedIn);
+            if (temp && temp.length > 0){
+                totalFound = temp;
+            }
+        }
+
         if (totalFound.length > 1 && searchObject.imageUrl){
             const imageUrls = totalFound.map(f => f.imageUrl);
             let closestImageMatch = tsString.getClosestMatch(searchObject.imageUrl, imageUrls);
