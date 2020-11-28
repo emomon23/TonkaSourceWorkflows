@@ -187,6 +187,11 @@
             tsCommon.sleep(20);
         }
     }
+
+    const _notify = (msg) => {
+        // lets use growl for this or some other toast?
+        console.log(msg);
+    }
     class TsUICommon {
         constructor (){}
 
@@ -203,6 +208,7 @@
         scrollToBottom = _scrollToBottom;
         scrollTilTrue = _scrollTilTrue;
         saveItemLocally = _saveItemLocally;
+        notify = _notify;
         getItemLocally = _getItemLocally;
         executeDelete = _executeDelete;
     }
