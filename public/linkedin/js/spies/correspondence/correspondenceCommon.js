@@ -34,7 +34,7 @@
         try {
             if (tsClipboardData.id){
                 const candidate = customCandidateScraperCallback();
-                tsClipboardData.text = tsTemplateProcessor.convertToTemplate(tsClipboardData.text, candidate);
+                tsClipboardData.text = tsTemplateProcessor.convertToTemplate(tsClipboardData.text);
                 tsClipboardRepository.save(tsClipboardData);
             }
         } catch (e) {
@@ -110,7 +110,13 @@
             await tsCommon.sleep(1000);
             textAreaElement = $('div[class*="message-container"]');
             textAreaElement = textAreaElement.length ? textAreaElement[textAreaElement.length - 1] : null;
-            text = textAreaElement ? $(textAreaElement).text().replace("An error occurred. Please try again.", "") : '';
+            text = textAreaElement ? $(textAreaElement).text() : '';
+
+            const stupidStringsInLinkedIn = ['An error occurred. Please try again.', 'An error occurred.', 'An error occured.', 'Please try again'];
+            stupidStringsInLinkedIn.forEach((s) => {
+                text = text.split(s).join('');
+            })
+            text = text.split('\n').filter(t => t && t.trim().length > 0).join('');
         }
 
         const toggleButton = $(`img[class*="${tsMsgId}"]`)[0];
@@ -130,7 +136,12 @@
 
     const _sendButtonClick = async (element) => {
         const correspondence = await _getMessageSent(element);
-        await connectionLifeCycleLogic.recordCorrespondence(correspondence);
+        if (correspondence && correspondence.text.length){
+            await connectionLifeCycleLogic.recordCorrespondence(correspondence);
+        }
+        else {
+            tsCommon.logError('Unable to get text send in correspondenceCommon._sendButtonClick');
+        }
     }
 
     const _onMouseClick = (e) => {

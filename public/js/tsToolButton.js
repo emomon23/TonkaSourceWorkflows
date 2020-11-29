@@ -160,6 +160,7 @@
         prependButton = _prependButton;
         appendButton =  _appendButton;
         containsButton = _containsButton;
+        tonkaSourceLogoUrl = tonkaSourceLogo;
        // createImageElement = _createImageElement
     }
 

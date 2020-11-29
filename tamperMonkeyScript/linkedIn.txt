@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LinkedIN Recruiter Parser
 // @namespace    http://tampermonkey.net/
-// @version      0.1271
+// @version      0.137
 // @description  try to take over the world!
 // @author       You
 // @domain       linkedin.com
@@ -143,12 +143,5 @@
 // ==/UserScript==
 
 (() => {
-    // END CSS
-
-    setTimeout(() => {
-        $('a[href*="/recruiter/profile/"]').attr('target', '_blank');
-        $('a:contains("Public Profile")').attr('target', '');
-
-    }, 500);
     console.log("Tamper Monkey: LinkedIn Recruiter Parser user script running...");
 })();

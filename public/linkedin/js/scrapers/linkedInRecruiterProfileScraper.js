@@ -253,13 +253,19 @@
         if (_currentPage === linkedInConstants.pages.RECRUITER_PROFILE) {
             linkedInRecruiterProfileScraper.lastProfileScraped = await _scrapeProfile();
         }
+
+        // Profile pages won't pop up a new window
+        const publicProfileLink = await tsUICommon.jQueryWait('li[class*="public-profile"] a');
+        await tsCommon.sleep(100);
+        $(publicProfileLink).click((e) => {
+            const link = $(e.target);
+            $(link).attr('target', '');
+        })
+
+        linkedInApp.showTsReady();
     }
 
     $(document).ready(() => {
-        // Profile pages won't pop up a new window
-        $('li[class*="public-profile"] a')
-            .attr('target', '');
-
        _delayReady();
     })
 })();

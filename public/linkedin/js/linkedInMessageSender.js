@@ -1,17 +1,17 @@
 (function () {
     const _getPublicProfile_MessageButtonSelector = (publicProfileWindow) => {
-        let linkButton = tsCommon.findAHyperLink('/messaging/thread/', publicProfileWindow.document);
-        if (linkButton !== null){
+        let linkButton = publicProfileWindow.document.querySelector('button[aria-label*="Connect with"]');
+        if (linkButton){
             return {
-                type: 'MESSAGE',
+                type: 'CONNECTION REQUEST',
                 clickable: linkButton
             }
         }
 
-        linkButton = publicProfileWindow.document.querySelector('button[aria-label*="Connect with"]');
-        if (linkButton !== undefined && linkButton !== null){
+        linkButton = tsCommon.findAHyperLink('/messaging/thread/', publicProfileWindow.document);
+        if (linkButton){
             return {
-                type: 'CONNECTION REQUEST',
+                type: 'MESSAGE',
                 clickable: linkButton
             }
         }
@@ -50,8 +50,9 @@
         $(publicProfileWindow.document).find('[name*="message"]').focus();
         publicProfileWindow.document.execCommand('insertText', true, messageToSend);
 
-        await tsCommon.sleep(1000);
+        await tsCommon.sleep(500);
         $(publicProfileWindow.document).find('button[aria-label*="Send now"]')[0].click();
+        await tsCommon.sleep(100);
         return true;
     }
 

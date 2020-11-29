@@ -18,33 +18,22 @@
         return result;
     }
 
-    const _getOrFindTheMemberIdFromInput = async (input) => {
+    const _findCandidate = async (input) => {
         if (!(input.memberId || (input.firstName && input.lastName))){
             throw new error('ERROR - Unable to record correspondence.  connection is not an object or missing identifiers');
         }
 
-        if (!isNaN(input)){
-            return input;
-        }
-
-        let memberId = input.memberId ? input.memberId : null;
-
-        if (!memberId){
-            const candidateRecord = await candidateController.searchForCandidate(input);
-            memberId = candidateRecord ? candidateRecord.memberId : null;
-        }
-
-        return memberId;
+        return  await candidateController.searchForCandidate(input);
     }
 
     const _findConnectionRequest = async (input) => {
-        const memberId = await _getOrFindTheMemberIdFromInput(input);
+        const candidate = await _findCandidate(input);
 
-        if (!memberId){
+        if (!candidate){
             return null;
         }
 
-        return await tsConnectionHistoryRepo.get(memberId);
+        return await tsConnectionHistoryRepo.get(candidate.memberId);
     }
 
     const _getFirstAndLastNameFromInput = async (input, memberId) => {
@@ -58,10 +47,9 @@
 
     const _saveConnectionRequest = async (noteSent, inputCandidate) => {
         try {
-            const memberId = await _getOrFindTheMemberIdFromInput(inputCandidate);
-            const candidateRecord = await _getFirstAndLastNameFromInput(inputCandidate, memberId);
+            const candidateRecord = await _findCandidate(inputCandidate);
 
-            if (!memberId){
+            if (!candidateRecord){
                 return null;
             }
 
@@ -69,16 +57,16 @@
             const linkedInProfileData = {
                 lastName: candidateRecord.lastName,
                 firstName: candidateRecord.firstName,
-                memberId,
+                memberId: candidateRecord.memberId,
                 noteId: noteObject.noteId,
                 dateConnectionRequestSent: (new Date()).getTime()
             }
 
             await tsConnectionHistoryRepo.insert(linkedInProfileData);
 
-            let history = {
+            const history = {
                 candidate: candidateRecord,
-                text: note,
+                text: noteSent,
                 type: 'CR',
                 recordCorrespondence: true
             }
@@ -87,20 +75,23 @@
             return {noteObject, linkedInProfileData};
 
         } catch (e) {
-            console.log(`Error in _saveConnectionRequest. ${e.message}`);
-            window.lastCrError = e;
+            tsCommon.logError(e, '_saveConnectionRequest');
             return null;
         }
     }
 
     const _recordConnectionRequestAccepted = async (connection) => {
-        const connectionEntry = await _findConnectionRequest(connection);
-        if (connectionEntry) {
-            connectionEntry.dateConnectionRequestAcceptanceRecorded = (new Date()).getTime();
-            await tsConnectionHistoryRepo.update(connectionEntry);
-        }
+        try {
+            const connectionEntry = await _findConnectionRequest(connection);
+            if (connectionEntry) {
+                connectionEntry.dateConnectionRequestAcceptanceRecorded = (new Date()).getTime();
+                await tsConnectionHistoryRepo.update(connectionEntry);
+            }
 
-        return connectionEntry;
+            return connectionEntry;
+        } catch (e) {
+            tsCommon.logError(e, '_recordConnectionRequestAccepted');
+        }
     }
 
     const _recordCorrespondenceOnConnectionRequestRecord = async (candidate) => {
@@ -119,52 +110,57 @@
         }
     }
 
-    const _recordCorrespondence = async (correspondenceObject, isConnectionRequest = false) => {
-        const candidate = await candidateController.searchForCandidate(correspondenceObject.candidate);
-        if (!(candidate && candidate.memberId)){
-            tsCommon.log("Unable to find candidate to record correspondence!", 'ERROR');
-            return;
-        }
+    const _recordCorrespondence = async (correspondenceObject) => {
+        try {
+            const candidate = await candidateController.searchForCandidate(correspondenceObject.candidate);
 
-        if (!isConnectionRequest){
-            await _recordCorrespondenceOnConnectionRequestRecord(candidate);
-        }
+            if (!(candidate && candidate.memberId)){
+                tsCommon.logError("Unable to find candidate to record correspondence!");
+                return;
+            }
 
-        if (correspondenceObject.recordCorrespondence !== false){
-            let update = true;
-            let snippet = correspondenceObject.text ? correspondenceObject.text : '';
-            snippet = snippet.length > 50 ? snippet.substr(0, 50) : snippet;
+            if (correspondenceObject.type === 'public-im'){
+                await _recordCorrespondenceOnConnectionRequestRecord(candidate);
+            }
 
-            let correspondence = await tsCorrespondenceHistoryRepo.get(candidate.memberId);
-            if (!correspondence){
-                update = false;
-                correspondence = {
-                    memberId: candidate.memberId,
-                    lastName: candidate.lastName,
-                    firstName: candidate.firstName,
-                    history: []
+            if (correspondenceObject.recordCorrespondence !== false){
+                let update = true;
+                let snippet = correspondenceObject.text ? correspondenceObject.text : '';
+                snippet = snippet.length > 50 ? snippet.substr(0, 50) : snippet;
+
+                let correspondence = await tsCorrespondenceHistoryRepo.get(candidate.memberId);
+                if (!correspondence){
+                    update = false;
+                    correspondence = {
+                        memberId: candidate.memberId,
+                        lastName: candidate.lastName,
+                        firstName: candidate.firstName,
+                        history: []
+                    }
+                }
+
+                correspondence.lastMessageSentDate = (new Date()).getTime();
+                correspondence.lastMessageType = correspondenceObject.type;
+
+                if (correspondenceObject.subject){
+                    correspondence.lastMessageSubject = correspondenceObject.subject;
+                }
+
+                if (snippet && snippet.length > 0){
+                    correspondence.lastMessageSnippet = snippet;
+                }
+
+                correspondence.history.push({date: correspondence.lastMessageSentDate, type: correspondence.lastMessageType});
+
+                if (update){
+                    await tsCorrespondenceHistoryRepo.update(correspondence);
+                }
+                else {
+                    await tsCorrespondenceHistoryRepo.insert(correspondence);
                 }
             }
-
-            correspondence.lastMessageSentDate = (new Date()).getTime();
-            correspondence.lastMessageType = correspondenceObject.type;
-
-            if (correspondenceObject.subject){
-                correspondence.lastMessageSubject = correspondenceObject.subject;
-            }
-
-            if (snippet && snippet.length > 0){
-                correspondence.lastMessageSnippet = snippet;
-            }
-
-            correspondence.history.push({date: correspondence.lastMessageSentDate, type: correspondence.lastMessageType});
-
-            if (update){
-                await tsCorrespondenceHistoryRepo.update(correspondence);
-            }
-            else {
-                await tsCorrespondenceHistoryRepo.insert(correspondence);
-            }
+        } catch (e) {
+           tsCommon.logError(e, '_recordCorrespondence')
         }
     }
 

@@ -171,13 +171,37 @@
         }
 
         if (totalFound && totalFound.length > 1 && searchObject.headline){
-            totalFound = totalFound.filter(t => t.headline.toLowerCase().indexOf(searchObject.headline.toLowerCase()) >= 0);
+            const searchHeadline =  searchObject.headline.split("&amp;").join("&").split('&#x27;').join("'").toLowerCase();
+            totalFound = totalFound.filter((t) => {
+                const foundHeadline = t.headline.split("&amp;").join("&").split('&#x27;').join("'").toLowerCase();
+                return foundHeadline.indexOf(searchHeadline) >= 0
+            });
         }
 
         if (totalFound && totalFound.length > 1 && searchObject.linkedIn){
             const temp = totalFound.filter(t => t.linkedIn === searchObject.linkedIn);
             if (temp && temp.length > 0){
                 totalFound = temp;
+            }
+        }
+
+        if (totalFound.length > 1){
+            const firstConnections = totalFound.filter((c) => {
+                let result = false;
+                if (c.alisonConnections){
+                    for (let k in c.alisonConnections){
+                        if (c.alisonConnections[k] === "1" || c.alisonConnections[k] === 1){
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+
+                return result;
+            });
+
+            if (firstConnections && firstConnections.length > 0){
+                totalFound = firstConnections;
             }
         }
 

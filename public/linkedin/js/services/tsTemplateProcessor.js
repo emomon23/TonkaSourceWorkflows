@@ -21,8 +21,8 @@
     const _convertToTemplate = (message, candidate) => {
         let result = message;
 
-            if (!(candidate && candidate.firstName)){
-        return _convertToTemplateBestGuess(message);
+        if (!(candidate && candidate.firstName)){
+            return _convertToTemplateBestGuess(message);
         }
 
         const firstName = candidate.firstName;

@@ -13,7 +13,7 @@
     }
 
     const _logError = (e, deets) => {
-        let msg = `ERROR - ${e.message}.`;
+        let msg = `ERROR - ${e.message || e}.`;
         if (deets && deets.length){
             msg += ` (${deets})`;
         }

@@ -9,7 +9,11 @@
             const note = textArea ? $(textArea).val() : '';
             const profile = linkedInPublicProfileScraper.currentProfileLite;
 
-            const noteTemplate = tsTemplateProcessor.convertToTemplate(note, profile);
+            let noteTemplate = tsTemplateProcessor.convertToTemplate(note, profile);
+
+            // in case we fat fingered a name
+            noteTemplate = noteTemplate === note ? tsTemplateProcessor.convertToTemplate(note) : noteTemplate;
+
             if (await connectionLifeCycleLogic.saveConnectionRequest(noteTemplate, profile)){
                 console.log("Connection Request saved to history")
             }

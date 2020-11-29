@@ -5,24 +5,12 @@
     }
 
     const _bindToConversationItems = async () => {
-        let conversationLinks = $('a[class*="conversation-link"]');
+        let conversationLinks = await tsUICommon.jQueryWait('a[class*="conversation-link"]');
 
-        for (let i = 0; i < 20; i++){
-            if ($(conversationLinks).length > 5) {
-                // eslint-disable-next-line no-loop-func
-                $(conversationLinks).click(() => {
-                    _delayCallingSetupSpy();
-                });
-                break;
-            }
-
-            // eslint-disable-next-line no-await-in-loop
-            await tsCommon.sleep(500);
-        }
-
-    }
-
-    const _scrapeCurrentCandidate = () => {
+        await tsCommon.sleep(200);
+        $(conversationLinks).click(() => {
+            _delayCallingSetupSpy();
+        });
 
     }
 
@@ -67,7 +55,8 @@
     const _delayDocReady = async () => {
         await tsCommon.sleep(1000);
         correspondenceCommon.setupSpy(document, _scrapeActiveInmailContactFromUi, _scrapeConnectionIdentifiers)
-        _bindToConversationItems();
+        await _bindToConversationItems();
+        linkedInApp.showTsReady();
     }
 
     $(document).ready(() => {
