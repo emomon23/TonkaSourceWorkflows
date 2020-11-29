@@ -162,6 +162,12 @@
         return input;
     }
 
+    const _alisonButtonClick = (e) => {
+        // eslint-disable-next-line no-alert
+        const menuItem = window.prompt(`1. Record Correspondence. \n 2. Scrape Contact Info. \n 3. Schedule Meeting. \n 4. Save Contact`);
+        console.log(menuItem);
+    }
+
     const _setupSpy = async (messageWindow, messageWindowScraperCallback, customCandidateScraper, customPasteHandler = null) => {
         customCandidateScraperCallback = customCandidateScraper;
         customPasteHandlerCallback = customPasteHandler;
@@ -191,11 +197,10 @@
                 tsToolButton.appendButton(header, "tiny", "tonkaSourceLogo", tsLogoKey, `record-message-switch ${messageGroupId}`, true);
                 const alisonButton = tsToolButton.appendButton(header, "tiny", "hotAlison1", `${key}-popup`, 'message-action-menu-container', false);
 
-                $(alisonButton).addClass('alisonButton').attr('ts-message-id', messageGroupId);
-
-                const menu = tsContactMenu.buildContactMenu(candidate);
-
-                tsPopup.bindToClick(alisonButton, menu);
+                $(alisonButton)
+                    .addClass('alisonButton')
+                    .attr('ts-message-id', messageGroupId)
+                    .click(_alisonButtonClick);
 
                 const hiddenInput = _createHiddenInput(messageGroupId, candidate);
 
