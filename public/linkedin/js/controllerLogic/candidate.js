@@ -171,16 +171,58 @@
         }
 
         if (totalFound && totalFound.length > 1 && searchObject.headline){
-            totalFound = totalFound.filter(t => t.headline.toLowerCase().indexOf(searchObject.headline.toLowerCase()) >= 0);
+            const searchHeadline =  searchObject.headline.split("&amp;").join("&").split('&#x27;').join("'").toLowerCase();
+            totalFound = totalFound.filter((t) => {
+                const foundHeadline = t.headline.split("&amp;").join("&").split('&#x27;').join("'").toLowerCase();
+                return foundHeadline.indexOf(searchHeadline) >= 0
+            });
         }
 
+        if (totalFound && totalFound.length > 1 && searchObject.linkedIn){
+            const temp = totalFound.filter(t => t.linkedIn === searchObject.linkedIn);
+            if (temp && temp.length > 0){
+                totalFound = temp;
+            }
+        }
+
+        if (totalFound.length > 1){
+            const firstConnections = totalFound.filter((c) => {
+                let result = false;
+                if (c.alisonConnections){
+                    for (let k in c.alisonConnections){
+                        if (c.alisonConnections[k] === "1" || c.alisonConnections[k] === 1){
+                            result = true;
+                            break;
+                        }
+                    }
+                }
+
+                return result;
+            });
+
+            if (firstConnections && firstConnections.length > 0){
+                totalFound = firstConnections;
+            }
+        }
+
+        if (totalFound.length > 1 && searchObject.imageUrl){
+            const imageUrls = totalFound.map(f => f.imageUrl);
+            let closestImageMatch = tsString.getClosestMatch(searchObject.imageUrl, imageUrls);
+            if (closestImageMatch && closestImageMatch.resultCompareString){
+                totalFound = totalFound.filter(t => t.imageUrl === closestImageMatch.resultCompareString);
+            }
+        }
         return totalFound && totalFound.length === 1 ? totalFound[0] : null;
     }
 
     const _findConnection = async (searchObject, filterOnDateConnectionRequestAcceptanceRecorded = false) => {
         let result = null;
+        if (!searchObject){
+            return null;
+        }
+
         if (searchObject.memberId) {
-            let search = searchObject.memberId && !isNaN(searchObject.memberId) ? Number.parseInt(searchObject.memberId) : searchObject.memberId;
+            let search = !isNaN(searchObject.memberId) ? Number.parseInt(searchObject.memberId) : searchObject.memberId;
             result = await candidateRepository.get(search);
             if (result){
                 return result;
@@ -188,7 +230,7 @@
         }
 
         if (searchObject.imageUrl){
-            result = await searchObject.getByIndex('imageUrl', searchObject.imageUrl);
+            result = await candidateRepository.getByIndex('imageUrl', searchObject.imageUrl);
             if (result && result.length === 1){
                 return result[0];
             }
@@ -199,7 +241,7 @@
         if (searchObject.headline){
             result = await candidateRepository.getByIndex('headline', searchObject.headline);
             if (result && result.length > 0){
-                result = result.filter(r => r.firstName === input.firstName
+                result = result.filter(r => r.firstName === searchObject.firstName
                                     && lNames.length === 0 || lNames.indexOf(r.lastName) >= 0);
 
                 if (result.length === 1){

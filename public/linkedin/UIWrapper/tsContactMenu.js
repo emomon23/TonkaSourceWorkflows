@@ -18,13 +18,25 @@
         $(container).append(listItem);
     }
 
+    const _delayBinding = async () => {
+        await tsCommon.sleep(1000);
+        $('.contact-menu-item').click(async (e) => {
+            tsPopup.closePopup();
+        });
+    }
+
     const _buildContactMenu = (contactIdentifier) => {
         const list = document.createElement('ul');
         _createMenuItem(list, 'Record Contact', 'record-contact', contactIdentifier);
         _createMenuItem(list, 'Scrape Contact Info', 'scrape-info', contactIdentifier);
         _createMenuItem(list, 'Schedule a Call', 'schedule-call', contactIdentifier);
 
-        return list;
+        const listContainer = $(document.createElement('div'))
+                                        .append(list);
+
+        _delayBinding();
+
+        return listContainer;
     }
 
     class TSContactMenu {

@@ -1,4 +1,5 @@
 (function () {
+    const _readyImage = "https://media-exp1.licdn.com/dms/image/C4E0BAQG13PuOrrmXTA/company-logo_100_100/0?e=1614211200&v=beta&t=mALyacgd2jO4--FlqqeP5ftGmI0FUsCRz6AJwuCq4rw";
     const _activeOpportunityKey = linkedInConstants.localStorageKeys.ACTIVE_OPPORTUNITY;
     const _roleKey = linkedInConstants.localStorageKeys.ROLE;
     const _saveOnRecruiterProfileKey = linkedInConstants.localStorageKeys.SAVE_ON_RECRUITER_PROFILE;
@@ -47,6 +48,30 @@
         }
         else {
             $(element).removeAttr('style');
+        }
+    }
+
+    const _getOrCreateLogoImage = (container) => {
+        // linked in results linked in logo has an image, linked in profile logo does not
+        let img = $(container).find('img')[0];
+        if (!img){
+            img = document.createElement('img');
+            $(img).attr('style', 'height:32px; width:32px');
+
+            $(container).prepend(img);
+        }
+
+        return img
+    }
+
+    const _showTsReady = async () => {
+        const liLogoLinks = await tsUICommon.jQueryWait(['a[class*="linkedin-logo"]', 'a[class*="logo MINI"]']);
+        if (liLogoLinks && liLogoLinks.length){
+            const liLogo = liLogoLinks[0];
+            $(liLogo).attr('class', '');
+
+            let logoImg = _getOrCreateLogoImage(liLogo);
+            $(logoImg).attr('src', _readyImage).attr('class', '');
         }
     }
 
@@ -238,6 +263,7 @@
         getActiveRole = _getActiveRole;
         getAlisonTags = _getAlisonTags;
         persistSkillsGPASearchFilter = _persistSkillsGPASearchFilter;
+        showTsReady = _showTsReady;
     }
 
     window.linkedInApp = new LinkedInApp();

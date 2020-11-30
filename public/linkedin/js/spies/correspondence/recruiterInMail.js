@@ -32,7 +32,8 @@
         return memberId && !isNaN(memberId) ? memberId : null;
     }
     const _scrapeDialogContact = async (dialog) => {
-        const span = $(dialog).find('span[class*="recipient-name"]')[0];
+        const selector = 'span[class*="recipient-name"]';
+        const span = dialog ? $(dialog).find(selector)[0] : $(selector)[0];
         if (!span){
             return null;
         }
@@ -72,7 +73,8 @@
             subject,
             textArea,
             sendButton,
-            header: buttonContainer
+            header: buttonContainer,
+            type: 'recruiter-in-mail'
         };
     }
 
@@ -81,7 +83,7 @@
 
         let found = $('div[class*="popup-dialog-wrapper"]')[0];  // aria-labelledby = inmail-header
         if (found){
-            correspondenceCommon.setupSpy(found, _scrapeRecruiterInMailDialog)
+            correspondenceCommon.setupSpy(found, _scrapeRecruiterInMailDialog, _scrapeDialogContact)
         }
     }
 

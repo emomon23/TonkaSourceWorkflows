@@ -74,9 +74,12 @@
         const img = _createImageElement(buttonImage, classValue);
         $(img).attr('toggle', toggle ? '1' : '0');
 
-        $(img).bind('click', (e) => {
-            const eImg = e.target;
-            const toggle = $(eImg).attr('toggle') === '1' ? true : false;
+        const imgContainer = document.createElement('span');
+        $(imgContainer).append(img);
+
+        $(imgContainer).bind('click', (e) => {
+            let eImg = e.target.nodeName.toLowerCase() === "img" ? e.target : $(e.target).find('img')[0];
+            const toggle = eImg ? $(eImg).attr('toggle') === '1' ? true : false : false;
 
             if (toggle){
                 let currentOpacity = $(eImg).css("opacity") || 1;
@@ -98,10 +101,10 @@
 
 
         if (shouldAppendTheLogo){
-            $(container).append(img);
+            $(container).append(imgContainer);
         }
         else {
-            $(container).prepend(img);
+            $(container).prepend(imgContainer);
         }
 
 
@@ -124,7 +127,7 @@
         }
 
         $(img).attr('state', opacity < 1 ? "0" : "1");
-        return img;
+        return imgContainer;
     }
 
     const _prependButton = (container, sizeIndicator, buttonImage, id = null, classValue = null, toggle = true, initialOpacityBetweenZeroAndOne = 1) => {
@@ -157,6 +160,7 @@
         prependButton = _prependButton;
         appendButton =  _appendButton;
         containsButton = _containsButton;
+        tonkaSourceLogoUrl = tonkaSourceLogo;
        // createImageElement = _createImageElement
     }
 

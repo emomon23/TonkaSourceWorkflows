@@ -12,6 +12,15 @@
         }
     }
 
+    const _logError = (e, deets) => {
+        let msg = `ERROR - ${e.message || e}.`;
+        if (deets && deets.length){
+            msg += ` (${deets})`;
+        }
+
+        _log(msg, 'ERROR');
+    }
+
     const _sleep = (ms) => {
         _log("Sleeping for " + ms + "ms");
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -188,6 +197,16 @@
         _findAHyperLink(hrefContains, documentReference).click();
     }
 
+    const _newGuid = (removeDashes = false, length = 32) => {
+        let result = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+
+        result = removeDashes ? result.replace(/-/gi, '') : result;
+        return length < result.length ? result.substr(0, length) : result;
+    }
+
     const _navigateToHyperLink = (hrefContains, parentWindow = null) => {
         if (parentWindow === null){
             parentWindow = window;
@@ -253,7 +272,9 @@
         constructor (){}
 
         log = _log;
+        logError = _logError;
         sleep = _sleep;
+        newGuid = _newGuid;
         httpGetJson = _httpGetJson;
         httpPostJson = _httpPostJson;
         httpGetText = _httpGetText;

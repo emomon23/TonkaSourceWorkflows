@@ -84,22 +84,26 @@
         return _findPreviousElement($(startElement).parent()[0], selector);
      }
 
-     const _findFirstDomElement = (arrayOfSelectors) => {
-         let result = null;
+     const _findFirstDomElement = (selectors) => {
+        const arrayOfSelectors = Array.isArray(selectors) ? selectors : [selectors];
+        let result = null;
 
-         for (let i = 0; i < arrayOfSelectors.length; i++){
+        for (let i = 0; i < arrayOfSelectors.length; i++){
             result = _findDomElements(arrayOfSelectors[i]);
             if (result !== null){
                 break;
             }
-         }
+        }
 
-         return result;
+        return result;
      }
 
     const _cleanseTextOfHtml = (text) => {
         const tempHtml = `<div>${text}</div>`;
-        return $(tempHtml).text();
+        let result = $(tempHtml).text();
+        result = result.split("&amp;").join("&").split('&#x27;').join("'");
+
+        return result;
     }
 
     const _rebind = (selector, eventName, functionReference_NOT_AnAnonomousFunction) => {
@@ -179,6 +183,39 @@
 
         return result;
     }
+
+    const _executeDelete = async (element, times) => {
+        $(element).focus()
+        for (let i = 0; i < times; i++){
+            document.execCommand('delete');
+            tsCommon.sleep(20);
+        }
+    }
+
+    const _notify = (msg) => {
+        // lets use growl for this or some other toast?
+        console.log(msg);
+    }
+
+    const _jQueryWait = async (selectors, maxWaitMS = 3000) => {
+        const sleep = 100;
+        const loops = maxWaitMS / sleep;
+
+        let found = _findFirstDomElement(selectors);
+        for (let i = 0; i < loops; i++){
+            if (found && found.length > 0){
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(sleep);
+                break;
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(sleep);
+            found = _findFirstDomElement(selectors)
+        }
+
+        return found;
+    }
     class TsUICommon {
         constructor (){}
 
@@ -195,7 +232,10 @@
         scrollToBottom = _scrollToBottom;
         scrollTilTrue = _scrollTilTrue;
         saveItemLocally = _saveItemLocally;
+        notify = _notify;
         getItemLocally = _getItemLocally;
+        executeDelete = _executeDelete;
+        jQueryWait = _jQueryWait;
     }
 
     window.tsUICommon = new TsUICommon();

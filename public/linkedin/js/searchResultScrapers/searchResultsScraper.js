@@ -143,40 +143,6 @@
         }
     }
 
-    const _getCandidateKeywordCount = async (candidateNameOrId, commaSeparatedListOfKeywords) => {
-        const candidate = _searchCandidates(candidateNameOrId);
-        if (candidate){
-            liTag = _pageLiTags[candidate.memberId];
-            if (!liTag){
-                tsCommon.log(`Unable to find link for ${candidate.firstName} ${candidate.lastName}`);
-                return;
-            }
-
-            var href = "https://www.linkedin.com" + $(`#search-result-${candidate.memberId} a`).attr('href');
-            const candidateWindow = window.open(href);
-
-            await tsCommon.sleep(2000);
-            const baseRef = $(candidateWindow.document).find(linkedInSelectors.recruiterProfilePage.profilePrimaryContent);
-            const keyWords = commaSeparatedListOfKeywords.split(",");
-            const result = [];
-
-            keyWords.forEach((key) => {
-                const k = key.trim();
-                const count = tsUICommon.getWordCount(baseRef, k);
-                result.push({key: k, count});
-            });
-
-            candidateWindow.close();
-            await tsCommon.sleep(2000);
-
-            // eslint-disable-next-line consistent-return
-            return result;
-        }
-        else {
-            tsCommon.log(`Unable to find candidate '${candidateNameOrId}'`);
-        }
-    }
-
     const _shouldWeSkipGettingDetailsOnThisCandidate = (candidate) => {
         if (candidate.isTechnicallyRelevant === false){
             return true;
@@ -369,10 +335,6 @@
                     candidateController.saveCandidate(trimmedCandidate);
                 } catch (e) {
                     tsCommon.log(e.message, 'ERROR');
-                }
-
-                if (trimmedCandidate.isJobSeeker || trimmedCandidate.isActivelyLooking){
-                    await linkedInApp.upsertContact(trimmedCandidate);
                 }
             });
 

@@ -20,6 +20,56 @@
         return matches;
     }
 
+    const _getMaxCharIndexMatch = (source, compare) => {
+		if (!(source && compare)){
+    	    return -1;
+        }
+
+		const sArray = [...source];
+        const cArray = [...compare];
+        const toLength = source.length < compare.length ? source.length : compare.length;
+
+        let result = -1;
+
+        for (let i = 0; i < toLength; i++){
+            if (sArray[i] !== cArray[i]){
+                break;
+            }
+
+            result = i;
+        }
+
+        return result;
+    }
+
+    const _getClosestMatch = (source, arrayToCompareTo) => {
+        let resultCompareString = null;
+        let maxCharIndex = -1;
+        let matchFoundOnIndex = -1;
+        const matchCounters =  {};
+
+        for (let i = 0; i < arrayToCompareTo.length; i++){
+            const index = _getMaxCharIndexMatch(source, arrayToCompareTo[i]);
+
+            if (index >= maxCharIndex){
+                maxCharIndex = index;
+                resultCompareString = arrayToCompareTo[i];
+                matchFoundOnIndex = i;
+                matchCounters[index] = matchCounters[index] ? matchCounters[index] + 1 : 1;
+            }
+        }
+
+        if ((!resultCompareString) || matchCounters[maxCharIndex] > 1){
+            return null
+        }
+
+        return {
+            matchFoundOnIndex,
+            resultCompareString,
+            maxCharMatchIndex : maxCharIndex
+        }
+    }
+
     const _stripExcessSpacesFromString = (text) => {
         if (typeof text !== 'string'){
             return null;
@@ -100,6 +150,51 @@
         return result;
     }
 
+    const _convertFullNameToObject = (fullName) => {
+        if (!fullName || fullName.length === 0){
+            return null;
+        }
+
+        const parts = fullName.split(' ');
+        const result = {
+            firstName: tsUICommon.cleanseTextOfHtml(parts[0])
+        }
+
+        if (parts.length > 1){
+            result.lastName = tsUICommon.cleanseTextOfHtml(parts[parts.length - 1]);
+        }
+
+        return result;
+    }
+
+    const _cleanText = (str) => {
+        if (typeof str === "string") {
+            let result = str;
+            if (str && str.length > 0){
+                result = str.split('\n').join('').trim();
+                result = _stripExcessSpacesFromString(str);
+                result = tsUICommon.cleanseTextOfHtml(result);
+            }
+
+            return result;
+        }
+
+        try {
+            const element = $(str);
+            let text = $(element).text ? $(element).text() : null;
+            if (!text) {
+                text = $(element).val ? $(element).val() : null;
+            }
+
+            if (text){
+                return _cleanText(text);
+            }
+
+            return '';
+        } catch (e) {
+            return '';
+        }
+    }
     class TSString {
         findDelimitedStrings = _findDelimitedStrings;
         findPrecedenceWithinString = _findPrecedenceWithinString;
@@ -108,6 +203,9 @@
         containsAll = _containsAll;
         toBoolean = _toBoolean;
         toStringify = _toStringify;
+        getClosestMatch = _getClosestMatch;
+        convertFullNameToObject = _convertFullNameToObject;
+        cleanText = _cleanText;
     }
 
     window.tsString = new TSString();
