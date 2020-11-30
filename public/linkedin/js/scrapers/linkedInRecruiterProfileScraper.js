@@ -217,7 +217,7 @@
                 });
 
             if (jobPosition){
-                jobPosition.description = scrapedExperience.description;
+                jobPosition.description = tsUICommon.cleanseTextOfHtml(scrapedExperience.description);
             }
         });
     }
@@ -232,7 +232,7 @@
 
         if (skillElements) {
             $(skillElements).each((index, skillElement) => {
-                skills.push($(skillElement).html());
+                skills.push($(skillElement).text());
             });
         }
 

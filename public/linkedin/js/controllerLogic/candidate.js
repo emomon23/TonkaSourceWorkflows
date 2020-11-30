@@ -21,6 +21,9 @@
             });
 
             if (match){
+                match.title = ip.title;
+                match.displayText = ip.displayText;
+
                 if (ip.description && ip.description.length){
                     // eg. This will happend when a 'lite candidate' has their profile scraped
                     match.description = ip.description;
