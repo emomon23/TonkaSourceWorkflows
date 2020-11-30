@@ -13,7 +13,10 @@
             c.firstName = tsUICommon.cleanseTextOfHtml(c.firstName);
             c.lastName = tsUICommon.cleanseTextOfHtml(c.lastName);
             c.city = tsUICommon.cleanseTextOfHtml(c.city);
-            _cleanJobHistoryCompanyNames(c);
+            c.industry = tsUICommon.cleanseTextOfHtml(c.industry);
+            c.headline = tsUICommon.cleanseTextOfHtml(c.headline);
+            c.summary = tsUICommon.cleanseTextOfHtml(c.summary);
+            _cleanJobHistory(c);
        })
     }
 
@@ -276,7 +279,7 @@
         return null;
     }
 
-    const _cleanJobHistoryCompanyNames = (candidate) => {
+    const _cleanJobHistory = (candidate) => {
         const findAndReplace = [{find: '&#x2F;', replace: '/'}, {find: '&amp;', replace: '&'}];
 
         if (candidate && candidate.positions && candidate.positions.length > 0){
@@ -287,6 +290,8 @@
                 });
 
                 p.companyName = tsUICommon.cleanseTextOfHtml(companyName);
+                p.title = tsUICommon.cleanseTextOfHtml(p.title);
+                p.displayText = tsUICommon.cleanseTextOfHtml(p.displayText);
             });
         }
     }

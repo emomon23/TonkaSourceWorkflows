@@ -419,6 +419,9 @@
     }
 
     const _processSkillStats = (skill, skillSearchPhrases, contact) => {
+        // Does contact have it in their headline
+        const isInHeadline = tsString.containsAny(contact.headline, skillSearchPhrases);
+
         // Does contact have it in their LinkedIn About/Summary?
         const isInSummary = tsString.containsAny(contact.linkedInSummary + ' ' + contact.summary, skillSearchPhrases);
 
@@ -439,18 +442,20 @@
             // Breadth: The number of different companies or roles using the same skill; makes you a potential lead.
             processedSkillStatistics[skill] = {
                 breadth: positionsWithSkill.length,
+                isInHeadline,
                 isInLinkedInSkills,
-                isInSummary,
                 isInSelfAssessedSkills,
+                isInSummary,
                 isInTags,
                 monthsOfUse: _calculateMonthsUsingSkill(positionsWithSkill),
                 monthsSinceLastUse: _calculateMonthsSinceLastUse(positionsWithSkill)
             };
-        } else if (isInSummary || isInLinkedInSkills || isInTags || isInSelfAssessedSkills) {
+        } else if (isInSummary || isInLinkedInSkills || isInTags || isInSelfAssessedSkills || isInHeadline) {
             processedSkillStatistics[skill] = {
+                isInHeadline,
                 isInLinkedInSkills,
-                isInSummary,
                 isInSelfAssessedSkills,
+                isInSummary,
                 isInTags,
             };
         }
