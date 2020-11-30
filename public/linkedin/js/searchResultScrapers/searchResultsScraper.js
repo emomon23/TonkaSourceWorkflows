@@ -347,7 +347,7 @@
             }
 
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
-            const companyAnalytics = positionAnalyzer.createCompanyAverageDurationObject(candidatesInResults);
+            const companyAnalytics = positionAnalyzer.processCompanyAnalytics(candidatesInResults);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
         }
     }

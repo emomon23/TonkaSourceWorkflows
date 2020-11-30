@@ -106,9 +106,9 @@
         return false;
     }
 
-    const _checkIfCompanyShouldBeSaved = (scrappedCandidateCompanyAverage) => {
-        const companyIdentifier = scrappedCandidateCompanyAverage.id || scrappedCandidateCompanyAverage.name;
-        const companyName = scrappedCandidateCompanyAverage.name;
+    const _checkIfCompanyShouldBeSaved = (scrapedCandidateCompanyAverage) => {
+        const companyIdentifier = scrapedCandidateCompanyAverage.id || scrapedCandidateCompanyAverage.name;
+        const companyName = scrapedCandidateCompanyAverage.name;
 
         const isCompanyBlackListed = _checkIfCompanyIdentifierIsContainedInList(companyIdentifier, companyName, BLACK_LIST_CONFIG);
         if (isCompanyBlackListed){
@@ -144,11 +144,11 @@
         return companyTitlesRepository.get(companyId);
     }
 
-    const _mapOutCompanyIdsInCompanyAverages = (companyAverages) => {
+    const _mapOutCompanyIdsInCompanyAnalytics = (companyAnalytics) => {
         const result = [];
         const ignoreKeys = ['id', 'name'];
 
-        for (let k in companyAverages){
+        for (let k in companyAnalytics){
             if (ignoreKeys.indexOf(k) === -1){
                 result.push(k);
             }
@@ -168,46 +168,6 @@
         }
 
         return result;
-    }
-
-    const _mergeSkills = (existingSkillsObject, scrapedEmploymentHistoryArray) => {
-        if (!(scrapedEmploymentHistoryArray && scrapedEmploymentHistoryArray.length)){
-            return existingSkillsObject || null;
-        }
-
-        let obj = existingSkillsObject || {};
-        const baseSkills = {
-                            "c#" : 0,
-                            "c++" : 0,
-                            "javascript" : 0,
-                            "java " : 0,
-                            "angular" : 0,
-                            "react" : 0,
-                            "ios" : 0,
-                            "android" : 0,
-                            "xamarin" : 0,
-                            "php" : 0,
-                            "azure" : 0,
-                            "aws" : 0,
-                            ".net" : 0,
-                            "selenium" : 0,
-                            "postgres" : 0,
-                            "ms sql" : 0,
-                            "mssql" : 0
-                        };
-
-        scrapedEmploymentHistoryArray.forEach((eh) => {
-            const title = (eh.lastTitle || '').toLowerCase();
-            for(let k in baseSkills) {
-                if (title.indexOf(k) >= 0){
-                    if (!obj[k]){
-                        obj[k] = true;
-                    }
-                }
-            }
-        });
-
-        return Object.keys(obj).length ? obj : null;
     }
 
     const _mergeTitles = (existingTitlesIndexObject, scrapedEmploymentHistoryArray) => {
@@ -275,12 +235,8 @@
             existing = false;
         }
 
-        const skillsAssessment = _mergeSkills(companySummary.skills, scrapedCompanyHistory.employmentHistory);
-        if (skillsAssessment){
-            companySummary.skills = skillsAssessment;
-        }
-
         companySummary.averageTurnover = _calculateTurnoverAverages(companyEmploymentHistories);
+        companySummary.skills = positionAnalyzer.mergeSkills(companySummary.skills, scrapedCompanyHistory.skills);
 
         if (existing){
             await companySummaryRepository.update(companySummary);
@@ -319,41 +275,41 @@
         return companyTitlesDoc;
     }
 
-    const _saveScrapedCandidatesPositionAnalysis = async (companyAverages) => {
+    const _saveCompanyAnalytics = async (companyAnalytics) => {
         if (! _checkIfCompanyAnalyticsIsTurnedOn()){
             return;
         }
 
-        const listOfCompanyIds = _mapOutCompanyIdsInCompanyAverages(companyAverages);
+        const listOfCompanyIds = _mapOutCompanyIdsInCompanyAnalytics(companyAnalytics);
         const existingSummaries = await companySummaryRepository.getSubset(listOfCompanyIds);
         const existingEmploymentHistories = await companyEmploymentHistoryRepository.getSubset(listOfCompanyIds);
         const existingTitles = await companyTitlesRepository.getSubset(listOfCompanyIds);
 
         for (let i = 0; i < listOfCompanyIds.length; i++){
-            const scrappedCandidateCompanyAverage = companyAverages[listOfCompanyIds[i]];
+            const scrapedCompanyAnalytics = companyAnalytics[listOfCompanyIds[i]];
 
-            if (_checkIfCompanyShouldBeSaved(scrappedCandidateCompanyAverage)){
+            if (_checkIfCompanyShouldBeSaved(scrapedCompanyAnalytics)){
                 // eslint-disable-next-line no-await-in-loop
-                const employmentHistory = await _saveEmploymentHistory(scrappedCandidateCompanyAverage, existingEmploymentHistories);
-
-                // eslint-disable-next-line no-await-in-loop
-                await _saveLiteCompanySummary(scrappedCandidateCompanyAverage, existingSummaries, employmentHistory);
+                const employmentHistory = await _saveEmploymentHistory(scrapedCompanyAnalytics, existingEmploymentHistories);
 
                 // eslint-disable-next-line no-await-in-loop
-                await _saveCompanyTitles(scrappedCandidateCompanyAverage, existingTitles)
+                await _saveLiteCompanySummary(scrapedCompanyAnalytics, existingSummaries, employmentHistory);
+
+                // eslint-disable-next-line no-await-in-loop
+                await _saveCompanyTitles(scrapedCompanyAnalytics, existingTitles)
             }
         }
 
-        console.log("saveScrapedCandidatesPositionAnalysis - DONE");
+        console.log("SaveCompanyAnalytics - DONE");
     }
 
-    const _saveScrappedCompanyProfile = async (scrapedProfile) => {
+    const _saveScrapedCompanyProfile = async (scrapedProfile) => {
 
-        console.log("saveScrappedCompanyProfile - DONE");
+        console.log("saveScrapedCompanyProfile - DONE");
     }
 
-    const _saveScrappedJobs = async (scrapedJobs) => {
-        console.log("saveScrappedJobs - DONE");
+    const _saveScrapedJobs = async (scrapedJobs) => {
+        console.log("saveScrapedJobs - DONE");
     }
 
     const _search = async (repo, companyName) => {
@@ -464,9 +420,9 @@
         searchEmploymentHistory = _searchEmploymentHistory;
         searchJobs = _searchJobs;
 
-        saveScrapedCandidatesPositionAnalysis = _saveScrapedCandidatesPositionAnalysis;
-        saveScrappedCompanyProfile = _saveScrappedCompanyProfile;
-        saveScrappedJobs = _saveScrappedJobs
+        saveCompanyAnalytics = _saveCompanyAnalytics;
+        saveScrapedCompanyProfile = _saveScrapedCompanyProfile;
+        saveScrapedJobs = _saveScrapedJobs
     }
 
     class CompaniesControllerConfiguration {
