@@ -96,7 +96,7 @@
         }
     }
 
-    const _analyzeASingleCandidatesPositions = (candidate) => {
+    const _analyzeASingleCandidatesPositions = (candidate, type = 'CORE_SKILLS') => {
         if (!(candidate && candidate.positions)){
             return;
         }
@@ -106,6 +106,7 @@
             p.isManagement = _checkIfManagement(p);
             p.isInternship = _checkIfInternship(p);
             p.roleGuess = _calculateRoleForAPosition(p);
+            p.skills = statistician.assessPositionSkills(p, type);
         });
 
         _analyzeCurrentlyWorkingPositions(candidate);

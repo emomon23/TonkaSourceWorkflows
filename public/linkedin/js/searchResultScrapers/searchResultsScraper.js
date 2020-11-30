@@ -329,7 +329,9 @@
 
             positionAnalyzer.analyzeCandidatesPositions(candidatesInResults);
 
-            candidatesInResults.forEach(async (candidate) => {
+            for (let i = 0; i < candidatesInResults.length; i++) {
+                const candidate = candidatesInResults[i];
+                // eslint-disable-next-line no-await-in-loop
                 await _scrapeCandidateHtml(candidate);
 
                 _pageCandidates.push(candidate);
@@ -337,11 +339,12 @@
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
 
                 try {
-                    candidateController.saveCandidate(trimmedCandidate);
+                    // eslint-disable-next-line no-await-in-loop
+                    await candidateController.saveCandidate(trimmedCandidate);
                 } catch (e) {
                     tsCommon.log(e.message, 'ERROR');
                 }
-            });
+            }
 
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
             const companyAnalytics = positionAnalyzer.createCompanyAverageDurationObject(candidatesInResults);

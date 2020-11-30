@@ -3,6 +3,7 @@
         skillStatsList = {
             // Groups
             "Amazon Web Services (AWS)": {
+                searchPhrases: ["AWS"],
                 childSkills: [
                     "Amazon API Gateway",
                     "Amazon Athena",
@@ -30,9 +31,9 @@
                     "AWS DataSync",
                     "AWS Glue",
                     "AWS IoT",
-                    "AWS Lambda",
-                    "AWS"
-                ]
+                    "AWS Lambda"
+                ],
+                isCoreSkill: true
             },
             "Amazon API Gateway": {
                 searchPhrases: ["Amazon API Gateway", "AWS API Gateway", "API Gateway"]
@@ -83,6 +84,7 @@
                 ]
             },
             "Azure Services": {
+                searchPhrases: ['Azure'],
                 childSkills: [
                     "Azure Active Directory",
                     "Azure Analysis Services",
@@ -109,7 +111,8 @@
                     // Sub-Groups
                     "Azure Storage",
                     "Azure CI/CD"
-                ]
+                ],
+                isCoreSkill: true
             },
             "Azure Storage": {
                 childSkills: [
@@ -123,10 +126,8 @@
                     "Azure File Storage"
                 ]
             },
-            "COM": {
-                searchPhrases: ["Component Object Model", " COM ", " COM,"]
-            },
             "DevOps": {
+                searchPhrases: ['DevOps', 'Dev Ops', 'Development Operations'],
                 childSkills: [
                     "Ansible",
                     "Chef",
@@ -150,7 +151,8 @@
                     "Java Server Pages",
                     "Spring",
                     "SpringBoot",
-                ]
+                ],
+                isCoreSkill: true
             },
             "JavaScript": {
                 childSkills: [
@@ -166,7 +168,8 @@
                     "TypeScript",
                     "VueJS",
                     "Web Components"
-                ]
+                ],
+                isCoreSkill: true
             },
             "Message Queues": {
                 childSkills: [
@@ -187,7 +190,8 @@
                 childSkills: ["Azure Service Bus", "Message Queues", "NServiceBus", "WebSphere ESB"]
             },
             "Mobile": {
-                childSkills: ["Xamarin Native", "Xamarin Forms", "Xamarin", "iOS", "Android", "Swift", "React Native", "Unity", "Flutter"]
+                childSkills: ["Xamarin Native", "Xamarin Forms", "Xamarin", "iOS", "Android", "Swift", "React Native", "Unity", "Flutter"],
+                isCoreSkill: true
             },
             ".NET": {
                 searchPhrases: [".NET"],
@@ -205,9 +209,9 @@
                     "WPF",
                     "COM",
                     "UWP",
-                    "Windows Forms",
-
-                ]
+                    "Windows Forms"
+                ],
+                isCoreSkill: true
             },
             "NoSQL": {
                 childSkills: ["Cassandra", "CouchDB", "CosmosDB", "DynamoDB", "Elasticsearch", "MongoDB", "Redis"]
@@ -218,10 +222,18 @@
             "Source Control": {
                 childSkills: ["BitBucket", "GitHub", "GitLab", "Git", "SVN", "TFS", "CVS", "Mercurial"]
             },
+            "Xamarin": {
+                childSkills: ["Xamarin Forms", "Xamarin Native"],
+                isCoreSkill: true
+            },
 
             // Individual Skills
             "Amazon MQ": {
                 searchPhrases: ["AmazonMQ", "Amazon MQ"]
+            },
+            "Android": {
+                searchPhrases: ["Android"],
+                isCoreSkill: true
             },
             "Angular": {
                 searchPhrases: [
@@ -239,7 +251,8 @@
                     "Angular 8",
                     "Angular ",
                     "Angular,"
-                ]
+                ],
+                isCoreSkill: true
             },
             "Apache ActiveMQ": {
                 searchPhrases: ["Apache ActiveMQ", "Apache Active MQ", "ActiveMQ", "Active MQ"]
@@ -274,6 +287,9 @@
             "Cloud Services": {
                 searchPhrases: ["Azure", "Amazon Web Services", "AWS", "Firebase", "Google Cloud", "Cloud"]
             },
+            "COM": {
+                searchPhrases: ["Component Object Model", " COM ", " COM,"]
+            },
             "CouchDB": {
                 searchPhrases: ["CouchDB", "Couch"]
             },
@@ -295,11 +311,19 @@
             "Google Cloud Pub/Sub": {
                 searchPhrases: ["Google Cloud Pub/Sub", "Google Cloud Pub / Sub", "Google Pub/Sub", "Google Pub / Sub"]
             },
+            "iOS": {
+                searchPhrases: ["iOS"],
+                isCoreSkill: true
+            },
             "KubeMQ": {
                 searchPhrases: ["KubeMQ", "Kube MQ"]
             },
             "MariaDB": {
                 searchPhrases: ["MariaDB", "Maria"]
+            },
+            "Microservice": {
+                searchPhrases: ["Microservice", "Micro-service", "Micro Service"],
+                isCoreSkill: true
             },
             "MongoDB": {
                 searchPhrases: ["MongoDB", "Mongo"]
@@ -317,33 +341,42 @@
                 searchPhrases: ["Perl"]
             },
             "PHP": {
-                searchPhrases: ["PHP"]
+                searchPhrases: ["PHP"],
+                isCoreSkill: true
             },
             "PostgreSQL": {
-                searchPhrases: ["PostgreSQL", "Postgress", "Postgres"]
+                searchPhrases: ["PostgreSQL", "Postgres"]
             },
             "Python": {
-                searchPhrases: ["Python"]
+                searchPhrases: ["Python"],
+                isCoreSkill: true
             },
             "QA Automation": {
                 searchPhrases: ["Test Automation", "QA Automation", "Quality Assurance Automation",
                     "SDET", "Software Developer in Test", "Software Development Engineer in Test", "Software Development in Test", "Software Developer Engineer in Test",
                     "automation framework"
                 ],
-                childSkills: ["Selenium", "JMeter", "TestNG", "Cucumber", "Maven", "SoapUI", "Protractor", "Cypress"]
+                childSkills: ["Selenium", "JMeter", "TestNG", "Cucumber", "Maven", "SoapUI", "Protractor", "Cypress"],
+                isCoreSkill: true
             },
             "QA Manual": {
                 searchPhrases: ["QA Analyst", "Manual QA", "Quality Assurance Analyst", "Test Script", "Test Suite", "Test Case"],
-                childSkills: ["Test Plan Creation", "Test Case Design", ]
+                childSkills: ["Test Plan Creation", "Test Case Design"]
             },
             "RabbitMQ": {
                 searchPhrases: ["RabbitMQ", "Rabbit MQ"]
             },
+            "React": {
+                searchPhrases: ["React"],
+                isCoreSkill: true
+            },
             "React Native": {
-                searchPhrases: ["React Native", "React.Native", "ReactNative"]
+                searchPhrases: ["React Native", "React.Native", "ReactNative"],
+                isCoreSkill: true
             },
             "Ruby": {
-                searchPhrases: ["Ruby"]
+                searchPhrases: ["Ruby"],
+                isCoreSkill: true
             },
             "Scala": {
                 searchPhrases: ["Scala"]
@@ -353,7 +386,8 @@
                 childSkills: ["Selenium WebDriver", "Selenium IDE", "Selenium RC", "Selenium Grid"]
             },
             "SQL Server": {
-                searchPhrases: ["Microsoft SQL Server", "SQL Server", "MS SQL"]
+                searchPhrases: ["Microsoft SQL Server", "SQL Server", "MS SQL"],
+                isCoreSkill: true
             },
             "SVN": {
                 searchPhrases: ["Subversion", "SVN"]
@@ -370,10 +404,15 @@
             },
             "UI/UX": {
                 searchPhrases: ["UI/UX", "Visual Communication", "Interaction Design", "Interactive Design", "Web Design"],
-                childSkills: ["HTML", "CSS", "SASS", "LESS", "JavaScript", "jQuery", "Bootstrap", "UX Research", "UX Design", "UX Writing", "Wireframing", "UI Prototyping", "Analytics"]
+                childSkills: ["HTML", "CSS", "SASS", "LESS", "JavaScript", "jQuery", "Bootstrap", "UX Research", "UX Design", "UX Writing", "Wireframing", "UI Prototyping", "Analytics"],
+                isCoreSkill: true
             },
             "Visual Basic": {
                 searchPhrases: ["Visual Basic", "VB5", "VB6"]
+            },
+            "VueJS": {
+                searchPhrases: ["VueJS", "Vue.js", "Vue"],
+                isCoreSkill: true
             },
             "Windows Forms": {
                 searchPhrases: ["Windows Forms", "WinForms", "Win Forms"]
@@ -383,10 +422,12 @@
                 childSkills: ["Balsamiq", "Moqups", "LucidChart", "Diagrams.net", "Visio", "Cacoo", "Sketch", "Omnigraffle", "Axure", "Terrastruct", "Mockplus", "Miro", " Xd ", "Justinmind", "ProtoPie"]
             },
             "Xamarin Forms": {
-                searchPhrases: ["Xamarin.Forms", "XamarinForms", "Xamarin Forms"]
+                searchPhrases: ["Xamarin.Forms", "XamarinForms", "Xamarin Forms"],
+                isCoreSkill: true
             },
             "Xamarin Native": {
-                searchPhrases: ["Xamarin.iOS", "XamarinIos", "Xamarin iOS", "Xamarin.Android", "XamarinAndroid", "Xamarin Android"]
+                searchPhrases: ["Xamarin.iOS", "XamarinIos", "Xamarin iOS", "Xamarin.Android", "XamarinAndroid", "Xamarin Android"],
+                isCoreSkills: true
             }
         }
     }

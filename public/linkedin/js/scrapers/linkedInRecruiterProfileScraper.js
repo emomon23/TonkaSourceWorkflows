@@ -195,6 +195,7 @@
             }
 
             job.description = $(li).find('p[class*="description searchable"]').text();
+            job.skills = statistician.assessPositionSkills(job, 'ALL_SKILLS');
             result.push(job);
         });
 
