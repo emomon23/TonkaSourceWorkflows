@@ -294,11 +294,11 @@
 
     const _mergeSkills = (skills1, skills2) => {
         let mergedSkills = [];
-        if (skills1 && skills2.length > 0) {
+        if (skills1 && skills1.length > 0) {
             mergedSkills = skills1;
             if (skills2 && skills2.length > 0) {
                 skills2.forEach((skill) => {
-                    if (!skills1[skill]) {
+                    if (skills1.indexOf(skill) === -1) {
                         mergedSkills.push(skill);
                     }
                 });

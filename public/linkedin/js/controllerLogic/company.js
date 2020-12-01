@@ -144,19 +144,6 @@
         return companyTitlesRepository.get(companyId);
     }
 
-    const _mapOutCompanyIdsInCompanyAnalytics = (companyAnalytics) => {
-        const result = [];
-        const ignoreKeys = ['id', 'name'];
-
-        for (let k in companyAnalytics){
-            if (ignoreKeys.indexOf(k) === -1){
-                result.push(k);
-            }
-        }
-
-        return result;
-    }
-
     const _mapEmploymentHistoryIndexToEmploymentHistoryArray = (companyEmploymentHistoryIndex) => {
         const result = [];
         const ignoreKeys = ['id', 'companyId', 'name', 'dateCreated', 'dateLastUpdated'];
@@ -280,10 +267,13 @@
             return;
         }
 
-        const listOfCompanyIds = _mapOutCompanyIdsInCompanyAnalytics(companyAnalytics);
+        const listOfCompanyIds = Object.keys(companyAnalytics);
         const existingSummaries = await companySummaryRepository.getSubset(listOfCompanyIds);
         const existingEmploymentHistories = await companyEmploymentHistoryRepository.getSubset(listOfCompanyIds);
         const existingTitles = await companyTitlesRepository.getSubset(listOfCompanyIds);
+
+        let skillsFoundAtCompanies = [];
+        const companiesWithFoundSkills = [];
 
         for (let i = 0; i < listOfCompanyIds.length; i++){
             const scrapedCompanyAnalytics = companyAnalytics[listOfCompanyIds[i]];
@@ -296,9 +286,17 @@
                 await _saveLiteCompanySummary(scrapedCompanyAnalytics, existingSummaries, employmentHistory);
 
                 // eslint-disable-next-line no-await-in-loop
-                await _saveCompanyTitles(scrapedCompanyAnalytics, existingTitles)
+                await _saveCompanyTitles(scrapedCompanyAnalytics, existingTitles);
+
+                // For efficiencies... We're updating new objects here before we execute the saveSkillCompanies
+                if (scrapedCompanyAnalytics.skills && scrapedCompanyAnalytics.skills.length > 0) {
+                    companiesWithFoundSkills.push(scrapedCompanyAnalytics);
+                    skillsFoundAtCompanies = positionAnalyzer.mergeSkills(skillsFoundAtCompanies, scrapedCompanyAnalytics.skills);
+                }
             }
         }
+
+        await _saveSkillCompanies(skillsFoundAtCompanies, companiesWithFoundSkills);
 
         console.log("SaveCompanyAnalytics - DONE");
     }
@@ -310,6 +308,41 @@
 
     const _saveScrapedJobs = async (scrapedJobs) => {
         console.log("saveScrapedJobs - DONE");
+    }
+
+    const _saveSkillCompanies = async (skills, companiesWithSkills) => {
+        if (! _checkIfCompanyAnalyticsIsTurnedOn()){
+            return;
+        }
+        if (!skills || !skills.length > 0) {
+            return;
+        }
+
+        const existingSkillCompaniesDocs = await skillCompaniesRepository.getSubset(skills);
+        const existingSkills = Object.keys(existingSkillCompaniesDocs);
+        skills.forEach(async (skill) => {
+            // Get the companyIds of the companies that have the skill reported
+            const companiesWithThisSkill = companiesWithSkills.filter( c => c.skills.includes(skill) );
+            const companyIdsWithThisSkill = companiesWithThisSkill.map((c) => {
+                return c.id
+            });
+
+            // Get the existing skillCompanies Doc
+            let skillCompaniesDoc = existingSkillCompaniesDocs.find(scd => scd.skill === skill);
+            if (skillCompaniesDoc) {
+                // Merge the companies and update the document
+                skillCompaniesDoc.companies = positionAnalyzer.mergeSkills(skillCompaniesDoc.companies, companyIdsWithThisSkill);
+                await skillCompaniesRepository.update(skillCompaniesDoc);
+            } else {
+                // Create the new skillCompanies document and insert
+                skillCompaniesDoc = {
+                    "skill": skill,
+                    "companies": companyIdsWithThisSkill
+                };
+                await skillCompaniesRepository.insert(skillCompaniesDoc);
+            }
+        });
+        console.log("SaveSkillCompanies - COMPLETE");
     }
 
     const _search = async (repo, companyName) => {

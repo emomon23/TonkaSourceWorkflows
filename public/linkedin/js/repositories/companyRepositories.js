@@ -1,6 +1,6 @@
 (() => {
     const TONKA_SOURCE_DATABASE = "TSCompanyData";
-    const VERSION = 1;
+    const VERSION = 2;
     const SCHEMAS = [
         {
             storeName: 'companySummary',
@@ -21,6 +21,11 @@
             storeName: 'companyTitles',
             idProperty: 'companyId',
             indexes: []
+        },
+        {
+            storeName: 'skillCompanies',
+            idProperty: 'skill',
+            indexes: []
         }
     ]
 
@@ -30,4 +35,5 @@
     window.companyEmploymentHistoryRepository = _storeFactory.createStore('companyEmploymentHistory')
     window.companySummaryRepository = _storeFactory.createStore('companySummary');
     window.companyTitlesRepository = _storeFactory.createStore('companyTitles');
+    window.skillCompaniesRepository = _storeFactory.createStore('skillCompanies');
 })();
