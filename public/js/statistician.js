@@ -1,6 +1,24 @@
 (() => {
     let processedSkillStatistics = {};
 
+    const _assessPositionSkills = (position, type) => {
+        const skillsInPosition = [];
+        for (let key in skillStats.skillStatsList) {
+            const skill = skillStats.skillStatsList[key];
+
+            // When we are scraping from search results, there will be 25 candidates with 5-15 jobs on average.
+            // We only have titles, and we want to minimize the assessment cost to only core skills as their
+            // titles are more likely to state 'Angular Developer' or 'JavaScript Engineer' over 'jQuery Developer'
+            if (!skill.ignoreForAnalytics && (type === 'ALL_SKILLS' || (type === 'CORE_SKILLS' && skill.isCoreSkill))) {
+                const flattenedSkillSearchPhrases = _flattenSkillSearchPhrases(skill);
+                if (_doesPositionHaveSkill(flattenedSkillSearchPhrases, position)) {
+                    skillsInPosition.push(key);
+                }
+            }
+        }
+        return skillsInPosition;
+    }
+
     const _assumptionForMonthsOfUse = (jobStatistics, skillStatistics) => {
         if (skillStatistics.isInSummary) {
             // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within their current position
@@ -362,6 +380,16 @@
         }
     }
 
+    const _doesPositionHaveSkill = (skillSearchPhrases, pos) => {
+        if (skillSearchPhrases && skillSearchPhrases.length > 0) {
+            if (tsString.containsAny(pos.description, skillSearchPhrases)
+                || tsString.containsAny(pos.title, skillSearchPhrases)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     const _findSkillInSelfAssessedSkills = (searchPhrases, contact) => {
         if (contact.devSkills && contact.devSkills.length) {
             for (let i = 0; i < contact.devSkills.length; i++) {
@@ -384,8 +412,11 @@
                 if (childSkillObj) {
                     flattenedSkills = flattenedSkills.concat(_flattenSkillSearchPhrases(childSkillObj, contact));
                 } else {
-                    // If there's not an associated child skill object, then we need to create one and process skills
-                    _processSkillStats(childSkill, [childSkill], contact);
+                    if (contact) {
+                        // If we're assessing a contact, we are doing a full skills assessment
+                        // If there's not an associated child skill object, then we need to create one and process skills for it
+                        _processSkillStats(childSkill, [childSkill], contact);
+                    }
                     // Also append the childSkill so that the parent is properly searched as well
                     flattenedSkills.push(childSkill);
                 }
@@ -402,13 +433,7 @@
     const _getPositionsWithSkill = (skillSearchPhrases, positions) => {
         if (positions && positions.length) {
             return positions.filter((pos) => {
-                if (skillSearchPhrases && skillSearchPhrases.length > 0) {
-                    if (tsString.containsAny(pos.description, skillSearchPhrases)
-                        || tsString.containsAny(pos.title, skillSearchPhrases)) {
-                        return true;
-                    }
-                }
-                return false;
+                return _doesPositionHaveSkill(skillSearchPhrases, pos);
             });
         }
         return null;
@@ -495,6 +520,7 @@
     }
 
     class Statistician {
+        assessPositionSkills = _assessPositionSkills;
         calculateJobJumperGrade = _calculateJobJumperGrade;
         calculateJobJumperGradeFromOnlyCurrentPosition = _calculateJobJumperGradeFromOnlyCurrentPosition;
         calculateJobJumperGrades = _calculateJobJumperGrades;

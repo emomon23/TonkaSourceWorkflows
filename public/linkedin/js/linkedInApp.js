@@ -187,7 +187,7 @@
     }
 
     const _saveCompanyAnalytics = async (analytics) => {
-        companiesController.saveScrapedCandidatesPositionAnalysis(analytics);
+        companiesController.saveCompanyAnalytics(analytics);
     }
 
     const _alisonContactSyncCallback = async (contact) => {

@@ -96,7 +96,7 @@
         }
     }
 
-    const _analyzeASingleCandidatesPositions = (candidate) => {
+    const _analyzeASingleCandidatesPositions = (candidate, type = 'CORE_SKILLS') => {
         if (!(candidate && candidate.positions)){
             return;
         }
@@ -106,6 +106,7 @@
             p.isManagement = _checkIfManagement(p);
             p.isInternship = _checkIfInternship(p);
             p.roleGuess = _calculateRoleForAPosition(p);
+            p.skills = statistician.assessPositionSkills(p, type);
         });
 
         _analyzeCurrentlyWorkingPositions(candidate);
@@ -114,14 +115,14 @@
         candidate.technicalYearString = _buildCandidateTechnicalYearsString(candidate);
     }
 
-    const _analyzeCandidatesPositions = (arrayOfCandidates) => {
+    const _analyzeCandidatesPositions = (arrayOfCandidates, type = 'CORE_SKILLS') => {
         arrayOfCandidates.forEach((c) => {
-            _analyzeCandidatePositions(c);
+            _analyzeCandidatePositions(c, type);
         });
     }
 
-    const _analyzeCandidatePositions = (c) => {
-        _analyzeASingleCandidatesPositions(c);
+    const _analyzeCandidatePositions = (c, type = 'CORE_SKILLS') => {
+        _analyzeASingleCandidatesPositions(c, type);
 
         const jobStatistics = statistician.calculateJobStatistics(c);
         c.statistics = (c.statistics) ? { ...c.statistics, jobStatistics } : { jobStatistics };
@@ -211,43 +212,24 @@
 
     }
 
-    const _getOrCreateCompanyAverageDoc = (companyAverages, position) => {
+    const _getOrCreateCompanyAnalyticsDoc = (companyAnalytics, position) => {
         if (!(position && position.companyName)){
             return null;
         }
 
         const companyIdentifier = position.companyId || position.companyName;
-        if (companyAverages[companyIdentifier]){
-            return companyAverages[companyIdentifier];
+        if (companyAnalytics[companyIdentifier]){
+            return companyAnalytics[companyIdentifier];
         }
 
-        const newCompany = {id: companyIdentifier, name: position.companyName, employmentHistory: []};
-        companyAverages[companyIdentifier] = newCompany;
+        const newCompany = {
+            employmentHistory: [],
+            id: companyIdentifier,
+            name: position.companyName,
+            skills: position.skills
+        };
+        companyAnalytics[companyIdentifier] = newCompany;
         return newCompany;
-    }
-
-    const _createCompanyAverageDurationObject = (postAnalysisCandidatesArray) => {
-        const companyAverages = {};
-
-        if (postAnalysisCandidatesArray){
-            postAnalysisCandidatesArray.forEach((candidate) => {
-                if (candidate.positions){
-                    const mergedCandidatePositions = _mergeCandidateSameCompanyPositions(candidate.positions);
-
-                    mergedCandidatePositions.forEach((p) => {
-                        if (p.endDateMonth && p.endDateYear){
-                            const companyDoc = _getOrCreateCompanyAverageDoc(companyAverages, p);
-                            if (companyDoc) {
-                                const positionSummary = _createPositionSummary(candidate, p);
-                                companyDoc.employmentHistory.push(positionSummary)
-                            }
-                        }
-                    });
-                }
-            });
-        }
-
-        return companyAverages;
     }
 
     const _createPositionSummary = (candidate, position) => {
@@ -257,7 +239,7 @@
         const endDate = statistician.createDateFromMonthAndYear(position.endDateMonth, position.endDateYear);
         const durationInMonths = statistician.calculateMonthsBetweenDates(startDate, endDate);
 
-        const isContract = position.title.toLowerCase().indexOf('contract') >= 0;
+        const isContract = position.title.toLowerCase().indexOf('contract') >= 0 || position.title.toLowerCase().indexOf('consultant') >= 0;
         const roleGuess = _calculateRoleForAPosition(position);
         const isTechnicallyRelevant = _checkIfTechnicallyRelevant(position);
         const isManagement = _checkIfManagement(position);
@@ -300,6 +282,7 @@
                 mergeWithPrior.startDate = p.startDate;
                 mergeWithPrior.startDateMonth = p.startDateMonth;
                 mergeWithPrior.startDateYear = p.startDateYear;
+                mergeWithPrior.skills = _mergeSkills(mergeWithPrior.skills, p.skills);
             }
             else {
                 result.push(p);
@@ -309,10 +292,52 @@
         return result;
     }
 
+    const _mergeSkills = (skills1, skills2) => {
+        let mergedSkills = [];
+        if (skills1 && skills1.length > 0) {
+            mergedSkills = skills1;
+            if (skills2 && skills2.length > 0) {
+                skills2.forEach((skill) => {
+                    if (skills1.indexOf(skill) === -1) {
+                        mergedSkills.push(skill);
+                    }
+                });
+            }
+        } else if (skills2 && skills2.length > 0) {
+            mergedSkills = skills2;
+        }
+        return mergedSkills;
+    }
+
+    const _processCompanyAnalytics = (candidates) => {
+        const companyAnalytics = {};
+
+        if (candidates){
+            candidates.forEach((candidate) => {
+                if (candidate.positions){
+                    const mergedCandidatePositions = _mergeCandidateSameCompanyPositions(candidate.positions);
+
+                    mergedCandidatePositions.forEach((p) => {
+                        if (p.endDateMonth && p.endDateYear){
+                            const companyAnalyticsDoc = _getOrCreateCompanyAnalyticsDoc(companyAnalytics, p);
+                            if (companyAnalyticsDoc) {
+                                const positionSummary = _createPositionSummary(candidate, p);
+                                companyAnalyticsDoc.employmentHistory.push(positionSummary)
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        return companyAnalytics;
+    }
+
     class PositionAnalyzer {
         analyzeCandidatePositions = _analyzeCandidatePositions;
         analyzeCandidatesPositions = _analyzeCandidatesPositions;
-        createCompanyAverageDurationObject = _createCompanyAverageDurationObject;
+        mergeSkills = _mergeSkills;
+        processCompanyAnalytics = _processCompanyAnalytics;
     }
 
     window.positionAnalyzer = new PositionAnalyzer();

@@ -8,16 +8,19 @@
 
     const _recruiterProfilePage = {
         fullName: 'div[class*="profile-info"] h1',
-        profileId: 'input[name*="profile-id"]',
-        profilePrimaryContent: '#primary-content',
-        publicProfileLink: 'a:contains("Public Profile")',
         saveButton: 'div[class*="profile-actions"] button[class*="save-btn"]',
         skillsList: '#profile-skills div ul[class*="skills"]',
         aboutSummary: '#profile-summary',
         experienceSection: '#profile-experience',
-        topCard: 'div[class*="primary-module"]',
+        experienceSectionPositions: '#profile-experience div[class*="module-body"] ul li[class*="position"]',
         headline: 'div[class*="info-container"] ul li[class*="title"]',
-        imageUrl: 'div[class*="module-body"] img[alt*="photo"]'
+        imageUrl: 'div[class*="module-body"] img[alt*="photo"]',
+        positionCompanyLink: 'div[class*="position-header"] h5 a',
+        positionDescription: 'p[class*="description"]',
+        profileId: 'input[name*="profile-id"]',
+        profilePrimaryContent: '#primary-content',
+        publicProfileLink: 'a:contains("Public Profile")',
+        topCard: 'div[class*="primary-module"]'
     }
 
     const _searchResultsPage = {
