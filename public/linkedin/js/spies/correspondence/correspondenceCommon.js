@@ -25,9 +25,9 @@
         return true;
     }
 
-    const _onPhoneNumberHighlighted = (evt , phoneNumber) => {
-        const candidate = _findCandidateForHighlightedText(evt.target);
-        console.log("A phone number has been highlighted");
+    const _onPhoneNumberHighlighted = async (evt , phoneNumber) => {
+        const candidate = await customCandidateScraperCallback();
+        tsPopup.showPopup(candidate, 'csp', phoneNumber);
     }
 
     const _onMessageCopiedToTsClipboard = (evt, tsClipboardData) => {
@@ -162,10 +162,26 @@
         return input;
     }
 
-    const _alisonButtonClick = (e) => {
+    const _alisonButtonClick = async (e) => {
+        let msgId = $(e.target).attr('ts-message-id');
+        if (!msgId) {
+            msgId = $(e.target.parentElement).attr('ts-message-id');
+        }
+
+        const candidateSearch = _getCandidateFromHiddenInput(msgId);
+        const candidate = await candidateController.searchForCandidate(candidateSearch);
+
+        let menuItems = 'cspir';
+        if (candidate.email) {
+            menuItems += 'e';
+        }
+
+        if (candidate.phone) {
+            menuItems += 'n'
+        }
+
         // eslint-disable-next-line no-alert
-        const menuItem = window.prompt(`1. Record Correspondence. \n 2. Scrape Contact Info. \n 3. Schedule Meeting. \n 4. Save Contact`);
-        console.log(menuItem);
+        tsPopup.showPopup(candidate, menuItems)
     }
 
     const _setupSpy = async (messageWindow, messageWindowScraperCallback, customCandidateScraper, customPasteHandler = null) => {

@@ -1,7 +1,40 @@
 (() => {
+
+    const _addActivelySeekingTextButtonToUI = () => {
+        const existing = $('#activelySeekingTextButton')[0];
+        if (existing){
+            return;
+        }
+
+        const labelElement  = $('#keywords-label')[0];
+
+        if (labelElement){
+            const a = document.createElement('a');
+            $(labelElement).append(a);
+
+            $(a)
+                .attr('href', '#')
+                .attr('id', 'activelySeekingTextButton')
+                .text('  ActivelySeeking')
+                .click(async () => {
+                    const editBtn = $('li[title*="Profile keywords"] button[class*="add-pills-btn"]')[0];
+                    if (editBtn){
+                        editBtn.click();
+                        await tsCommon.sleep(500);
+                        const textArea = $('#facet-keywords textarea')[0];
+                        if (textArea){
+                            $(textArea).focus();
+                            document.execCommand('insertText', 'true', `("Actively Seeking" OR "Actively Looking" OR "Currently Seeking" OR "Currently Looking" OR "Seeking New Opp" OR "Seeking Opp" OR "Open to work") AND \n`);
+                        }
+                    }
+                });
+        }
+    }
+
     const _bindToElements = async () => {
         await _bindToRecruiterProfileLinks();
         _bindToJumperGradeRollOver();
+        _addActivelySeekingTextButtonToUI();
 
         linkedInApp.showTsReady();
     }

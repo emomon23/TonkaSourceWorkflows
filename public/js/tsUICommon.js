@@ -3,7 +3,7 @@
         const copyInput = document.createElement("input");
         $(copyInput).val(value)
 
-        const parent = document.body ? document.body : document.activeElement;
+        const parent = $(document).find('div')[0];
         $(parent).append(copyInput);
 
         await tsCommon.sleep(100);

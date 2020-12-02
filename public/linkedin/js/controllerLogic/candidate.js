@@ -75,7 +75,7 @@
         }
 
         const fieldsNotToBeOverridden = ['positions', 'lastName', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
-        let existingCandidate = await _getCandidate(candidate.memberId);
+        let existingCandidate = await _getCandidateByMemberId(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
 
@@ -113,7 +113,7 @@
         }
     }
 
-    const _getCandidate = async (memberId) => {
+    const _getCandidateByMemberId = async (memberId) => {
         const lookFor = !isNaN(memberId) ? Number.parseInt(memberId) : null;
 
         if (lookFor){
@@ -256,9 +256,9 @@
         return await _lastNamesSearch(lNames, searchObject);
     }
 
-    const _searchForCandidate = async (searchFor, forceStringSearchForConsoleDebuggingOnly = false) => {
+    const _searchForCandidate = async (searchFor) => {
         if (!isNaN(searchFor)){
-            return await _getCandidate(searchFor);
+            return await _getCandidateByMemberId(searchFor);
         }
 
         if (typeof searchFor !== "object") {
@@ -305,11 +305,27 @@
         }
     }
 
+    const _saveContactInfo = async (candidateSearchValues, contactInfoData) => {
+        if (contactInfoData && (contactInfoData.phone || contactInfoData.email)){
+            const candidate = await _searchForCandidate(candidateSearchValues);
+            if (contactInfoData.email){
+                candidate.email = contactInfoData.email;
+            }
+
+            if (contactInfoData.phone){
+                candidate.phone = contactInfoData.phone;
+            }
+
+            await _saveCandidate(candidate);
+        }
+    }
+
     class CandidateController {
+        saveContactInfo = _saveContactInfo;
         saveCandidate = _saveCandidate;
         saveCandidates = _saveCandidates;
         getCandidateList = _getCandidateList;
-        getCandidate = _getCandidate;
+        getCandidate = _searchForCandidate;
         searchForCandidate = _searchForCandidate;
         getJobSeekers = _getJobSeekers;
         getContractors = _getContractors;

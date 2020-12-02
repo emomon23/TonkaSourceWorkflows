@@ -134,7 +134,7 @@
 // @ignore      http://localhost:5001/linkedin/js/spies/projectPipelineSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/myPublicNetworkSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/connectionRequests.js
-// @ignore      http://localhost:5001/linkedin/js/spies/correspondence/correspondenceCommong.js
+// @ignore      http://localhost:5001/linkedin/js/spies/correspondence/correspondenceCommon.js
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/publicMessaging.js
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/recruiterConversations.js
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/recruiterInMail.js

@@ -154,8 +154,8 @@
         return result;
     }
 
-    const _scrapeFirstAndLastNameFromProfile = () => {
-        let element = tsUICommon.findFirstDomElement(['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")']);
+    const _scrapeFirstAndLastNameFromProfile = async () => {
+        let element = tsUICommon.jQueryWait(['button[aria-label*="Connect with"]', 'span[class*="a11y-text"]:contains("profile via message")', 'span[class*="a11y-text"]:contains("profile to PDF")', 'span[class*="a11y-text"]:contains("Report or block")']);
         if (element === null){
             return null;
         }
@@ -185,9 +185,9 @@
         return result;
     }
 
-    const _scrapeNameLocationDegree = () => {
+    const _scrapeNameLocationDegree = async () => {
         const selectors = linkedInSelectors.publicProfilePage;
-        const flName = _scrapeFirstAndLastNameFromProfile();
+        const flName = await _scrapeFirstAndLastNameFromProfile();
 
         // Minneapolis-St. Paul
         const locationAreaElement = $(selectors.location)[0];
@@ -234,7 +234,7 @@
 
     const _scrapeProfile = async (includeJobHistory = true) => {
             const fakeUser = _scrapedFakeUser();
-            const scrapedCandidate =  _scrapeNameLocationDegree();
+            const scrapedCandidate =  await _scrapeNameLocationDegree();
             scrapedCandidate.linkedIn = window.location.href;
 
             scrapedCandidate.headline = _scrapeHeadline();
