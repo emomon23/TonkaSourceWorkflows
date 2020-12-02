@@ -93,6 +93,28 @@
             candidate.linkedIn = _scrapePublicProfileLink();
             candidate.rawExperienceText = $(linkedInSelectors.recruiterProfilePage.experienceSection).text().replace('Experience', '');
 
+            const positionElements = $(linkedInSelectors.recruiterProfilePage.experienceSectionPositions);
+            if (positionElements.length > 0){
+                $(positionElements).each((index) => {
+                    let companyId = '';
+                    const companyLinkElement = $(positionElements[index]).find(linkedInSelectors.recruiterProfilePage.positionCompanyLink);
+                    if (companyLinkElement) {
+                        const companyHref = $(companyLinkElement).attr('href');
+                        const matches = companyHref.match(new RegExp('/recruiter/company/(\\d+)'));
+                        companyId = (matches && matches.length >= 2) ? matches[1] : '';
+                    }
+
+                    if (companyId && !isNaN(parseInt(companyId))) {
+                        const existingPosition = candidate.positions.find(p => p.companyId === parseInt(companyId));
+                        if (existingPosition) {
+                            const description = $(linkedInSelectors.recruiterProfilePage.positionDescription).text();
+                            existingPosition.description = description;
+                        }
+                    }
+                });
+            }
+
+
             const summaryElement = $(linkedInSelectors.recruiterProfilePage.aboutSummary);
             if (summaryElement && summaryElement.length > 0){
                 candidate.summary = $(summaryElement).text().replace('Summary', '').trim();
@@ -125,6 +147,9 @@
             } catch (e) {
                 tsCommon.log(e.message, 'ERROR');
             }
+            positionAnalyzer.analyzeCandidatePositions(candidate, 'ALL_SKILLS');
+            const companyAnalytics = positionAnalyzer.processCompanyAnalytics([candidate]);
+            linkedInApp.saveCompanyAnalytics(companyAnalytics);
 
         }
 

@@ -220,7 +220,8 @@
                 childSkills: ["MariaDB", "MySQL", "PostgreSQL", "Oracle", "SQL Server"]
             },
             "Source Control": {
-                childSkills: ["BitBucket", "GitHub", "GitLab", "Git", "SVN", "TFS", "CVS", "Mercurial"]
+                childSkills: ["BitBucket", "GitHub", "GitLab", "Git", "SVN", "TFS", "CVS", "Mercurial"],
+                ignoreForAnalytics: true
             },
             "Xamarin": {
                 childSkills: ["Xamarin Forms", "Xamarin Native"],

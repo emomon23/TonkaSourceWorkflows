@@ -115,14 +115,14 @@
         candidate.technicalYearString = _buildCandidateTechnicalYearsString(candidate);
     }
 
-    const _analyzeCandidatesPositions = (arrayOfCandidates) => {
+    const _analyzeCandidatesPositions = (arrayOfCandidates, type = 'CORE_SKILLS') => {
         arrayOfCandidates.forEach((c) => {
-            _analyzeCandidatePositions(c);
+            _analyzeCandidatePositions(c, type);
         });
     }
 
-    const _analyzeCandidatePositions = (c) => {
-        _analyzeASingleCandidatesPositions(c);
+    const _analyzeCandidatePositions = (c, type = 'CORE_SKILLS') => {
+        _analyzeASingleCandidatesPositions(c, type);
 
         const jobStatistics = statistician.calculateJobStatistics(c);
         c.statistics = (c.statistics) ? { ...c.statistics, jobStatistics } : { jobStatistics };

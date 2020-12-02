@@ -9,7 +9,7 @@
             // When we are scraping from search results, there will be 25 candidates with 5-15 jobs on average.
             // We only have titles, and we want to minimize the assessment cost to only core skills as their
             // titles are more likely to state 'Angular Developer' or 'JavaScript Engineer' over 'jQuery Developer'
-            if (type === 'ALL_SKILLS' || (type === 'CORE_SKILLS' && skill.isCoreSkill)) {
+            if (!skill.ignoreForAnalytics && (type === 'ALL_SKILLS' || (type === 'CORE_SKILLS' && skill.isCoreSkill))) {
                 const flattenedSkillSearchPhrases = _flattenSkillSearchPhrases(skill);
                 if (_doesPositionHaveSkill(flattenedSkillSearchPhrases, position)) {
                     skillsInPosition.push(key);
