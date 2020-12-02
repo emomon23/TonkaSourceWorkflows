@@ -43,6 +43,9 @@
                 startDateYear: p.startDateYear,
                 companyId: p.companyId,
                 companyName: p.companyName,
+                current: p.current,
+                skills: p.skills,
+                roleGuess: p.roleGuess,
                 displayText: p.displayText,
                 title: p.title,
             };
@@ -305,6 +308,21 @@
         }
     }
 
+    const _doesCandidateMatchSkillsSearch = async (candidate, arrayOfSkillSearch) => {
+
+    }
+
+    const _searchOnSkills = async (arrayOfSkillSearch) => {
+
+        const skillSearch = Array.isArray(arrayOfSkillSearch) ? arrayOfSkillSearch : [arrayOfSkillSearch];
+        // skillName: 'java', yearsBack: '3'
+        const allCandidates = await _getEntireCandidateList();
+        const candidateMatch = allCandidates.filter((candidate) => {
+            return _doesCandidateMatchSkillsSearch(candidate, arrayOfSkillSearch);
+        })
+
+    }
+
     const _saveContactInfo = async (candidateSearchValues, contactInfoData) => {
         if (contactInfoData && (contactInfoData.phone || contactInfoData.email)){
             const candidate = await _searchForCandidate(candidateSearchValues);
@@ -329,6 +347,7 @@
         searchForCandidate = _searchForCandidate;
         getJobSeekers = _getJobSeekers;
         getContractors = _getContractors;
+        searchOnSkills = _searchOnSkills;
 
         // loadLotsOfData = _loadLotsOfData;
     }

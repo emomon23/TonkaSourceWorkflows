@@ -132,7 +132,7 @@
             linkedInApp.upsertContact(candidate);
 
             // Process Statistics
-            candidate.statistics = statistician.processStatistics(candidate);
+            candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
 
             // Calculate Skill Statistics Grades
             const skillsStatisticsList = [candidate.statistics];

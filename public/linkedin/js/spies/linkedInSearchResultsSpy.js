@@ -1,6 +1,7 @@
 (() => {
 
     const _addActivelySeekingTextButtonToUI = () => {
+        const activelySeekingFilterString = `("seeking new opportunit" OR "seeking an opportun" OR "seeking opportunit" OR "seeking a opportunit" OR "seeking employment" OR "seeking entry" OR "currently seeking " OR "actively seeking" OR "actively looking" OR "currently looking" OR "opentowork" OR "open to work" OR "looking for new" OR "looking for a") `;
         const existing = $('#activelySeekingTextButton')[0];
         if (existing){
             return;
@@ -24,7 +25,7 @@
                         const textArea = $('#facet-keywords textarea')[0];
                         if (textArea){
                             $(textArea).focus();
-                            document.execCommand('insertText', 'true', `("Actively Seeking" OR "Actively Looking" OR "Currently Seeking" OR "Currently Looking" OR "Seeking New Opp" OR "Seeking Opp" OR "Open to work") AND \n`);
+                            document.execCommand('insertText', 'true', activelySeekingFilterString);
                         }
                     }
                 });

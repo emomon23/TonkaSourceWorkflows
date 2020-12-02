@@ -488,21 +488,24 @@
         return true;
     }
 
-    const _processSkillsStatistics = (contact) => {
+    const _processSkillsStatistics = (contact, type = 'CORE_SKILLS') => {
         const contactCopy = JSON.parse(JSON.stringify(contact));
         _cleanContactPositions(contactCopy.positions);
         for (let key in skillStats.skillStatsList) {
             const skill = skillStats.skillStatsList[key];
+            if (type === 'CORE_SKILLS' && !skill.isCoreSkill) {
+                continue;
+            }
             const flattenedSkillSearchPhrases = _flattenSkillSearchPhrases(skill, contactCopy);
             _processSkillStats(key, flattenedSkillSearchPhrases, contactCopy);
         }
         return processedSkillStatistics;
     }
 
-    const _processStatistics = (contact) => {
+    const _processStatistics = (contact, type = 'CORE_SKILLS') => {
         const result = {};
 
-        const skillStatistics = _processSkillsStatistics(contact);
+        const skillStatistics = _processSkillsStatistics(contact, type);
 
         result.skillStatistics = skillStatistics;
         result.skillsList = Object.keys(skillStatistics);

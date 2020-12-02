@@ -336,6 +336,11 @@
 
                 _pageCandidates.push(candidate);
 
+                // Process Statistics
+                // Put the skills on each position
+                positionAnalyzer.analyzeCandidatePositions(candidate);
+                candidate.statistics = statistician.processStatistics(candidate, 'CORE_SKILLS');
+
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
 
                 try {
