@@ -14,6 +14,128 @@
             tsCommon.log("Unable to open dashboard.  CHECK POP UP BLOCKER?", "WARN");
         }
     }
+    const _createTonkaSourceMenu = () => {
+        const tsMenu = $(document.createElement('div')).attr('id', 'tsMenu').attr('class', 'ts-menu');
+
+
+        const companySkillSearch = $(document.createElement('div'))
+            .attr('class', 'ts-menu-item')
+            .click(_displayCompanySkillSearchHtml)
+            .text("Company Skill Search");
+
+        const menuItem2 = $(document.createElement('div')).attr('class', 'ts-menu-item').click(() => {
+            const html = "REPORT 2";
+            $('#tsContent').html(html).show();
+        }).text("REPORT 2");
+
+        const menuItem3 = $(document.createElement('div')).attr('class', 'ts-menu-item').click(() => {
+            const html = "REPORT 3";
+            $('#tsContent').html(html).show();
+        }).text("REPORT 3");
+
+        const toggleButton = $(document.createElement('button')).click(() => {
+            $('#tsContent').toggle();
+        }).text("Show/Hide").attr('class', 'ts-menu-button-toggle ts-button-li');
+
+        tsMenu.append(companySkillSearch).append(menuItem2).append(menuItem3).append(toggleButton);
+
+        return tsMenu;
+    }
+
+    const _displayCompanySkillSearchHtml = () => {
+        // Clear the content
+        $('#tsContent').html("");
+        const container = $(document.createElement('div'))
+            .attr('id', 'companySkillSearchContainer')
+            .attr('class', 'company-skill-search-container');
+
+        // Create the Skill Search elements
+        const skillSearchContainer = $(document.createElement('div'));
+        const skillSearchInput = $(document.createElement('input'))
+            .attr('id', 'tsSkillSearch')
+            .attr('name', 'skillSearch');
+        const skillSearchButton = $(document.createElement('button'))
+            .attr('id', 'skillSearchButton')
+            .attr('class', 'ts-button-li')
+            .text('Search')
+            .click(_getSkillSearchResults);
+        $(skillSearchContainer).append('<span>Skill(s)<span>').append(skillSearchInput).append(skillSearchButton);
+
+        // Create the results container
+        const resultsContainer = $(document.createElement('div'))
+            .attr('id', 'companySkillSearchResultsContainer')
+            .attr('class', 'company-skill-search-results');
+
+        $(container).append(skillSearchContainer);
+        $(container).append(resultsContainer);
+
+        $('#tsContent').append(container).show();
+    }
+
+    const _getSkillSearchResults = async () => {
+        $('#companySkillSearchResultsContainer').html("");
+        const skillSearch = $("#tsSkillSearch").val();
+
+        const matchingSkillCompanies = await companiesController.searchSkillCompanies(skillSearch);
+
+        const resultsContainer = $('div[class*="company-skill-search-results"');
+
+        const headers = [
+            { name: "ID", property: "companyId" },
+            { name: "Company", property: "name" },
+            { name: "Skills", property: "skills" }
+        ];
+        const grid = _createDataGrid(headers, matchingSkillCompanies);
+
+        $('#companySkillSearchResultsContainer').append(grid);
+    }
+
+    const _createDataGrid = (configs, data, type = 'COMPANY_SUMMARY') => {
+        const grid = $(document.createElement('div')).attr('class', 'table');
+
+        // Loop through configs and create headers
+        const headerRow = $(document.createElement('div')).attr('class', 'table-header');
+        configs.forEach((c) => {
+            const header = $(document.createElement('div')).attr('class', 'table-header-cell').text(c.name);
+            $(headerRow).append(header);
+        });
+
+        const tableBody = $(document.createElement('div')).attr('class', 'table-body');
+        // Loop through Data and apply attributes to columns
+        data.forEach((d) => {
+            const dataRow = $(document.createElement('div')).attr('class', 'table-row');
+            configs.forEach((c) => {
+                const dataCell = $(document.createElement('div')).attr('class', 'table-cell')
+
+                // Create a link for Company Name if this is COMPANY_SUMMARY
+                if (type === 'COMPANY_SUMMARY' && (c.property === 'companyId' || c.property === 'name') && !isNaN(parseInt(d['companyId']))) {
+                    const link = $(document.createElement('a'))
+                        .attr('target', '_blank')
+                        .attr('href', `https://www.linkedin.com/recruiter/company/${d['companyId']}`)
+                        .text(d[c.property]);
+                    $(dataCell).append(link);
+                } else {
+                    let propData = d[c.property];
+                    if (Array.isArray(propData)) {
+                        propData = propData.sort().join(', ');
+                    }
+                    $(dataCell).text(propData);
+                }
+                $(dataRow).append(dataCell);
+            })
+            $(tableBody).append(dataRow);
+        });
+
+        return $(grid).append(headerRow).append(tableBody);
+    }
+
+    const _launchTonkaSourceMenu = () => {
+        const tsContainer = $(document.createElement('div')).attr('id', 'tsContainer').attr('class', 'ts-container');
+        const tsContent = $(document.createElement('div')).attr('id', 'tsContent').attr('class', 'ts-content');
+        const tsMenu = _createTonkaSourceMenu();
+        $(tsContainer).append(tsMenu).append(tsContent);
+        $('body').prepend(tsContainer);
+    }
 
     const _launchConnectionRequestBlaster = async () => {
         const crStats = await connectionLifeCycleLogic.displayStatsConsoleLogMessage();
@@ -110,6 +232,7 @@
 
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
+        launchTonkaSourceMenu = _launchTonkaSourceMenu;
         launchSkillsGPASearch = _launchSkillsGPASearch;
         launchInMailBlaster = _launchInMailBlaster;
         launchConnectionRequestBlaster = _launchConnectionRequestBlaster;

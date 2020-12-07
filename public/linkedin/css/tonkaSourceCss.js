@@ -41,6 +41,61 @@
     color: red;
 }
 
+.table {
+    width: 100%;
+    display: table;
+}
+
+.table-caption {
+    display: table-caption;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+.table-header{
+    display: table-header-group;
+    background-color: #015183;
+    font-weight: bold;
+    font-size: 20px;
+    color: #FFF;
+}
+
+.table-header-cell{
+    display: table-cell;
+    padding: 10px;
+    text-align: justify;
+    border-bottom: 1px solid black;
+}
+
+.table-body {
+    display: table-row-group;
+}
+
+.table-row {
+    display: table-row;
+}
+
+.table-cell {
+    display: table-cell;
+    padding: 3px 10px;
+}
+
+.table-footer {
+    display: table-footer-group;
+    background-color: gray;
+    font-weight: bold;
+    font-size: 25px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.table-footer-cell {
+    display: table-cell;
+    padding: 10px;
+    text-align: justify;
+    border-bottom: 1px solid black;
+}
+
 .tooltip {
     position: relative;
     display: inline-block;
@@ -74,6 +129,86 @@
 
 .tooltip:hover .tooltiptext {
     visibility: visible;
+}
+
+.ts-content {
+    display: none;
+    width: 95%;
+    height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0 50px;
+}
+
+.ts-menu {
+    font-size: 14px;
+    font-weight: bold;
+    width: 100%;
+    margin: auto;
+    text-align: center;
+}
+
+.ts-menu-item {
+    width: 15%;
+    display: inline-block;
+    padding: 10px 10px;
+    border-right: 1px solid #015183;
+    text-align: center;
+    max-width: 150px;
+}
+
+.ts-menu-item:first-of-type {
+    border-left: 1px solid #015183;
+}
+
+.ts-menu-item:hover {
+    background-color: #015183;
+    color: white;
+}
+
+.ts-menu-button-toggle {
+    float: right;
+}
+
+.ts-button-li, .ts-button-li:visited {
+    font-weight: bold;
+    border-width: 1px;
+    border-style: solid;
+    cursor: pointer;
+    margin: 4px 10px 4px 0px;
+    overflow: visible;
+    text-decoration: none !important;
+    text-align: center;
+    width: auto;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.35);
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+    border-radius: 3px;
+    padding: 0 10px;
+    height: 26px;
+    line-height: 24px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    font-size: 12px;
+    color: #fff;
+    background-color: #287bbc;
+    border-color: #1b5480;
+    filter: progid:DXImageTransform.Microsoft.gradient(gradientType=0, startColorstr='#FF287BBC', endColorstr='#FF23639A');
+    background-image: -webkit-linear-gradient(top, #287bbc 0%,#23639a 100%);
+    background-image: -moz-linear-gradient(top, #287bbc 0%,#23639a 100%);
+    background-image: -o-linear-gradient(top, #287bbc 0%,#23639a 100%);
+    background-image: linear-gradient(top, #287bbc 0%,#23639a 100%);
+    white-space: nowrap;
+    display: -moz-inline-stack;
+    display: inline-block;
+    vertical-align: middle;
+    *vertical-align: auto;
+    zoom: 1;
+    *display: inline;
+    vertical-align: middle;
 }
 
 .popup {

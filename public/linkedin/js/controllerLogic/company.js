@@ -349,12 +349,33 @@
         return await repo.getByIndex('name', companyName);
     }
 
-    const _searchSummary = async (companyName) => {
-        return await _search(companySummaryRepository, companyName);
-    }
-
     const _searchEmploymentHistory = async (companyName) => {
         return await _search(companyEmploymentHistoryRepository, companyName);
+    }
+
+    const _searchSkillCompanies = async (skills) => {
+        if (skills.trim()) {
+            const listOfSkills = skills.split(",").map((s) => s.trim());
+
+            const skillCompaniesDocs = await skillCompaniesRepository.getSubset(listOfSkills);
+            if (skillCompaniesDocs) {
+                // First we need to find the companies that are contained within all the skill elements
+                let matchingCompanies = []
+                skillCompaniesDocs.forEach((skillCompaniesDoc) => {
+                    matchingCompanies = tsArray.intersection(matchingCompanies, skillCompaniesDoc.companies);
+                });
+
+                // If we still have companies, lets go get their summary
+                if (matchingCompanies.length) {
+                    return await companySummaryRepository.getSubset(matchingCompanies);
+                }
+            }
+        }
+        return null;
+    }
+
+    const _searchSummary = async (companyName) => {
+        return await _search(companySummaryRepository, companyName);
     }
 
     const _searchJobs = async (companyName) => {
@@ -443,19 +464,19 @@
     }
 
     class CompaniesController {
-        getSummary = _getSummary;
-        getSummaries = _getSummaries;
         getAllJobs = _getAllJobs;
         getCompanyJobs = _getCompanyJobs
         getCompanyEmploymentHistories = _getCompanyEmploymentHistories;
+        getSummaries = _getSummaries;
+        getSummary = _getSummary;
         getTitles = _getTitles;
-        searchSummary = _searchSummary;
-        searchEmploymentHistory = _searchEmploymentHistory;
-        searchJobs = _searchJobs;
-
         saveCompanyAnalytics = _saveCompanyAnalytics;
         saveScrapedCompanyProfile = _saveScrapedCompanyProfile;
-        saveScrapedJobs = _saveScrapedJobs
+        saveScrapedJobs = _saveScrapedJobs;
+        searchEmploymentHistory = _searchEmploymentHistory;
+        searchJobs = _searchJobs;
+        searchSkillCompanies = _searchSkillCompanies;
+        searchSummary = _searchSummary;
     }
 
     class CompaniesControllerConfiguration {
