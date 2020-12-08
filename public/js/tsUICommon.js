@@ -124,9 +124,15 @@
                 const dataCell = $(document.createElement('div')).attr('class', 'table-cell')
 
                 let propData = d[c.property];
+
                 // If our data is an array, sort and explode it to a string
                 if (Array.isArray(propData)) {
                     propData = propData.sort().join(', ');
+                } else if (typeof propData === 'string' || propData instanceof String) {
+                    // If our data begins with http, let's create a link and label it with the header title
+                    if (propData.match(new RegExp('^http'))) {
+                        propData = $(document.createElement('a')).attr('target', '_blank').attr('href', propData).text(c.name);
+                    }
                 }
 
                 $(dataCell).html(propData);

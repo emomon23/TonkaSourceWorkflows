@@ -46,6 +46,8 @@
             { name: "Industry", property: "industry" },
             { name: "Size", property: "size" },
             { name: "Website", property: "website" },
+            { name: "Jobs (MN)", property: "mnJobsUrl" },
+            { name: "Jobs (US)", property: "usaJobsUrl" },
             { name: "Skills", property: "skills" }
         ];
 

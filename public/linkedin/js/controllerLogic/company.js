@@ -120,7 +120,10 @@
     }
 
     const _getSummary = async (companyId) => {
-        return await companySummaryRepository.get(companyId);
+        if (companyId) {
+            return await companySummaryRepository.get(companyId);
+        }
+        return null;
     }
 
     const _getSummaries = async () => {
@@ -161,6 +164,15 @@
         }
 
         return result;
+    }
+
+    const _saveCompanySummary = async (companySummary) => {
+        if (companySummary.dateLastUpdated) {
+            await companySummaryRepository.update(companySummary);
+        }
+        else {
+            await companySummaryRepository.insert(companySummary);
+        }
     }
 
     const _saveEmploymentHistory = async (scrapedCompanyAverage, existingEmploymentHistories) => {
@@ -402,6 +414,7 @@
         getSummary = _getSummary;
         getTitles = _getTitles;
         saveCompanyAnalytics = _saveCompanyAnalytics;
+        saveCompanySummary = _saveCompanySummary;
         saveScrapedCompanyProfile = _saveScrapedCompanyProfile;
         saveScrapedJobs = _saveScrapedJobs;
         searchEmploymentHistory = _searchEmploymentHistory;
