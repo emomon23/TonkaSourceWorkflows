@@ -49,6 +49,10 @@ function root (cb) {
 
 gulp.task('firebase', shell.task(['firebase deploy']));
 
+gulp.task('watch', () => {
+    gulp.watch(['public/**/*.js', 'public/**/*/css'], exports.build);
+});
+
 exports.build = gulp.series(
     clean,
     gulp.parallel(
