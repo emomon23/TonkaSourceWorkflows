@@ -1,4 +1,6 @@
 (function () {
+    const SAVE_COMPANY_DATA_CONFIG = 'tsCompanyLogic.saveCompanyData';
+
     const _advanceToNextLinkedInResultPage = () => {
         const buttonExists = $("[type='chevron-right-icon']").length;
         if (buttonExists){
@@ -26,6 +28,18 @@
         else {
             tsCommon.log("Unable to 'postMessage', no reference to alisonHookWindow exists (run launchTonkaSource()? Check Pop up blocker?)");
         }
+    }
+
+    const _checkIfCompanyAnalyticsIsTurnedOn = () => {
+        const saveCompanyData = tsConfig.get(SAVE_COMPANY_DATA_CONFIG);
+        return saveCompanyData === true
+        || (
+            typeof saveCompanyData === "string" &&
+            (
+                saveCompanyData.toLowerCase() === 'true'
+                || saveCompanyData.toLowerCase() === 'on'
+            )
+        )
     }
 
     const _displayGrade = (label, element, gradeObj, attrs = []) => {
@@ -115,6 +129,7 @@
 
         advanceToNextLinkedInResultPage = _advanceToNextLinkedInResultPage;
         callAlisonHookWindow = _callAlisonHookWindow;
+        checkIfCompanyAnalyticsIsTurnedOn = _checkIfCompanyAnalyticsIsTurnedOn;
         displayGrade = _displayGrade;
         getRoleName = _getRoleName;
         parseJobDurationDateRangeString = _parseJobDurationDateRangeString;

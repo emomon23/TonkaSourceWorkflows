@@ -1,5 +1,4 @@
 (() => {
-    const SAVE_COMPANY_DATA_CONFIG = 'tsCompanyLogic.saveCompanyData';
     const BLACK_LIST_CONFIG = 'tsCompanyLogic.blackListedCompanies';
     const WHITE_LIST_CONFIG = 'tsCompanyLogic.whiteListedCompanies';
 
@@ -71,18 +70,6 @@
         result.NonTechnicalStaffNonManagementTurnover = temp;
 
         return result;
-    }
-
-    const _checkIfCompanyAnalyticsIsTurnedOn = () => {
-        const saveCompanyData = tsConfig.get(SAVE_COMPANY_DATA_CONFIG);
-        return saveCompanyData === true
-        || (
-            typeof saveCompanyData === "string" &&
-            (
-                saveCompanyData.toLowerCase() === 'true'
-                || saveCompanyData.toLowerCase() === 'on'
-            )
-        )
     }
 
     const _checkIfCompanyIdentifierIsContainedInList = (companyIdentifier, companyName, configSettingListName) => {
@@ -263,7 +250,7 @@
     }
 
     const _saveCompanyAnalytics = async (companyAnalytics) => {
-        if (! _checkIfCompanyAnalyticsIsTurnedOn()){
+        if (! linkedInCommon.checkIfCompanyAnalyticsIsTurnedOn()){
             return;
         }
 
