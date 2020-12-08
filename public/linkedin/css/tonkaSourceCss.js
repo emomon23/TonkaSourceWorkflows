@@ -154,7 +154,6 @@
     padding: 10px 10px;
     border-right: 1px solid #015183;
     text-align: center;
-    max-width: 150px;
 }
 
 .ts-menu-item:first-of-type {

@@ -79,6 +79,16 @@
         return null;
     }
 
+    const _isRecruiterPage = () => {
+        const currentPage  = _whatPageAmIOn();
+        const recruiterPages = linkedInConstants.RECRUITER_PAGES
+
+        if (recruiterPages.indexOf(currentPage) !== -1) {
+            return true;
+        }
+        return false;
+    }
+
     const _whatPageAmIOn = () => {
         const href = window.location.href.toLowerCase();
         let result = null;
@@ -132,6 +142,7 @@
         checkIfCompanyAnalyticsIsTurnedOn = _checkIfCompanyAnalyticsIsTurnedOn;
         displayGrade = _displayGrade;
         getRoleName = _getRoleName;
+        isRecruiterPage = _isRecruiterPage;
         parseJobDurationDateRangeString = _parseJobDurationDateRangeString;
         whatPageAmIOn = _whatPageAmIOn;
     }

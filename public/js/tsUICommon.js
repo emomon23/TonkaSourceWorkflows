@@ -106,6 +106,38 @@
         return result;
     }
 
+    const _createDataGrid = (configs, data) => {
+        const grid = $(document.createElement('div')).attr('class', 'table');
+
+        // Loop through configs and create headers
+        const headerRow = $(document.createElement('div')).attr('class', 'table-header');
+        configs.forEach((c) => {
+            const header = $(document.createElement('div')).attr('class', 'table-header-cell').text(c.name);
+            $(headerRow).append(header);
+        });
+
+        const tableBody = $(document.createElement('div')).attr('class', 'table-body');
+        // Loop through Data and apply attributes to columns
+        data.forEach((d) => {
+            const dataRow = $(document.createElement('div')).attr('class', 'table-row');
+            configs.forEach((c) => {
+                const dataCell = $(document.createElement('div')).attr('class', 'table-cell')
+
+                let propData = d[c.property];
+                // If our data is an array, sort and explode it to a string
+                if (Array.isArray(propData)) {
+                    propData = propData.sort().join(', ');
+                }
+
+                $(dataCell).html(propData);
+                $(dataRow).append(dataCell);
+            })
+            $(tableBody).append(dataRow);
+        });
+
+        return $(grid).append(headerRow).append(tableBody);
+    }
+
     const _rebind = (selector, eventName, functionReference_NOT_AnAnonomousFunction) => {
         try {
             $(selector).unbind(eventName, functionReference_NOT_AnAnonomousFunction)
@@ -220,6 +252,7 @@
         constructor (){}
 
         copyToClipboard = _copyToClipboard;
+        createDataGrid = _createDataGrid;
         createListItem = _createListItem;
         removeListItem = _removeListItem;
         addButton = _addButton;

@@ -7,6 +7,39 @@
     // In case a page is saving MANY contacts...we only want to alert message once.
     let roleAlert = false;
 
+    const _createTonkaSourceMenu = () => {
+        const tsMenu = $(document.createElement('div')).attr('id', 'tsMenu').attr('class', 'ts-menu');
+
+
+        const companySkillSearch = companySkillSearchMenu.menuOption();
+
+        const menuItem2 = $(document.createElement('div')).attr('class', 'ts-menu-item').click(() => {
+            const html = "REPORT 2";
+            $('#tsContent').html(html).show();
+        }).text("REPORT 2");
+
+        const menuItem3 = $(document.createElement('div')).attr('class', 'ts-menu-item').click(() => {
+            const html = "REPORT 3";
+            $('#tsContent').html(html).show();
+        }).text("REPORT 3");
+
+        const toggleButton = $(document.createElement('button')).click(() => {
+            $('#tsContent').toggle();
+        }).text("Show/Hide").attr('class', 'ts-menu-button-toggle ts-button-li');
+
+        tsMenu.append(companySkillSearch).append(menuItem2).append(menuItem3).append(toggleButton);
+
+        return tsMenu;
+    }
+
+    const _displayTonkaSourceMenu = (containerToAppendTo = 'body') => {
+        const tsContainer = $(document.createElement('div')).attr('id', 'tsContainer').attr('class', 'ts-container');
+        const tsContent = $(document.createElement('div')).attr('id', 'tsContent').attr('class', 'ts-content');
+        const tsMenu = _createTonkaSourceMenu();
+        $(tsContainer).append(tsMenu).append(tsContent);
+        $(containerToAppendTo).prepend(tsContainer);
+    }
+
     const _getActiveOpportunity = () => {
         return window.localStorage.getItem(_activeOpportunityKey);
     }
@@ -348,7 +381,12 @@
             }
         });
 
-        tsCommand.launchTonkaSourceMenu();
+        // Display the TS Menu
+        if (linkedInCommon.isRecruiterPage()) {
+            _displayTonkaSourceMenu();
+        } else if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PUBLIC_PROFILE) {
+            _displayTonkaSourceMenu('div[class*="body"]');
+        }
     });
 
 })();
