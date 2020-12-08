@@ -76,7 +76,7 @@
         $('#companySkillSearchResultsContainer').html("");
         const skillSearch = $("#tsSkillSearch").val();
 
-        const matchingSkillCompanies = await companiesController.searchSkillCompanies(skillSearch);
+        const matchingSkillCompanies = await skillCompaniesController.search(skillSearch);
 
         const resultsContainer = $('div[class*="company-skill-search-results"');
 

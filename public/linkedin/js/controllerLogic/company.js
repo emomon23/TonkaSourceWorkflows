@@ -275,7 +275,7 @@
                 // eslint-disable-next-line no-await-in-loop
                 await _saveCompanyTitles(scrapedCompanyAnalytics, existingTitles);
 
-                // For efficiencies... We're updating new objects here before we execute the saveSkillCompanies
+                // For efficiencies... We're updating new objects here before we execute the skillCompanies save
                 if (scrapedCompanyAnalytics.skills && scrapedCompanyAnalytics.skills.length > 0) {
                     companiesWithFoundSkills.push(scrapedCompanyAnalytics);
                     skillsFoundAtCompanies = positionAnalyzer.mergeSkills(skillsFoundAtCompanies, scrapedCompanyAnalytics.skills);
@@ -283,7 +283,7 @@
             }
         }
 
-        await _saveSkillCompanies(skillsFoundAtCompanies, companiesWithFoundSkills);
+        await skillCompaniesController.save(skillsFoundAtCompanies, companiesWithFoundSkills);
 
         console.log("SaveCompanyAnalytics - DONE");
     }
@@ -297,68 +297,12 @@
         console.log("saveScrapedJobs - DONE");
     }
 
-    const _saveSkillCompanies = async (skills, companiesWithSkills) => {
-        if (! _checkIfCompanyAnalyticsIsTurnedOn()){
-            return;
-        }
-        if (!skills || !skills.length > 0) {
-            return;
-        }
-
-        const existingSkillCompaniesDocs = await skillCompaniesRepository.getSubset(skills);
-        const existingSkills = Object.keys(existingSkillCompaniesDocs);
-        skills.forEach(async (skill) => {
-            // Get the companyIds of the companies that have the skill reported
-            const companiesWithThisSkill = companiesWithSkills.filter( c => c.skills.includes(skill) );
-            const companyIdsWithThisSkill = companiesWithThisSkill.map((c) => {
-                return c.id
-            });
-
-            // Get the existing skillCompanies Doc
-            let skillCompaniesDoc = existingSkillCompaniesDocs.find(scd => scd.skill === skill);
-            if (skillCompaniesDoc) {
-                // Merge the companies and update the document
-                skillCompaniesDoc.companies = positionAnalyzer.mergeSkills(skillCompaniesDoc.companies, companyIdsWithThisSkill);
-                await skillCompaniesRepository.update(skillCompaniesDoc);
-            } else {
-                // Create the new skillCompanies document and insert
-                skillCompaniesDoc = {
-                    "skill": skill,
-                    "companies": companyIdsWithThisSkill
-                };
-                await skillCompaniesRepository.insert(skillCompaniesDoc);
-            }
-        });
-        console.log("SaveSkillCompanies - COMPLETE");
-    }
-
     const _search = async (repo, companyName) => {
         return await repo.getByIndex('name', companyName);
     }
 
     const _searchEmploymentHistory = async (companyName) => {
         return await _search(companyEmploymentHistoryRepository, companyName);
-    }
-
-    const _searchSkillCompanies = async (skills) => {
-        if (skills.trim()) {
-            const listOfSkills = skills.split(",").map((s) => s.trim());
-
-            const skillCompaniesDocs = await skillCompaniesRepository.getSubset(listOfSkills);
-            if (skillCompaniesDocs) {
-                // First we need to find the companies that are contained within all the skill elements
-                let matchingCompanies = []
-                skillCompaniesDocs.forEach((skillCompaniesDoc) => {
-                    matchingCompanies = tsArray.intersection(matchingCompanies, skillCompaniesDoc.companies);
-                });
-
-                // If we still have companies, lets go get their summary
-                if (matchingCompanies.length) {
-                    return await companySummaryRepository.getSubset(matchingCompanies);
-                }
-            }
-        }
-        return null;
     }
 
     const _searchSummary = async (companyName) => {
@@ -462,7 +406,6 @@
         saveScrapedJobs = _saveScrapedJobs;
         searchEmploymentHistory = _searchEmploymentHistory;
         searchJobs = _searchJobs;
-        searchSkillCompanies = _searchSkillCompanies;
         searchSummary = _searchSummary;
     }
 

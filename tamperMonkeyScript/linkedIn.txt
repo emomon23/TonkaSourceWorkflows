@@ -52,6 +52,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/company.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/candidate.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/skillCompanies.js
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
@@ -112,6 +113,7 @@
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/company.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/candidate.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
+// @ignore      http://localhost:5001/linkedin/js/controllerLogic/skillCompanies.js
 
 
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInContactInfoScraper.js
