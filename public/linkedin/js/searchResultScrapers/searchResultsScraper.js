@@ -279,6 +279,19 @@
         return null;
     }
 
+    const _walkTheSearchResultsPages = async () => {
+        for (let i = 0; i < 40; i++){
+            if (!linkedInCommon.advanceToNextLinkedInResultPage()){
+                break;
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.randomSleep(6000, 9000);
+        }
+
+        console.log("DONE - walkTheSearchResultsPages");
+    }
+
     const _cleanJobHistory = (candidate) => {
         const findAndReplace = [{find: '&#x2F;', replace: '/'}, {find: '&amp;', replace: '&'}];
 
@@ -340,6 +353,7 @@
                 // Put the skills on each position
                 positionAnalyzer.analyzeCandidatePositions(candidate);
                 candidate.statistics = statistician.processStatistics(candidate, 'CORE_SKILLS');
+                console.log({candidate});
 
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
 
@@ -401,6 +415,7 @@
     class SearchResultsScraper {
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         persistLastRecruiterProfile = _persistLastRecruiterProfile;
+        walkTheSearchResultsPages = _walkTheSearchResultsPages;
         getCurrentRecruiterProfileCandidate = getCurrentRecruiterProfileCandidate;
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
         gatherAllJobSeekersExperienceData = _gatherAllJobSeekersExperienceData;

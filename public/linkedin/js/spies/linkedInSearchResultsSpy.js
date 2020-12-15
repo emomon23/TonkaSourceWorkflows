@@ -25,7 +25,14 @@
                         const textArea = $('#facet-keywords textarea')[0];
                         if (textArea){
                             $(textArea).focus();
-                            document.execCommand('insertText', 'true', activelySeekingFilterString);
+                            const existingText = $(textArea).val();
+
+                            if (existingText && existingText.length){
+                                await tsUICommon.executeDelete(textArea, existingText.length);
+                            }
+
+                            const insertText = existingText && existingText.length ? `${existingText}\n${activelySeekingFilterString}` : activelySeekingFilterString;
+                            document.execCommand('insertText', 'true', insertText);
                         }
                     }
                 });

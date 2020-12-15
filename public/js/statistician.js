@@ -78,6 +78,20 @@
         return true;
     }
 
+    const _calculateMonthsSinceWorkedAtPosition = (position) => {
+        if (!(position && position.startDateMonth && position.startDateYear)){
+            return Number.max;
+        }
+
+        if (!position.endDateMonth){
+            return 0; // They are currently working there
+        }
+
+        let dateString = `${position.endDateMonth}/27/${position.endDateYear}`;
+        const dateWorked = new Date(dateString);
+        return _calculateMonthsBetweenDates(dateWorked, new Date());
+    }
+
     const _calculateJobJumperGrade = (contactJobStatistics) => {
         let jobJumper = {
             gpa: 0,
@@ -528,6 +542,7 @@
         calculateJobJumperGradeFromOnlyCurrentPosition = _calculateJobJumperGradeFromOnlyCurrentPosition;
         calculateJobJumperGrades = _calculateJobJumperGrades;
         calculateJobStatistics = _calculateJobStatistics;
+        calculateMonthsSinceWorkedAtPosition = _calculateMonthsSinceWorkedAtPosition;
         calculateMonthsBetweenDates = _calculateMonthsBetweenDates;
         calculateMonthsSinceLastUse = _calculateMonthsSinceLastUse;
         calculateMonthsUsingSkill = _calculateMonthsUsingSkill;

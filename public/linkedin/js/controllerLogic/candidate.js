@@ -23,6 +23,7 @@
             if (match){
                 match.title = ip.title;
                 match.displayText = ip.displayText;
+                match.skills = ip.skills;
 
                 if (ip.description && ip.description.length){
                     // eg. This will happend when a 'lite candidate' has their profile scraped
@@ -34,33 +35,6 @@
         });
 
         return result;
-    }
-
-    const _trimDownPositions = (positions) => {
-        return positions ? positions.map((p) => {
-            const mappedPosition = {
-                startDateMonth: p.startDateMonth,
-                startDateYear: p.startDateYear,
-                companyId: p.companyId,
-                companyName: p.companyName,
-                current: p.current,
-                skills: p.skills,
-                roleGuess: p.roleGuess,
-                displayText: p.displayText,
-                title: p.title,
-            };
-
-            if (p.endDateMonth) {
-                mappedPosition.endDateMonth = p.endDateMonth;
-                mappedPosition.endDateYear = p.endDateYear;
-            }
-
-            if (p.description && p.description.length){
-                mappedPosition.description = p.description;
-            }
-
-            return mappedPosition;
-        }) : [];
     }
 
     const _checkIfDataCameFromPublicProfileOrRecruiterProfilePage = (candidate) => {
@@ -85,9 +59,6 @@
         if (_checkIfDataCameFromPublicProfileOrRecruiterProfilePage(candidate)){
             candidate.detailsLastScrapedDate = (new Date()).getTime();
         }
-
-        // Trim positions to minimal data for storage
-        candidate.positions  = _trimDownPositions(candidate.positions);
 
         if (existingCandidate){
             for (let k in candidate){
@@ -308,19 +279,68 @@
         }
     }
 
-    const _doesCandidateMatchSkillsSearch = async (candidate, arrayOfSkillSearch) => {
+    const _doesCandidateMatchSkillsSearch = (candidate, arrayOfSkillSearch) => {
+        // statistician.calculateMonthsSinceWorkedAtPosition
+        let positions = candidate.positions;
+        arrayOfSkillSearch.forEach((skillSearch) => {
+            const ageFilter = skillSearch.months ? skillSearch.months : 24;
+            const skillFilter = skillSearch.skill.toLowerCase().trim();
 
+            positions = positions.filter((p) => {
+                const ageOfPosition = statistician.calculateMonthsSinceWorkedAtPosition(p);
+                if (ageOfPosition > ageFilter){
+                    return false;
+                }
+
+                const positionSkills = p.skills || [];
+                if (positionSkills.length > 0){
+                    const skillMatch = positionSkills.filter((s) => {
+                        const positionSkill = s.toLowerCase().trim();
+                        return positionSkill === skillFilter
+                    });
+
+                    return skillMatch.length > 0;
+                }
+
+                return false;
+            });
+        });
+
+        const doesCandidateMatch = positions.length > 0;
+        return doesCandidateMatch;
+    }
+
+    const _writeCandidateMatchFilterStringToWindow = (candidates) => {
+        let str = '';
+        candidates.forEach((c) => {
+            if (c.firstName && c.lastName){
+                str += `"${c.firstName} ${c.lastName}" OR `
+            }
+        });
+
+        if (str.length > 0){
+            str = str.substr(0, str.length - 4);
+            str = `\n AND (${str}) `
+        }
+
+        window.candidateMatchFilter = str;
     }
 
     const _searchOnSkills = async (arrayOfSkillSearch) => {
-
         const skillSearch = Array.isArray(arrayOfSkillSearch) ? arrayOfSkillSearch : [arrayOfSkillSearch];
-        // skillName: 'java', yearsBack: '3'
         const allCandidates = await _getEntireCandidateList();
-        const candidateMatch = allCandidates.filter((candidate) => {
-            return _doesCandidateMatchSkillsSearch(candidate, arrayOfSkillSearch);
-        })
 
+        const candidateMatch = allCandidates.filter((candidate) => {
+            const candidateMatchesResult = _doesCandidateMatchSkillsSearch(candidate, skillSearch);
+            return candidateMatchesResult;
+        });
+
+        if (candidateMatch && candidateMatch.length){
+            _writeCandidateMatchFilterStringToWindow(candidateMatch);
+        }
+
+        console.log(`Number of candidate who match skillsSearch: ${candidateMatch.length}`)
+        return candidateMatch;
     }
 
     const _saveContactInfo = async (candidateSearchValues, contactInfoData) => {
