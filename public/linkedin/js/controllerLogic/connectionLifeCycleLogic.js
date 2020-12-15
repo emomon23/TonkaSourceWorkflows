@@ -91,6 +91,7 @@
             return connectionEntry;
         } catch (e) {
             tsCommon.logError(e, '_recordConnectionRequestAccepted');
+            return null;
         }
     }
 
