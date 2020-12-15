@@ -24,6 +24,7 @@
         };
 
         pages = {
+            RECRUITER_COMPANY: "/recruiter/company",
             RECRUITER_SEARCH_RESULTS: "/recruiter/smartsearch",
             RECRUITER_PROFILE: "/recruiter/profile/",
             PUBLIC_PROFILE: "linkedin.com/in/",
@@ -33,6 +34,12 @@
             LOGIN: "login",
             FEED: 'feed'
         };
+
+        RECRUITER_PAGES = [
+            this.pages.RECRUITER_COMPANY,
+            this.pages.RECRUITER_SEARCH_RESULTS,
+            this.pages.RECRUITER_PROFILE
+        ]
     }
     window.linkedInConstants = new LinkedInConstants();
 })();

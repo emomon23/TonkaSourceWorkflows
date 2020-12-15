@@ -1,5 +1,4 @@
 (() => {
-    const SAVE_COMPANY_DATA_CONFIG = 'tsCompanyLogic.saveCompanyData';
     const BLACK_LIST_CONFIG = 'tsCompanyLogic.blackListedCompanies';
     const WHITE_LIST_CONFIG = 'tsCompanyLogic.whiteListedCompanies';
 
@@ -73,18 +72,6 @@
         return result;
     }
 
-    const _checkIfCompanyAnalyticsIsTurnedOn = () => {
-        const saveCompanyData = tsConfig.get(SAVE_COMPANY_DATA_CONFIG);
-        return saveCompanyData === true
-        || (
-            typeof saveCompanyData === "string" &&
-            (
-                saveCompanyData.toLowerCase() === 'true'
-                || saveCompanyData.toLowerCase() === 'on'
-            )
-        )
-    }
-
     const _checkIfCompanyIdentifierIsContainedInList = (companyIdentifier, companyName, configSettingListName) => {
         const companyStringSearch = typeof companyIdentifier === "string" ? companyIdentifier : companyIdentifier.toString ? companyIdentifier.toString() : '';
         const companyNumericSearch = !isNaN(companyIdentifier) ? Number.parseInt(companyIdentifier) : null;
@@ -133,7 +120,10 @@
     }
 
     const _getSummary = async (companyId) => {
-        return await companySummaryRepository.get(companyId);
+        if (companyId) {
+            return await companySummaryRepository.get(companyId);
+        }
+        return null;
     }
 
     const _getSummaries = async () => {
@@ -174,6 +164,15 @@
         }
 
         return result;
+    }
+
+    const _saveCompanySummary = async (companySummary) => {
+        if (companySummary.dateLastUpdated) {
+            await companySummaryRepository.update(companySummary);
+        }
+        else {
+            await companySummaryRepository.insert(companySummary);
+        }
     }
 
     const _saveEmploymentHistory = async (scrapedCompanyAverage, existingEmploymentHistories) => {
@@ -263,7 +262,7 @@
     }
 
     const _saveCompanyAnalytics = async (companyAnalytics) => {
-        if (! _checkIfCompanyAnalyticsIsTurnedOn()){
+        if (! linkedInCommon.checkIfCompanyAnalyticsIsTurnedOn()){
             return;
         }
 
@@ -288,7 +287,7 @@
                 // eslint-disable-next-line no-await-in-loop
                 await _saveCompanyTitles(scrapedCompanyAnalytics, existingTitles);
 
-                // For efficiencies... We're updating new objects here before we execute the saveSkillCompanies
+                // For efficiencies... We're updating new objects here before we execute the skillCompanies save
                 if (scrapedCompanyAnalytics.skills && scrapedCompanyAnalytics.skills.length > 0) {
                     companiesWithFoundSkills.push(scrapedCompanyAnalytics);
                     skillsFoundAtCompanies = positionAnalyzer.mergeSkills(skillsFoundAtCompanies, scrapedCompanyAnalytics.skills);
@@ -296,7 +295,7 @@
             }
         }
 
-        await _saveSkillCompanies(skillsFoundAtCompanies, companiesWithFoundSkills);
+        await skillCompaniesController.save(skillsFoundAtCompanies, companiesWithFoundSkills);
 
         console.log("SaveCompanyAnalytics - DONE");
     }
@@ -310,51 +309,16 @@
         console.log("saveScrapedJobs - DONE");
     }
 
-    const _saveSkillCompanies = async (skills, companiesWithSkills) => {
-        if (! _checkIfCompanyAnalyticsIsTurnedOn()){
-            return;
-        }
-        if (!skills || !skills.length > 0) {
-            return;
-        }
-
-        const existingSkillCompaniesDocs = await skillCompaniesRepository.getSubset(skills);
-        const existingSkills = Object.keys(existingSkillCompaniesDocs);
-        skills.forEach(async (skill) => {
-            // Get the companyIds of the companies that have the skill reported
-            const companiesWithThisSkill = companiesWithSkills.filter( c => c.skills.includes(skill) );
-            const companyIdsWithThisSkill = companiesWithThisSkill.map((c) => {
-                return c.id
-            });
-
-            // Get the existing skillCompanies Doc
-            let skillCompaniesDoc = existingSkillCompaniesDocs.find(scd => scd.skill === skill);
-            if (skillCompaniesDoc) {
-                // Merge the companies and update the document
-                skillCompaniesDoc.companies = positionAnalyzer.mergeSkills(skillCompaniesDoc.companies, companyIdsWithThisSkill);
-                await skillCompaniesRepository.update(skillCompaniesDoc);
-            } else {
-                // Create the new skillCompanies document and insert
-                skillCompaniesDoc = {
-                    "skill": skill,
-                    "companies": companyIdsWithThisSkill
-                };
-                await skillCompaniesRepository.insert(skillCompaniesDoc);
-            }
-        });
-        console.log("SaveSkillCompanies - COMPLETE");
-    }
-
     const _search = async (repo, companyName) => {
         return await repo.getByIndex('name', companyName);
     }
 
-    const _searchSummary = async (companyName) => {
-        return await _search(companySummaryRepository, companyName);
-    }
-
     const _searchEmploymentHistory = async (companyName) => {
         return await _search(companyEmploymentHistoryRepository, companyName);
+    }
+
+    const _searchSummary = async (companyName) => {
+        return await _search(companySummaryRepository, companyName);
     }
 
     const _searchJobs = async (companyName) => {
@@ -443,19 +407,19 @@
     }
 
     class CompaniesController {
-        getSummary = _getSummary;
-        getSummaries = _getSummaries;
         getAllJobs = _getAllJobs;
         getCompanyJobs = _getCompanyJobs
         getCompanyEmploymentHistories = _getCompanyEmploymentHistories;
+        getSummaries = _getSummaries;
+        getSummary = _getSummary;
         getTitles = _getTitles;
-        searchSummary = _searchSummary;
+        saveCompanyAnalytics = _saveCompanyAnalytics;
+        saveCompanySummary = _saveCompanySummary;
+        saveScrapedCompanyProfile = _saveScrapedCompanyProfile;
+        saveScrapedJobs = _saveScrapedJobs;
         searchEmploymentHistory = _searchEmploymentHistory;
         searchJobs = _searchJobs;
-
-        saveCompanyAnalytics = _saveCompanyAnalytics;
-        saveScrapedCompanyProfile = _saveScrapedCompanyProfile;
-        saveScrapedJobs = _saveScrapedJobs
+        searchSummary = _searchSummary;
     }
 
     class CompaniesControllerConfiguration {

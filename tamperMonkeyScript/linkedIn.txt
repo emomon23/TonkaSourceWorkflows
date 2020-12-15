@@ -17,6 +17,7 @@
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsHttpInterceptor.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/promiseLoop.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsArray.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsConstants.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/js/tsString.js
@@ -51,12 +52,17 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/company.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/candidate.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/skillCompanies.js
+
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/companySkillSearch.js
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInPublicProfileScraper.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterCompanyScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterFilter.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
+
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/jobHistoryScrapeManager.js
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInSearchResultsSpy.js
@@ -80,6 +86,7 @@
 
 // @ignore      http://localhost:5001/js/tsHttpInterceptor.js
 // @ignore      http://localhost:5001/js/promiseLoop.js
+// @ignore      http://localhost:5001/js/tsArray.js
 // @ignore      http://localhost:5001/js/tsConstants.js
 // @ignore      http://localhost:5001/js/tsCommon.js
 // @ignore      http://localhost:5001/js/tsString.js
@@ -110,10 +117,13 @@
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/company.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/candidate.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
+// @ignore      http://localhost:5001/linkedin/js/controllerLogic/skillCompanies.js
 
+// @ignore      http://localhost:5001/linkedin/js/menus/companySkillSearch.js
 
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInPublicProfileScraper.js
+// @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterCompanyScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterFilter.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/jobHistoryScrapeManager.js

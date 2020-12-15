@@ -6,6 +6,12 @@
         CLOSE: 'button[aria-label*="Dismiss"]'
     }
 
+    const _recruiterCompanyPage = {
+        COMPANY_DETAIL_HEADERS: 'div[class*="key-company-data"] table tbody tr th',
+        COMPANY_DETAILS: 'div[class*="key-company-data"] table tbody tr td',
+        COMPANY_NAME: 'div[class*="company-page"] div[class*="top-bar"] div[class*="header"] h1'
+    }
+
     const _recruiterProfilePage = {
         fullName: 'div[class*="profile-info"] h1',
         saveButton: 'div[class*="profile-actions"] button[class*="save-btn"]',
@@ -108,6 +114,7 @@
 
     class LinkedInSelectors {
         contactInfoPage = _contactInfoPage;
+        recruiterCompanyPage = _recruiterCompanyPage;
         recruiterProfilePage = _recruiterProfilePage;
         searchResultsPage = _searchResultsPage;
         publicProfilePage = _publicProfilePage;
