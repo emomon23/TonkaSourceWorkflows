@@ -282,6 +282,10 @@
     const _doesCandidateMatchSkillsSearch = (candidate, arrayOfSkillSearch) => {
         // statistician.calculateMonthsSinceWorkedAtPosition
         let positions = candidate.positions;
+        if (!Array.isArray(positions)){
+            return false;
+        }
+
         arrayOfSkillSearch.forEach((skillSearch) => {
             const ageFilter = skillSearch.months ? skillSearch.months : 24;
             const skillFilter = skillSearch.skill.toLowerCase().trim();
@@ -310,17 +314,33 @@
         return doesCandidateMatch;
     }
 
-    const _writeCandidateMatchFilterStringToWindow = (candidates) => {
+    const _writeCandidateMatchFilterStringToWindow = async (candidates) => {
         let str = '';
+        let posStr = '';
+
         candidates.forEach((c) => {
             if (c.firstName && c.lastName){
-                str += `"${c.firstName} ${c.lastName}" OR `
+                str += '"' + (c.lastName.length > 2 ? c.lastName : c.firstName) + '" OR ';
+
+                let currentPosition = Array.isArray(c.positions) ? c.positions.filter(p => p.current === true) : [];
+                currentPosition = currentPosition.length > 0 ? currentPosition[0] : null;
+
+                if (currentPosition && currentPosition.title){
+                    posStr += `"${currentPosition.title}" OR `;
+                }
             }
         });
 
         if (str.length > 0){
             str = str.substr(0, str.length - 4);
             str = `\n AND (${str}) `
+        }
+
+        if (posStr.length > 0){
+            posStr = posStr.substr(0, posStr.length - 4);
+            posStr = `\n AND (${posStr}) `;
+
+            str += posStr;
         }
 
         window.candidateMatchFilter = str;

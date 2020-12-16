@@ -1,7 +1,7 @@
 (() => {
+    const _activelySeekingFilterString = `("seeking new opportunit" OR "seeking an opportun" OR "seeking opportunit" OR "seeking a opportunit" OR "seeking employment" OR "seeking entry" OR "currently seeking " OR "actively seeking" OR "actively looking" OR "currently looking" OR "opentowork" OR "open to work" OR "looking for new" OR "looking for a") `;
 
     const _addActivelySeekingTextButtonToUI = () => {
-        const activelySeekingFilterString = `("seeking new opportunit" OR "seeking an opportun" OR "seeking opportunit" OR "seeking a opportunit" OR "seeking employment" OR "seeking entry" OR "currently seeking " OR "actively seeking" OR "actively looking" OR "currently looking" OR "opentowork" OR "open to work" OR "looking for new" OR "looking for a") `;
         const existing = $('#activelySeekingTextButton')[0];
         if (existing){
             return;
@@ -22,20 +22,24 @@
                     if (editBtn){
                         editBtn.click();
                         await tsCommon.sleep(500);
-                        const textArea = $('#facet-keywords textarea')[0];
-                        if (textArea){
-                            $(textArea).focus();
-                            const existingText = $(textArea).val();
-
-                            if (existingText && existingText.length){
-                                await tsUICommon.executeDelete(textArea, existingText.length);
-                            }
-
-                            const insertText = existingText && existingText.length ? `${existingText}\n${activelySeekingFilterString}` : activelySeekingFilterString;
-                            document.execCommand('insertText', 'true', insertText);
-                        }
+                        _appendToKeywordsFilter(_activelySeekingFilterString);
                     }
                 });
+        }
+    }
+
+    const _appendToKeywordsFilter = async (appendText) => {
+        const textArea = $('#facet-keywords textarea')[0];
+        if (textArea){
+            $(textArea).focus();
+            const existingText = $(textArea).val();
+
+            if (existingText && existingText.length){
+                await tsUICommon.executeDelete(textArea, existingText.length + 30);
+            }
+
+            const insertText = existingText && existingText.length ? `${existingText}\n${appendText}` : appendText;
+            document.execCommand('insertText', 'true', insertText);
         }
     }
 
@@ -97,6 +101,8 @@
 
     class LinkedInSearchResultsSpy {
         bindToRecruiterProfileLinks = _bindToRecruiterProfileLinks;
+        appendToKeywordsFilter = _appendToKeywordsFilter;
+        getActivelySeekingString = () => {return _activelySeekingFilterString};
     }
 
     window.linkedInRecruiterProfileSpy = new LinkedInSearchResultsSpy();
