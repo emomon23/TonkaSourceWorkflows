@@ -39,7 +39,10 @@
     }
 
     const _assumptionForMonthsSinceLastUse = (jobStatistics, skillStatistics) => {
-        if (skillStatistics.isInSummary) {
+        if (skillStatistics.isInHeadline) {
+            // If In Headline, candidate is identifying themselves with this skill.  Start by saying it's within 3 months, just so it's not an A grade
+            return 999;
+        } else if (skillStatistics.isInSummary) {
             // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within 3 months, just so it's not an A grade
             return 3;
         } else if (skillStatistics.isInSelfAssessedSkills) {

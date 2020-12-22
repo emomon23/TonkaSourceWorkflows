@@ -1,6 +1,12 @@
 (function () {
     const _getPublicProfile_MessageButtonSelector = (publicProfileWindow) => {
         let linkButton = publicProfileWindow.document.querySelector('button[aria-label*="Connect with"]');
+
+        if (!linkButton){
+            // Attempt to get the 'Connect' button, under the elipsis
+            linkButton = $('div[class*="pv-s-profile-actions__overflow"] li-icon[type*="connect-icon"]')[0];
+        }
+
         if (linkButton){
             return {
                 type: 'CONNECTION REQUEST',
@@ -59,6 +65,9 @@
     const _navigateToPublicProfilePage = async (candidate) => {
         const href = `https://www.linkedin.com${candidate.linkedInRecruiterUrl}`;
         const publicProfileWindow = window.open(href);
+
+        const contactInfo = await linkedInContactInfoScraper.scrapeContactInfoFromRecruiterProfile(candidate, publicProfileWindow);
+        await candidateController.saveContactInfo(candidate, contactInfo);
 
         await tsCommon.sleep(5000);
         tsCommon.navigateToHyperLink(".com/in", publicProfileWindow);

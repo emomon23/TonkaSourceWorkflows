@@ -26,8 +26,8 @@
     }
 
     const _onPhoneNumberHighlighted = async (evt , phoneNumber) => {
-        const candidate = await customCandidateScraperCallback();
-        tsPopup.showPopup(candidate, 'csp', phoneNumber);
+       // const candidate = await customCandidateScraperCallback();
+       // tsPopup.showPopup(candidate, 'csp', phoneNumber);
     }
 
     const _onMessageCopiedToTsClipboard = (evt, tsClipboardData) => {

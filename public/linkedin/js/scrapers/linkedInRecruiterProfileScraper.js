@@ -150,7 +150,6 @@
             positionAnalyzer.analyzeCandidatePositions(candidate, 'ALL_SKILLS');
             const companyAnalytics = positionAnalyzer.processCompanyAnalytics([candidate]);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
-
         }
 
         return candidate;

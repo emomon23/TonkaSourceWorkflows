@@ -67,8 +67,35 @@
         return result;
     }
 
-    const _scrapeContactInfoFromRecruiterProfile = async (candidate, windowRef) => {
+    const _getRecruiterProfileContactInfoDialog = async (windowRef) => {
+        return $(windowRef).find('#dialog')[0];
+    }
 
+    const _scrapeContactInfoFromRecruiterProfile = async (windowRef) => {
+        let dialog = _getRecruiterProfileContactInfoDialog(windowRef);
+        if (!dialog){
+            const contactInfoBtn = $(windowRef).find('button[data-lira-action*="edit-contact-info"]')[0];
+            if (!contactInfoBtn){
+                return null;
+            }
+
+            contactInfoBtn.click();
+            await tsCommon.sleep(2000);
+            dialog = _getRecruiterProfileContactInfoDialog(windowRef);
+        }
+
+        if (!dialog){
+            return null;
+        }
+
+        const dialogText = $(dialog).text();
+        const emails = tsString.extractEmailAddresses(dialogText);
+        const phoneNumbers = tsString.extractPhoneNumbers(dialogText);
+
+        return {
+            emails,
+            phoneNumbers
+        }
     }
 
     const _getProfileWindow = async (candidate) => {
@@ -167,6 +194,7 @@
 
     class LinkedInContactInfoScraper {
         scrapeContactInfo = _scrapeContactInfo;
+        scrapeContactInfoFromRecruiterProfile = _scrapeContactInfoFromRecruiterProfile;
     }
 
     window.linkedInContactInfoScraper = new LinkedInContactInfoScraper();

@@ -364,17 +364,25 @@
     }
 
     const _saveContactInfo = async (candidateSearchValues, contactInfoData) => {
-        if (contactInfoData && (contactInfoData.phone || contactInfoData.email)){
+        if (contactInfoData && (contactInfoData.phoneNumbers || contactInfoData.emails)){
             const candidate = await _searchForCandidate(candidateSearchValues);
-            if (contactInfoData.email){
-                candidate.email = contactInfoData.email;
+
+            if ((!candidate.email) && contactInfoData.emails && contactInfoData.emails.length){
+                candidate.email = contactInfoData.emails[0];
+                if (contactInfoData.emails.length > 1){
+                    candidate.emailList = contactInfoData.emails;
+                }
             }
 
-            if (contactInfoData.phone){
-                candidate.phone = contactInfoData.phone;
+            if ((candidate.phone) && contactInfoData.phoneNumbers){
+                candidate.phone = contactInfoData.phoneNumbers[0];
+                if (contactInfoData.phoneNumbers.length > 1){
+                    candidate.phoneNumberList = contactInfoData.phoneNumbers;
+                }
             }
 
             await _saveCandidate(candidate);
+            return candidate;
         }
     }
 

@@ -481,6 +481,8 @@
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
             const companyAnalytics = positionAnalyzer.processCompanyAnalytics(candidatesInResults);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
+
+            console.log(candidate);
         }
     }
 

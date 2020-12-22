@@ -150,6 +150,19 @@
         return result;
     }
 
+    const _extractEmailAddresses = (text) => {
+        const regEx = /[a-zA-Z0-9-_.]+@[a-zA-Z0-9-_.]+(\.com|\.gov|\.org|\.tv|\.net|\.co|\.store|\.us|\.live)/gi;
+        const emails = text.match(regEx);
+        return emails && emails.length ? emails : null;
+    }
+
+    const _extractPhoneNumbers = (text) => {
+        const rgEx = /(\d{1})?(\.|\s)?\d{3}(\-|\.|\s)?\d{3}(\-|\.|\s)?\d{4}/gi;
+        const phoneNumbers = text.match(rgEx);
+
+        return phoneNumbers && phoneNumbers.length ? phoneNumbers : null;
+    }
+
     const _convertFullNameToObject = (fullName) => {
         if (!fullName || fullName.length === 0){
             return null;
@@ -201,6 +214,8 @@
         stripExcessSpacesFromString = _stripExcessSpacesFromString;
         containsAny = _containsAny;
         containsAll = _containsAll;
+        extractEmailAddresses = _extractEmailAddresses;
+        extractPhoneNumbers = _extractPhoneNumbers
         toBoolean = _toBoolean;
         toStringify = _toStringify;
         getClosestMatch = _getClosestMatch;
