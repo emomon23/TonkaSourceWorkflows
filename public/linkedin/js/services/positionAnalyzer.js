@@ -306,7 +306,7 @@
         } else if (skills2 && skills2.length > 0) {
             mergedSkills = skills2;
         }
-        return mergedSkills;
+        return tsArray.removeDuplicates(mergedSkills);
     }
 
     const _processCompanyAnalytics = (candidates) => {
