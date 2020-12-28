@@ -49,7 +49,7 @@
             _candidateFound = null;
         }
 
-        const cachedCandidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
+        const cachedCandidate = await linkedInSearchResultsScraper.getCurrentRecruiterProfileCandidate();
         if (cachedCandidate
             && cachedCandidate.firstName === candidateSearch.firstName
             && cachedCandidate.lastName === candidateSearch.lastName){

@@ -48,7 +48,6 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/connectionLifeCycleRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/tsClipboardRepository.js
 
-
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/company.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/candidate.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
@@ -56,20 +55,18 @@
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/companySkillSearch.js
 
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterCompanyScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterFilter.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
-
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInSearchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/jobHistoryScrapeManager.js
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInSearchResultsSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/projectPipelineSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInLoginSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/myPublicNetworkSpy.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/correspondence/tsClipboardSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/correspondence/connectionRequests.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/correspondence/correspondenceCommon.js
@@ -80,7 +77,6 @@
 
 // @require     https://tonkasourceworkflows.firebaseapp.com/linkedin/css/jqueryModalCss.js
 // @require     https://tonkasourceworkflows.firebaseapp.com/linkedin/css/tonkaSourceCss.js
-
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/linkedInApp.js
 
@@ -126,8 +122,8 @@
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterCompanyScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterFilter.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterProfileScraper.js
+// @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInSearchResultsScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/jobHistoryScrapeManager.js
-
 
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/tsClipboardSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
@@ -140,8 +136,6 @@
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/recruiterInMail.js
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/publicInMail.js
 
-
-// @ignore      http://localhost:5001/linkedin/js/searchResultScrapers/searchResultsScraper.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInMessageSender.js
 // @ignore      http://localhost:5001/linkedin/js/linkedInApp.js
 // @ignore      http://localhost:5001/linkedin/js/tsCommand.js

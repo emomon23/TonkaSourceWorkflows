@@ -88,7 +88,7 @@
 
                     if (parent){
                         const memberId = $(parent).attr('id').replace('search-result-', '');
-                        searchResultsScraper.persistLastRecruiterProfile(memberId);
+                        linkedInSearchResultsScraper.persistLastRecruiterProfile(memberId);
                     }
 
                     $(e.target).attr('target', '_blank');

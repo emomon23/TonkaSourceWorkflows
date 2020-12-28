@@ -291,7 +291,7 @@
                         }
                     }
                     else {
-                        searchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
+                        linkedInSearchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
 
                         // eslint-disable-next-line no-await-in-loop
                         await tsCommon.randomSleep(2000, 3000);
@@ -389,7 +389,7 @@
 
                 // eslint-disable-next-line no-await-in-loop
                 await tsCommon.sleep(3000);
-             }
+            }
 
             if (!linkedInCommon.advanceToNextLinkedInResultPage()){
                 break;
@@ -481,8 +481,6 @@
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
             const companyAnalytics = positionAnalyzer.processCompanyAnalytics(candidatesInResults);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
-
-            console.log(candidate);
         }
     }
 
@@ -527,7 +525,7 @@
         return _pageCandidates && _pageCandidates.map ? _pageCandidates.map(c => c.memberId) : [];
     }
 
-    class SearchResultsScraper {
+    class LinkedInSearchResultsScraper {
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         persistLastRecruiterProfile = _persistLastRecruiterProfile;
         walkTheSearchResultsPages = _walkTheSearchResultsPages;
@@ -543,6 +541,6 @@
         interceptSearchResults = _interceptSearchResults;
     }
 
-    window.searchResultsScraper = new SearchResultsScraper();
+    window.linkedInSearchResultsScraper = new LinkedInSearchResultsScraper();
 })();
 
