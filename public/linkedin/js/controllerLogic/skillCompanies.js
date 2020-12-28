@@ -22,7 +22,7 @@
             let skillCompaniesDoc = existingSkillCompaniesDocs.find(scd => scd.skill === skill);
             if (skillCompaniesDoc) {
                 // Merge the companies and update the document
-                skillCompaniesDoc.companies = positionAnalyzer.mergeSkills(skillCompaniesDoc.companies, companyIdsWithThisSkill);
+                skillCompaniesDoc.companies = tsArray.union(skillCompaniesDoc.companies, companyIdsWithThisSkill);
                 await skillCompaniesRepository.update(skillCompaniesDoc);
             } else {
                 // Create the new skillCompanies document and insert

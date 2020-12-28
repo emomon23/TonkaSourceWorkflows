@@ -282,7 +282,7 @@
                 mergeWithPrior.startDate = p.startDate;
                 mergeWithPrior.startDateMonth = p.startDateMonth;
                 mergeWithPrior.startDateYear = p.startDateYear;
-                mergeWithPrior.skills = _mergeSkills(mergeWithPrior.skills, p.skills);
+                mergeWithPrior.skills = tsArray.union(mergeWithPrior.skills, p.skills);
             }
             else {
                 result.push(p);
@@ -290,23 +290,6 @@
         });
 
         return result;
-    }
-
-    const _mergeSkills = (skills1, skills2) => {
-        let mergedSkills = [];
-        if (skills1 && skills1.length > 0) {
-            mergedSkills = skills1;
-            if (skills2 && skills2.length > 0) {
-                skills2.forEach((skill) => {
-                    if (skills1.indexOf(skill) === -1) {
-                        mergedSkills.push(skill);
-                    }
-                });
-            }
-        } else if (skills2 && skills2.length > 0) {
-            mergedSkills = skills2;
-        }
-        return tsArray.removeDuplicates(mergedSkills);
     }
 
     const _processCompanyAnalytics = (candidates) => {
@@ -336,7 +319,6 @@
     class PositionAnalyzer {
         analyzeCandidatePositions = _analyzeCandidatePositions;
         analyzeCandidatesPositions = _analyzeCandidatesPositions;
-        mergeSkills = _mergeSkills;
         processCompanyAnalytics = _processCompanyAnalytics;
     }
 
