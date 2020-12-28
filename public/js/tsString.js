@@ -157,7 +157,7 @@
     }
 
     const _extractPhoneNumbers = (text) => {
-        const rgEx = /(\d{1})?(\.|\s)?\d{3}(\-|\.|\s)?\d{3}(\-|\.|\s)?\d{4}/gi;
+        const rgEx = /(\d{1})?(\.|\s)?\d{3}(-|\.|\s)?\d{3}(-|\.|\s)?\d{4}/gi;
         const phoneNumbers = text.match(rgEx);
 
         return phoneNumbers && phoneNumbers.length ? phoneNumbers : null;

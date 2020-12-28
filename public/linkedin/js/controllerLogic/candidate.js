@@ -384,6 +384,7 @@
             await _saveCandidate(candidate);
             return candidate;
         }
+        return null;
     }
 
     class CandidateController {
