@@ -64,7 +64,9 @@
             $(container).append($(document.createElement('div')).text(grade).attr('class', 'grade'));
 
             $(element).append(container);
+            return container;
         }
+        return null;
     }
 
     const _getRoleName = (roleName) => {
