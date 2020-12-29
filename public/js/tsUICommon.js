@@ -3,7 +3,7 @@
         const copyInput = document.createElement("input");
         $(copyInput).val(value)
 
-        const parent = document.body ? document.body : document.activeElement;
+        const parent = $(document).find('div')[0];
         $(parent).append(copyInput);
 
         await tsCommon.sleep(100);
@@ -144,6 +144,13 @@
         return $(grid).append(headerRow).append(tableBody);
     }
 
+    const _createTooltip = (el, tooltipText) => {
+        const tooltip = $(document.createElement("span"))
+            .attr("class", "tooltiptext")
+            .html(tooltipText);
+        $(el).append(tooltip);
+    }
+
     const _rebind = (selector, eventName, functionReference_NOT_AnAnonomousFunction) => {
         try {
             $(selector).unbind(eventName, functionReference_NOT_AnAnonomousFunction)
@@ -260,6 +267,7 @@
         copyToClipboard = _copyToClipboard;
         createDataGrid = _createDataGrid;
         createListItem = _createListItem;
+        createTooltip = _createTooltip;
         removeListItem = _removeListItem;
         addButton = _addButton;
         findDomElements = _findDomElements;

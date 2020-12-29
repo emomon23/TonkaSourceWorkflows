@@ -36,6 +36,26 @@
         return result;
     }
 
+    const _mapKeywordsEntryToPositiveArray = (str) => {
+        const result = [];
+        const	keywordString = str.replace(/"/gi, '').toUpperCase();
+      const andGroup = keywordString.split(' AND ');
+
+      andGroup.forEach((a) => {
+          const orGroup = a.split(' OR ');
+
+        orGroup.forEach((w) => {
+            if (w.indexOf('NOT') === -1){
+              const word = w.replace(/\(/gi, '').replace(/\)/gi, '');
+            result.push(word);
+          }
+        })
+
+      })
+
+      return result;
+    }
+
     const _scrapeFilterInputsSearchResultFilters = () => {
         const result = {};
         let filterListItems = $(linkedInSelectors.searchResultsPage.searchFilterCategories);
@@ -56,6 +76,9 @@
             }
         });
 
+        if (result && Array.isArray(result.keywords)){
+            result.keywordsPositiveMatchArray = _mapKeywordsEntryToPositiveArray(result.keywords[0]);
+        }
         return result;
     }
 
@@ -145,6 +168,7 @@
     const _scrapeLinkedSearchFilters = () => {
         const filterObject = _scrapeFilterInputsSearchResultFilters();
         window.tsRecruiterSearchFilters = tsRecruiterSearchFilterRepository.saveLinkedInRecruiterSearchFilters(filterObject);
+        return filterObject;
     }
 
     const _getRecruiterFilterKeywordMatchStrucuture = () => {

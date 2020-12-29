@@ -1,33 +1,53 @@
 (() => {
-    const _bindToElements = async () => {
-        await _bindToRecruiterProfileLinks();
-        _bindToJumperGradeRollOver();
+    const _activelySeekingFilterString = `("seeking new opportunit" OR "seeking an opportun" OR "seeking opportunit" OR "seeking a opportunit" OR "seeking employment" OR "seeking entry" OR "currently seeking " OR "actively seeking" OR "actively looking" OR "currently looking" OR "opentowork" OR "open to work" OR "looking for new" OR "looking for a") `;
 
-        linkedInApp.showTsReady();
+    const _addActivelySeekingTextButtonToUI = () => {
+        const existing = $('#activelySeekingTextButton')[0];
+        if (existing){
+            return;
+        }
+
+        const labelElement  = $('#keywords-label')[0];
+
+        if (labelElement){
+            const a = document.createElement('a');
+            $(labelElement).append(a);
+
+            $(a)
+                .attr('href', '#')
+                .attr('id', 'activelySeekingTextButton')
+                .text('  ActivelySeeking')
+                .click(async () => {
+                    const editBtn = $('li[title*="Profile keywords"] button[class*="add-pills-btn"]')[0];
+                    if (editBtn){
+                        editBtn.click();
+                        await tsCommon.sleep(500);
+                        _appendToKeywordsFilter(_activelySeekingFilterString);
+                    }
+                });
+        }
     }
 
-    const _bindToJumperGradeRollOver = async () => {
-        try {
-            let jGrades = await tsUICommon.jQueryWait('div.grade-container', 10000);
+    const _appendToKeywordsFilter = async (appendText) => {
+        const textArea = $('#facet-keywords textarea')[0];
+        if (textArea){
+            $(textArea).focus();
+            const existingText = $(textArea).val();
 
-            if (jGrades.length > 0){
-                jGrades = jGrades.toArray();
-                for (let j = 0; j < jGrades.length; j++) {
-                    const jg = jGrades[j];
-                    const memberId = $(jg).attr('memberId');
-
-                    // eslint-disable-next-line no-await-in-loop
-                    const candidate = await candidateController.getCandidate(memberId);
-                    const tooltipText = candidate && candidate.technicalYearString ? candidate.technicalYearString : 'none';
-                    const tooltip = document.createElement("span");
-                    $(tooltip).attr("class", "tooltiptext").html(tooltipText);
-                    $(jg).append(tooltip);
-                }
+            if (existingText && existingText.length){
+                await tsUICommon.executeDelete(textArea, existingText.length + 30);
             }
+
+            const insertText = existingText && existingText.length ? `${existingText}\n${appendText}` : appendText;
+            document.execCommand('insertText', 'true', insertText);
         }
-        catch (e) {
-            tsCommon.logError(e);
-        }
+    }
+
+    const _bindToElements = async () => {
+        await _bindToRecruiterProfileLinks();
+        _addActivelySeekingTextButtonToUI();
+
+        linkedInApp.showTsReady();
     }
 
     const _bindToRecruiterProfileLinks = async () => {
@@ -43,7 +63,7 @@
 
                     if (parent){
                         const memberId = $(parent).attr('id').replace('search-result-', '');
-                        searchResultsScraper.persistLastRecruiterProfile(memberId);
+                        linkedInSearchResultsScraper.persistLastRecruiterProfile(memberId);
                     }
 
                     $(e.target).attr('target', '_blank');
@@ -56,6 +76,8 @@
 
     class LinkedInSearchResultsSpy {
         bindToRecruiterProfileLinks = _bindToRecruiterProfileLinks;
+        appendToKeywordsFilter = _appendToKeywordsFilter;
+        getActivelySeekingString = () => {return _activelySeekingFilterString};
     }
 
     window.linkedInRecruiterProfileSpy = new LinkedInSearchResultsSpy();

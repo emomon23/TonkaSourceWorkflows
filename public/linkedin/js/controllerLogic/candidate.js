@@ -23,6 +23,7 @@
             if (match){
                 match.title = ip.title;
                 match.displayText = ip.displayText;
+                match.skills = ip.skills;
 
                 if (ip.description && ip.description.length){
                     // eg. This will happend when a 'lite candidate' has their profile scraped
@@ -34,30 +35,6 @@
         });
 
         return result;
-    }
-
-    const _trimDownPositions = (positions) => {
-        return positions ? positions.map((p) => {
-            const mappedPosition = {
-                startDateMonth: p.startDateMonth,
-                startDateYear: p.startDateYear,
-                companyId: p.companyId,
-                companyName: p.companyName,
-                displayText: p.displayText,
-                title: p.title,
-            };
-
-            if (p.endDateMonth) {
-                mappedPosition.endDateMonth = p.endDateMonth;
-                mappedPosition.endDateYear = p.endDateYear;
-            }
-
-            if (p.description && p.description.length){
-                mappedPosition.description = p.description;
-            }
-
-            return mappedPosition;
-        }) : [];
     }
 
     const _checkIfDataCameFromPublicProfileOrRecruiterProfilePage = (candidate) => {
@@ -75,16 +52,13 @@
         }
 
         const fieldsNotToBeOverridden = ['positions', 'lastName', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
-        let existingCandidate = await _getCandidate(candidate.memberId);
+        let existingCandidate = await _getCandidateByMemberId(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
 
         if (_checkIfDataCameFromPublicProfileOrRecruiterProfilePage(candidate)){
             candidate.detailsLastScrapedDate = (new Date()).getTime();
         }
-
-        // Trim positions to minimal data for storage
-        candidate.positions  = _trimDownPositions(candidate.positions);
 
         if (existingCandidate){
             for (let k in candidate){
@@ -113,7 +87,7 @@
         }
     }
 
-    const _getCandidate = async (memberId) => {
+    const _getCandidateByMemberId = async (memberId) => {
         const lookFor = !isNaN(memberId) ? Number.parseInt(memberId) : null;
 
         if (lookFor){
@@ -256,9 +230,9 @@
         return await _lastNamesSearch(lNames, searchObject);
     }
 
-    const _searchForCandidate = async (searchFor, forceStringSearchForConsoleDebuggingOnly = false) => {
+    const _searchForCandidate = async (searchFor) => {
         if (!isNaN(searchFor)){
-            return await _getCandidate(searchFor);
+            return await _getCandidateByMemberId(searchFor);
         }
 
         if (typeof searchFor !== "object") {
@@ -305,14 +279,124 @@
         }
     }
 
+    const _doesCandidateMatchSkillsSearch = (candidate, arrayOfSkillSearch) => {
+        // statistician.calculateMonthsSinceWorkedAtPosition
+        let positions = candidate.positions;
+        if (!Array.isArray(positions)){
+            return false;
+        }
+
+        arrayOfSkillSearch.forEach((skillSearch) => {
+            const ageFilter = skillSearch.months ? skillSearch.months : 24;
+            const skillFilter = skillSearch.skill.toLowerCase().trim();
+
+            positions = positions.filter((p) => {
+                const ageOfPosition = statistician.calculateMonthsSinceWorkedAtPosition(p);
+                if (ageOfPosition > ageFilter){
+                    return false;
+                }
+
+                const positionSkills = p.skills || [];
+                if (positionSkills.length > 0){
+                    const skillMatch = positionSkills.filter((s) => {
+                        const positionSkill = s.toLowerCase().trim();
+                        return positionSkill === skillFilter
+                    });
+
+                    return skillMatch.length > 0;
+                }
+
+                return false;
+            });
+        });
+
+        const doesCandidateMatch = positions.length > 0;
+        return doesCandidateMatch;
+    }
+
+    const _writeCandidateMatchFilterStringToWindow = async (candidates) => {
+        let str = '';
+        let posStr = '';
+
+        candidates.forEach((c) => {
+            if (c.firstName && c.lastName){
+                str += '"' + (c.lastName.length > 2 ? c.lastName : c.firstName) + '" OR ';
+
+                let currentPosition = Array.isArray(c.positions) ? c.positions.filter(p => p.current === true) : [];
+                currentPosition = currentPosition.length > 0 ? currentPosition[0] : null;
+
+                if (currentPosition && currentPosition.title){
+                    posStr += `"${currentPosition.title}" OR `;
+                }
+            }
+        });
+
+        if (str.length > 0){
+            str = str.substr(0, str.length - 4);
+            str = `\n AND (${str}) `
+        }
+
+        if (posStr.length > 0){
+            posStr = posStr.substr(0, posStr.length - 4);
+            posStr = `\n AND (${posStr}) `;
+
+            str += posStr;
+        }
+
+        window.candidateMatchFilter = str;
+    }
+
+    const _searchOnSkills = async (arrayOfSkillSearch) => {
+        const skillSearch = Array.isArray(arrayOfSkillSearch) ? arrayOfSkillSearch : [arrayOfSkillSearch];
+        const allCandidates = await _getEntireCandidateList();
+
+        const candidateMatch = allCandidates.filter((candidate) => {
+            const candidateMatchesResult = _doesCandidateMatchSkillsSearch(candidate, skillSearch);
+            return candidateMatchesResult;
+        });
+
+        if (candidateMatch && candidateMatch.length){
+            _writeCandidateMatchFilterStringToWindow(candidateMatch);
+        }
+
+        console.log(`Number of candidate who match skillsSearch: ${candidateMatch.length}`)
+        return candidateMatch;
+    }
+
+    const _saveContactInfo = async (candidateSearchValues, contactInfoData) => {
+        if (contactInfoData && (contactInfoData.phoneNumbers || contactInfoData.emails)){
+            const candidate = await _searchForCandidate(candidateSearchValues);
+
+            if ((!candidate.email) && contactInfoData.emails && contactInfoData.emails.length){
+                candidate.email = contactInfoData.emails[0];
+                if (contactInfoData.emails.length > 1){
+                    candidate.emailList = contactInfoData.emails;
+                }
+            }
+
+            if ((candidate.phone) && contactInfoData.phoneNumbers){
+                candidate.phone = contactInfoData.phoneNumbers[0];
+                if (contactInfoData.phoneNumbers.length > 1){
+                    candidate.phoneNumberList = contactInfoData.phoneNumbers;
+                }
+            }
+
+            await _saveCandidate(candidate);
+            return candidate;
+        }
+        return null;
+    }
+
     class CandidateController {
+        saveContactInfo = _saveContactInfo;
         saveCandidate = _saveCandidate;
         saveCandidates = _saveCandidates;
         getCandidateList = _getCandidateList;
-        getCandidate = _getCandidate;
+        getCandidate = _searchForCandidate;
         searchForCandidate = _searchForCandidate;
         getJobSeekers = _getJobSeekers;
         getContractors = _getContractors;
+        searchOnSkills = _searchOnSkills;
 
         // loadLotsOfData = _loadLotsOfData;
     }

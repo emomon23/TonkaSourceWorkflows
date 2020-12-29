@@ -18,7 +18,7 @@
     const _launchConnectionRequestBlaster = async () => {
         const crStats = await connectionLifeCycleLogic.displayStatsConsoleLogMessage();
 
-        const memberIds = searchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+        const memberIds = linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
         if (!memberIds || memberIds.length === 0){
             console.log("No member ids available on current page, refresh the result pane");
             return;
@@ -92,7 +92,7 @@
             await tsCommon.sleep(8000);
         }
 
-        await jobWindow.searchResultsScraper.gatherAllJobSeekersExperienceData();
+        await jobWindow.linkedInSearchResultsScraper.gatherAllJobSeekersExperienceData();
         await tsCommon.sleep(2000);
 
         jobWindow.close();

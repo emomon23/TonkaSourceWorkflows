@@ -222,7 +222,7 @@
         }
 
         companySummary.averageTurnover = _calculateTurnoverAverages(companyEmploymentHistories);
-        companySummary.skills = positionAnalyzer.mergeSkills(companySummary.skills, scrapedCompanyHistory.skills);
+        companySummary.skills = tsArray.union(companySummary.skills, scrapedCompanyHistory.skills);
 
         if (existing){
             await companySummaryRepository.update(companySummary);
@@ -290,7 +290,7 @@
                 // For efficiencies... We're updating new objects here before we execute the skillCompanies save
                 if (scrapedCompanyAnalytics.skills && scrapedCompanyAnalytics.skills.length > 0) {
                     companiesWithFoundSkills.push(scrapedCompanyAnalytics);
-                    skillsFoundAtCompanies = positionAnalyzer.mergeSkills(skillsFoundAtCompanies, scrapedCompanyAnalytics.skills);
+                    skillsFoundAtCompanies = tsArray.union(skillsFoundAtCompanies, scrapedCompanyAnalytics.skills);
                 }
             }
         }

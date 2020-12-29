@@ -1,11 +1,13 @@
 (function () {
-    const _log = (message, type = 'LOG') => {
+    const _log = (toLog, type = 'LOG') => {
+        const message = toLog ? toLog.message || toLog : '(no message provided)';
+
         switch (type.toUpperCase()) {
             case 'WARN':
                 console.warn(message);
                 break;
             case 'ERROR':
-                console.error(message);
+                console.error(new Error(message));
                 break;
             default:
                 console.log(message);

@@ -49,7 +49,7 @@
             _candidateFound = null;
         }
 
-        const cachedCandidate = await searchResultsScraper.getCurrentRecruiterProfileCandidate();
+        const cachedCandidate = await linkedInSearchResultsScraper.getCurrentRecruiterProfileCandidate();
         if (cachedCandidate
             && cachedCandidate.firstName === candidateSearch.firstName
             && cachedCandidate.lastName === candidateSearch.lastName){
@@ -132,7 +132,7 @@
             linkedInApp.upsertContact(candidate);
 
             // Process Statistics
-            candidate.statistics = statistician.processStatistics(candidate);
+            candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
 
             // Calculate Skill Statistics Grades
             const skillsStatisticsList = [candidate.statistics];
@@ -150,7 +150,6 @@
             positionAnalyzer.analyzeCandidatePositions(candidate, 'ALL_SKILLS');
             const companyAnalytics = positionAnalyzer.processCompanyAnalytics([candidate]);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
-
         }
 
         return candidate;

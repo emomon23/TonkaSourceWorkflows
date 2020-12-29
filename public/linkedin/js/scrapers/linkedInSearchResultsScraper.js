@@ -2,6 +2,7 @@
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
     const _localStorageLastCandidateProfile = 'tsLastCandidateProfile';
     let _pageCandidates = [];
+    let _keywordCandidateMatches = [];
     let _pageLiTags = {};
     let _keepGatheringJobSeekerExperience = true;
     let _keepWalkingResultsPages = true;
@@ -37,7 +38,99 @@
         }
     }
 
-    const  _displayJobJumperAnalysis = (candidate) => {
+    const _evaluatePositionKeywordMatch = (keywordsString, position) => {
+        if (!(position && position.skills && keywordsString)){
+            return 0;
+        }
+
+        let result = 0;
+        const skills = position.skills.map(s => s.toUpperCase());
+        for (let i = 0; i < skills.length; i++){
+            if (keywordsString.indexOf(skills[i]) >= 0){
+                if (position.current === true){
+                    result = 3;
+                }
+                else {
+                    const age = statistician.calculateMonthsSinceWorkedAtPosition(position);
+                    result = age < 14 ? 2 : 1;
+                }
+
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    const _evaluateCandidateHeadlineKeywordMatch = (keywordsArray, candidate) => {
+        const headline = candidate.headline ? candidate.headline.toUpperCase() : '';
+        let result = 0;
+
+        for (let i = 0; i < keywordsArray.length; i++){
+            const ignoreKeywords = ["SEEKING", "CURRENTLY", "ACTIVELY", "OPEN", "LOOKING FOR"];
+            let ignore = false;
+
+            for (let j = 0; j < ignoreKeywords.length; j++){
+                if (keywordsArray[i].startsWith(ignoreKeywords[j])){
+                    ignore = true;
+                    break;
+                }
+            }
+
+            if ((!ignore) && headline.indexOf(keywordsArray[i]) >= 0){
+                result = 3;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    const _displaySkillMatchAnalysis = (candidatesInResults) => {
+        const filters = linkedInRecruiterFilter.scrapeLinkedSearchFilters();
+
+        let keywords = Array.isArray(filters.keywordsPositiveMatchArray) ? filters.keywordsPositiveMatchArray : [];
+        keywords = keywords
+                    .map(k => k.split('"').join('').toUpperCase())
+                    .filter(k => k.indexOf("RECRUITER") === -1
+                                && k.indexOf("HR") === -1);
+
+        const keywordStrings = keywords.join(" ");
+
+        candidatesInResults.forEach((c) => {
+            const positions = Array.isArray(c.positions) ? c.positions : [];
+            let matchValue = _evaluateCandidateHeadlineKeywordMatch(keywords, c);
+
+            if (matchValue < 3){
+                for (let p = 0; p < positions.length; p++){
+                    const match = _evaluatePositionKeywordMatch(keywordStrings, positions[p]);
+                    if (match > matchValue){
+                        matchValue = match;
+                        if (match === 3){
+                            break; // Highest match rating available
+                        }
+                    }
+                }
+            }
+
+            let indicator = '';
+            for (let i = 0; i < matchValue; i++){
+                indicator += "!";
+            }
+
+            if (indicator.length) {
+                const candidateNameElement = $(`#search-result-${c.memberId} h3 a`)[0];
+                if (candidateNameElement){
+                    let currentText = $(candidateNameElement).text() + ` ${indicator}`;
+                    $(candidateNameElement).text(currentText);
+                }
+
+                _keywordCandidateMatches.push(c.memberId);
+            }
+        });
+    }
+
+    const  _displayGrades = (candidate, skillsFilter) => {
         if (candidate
             && candidate.grades
             && candidate.grades.jobJumper){
@@ -48,7 +141,37 @@
 
                 const newDiv = document.createElement("div");
                 $(newDiv).attr('class', "profile-grade-container");
-                linkedInCommon.displayGrade('Job Jumper', newDiv, candidate.grades.jobJumper, [ { name: 'memberId', value: candidate.memberId }]);
+
+                const jjContainer = linkedInCommon.displayGrade('Job Jumper', newDiv, candidate.grades.jobJumper, [ { name: 'name', value: "JobJumper" }, { name: 'memberId', value: candidate.memberId } ]);
+                if (jjContainer) {
+                    tsUICommon.createTooltip(jjContainer, (candidate.technicalYearString) ? candidate.technicalYearString : 'none');
+                }
+
+                const muContainer = linkedInCommon.displayGrade('Months Using', newDiv, candidate.statistics.grades.cumulativeMonthsUsing);
+                const wmContainer = linkedInCommon.displayGrade('Within Months', newDiv, candidate.statistics.grades.cumulativeWithinMonths);
+
+                // Lets add tooltips to Months Using / Within Months
+                if (skillsFilter && skillsFilter.skills
+                    && candidate.statistics && candidate.statistics.skillStatistics) {
+                    const skillNames = skillsFilter ? Object.keys(skillsFilter.skills) : [];
+
+                    const howMonthsUsingWasCalculated = [];
+                    const howWithinMonthsWasCalculated = [];
+                    skillNames.forEach((skill) => {
+                        const skillStats = candidate.statistics.skillStatistics[skill];
+                        if (skillStats && skillStats.grades) {
+                            howMonthsUsingWasCalculated.push(`${skill}: ${skillStats.grades.monthsUsing.calculatedBy}`);
+                            howWithinMonthsWasCalculated.push(`${skill}: ${skillStats.grades.withinMonths.calculatedBy}`);
+                        }
+                    })
+                    // Add the tooltips
+                    if (muContainer && howMonthsUsingWasCalculated.length) {
+                        tsUICommon.createTooltip(muContainer, howMonthsUsingWasCalculated.join("<br/><br/>"));
+                    }
+                    if (wmContainer && howWithinMonthsWasCalculated.length) {
+                        tsUICommon.createTooltip(wmContainer, howWithinMonthsWasCalculated.join("<br/><br/>"));
+                    }
+                }
 
                 $(searchResult).prepend(newDiv);
         }
@@ -115,7 +238,6 @@
         }
 
         _highlightIfCandidateIsJobSeeker(candidate);
-        _displayJobJumperAnalysis(candidate);
     }
 
     const _waitForResultsHTMLToRender = async (lastCandidate) => {
@@ -198,7 +320,7 @@
                         }
                     }
                     else {
-                        searchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
+                        linkedInSearchResultsScraper.persistLastRecruiterProfile(candidate.memberId);
 
                         // eslint-disable-next-line no-await-in-loop
                         await tsCommon.randomSleep(2000, 3000);
@@ -279,6 +401,36 @@
         return null;
     }
 
+    const _walkTheSearchResultsPages = async (addKeywordMatchesToClipboard) => {
+        for (let i = 0; i < 40; i++){
+            if (addKeywordMatchesToClipboard){
+                for (let k = 0; k < _keywordCandidateMatches.length; k++){
+                    const checkBox = $(`#search-result-${_keywordCandidateMatches[k]} input[type*="checkbox"]`)[0];
+                    if (checkBox){
+                        $(checkBox).prop('checked', true);
+                    }
+                }
+
+                $('#top-bar').addClass('profile-selected');
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(400);
+                $('button[data-action*="clipboard-add"] li-icon').click();
+
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(3000);
+            }
+
+            if (!linkedInCommon.advanceToNextLinkedInResultPage()){
+                break;
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.randomSleep(6000, 9000);
+        }
+
+        console.log("DONE - walkTheSearchResultsPages");
+    }
+
     const _cleanJobHistory = (candidate) => {
         const findAndReplace = [{find: '&#x2F;', replace: '/'}, {find: '&amp;', replace: '&'}];
 
@@ -314,6 +466,7 @@
     }
 
     const _interceptSearchResults = async (responseObj) => {
+        _keywordCandidateMatches = [];
         const interceptedResults = JSON.parse(responseObj.responseText);
         const candidatesInResults = interceptedResults.result.searchResults;
         _pageCandidates = [];
@@ -336,6 +489,22 @@
 
                 _pageCandidates.push(candidate);
 
+                // Process Statistics
+                // Put the skills on each position
+                positionAnalyzer.analyzeCandidatePositions(candidate);
+                candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
+
+                // Calculate Skill Statistics Grades
+                const skillsStatisticsList = [candidate.statistics];
+                const skillsFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
+                if (skillsFilter) {
+                    statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter, false);
+                }
+
+                _displayGrades(candidate, skillsFilter);
+
+                console.log({candidate});
+
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
 
                 try {
@@ -345,6 +514,8 @@
                     tsCommon.log(e.message, 'ERROR');
                 }
             }
+
+            _displaySkillMatchAnalysis(candidatesInResults);
 
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
             const companyAnalytics = positionAnalyzer.processCompanyAnalytics(candidatesInResults);
@@ -393,9 +564,10 @@
         return _pageCandidates && _pageCandidates.map ? _pageCandidates.map(c => c.memberId) : [];
     }
 
-    class SearchResultsScraper {
+    class LinkedInSearchResultsScraper {
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         persistLastRecruiterProfile = _persistLastRecruiterProfile;
+        walkTheSearchResultsPages = _walkTheSearchResultsPages;
         getCurrentRecruiterProfileCandidate = getCurrentRecruiterProfileCandidate;
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
         gatherAllJobSeekersExperienceData = _gatherAllJobSeekersExperienceData;
@@ -408,6 +580,6 @@
         interceptSearchResults = _interceptSearchResults;
     }
 
-    window.searchResultsScraper = new SearchResultsScraper();
+    window.linkedInSearchResultsScraper = new LinkedInSearchResultsScraper();
 })();
 

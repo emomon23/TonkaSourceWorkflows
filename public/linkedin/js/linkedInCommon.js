@@ -2,10 +2,10 @@
     const SAVE_COMPANY_DATA_CONFIG = 'tsCompanyLogic.saveCompanyData';
 
     const _advanceToNextLinkedInResultPage = () => {
-        const buttonExists = $("[type='chevron-right-icon']").length;
-        if (buttonExists){
+        const nextButton = $(`a[class*="page-link"][title*="Next Page"] span`)[0];
+        if (nextButton){
             tsCommon.log("advancing to the next page");
-            $("[type='chevron-right-icon']").click();
+            nextButton.click();
             return true;
         }
 
@@ -64,7 +64,9 @@
             $(container).append($(document.createElement('div')).text(grade).attr('class', 'grade'));
 
             $(element).append(container);
+            return container;
         }
+        return null;
     }
 
     const _getRoleName = (roleName) => {

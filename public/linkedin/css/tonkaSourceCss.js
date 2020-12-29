@@ -104,7 +104,7 @@
 
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 250px;
+    width: 375px;
     background-color: black;
     color: #fff;
     text-align: left;

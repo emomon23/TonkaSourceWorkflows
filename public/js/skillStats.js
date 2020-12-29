@@ -372,7 +372,7 @@
                 isCoreSkill: true
             },
             "React Native": {
-                searchPhrases: ["React Native", "React.Native", "ReactNative"],
+                searchPhrases: ["React Native", "React.Native", "ReactNative", "React-Native"],
                 isCoreSkill: true
             },
             "Ruby": {

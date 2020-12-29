@@ -21,6 +21,10 @@
         return array2;
     }
 
+    const _removeDuplicates = (array1) => {
+        return [...new Set(array1)];
+    }
+
     const _symmetricalDifference = (array1, array2) => {
         if (array1 && array1.length) {
             if (array2 && array2.length) {
@@ -42,9 +46,11 @@
         }
         return array2;
     }
+
     class TSArray {
         difference = _difference;
         intersection = _intersection;
+        removeDuplicates = _removeDuplicates;
         symmetricalDifference = _symmetricalDifference;
         union = _union;
     }

@@ -268,7 +268,7 @@
 
     const _fireConnectionRequestBlast = async (bodyObj) => {
         const body = bodyObj.body;
-        const currentMemberIdsArray = searchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+        const currentMemberIdsArray = linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
 
         for(let i = 0; i < currentMemberIdsArray.length; i++){
             // eslint-disable-next-line no-await-in-loop
@@ -306,7 +306,7 @@
     // should be routed to the linkedInApp object.
     tsCommon.setUpPostMessageListener('linkedInApp');
 
-    tsInterceptor.interceptResponse('get', '/api/smartsearch?', searchResultsScraper.interceptSearchResults);
+    tsInterceptor.interceptResponse('get', '/api/smartsearch?', linkedInSearchResultsScraper.interceptSearchResults);
 
     // firefox was 'telling on tonkasource' to linked in, when it found tampermonkey script gets loaded.
     // try to suppress that method call.
