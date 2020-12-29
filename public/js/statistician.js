@@ -20,40 +20,47 @@
     }
 
     const _assumptionForMonthsOfUse = (jobStatistics, skillStatistics) => {
-        if (skillStatistics.isInSummary) {
+        if (skillStatistics.isInHeadline) {
             // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within their current position
             if (jobStatistics && jobStatistics.current) {
-                return Number.parseInt(jobStatistics.current / 0.083);
+                return [Number.parseInt(jobStatistics.current / 0.083), 'ASSUMPTION - Found in Headline :: Using number of years at current job.'];
             }
-            // Don't have a current position, so lets then default this skill to 24 months of use
-            return 24;
+            // Don't have a current position, so lets then default this skill to 12 months of use
+            return [12, 'ASSUMPTION - Found in Headline :: Defaulting to 12 months of use.'];
+        } else if (skillStatistics.isInSummary) {
+            // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within their current position
+            if (jobStatistics && jobStatistics.current) {
+                return [Number.parseInt(jobStatistics.current / 0.083), 'ASSUMPTION - Found in Summary :: Using number of years at current job.'];
+            }
+            // Don't have a current position, so lets then default this skill to 12 months of use
+            return [12, 'ASSUMPTION - Found in Summary :: No current job, defaulting to 12 months of use.'];
         } else if (skillStatistics.isInSelfAssessedSkills) {
             // Candidate has made claims they have this skill, we'll give them 12 months for this
             // Should update stats so this returns "Years of Use" that we collect, then we can just set it to that value
-            return 12;
+            return [12, 'ASSUMPTION - Found in Self-Assessed Skills :: Defaulting to 12 months of use.'];
         } else if (skillStatistics.isInLinkedInSkills) {
             // Candidate has this listed in their Linked IN skills section, maybe they've used it a ton, maybe they've read about it or have dabbled,  Let's only give them credit for 6 months.
-            return 6;
+            return [6, 'ASSUMPTION - Found in LinkedIn Skills :: Defaulting to 6 months of use.'];
         }
-        return 0;
+        return [0, 'ASSUMPTION - Could not assess.'];
     }
 
     const _assumptionForMonthsSinceLastUse = (jobStatistics, skillStatistics) => {
         if (skillStatistics.isInHeadline) {
-            // If In Headline, candidate is identifying themselves with this skill.  Start by saying it's within 3 months, just so it's not an A grade
-            return 999;
+            // If In Headline, candidate is identifying themselves with this skill.  Start by saying it's within 3 months, just so it's not an A grade if we want them using it right now
+            return [3, 'ASSUMPTION - Found in Headline :: Defaulting to 3 months since use.'];
         } else if (skillStatistics.isInSummary) {
-            // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within 3 months, just so it's not an A grade
-            return 3;
+            // If In Summary, candidate is identifying themselves with this skill.  Start by saying it's within 3 months, just so it's not an A grade if we want them using it right now
+            return [3, 'ASSUMPTION - Found in Summary :: Defaulting to 3 months since use.'];
         } else if (skillStatistics.isInSelfAssessedSkills) {
             // Candidate has made claims they have this skill, we'll say they've used it within the last 5 years
             // Should update stats so this returns "Years of Use" that we collect, then we can just set it to that value
-            return 60;
+            return [60, 'ASSUMPTION - Found in Self-Assessed Skills :: Defaulting to 60 months since use.'];
         } else if (skillStatistics.isInLinkedInSkills) {
             // Candidate has this listed in their Linked IN skills section, maybe they've used it a ton, maybe they've read about it or have dabbled,  Let's say within 5 years
-            return 60;
+            return [60, 'ASSUMPTION - Found in LinkedIn Skills :: Defaulting to 60 months since use.'];
         }
-        return 9999;
+        return [9999, 'ASSUMPTION - Could not assess.'];
     }
 
     const _cleanContactPositions = (positions) => {
@@ -297,8 +304,9 @@
                         skillStatistics.grades = {};
                         const filterSkill = filter.skills[skill];
 
+                        let monthsUsingHowCalculated = "Position Analysis";
                         if (!skillStatistics.monthsOfUse || isNaN(skillStatistics.monthsOfUse)) {
-                            skillStatistics.monthsOfUse = _assumptionForMonthsOfUse(contactStatisticsList[i].jobStatistics, skillStatistics);
+                            [skillStatistics.monthsOfUse, monthsUsingHowCalculated] = _assumptionForMonthsOfUse(contactStatisticsList[i].jobStatistics, skillStatistics);
                         }
                         // Set a default if missing or value is undefined
                         if (filterSkill.monthsUsing === undefined) {
@@ -309,11 +317,13 @@
                         allMonthsUsingGpas.push(monthsUsingGpa);
                         skillStatistics.grades.monthsUsing  = {
                             gpa: monthsUsingGpa,
-                            grade: gradeUtil.getGrade(monthsUsingGpa)
+                            grade: gradeUtil.getGrade(monthsUsingGpa),
+                            calculatedBy: monthsUsingHowCalculated
                         }
 
+                        let monthsSinceLastUseHowCalculated = "Position Analysis";
                         if (skillStatistics.monthsSinceLastUse === undefined || isNaN(skillStatistics.monthsSinceLastUse)) {
-                            skillStatistics.monthsSinceLastUse = _assumptionForMonthsSinceLastUse(contactStatisticsList[i].jobStatistics, skillStatistics);
+                            [skillStatistics.monthsSinceLastUse, monthsSinceLastUseHowCalculated] = _assumptionForMonthsSinceLastUse(contactStatisticsList[i].jobStatistics, skillStatistics);
                         }
                         // Set a default if missing or value is undefined
                         if (filterSkill.withinMonths === undefined) {
@@ -323,18 +333,21 @@
                         allWithinMonthsGpas.push(withinMonthsGpa);
                         skillStatistics.grades.withinMonths = {
                             gpa: withinMonthsGpa,
-                            grade: gradeUtil.getGrade(withinMonthsGpa)
+                            grade: gradeUtil.getGrade(withinMonthsGpa),
+                            calculatedBy: monthsSinceLastUseHowCalculated
                         }
                     } else {
                         contactSkillsStatistics[skill] = {
                             grades: {
                                 monthsUsing: {
                                     gpa: 0,
-                                    grade: 'F'
+                                    grade: 'F',
+                                    calculatedBy: 'Skill not found in candidate data.'
                                 },
                                 withinMonths: {
                                     gpa: 0,
-                                    grade: 'F'
+                                    grade: 'F',
+                                    calculatedBy: 'Skill not found in candidate data.'
                                 }
                             }
                         };
@@ -520,6 +533,8 @@
     }
 
     const _processStatistics = (contact, type = 'CORE_SKILLS') => {
+        // Reset processed statistics
+        processedSkillStatistics = {}
         const result = {};
 
         const skillStatistics = _processSkillsStatistics(contact, type);

@@ -45,34 +45,9 @@
 
     const _bindToElements = async () => {
         await _bindToRecruiterProfileLinks();
-        _bindToJumperGradeRollOver();
         _addActivelySeekingTextButtonToUI();
 
         linkedInApp.showTsReady();
-    }
-
-    const _bindToJumperGradeRollOver = async () => {
-        try {
-            let jGrades = await tsUICommon.jQueryWait('div.grade-container', 10000);
-
-            if (jGrades.length > 0){
-                jGrades = jGrades.toArray();
-                for (let j = 0; j < jGrades.length; j++) {
-                    const jg = jGrades[j];
-                    const memberId = $(jg).attr('memberId');
-
-                    // eslint-disable-next-line no-await-in-loop
-                    const candidate = await candidateController.getCandidate(memberId);
-                    const tooltipText = candidate && candidate.technicalYearString ? candidate.technicalYearString : 'none';
-                    const tooltip = document.createElement("span");
-                    $(tooltip).attr("class", "tooltiptext").html(tooltipText);
-                    $(jg).append(tooltip);
-                }
-            }
-        }
-        catch (e) {
-            tsCommon.logError(e);
-        }
     }
 
     const _bindToRecruiterProfileLinks = async () => {

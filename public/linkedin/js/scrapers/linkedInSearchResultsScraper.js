@@ -130,7 +130,7 @@
         });
     }
 
-    const  _displayJobJumperAnalysis = (candidate) => {
+    const  _displayGrades = (candidate, skillsFilter) => {
         if (candidate
             && candidate.grades
             && candidate.grades.jobJumper){
@@ -141,7 +141,37 @@
 
                 const newDiv = document.createElement("div");
                 $(newDiv).attr('class', "profile-grade-container");
-                linkedInCommon.displayGrade('Job Jumper', newDiv, candidate.grades.jobJumper, [ { name: 'memberId', value: candidate.memberId }]);
+
+                const jjContainer = linkedInCommon.displayGrade('Job Jumper', newDiv, candidate.grades.jobJumper, [ { name: 'name', value: "JobJumper" }, { name: 'memberId', value: candidate.memberId } ]);
+                if (jjContainer) {
+                    tsUICommon.createTooltip(jjContainer, (candidate.technicalYearString) ? candidate.technicalYearString : 'none');
+                }
+
+                const muContainer = linkedInCommon.displayGrade('Months Using', newDiv, candidate.statistics.grades.cumulativeMonthsUsing);
+                const wmContainer = linkedInCommon.displayGrade('Within Months', newDiv, candidate.statistics.grades.cumulativeWithinMonths);
+
+                // Lets add tooltips to Months Using / Within Months
+                if (skillsFilter && skillsFilter.skills
+                    && candidate.statistics && candidate.statistics.skillStatistics) {
+                    const skillNames = skillsFilter ? Object.keys(skillsFilter.skills) : [];
+
+                    const howMonthsUsingWasCalculated = [];
+                    const howWithinMonthsWasCalculated = [];
+                    skillNames.forEach((skill) => {
+                        const skillStats = candidate.statistics.skillStatistics[skill];
+                        if (skillStats && skillStats.grades) {
+                            howMonthsUsingWasCalculated.push(`${skill}: ${skillStats.grades.monthsUsing.calculatedBy}`);
+                            howWithinMonthsWasCalculated.push(`${skill}: ${skillStats.grades.withinMonths.calculatedBy}`);
+                        }
+                    })
+                    // Add the tooltips
+                    if (muContainer && howMonthsUsingWasCalculated.length) {
+                        tsUICommon.createTooltip(muContainer, howMonthsUsingWasCalculated.join("<br/><br/>"));
+                    }
+                    if (wmContainer && howWithinMonthsWasCalculated.length) {
+                        tsUICommon.createTooltip(wmContainer, howWithinMonthsWasCalculated.join("<br/><br/>"));
+                    }
+                }
 
                 $(searchResult).prepend(newDiv);
         }
@@ -208,7 +238,6 @@
         }
 
         _highlightIfCandidateIsJobSeeker(candidate);
-        _displayJobJumperAnalysis(candidate);
     }
 
     const _waitForResultsHTMLToRender = async (lastCandidate) => {
@@ -463,7 +492,17 @@
                 // Process Statistics
                 // Put the skills on each position
                 positionAnalyzer.analyzeCandidatePositions(candidate);
-                candidate.statistics = statistician.processStatistics(candidate, 'CORE_SKILLS');
+                candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
+
+                // Calculate Skill Statistics Grades
+                const skillsStatisticsList = [candidate.statistics];
+                const skillsFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
+                if (skillsFilter) {
+                    statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter, false);
+                }
+
+                _displayGrades(candidate, skillsFilter);
+
                 console.log({candidate});
 
                 const trimmedCandidate = _trimScrapedCandidate(candidate);
