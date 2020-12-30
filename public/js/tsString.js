@@ -79,12 +79,12 @@
     }
 
     const _containsAny = (string, substrings) => {
-        if (!string) {
+        if (!string || !string.trim || !string.trim()) {
             return false;
         }
 
         return substrings.some((substring) => {
-            if (string.toLowerCase().includes(substring.toLowerCase())) {
+            if (string.trim().match(new RegExp('.*' + substring + '.*', 'i'))) {
                 return true;
             }
             return false;
@@ -92,16 +92,15 @@
     }
 
     const _containsAll = (string, substrings) => {
-        if (!string || !string.trim){
+        if (!string || !string.trim || !string.trim()){
             return false;
         }
 
         let result = true;
-        const lCaseString = string.trim().toLowerCase();
 
         for(let i = 0; i < substrings.length; i++){
             let lookFor = substrings[i];
-            if (lookFor && lookFor.trim && lCaseString.indexOf(lookFor.trim().toLowerCase()) === -1){
+            if (lookFor && string.trim().match(new RegExp('.*' + lookFor + '.*', 'i')) === -1) {
                 result = false;
                 break;
             }

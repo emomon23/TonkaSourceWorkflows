@@ -237,22 +237,11 @@
                 isCoreSkill: true
             },
             "Angular": {
-                searchPhrases: [
-                    "Angular2",
-                    "Angular 2",
-                    "Angular4",
-                    "Angular 4",
-                    "Angular5",
-                    "Angular 5",
-                    "Angular6",
-                    "Angular 6",
-                    "Angular7",
-                    "Angular 7",
-                    "Angular8",
-                    "Angular 8",
-                    "Angular ",
-                    "Angular,"
-                ],
+                searchPhrases: ['(?=angular(?![-|.|\\s+]?js|\\s*1))'], // Don't mess with this.  It will match Angular on Angular, AngularJS, but not if just Angular.JS is present,
+                isCoreSkill: true
+            },
+            "AngularJS": {
+                searchPhrases: ['AngularJS', 'Angular JS', 'Angular 1', 'Angular1', 'Angular.JS'],
                 isCoreSkill: true
             },
             "Apache ActiveMQ": {
@@ -368,7 +357,7 @@
                 searchPhrases: ["RabbitMQ", "Rabbit MQ"]
             },
             "React": {
-                searchPhrases: ["React"],
+                searchPhrases: ['(?=react(?![-|.|\\s+]?native))'], // Don't mess with this.  It will match React on React, ReactNative, but not if just React Native is present
                 isCoreSkill: true
             },
             "React Native": {
