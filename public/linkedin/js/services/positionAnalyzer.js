@@ -68,7 +68,7 @@
         candidate.isManagement = currentPositions.filter(p => _checkIfManagement(p)).length > 0;
         candidate.isIntern = currentPositions.filter(p => _checkIfInternship(p)).length > 0;
 
-        const titlesString = candidate.positions.map(p => p.title).join('.  ');
+        const titlesString = currentPositions.map(p => p.title).join('.  ');
         candidate.roleGuess = _calculateRoleForAPosition({title: titlesString});
 
         if (candidate.isTechnicallyRelevant && (candidate.isContractorOverride === null || candidate.isContractorOverride === undefined)){

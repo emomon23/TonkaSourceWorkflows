@@ -81,7 +81,7 @@
                     pos1.startDateYear = pos2.startDateYear;
                     pos1.description += ' ' + pos2.description;
                     pos1.title += ' ' + pos2.title;
-                    positions.splice(k,1);
+                    positions.splice(k, 1);
                 }
             }
         }
@@ -89,11 +89,11 @@
     }
 
     const _calculateMonthsSinceWorkedAtPosition = (position) => {
-        if (!(position && position.startDateMonth && position.startDateYear)){
+        if (!(position && position.startDateMonth && position.startDateYear)) {
             return Number.max;
         }
 
-        if (!position.endDateMonth){
+        if (!position.endDateMonth) {
             return 0; // They are currently working there
         }
 
@@ -175,6 +175,7 @@
                 numberOfJobs: totalJobs
             };
             let totalJobYears = 0;
+            let totalTechnicalJobYears = 0;
 
             copyOfPositions.forEach((position) => {
                 let isCurrentJob = true;
@@ -192,6 +193,11 @@
 
                 // Add to our total job years
                 totalJobYears += totalYearsOnJob
+
+                if (position.isTechnicallyRelevant) {
+                    const totalTechMonthsOnJob = _calculateMonthsBetweenDates(startDate, endDate);
+                    totalTechnicalJobYears += Math.round(100 * totalTechMonthsOnJob * 0.08333) / 100;
+                }
 
                 if (isCurrentJob) {
                     // If we have a current job, we don't want to include in average.  We only want to average the
@@ -227,6 +233,11 @@
                 // Set average years on job
                 yearsOnJobStatistics.average = Math.round(100 * totalJobYears / totalJobs) / 100;
                 yearsOnJobStatistics.yearsOfExperience = totalJobYears;
+            }
+
+            if (totalTechnicalJobYears) {
+                // Set average years on job
+                yearsOnJobStatistics.yearsOfTechnicalExperience = totalTechnicalJobYears;
             }
             const jobJumper = _calculateJobJumperGrade(yearsOnJobStatistics);
             contact.grades = (contact.grades) ? { ...contact.grades, jobJumper } : { jobJumper };
@@ -315,7 +326,7 @@
 
                         const monthsUsingGpa = gradeUtil.calculateGpa(filterSkill.monthsUsing, skillStatistics.monthsOfUse);
                         allMonthsUsingGpas.push(monthsUsingGpa);
-                        skillStatistics.grades.monthsUsing  = {
+                        skillStatistics.grades.monthsUsing = {
                             gpa: monthsUsingGpa,
                             grade: gradeUtil.getGrade(monthsUsingGpa),
                             calculatedBy: monthsUsingHowCalculated
@@ -355,14 +366,14 @@
                 }
 
                 if (!foundAtLeastOneMatchingSkill && spliceIfMinNotMet) {
-                    contactStatisticsList.splice(i,1);
+                    contactStatisticsList.splice(i, 1);
                 } else {
                     contactStatisticsList[i].grades = {};
                     if (allMonthsUsingGpas.length) {
                         const cumulativeMonthsUsingGpa = gradeUtil.calculateCumulativeGpa(allMonthsUsingGpas);
                         if (spliceIfMinNotMet && filter.minMonthsUsingGpa !== undefined
                             && (cumulativeMonthsUsingGpa === undefined || cumulativeMonthsUsingGpa < filter.minMonthsUsingGpa)) {
-                                contactStatisticsList.splice(i,1);
+                            contactStatisticsList.splice(i, 1);
                         } else {
                             if (contactStatisticsList[i] && contactStatisticsList[i].grades) {
                                 contactStatisticsList[i].grades.cumulativeMonthsUsing = {
@@ -375,7 +386,7 @@
                     if (allWithinMonthsGpas.length) {
                         const cumulativeWithinMonthsGpa = gradeUtil.calculateCumulativeGpa(allWithinMonthsGpas);
                         if (spliceIfMinNotMet && filter.minWithinMonthsGpa && cumulativeWithinMonthsGpa < filter.minWithinMonthsGpa) {
-                            contactStatisticsList.splice(i,1);
+                            contactStatisticsList.splice(i, 1);
                         } else {
                             if (contactStatisticsList[i] && contactStatisticsList[i].grades) {
                                 contactStatisticsList[i].grades.cumulativeWithinMonths = {
@@ -529,6 +540,11 @@
             const flattenedSkillSearchPhrases = _flattenSkillSearchPhrases(skill, contactCopy);
             _processSkillStats(key, flattenedSkillSearchPhrases, contactCopy);
         }
+        // Lets add addition filter keywords to assess
+        const filter = getFilter();
+        for (let key in filter.bonusKeywords) {
+            _processSkillStats(key, key, contactCopy);
+        }
         return processedSkillStatistics;
     }
 
@@ -544,6 +560,40 @@
         result.jobStatistics = _calculateJobStatistics(contact);
 
         return result;
+    }
+
+    const _doesCandidateMatch = (contact, matchData) => {
+        /* matchData: { requiredKeywords [array],
+                        bonusKeywords [array],
+                        ignoreManagers,
+                        ignoreInternships,
+                        ignoreStudents,
+                        technicalRelevanceWithinMonths (0 = currently),
+                        totalTechnicalRelevanceMonths
+                    }
+                    {"isJobSeeker":true,
+                    ignoreManagers,
+                    ignoreInternships,
+                    ignoreStudents,
+                    bonusKeywords: {
+                        "EMR": {
+                            "monthsUsing": 12,
+                            "required": true
+                        }
+                    },
+                    "skills":{"React Native":
+                            {"monthsUsing":24,
+                            "withinMonths":6,"
+                            required":true}
+                        },
+                        "minMonthsUsingGpa":4,"
+                        minWithinMonthsGpa":4
+
+                    }
+
+                      */
+
+
     }
 
     const _resetProcessedSkills = () => {

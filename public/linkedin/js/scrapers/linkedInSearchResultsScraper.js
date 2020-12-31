@@ -457,6 +457,61 @@
         return await candidateController.getCandidate(memberId);
     }
 
+    const _mergeFields = (sourceObj, destinationObj, fieldNames) => {
+        fieldNames.forEach((fieldName) => {
+            if ((sourceObj[fieldName] !== undefined && sourceObj[fieldName] !== null)
+                && sourceObj[fieldName] !== destinationObj[fieldName]) {
+                    destinationObj[fieldName] = sourceObj[fieldName];
+            }
+        });
+    }
+
+    const _mergeScrapedCandidateWithDbCandidate = (dbC, scrapedC) => {
+        if (scrapedC.lastName.length > dbC.lastName.length){
+            dbC.lastName = scrapedC.lastName;
+        }
+
+        _mergeFields(scrapedC, dbC, ["degree", "headline", "industry", "isJobSeeker", "isPremiumSubscriber", "location", "canSendMessage", "companyConnectionsPathNum", "extendedLocationEnabled", "index", "networkDistance", "niid", "profileLocked", "prospectId", "score", "sharedNumConnections", "summary", "willingToSharePhoneNumberToRecruiters"]);
+
+        scrapedC.positions.forEach((position) => {
+            const positionIdentifyingValue = position.companyId || position.companyName;
+            const dbPosition = dbC.positions.find(p => p.startDateMonth === position.startDateMonth && (p.companyId === positionIdentifyingValue || p.companyName === positionIdentifyingValue));
+
+            if (dbPosition){
+                _mergeFields(position, dbPosition, ["companyName", "companyType", "companyUrl", "current", "displayText", "endDateMonth", "endDateYear", "searchCompanyUrl", "searchTitleUrl", "title"])
+            }
+            else {
+                dbC.positions.push(position);
+                isDirty = true;
+            }
+        });
+
+        return dbC;
+    }
+
+    const _mergeScrapedCandidatesWithDbCandidates = async (scrapedCandidates) => {
+        const memberIds = scrapedCandidates.map(c => c.memberId);
+        const resultCandidates = [];
+        const dbCandidates = await candidateRepository.getSubset(memberIds);
+
+        if (!Array.isArray(dbCandidates)){
+            return scrapedCandidates;
+        }
+
+        scrapedCandidates.forEach((scraped) => {
+            const dbCandidate = dbCandidates.find(c => c.memberId === scraped.memberId);
+            if (dbCandidate){
+                const merged = _mergeScrapedCandidateWithDbCandidate(dbCandidate, scraped);
+                resultCandidates.push(merged);
+            }
+            else {
+                resultCandidates.push(scraped);
+            }
+        });
+
+        return resultCandidates;
+    }
+
     const _trimScrapedCandidate = (scraped) => {
         const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance', 'companyConnectionsPathNum', 'familiarName', 'fullName', 'isOpenProfile', 'memberInATSInfo', 'passedPrivacyCheck', 'projectStatuses', 'prospectId', 'views'];
         const result = _.omit(scraped, omitFields);
@@ -468,7 +523,8 @@
     const _interceptSearchResults = async (responseObj) => {
         _keywordCandidateMatches = [];
         const interceptedResults = JSON.parse(responseObj.responseText);
-        const candidatesInResults = interceptedResults.result.searchResults;
+        let candidatesInResults = interceptedResults.result.searchResults;
+
         _pageCandidates = [];
         _pageLiTags = {};
 
@@ -476,8 +532,10 @@
 
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
-
             _cleanseCandidateData(candidatesInResults);
+
+            candidatesInResults = await _mergeScrapedCandidatesWithDbCandidates(candidatesInResults);
+
             _highlightPendingConnectionRequests(candidatesInResults);
 
             positionAnalyzer.analyzeCandidatesPositions(candidatesInResults);
