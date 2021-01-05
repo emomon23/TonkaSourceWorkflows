@@ -2,7 +2,6 @@
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
     const _localStorageLastCandidateProfile = 'tsLastCandidateProfile';
     let _pageCandidates = [];
-    let _keywordCandidateMatches = [];
     let _pageLiTags = {};
     let _keepGatheringJobSeekerExperience = true;
     let _keepWalkingResultsPages = true;
@@ -87,6 +86,7 @@
     }
 
     const _displaySkillMatchAnalysis = (candidatesInResults) => {
+        /*
         const filters = linkedInRecruiterFilter.scrapeLinkedSearchFilters();
 
         let keywords = Array.isArray(filters.keywordsPositiveMatchArray) ? filters.keywordsPositiveMatchArray : [];
@@ -96,38 +96,7 @@
                                 && k.indexOf("HR") === -1);
 
         const keywordStrings = keywords.join(" ");
-
-        candidatesInResults.forEach((c) => {
-            const positions = Array.isArray(c.positions) ? c.positions : [];
-            let matchValue = _evaluateCandidateHeadlineKeywordMatch(keywords, c);
-
-            if (matchValue < 3){
-                for (let p = 0; p < positions.length; p++){
-                    const match = _evaluatePositionKeywordMatch(keywordStrings, positions[p]);
-                    if (match > matchValue){
-                        matchValue = match;
-                        if (match === 3){
-                            break; // Highest match rating available
-                        }
-                    }
-                }
-            }
-
-            let indicator = '';
-            for (let i = 0; i < matchValue; i++){
-                indicator += "!";
-            }
-
-            if (indicator.length) {
-                const candidateNameElement = $(`#search-result-${c.memberId} h3 a`)[0];
-                if (candidateNameElement){
-                    let currentText = $(candidateNameElement).text() + ` ${indicator}`;
-                    $(candidateNameElement).text(currentText);
-                }
-
-                _keywordCandidateMatches.push(c.memberId);
-            }
-        });
+        */
     }
 
     const  _displayGrades = (candidate, skillsFilter) => {
@@ -401,13 +370,18 @@
         return null;
     }
 
-    const _walkTheSearchResultsPages = async (addKeywordMatchesToClipboard) => {
+    const _walkTheSearchResultsPages = async (keywordMatchCriteria) => {
         for (let i = 0; i < 40; i++){
-            if (addKeywordMatchesToClipboard){
-                for (let k = 0; k < _keywordCandidateMatches.length; k++){
-                    const checkBox = $(`#search-result-${_keywordCandidateMatches[k]} input[type*="checkbox"]`)[0];
-                    if (checkBox){
-                        $(checkBox).prop('checked', true);
+            if (keywordMatchCriteria){
+                for (let k = 0; k < _pageCandidates.length; k++){
+                    const candidate = _pageCandidates[k];
+                    const match = statistician.doesCandidateMatchForClipboard(candidate, keywordMatchCriteria);
+
+                    if (match) {
+                        const checkBox = $(`#search-result-${candidate.memberId} input[type*="checkbox"]`)[0];
+                        if (checkBox){
+                            $(checkBox).prop('checked', true);
+                        }
                     }
                 }
 
@@ -467,24 +441,25 @@
     }
 
     const _mergeScrapedCandidateWithDbCandidate = (dbC, scrapedC) => {
-        if (scrapedC.lastName.length > dbC.lastName.length){
-            dbC.lastName = scrapedC.lastName;
-        }
+        dbC.lastName = dbC.lastName === "undefined" ? scrapedC.lastName : dbC.lastName;
+        dbC.firstName = scrapedC.firstName;
 
         _mergeFields(scrapedC, dbC, ["degree", "headline", "industry", "isJobSeeker", "isPremiumSubscriber", "location", "canSendMessage", "companyConnectionsPathNum", "extendedLocationEnabled", "index", "networkDistance", "niid", "profileLocked", "prospectId", "score", "sharedNumConnections", "summary", "willingToSharePhoneNumberToRecruiters"]);
 
-        scrapedC.positions.forEach((position) => {
-            const positionIdentifyingValue = position.companyId || position.companyName;
-            const dbPosition = dbC.positions.find(p => p.startDateMonth === position.startDateMonth && (p.companyId === positionIdentifyingValue || p.companyName === positionIdentifyingValue));
+        if (Array.isArray(scrapedC.position)){
+            scrapedC.positions.forEach((position) => {
+                const positionIdentifyingValue = position.companyId || position.companyName;
+                const dbPosition = dbC.positions.find(p => p.startDateMonth === position.startDateMonth && (p.companyId === positionIdentifyingValue || p.companyName === positionIdentifyingValue));
 
-            if (dbPosition){
-                _mergeFields(position, dbPosition, ["companyName", "companyType", "companyUrl", "current", "displayText", "endDateMonth", "endDateYear", "searchCompanyUrl", "searchTitleUrl", "title"])
-            }
-            else {
-                dbC.positions.push(position);
-                isDirty = true;
-            }
-        });
+                if (dbPosition){
+                    _mergeFields(position, dbPosition, ["companyName", "companyType", "companyUrl", "current", "displayText", "endDateMonth", "endDateYear", "searchCompanyUrl", "searchTitleUrl", "title"])
+                }
+                else {
+                    dbC.positions.push(position);
+                    isDirty = true;
+                }
+            });
+        }
 
         return dbC;
     }
@@ -521,7 +496,6 @@
     }
 
     const _interceptSearchResults = async (responseObj) => {
-        _keywordCandidateMatches = [];
         const interceptedResults = JSON.parse(responseObj.responseText);
         let candidatesInResults = interceptedResults.result.searchResults;
 
@@ -534,7 +508,7 @@
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
             _cleanseCandidateData(candidatesInResults);
 
-            candidatesInResults = await _mergeScrapedCandidatesWithDbCandidates(candidatesInResults);
+            // candidatesInResults = await _mergeScrapedCandidatesWithDbCandidates(candidatesInResults);
 
             _highlightPendingConnectionRequests(candidatesInResults);
 

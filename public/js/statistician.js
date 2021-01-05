@@ -484,6 +484,96 @@
         return processedSkillStatistics;
     }
 
+    const _findSkillStatistic = (contact, skillName) => {
+        if (! (contact && contact.statistics && contact.statistics.skillStatistics)){
+            return null;
+        }
+
+        let result = null;
+        const lSkillName = skillName.toLowerCase();
+        const keyFound = Object.keys(contact.statistics.skillStatistics).find((k) => k.toLowerCase() === lSkillName);
+
+        return keyFound ? contact.statistics.skillStatistics[keyFound] : null;
+     }
+
+    const _isKeywordFoundInAnySpecifiedFields = (obj, properties, lookFor) => {
+        let result = false;
+
+        properties.forEach((property) => {
+            if (obj && obj[property]){
+                const sourceValue = obj[property].toLowerCase ? obj[property].toLowerCase() : obj[property];
+                const indexOf =  sourceValue.indexOf ? sourceValue.indexOf(lookFor) : -1;
+                result = result || indexOf >= 0;
+            }
+        });
+
+        return result;
+    }
+
+    const _doesCandidateContainAnyKeyword = (contact, searchWords) => {
+
+        if (!Array.isArray(searchWords)){
+            return false;
+        }
+
+        const keywords = searchWords.map(w => w.toLowerCase());
+
+        let result = false;
+        for (let i = 0; i < keywords.length; i++){
+            const skillMatch = _findSkillStatistic(contact, keywords[i]);
+            if (skillMatch){
+                // Can't just be 'isInLinkedInSkills'
+                const {isInHeadline, isInSelfAssessedSkills, isInSummary, isInTags, isInJobHistory} = skillMatch;
+                if (isInHeadline || isInSelfAssessedSkills || isInSummary || isInTags || isInJobHistory){
+                    result = true;
+                    break;
+                }
+            }
+            else {
+                // Is this keyword something like 'EMR', or 'Remote Monitoring' or some that is not a 'Known skill'?
+                result = _isKeywordFoundInAnySpecifiedFields(contact, ['headline', 'summary'], keywords[i]);
+                if (result === false && Array.isArray(contact.positions)) {
+                   for (let p = 0; p < contact.positions.length; p++){
+                        const position = contact.positions[p];
+                        result = result || _isKeywordFoundInAnySpecifiedFields(position, ['title', 'description', 'displayText'], keywords[i]);
+                   }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    const _doesCandidateMatchForClipboard = (contact, matchData) => {
+        /*
+            matchData: {
+                ignoreStudents: true,
+                ignoreManagers: true,
+                ignoreInternships: true,
+                technicalRelevanceWithinMonths: 6,
+                keywords: ['React Native']
+            }
+        */
+        if ((contact.isManagement && matchData.ignoreManagers)
+            || (matchData.ignoreStudents && (contact.isIntern || contact.isStudent))) {
+                return false;
+        }
+
+        const keywordsFound = _doesCandidateContainAnyKeyword(contact, matchData.keywords);
+        if (!keywordsFound){
+            return false;
+        }
+
+        if (!isNaN(matchData.technicalRelevanceWithinMonths) && matchData.technicalRelevanceWithinMonths !== null) {
+            const contactTechnicalLastUsed = matchData.ignoreInternships ? contact.numberOfMonthsSinceTechnicalSkillsUsedProfessionally : contact.numberOfMonthsSinceTechnicalSkillsUsed;
+            if (contactTechnicalLastUsed > matchData.technicalRelevanceWithinMonths){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     const _processSkillStats = (skill, skillSearchPhrases, contact) => {
         // Does contact have it in their headline
         const isInHeadline = tsString.containsAny(contact.headline, skillSearchPhrases);
@@ -513,6 +603,7 @@
                 isInSelfAssessedSkills,
                 isInSummary,
                 isInTags,
+                isInJobHistory : true,
                 monthsOfUse: _calculateMonthsUsingSkill(positionsWithSkill),
                 monthsSinceLastUse: _calculateMonthsSinceLastUse(positionsWithSkill)
             };
@@ -540,11 +631,7 @@
             const flattenedSkillSearchPhrases = _flattenSkillSearchPhrases(skill, contactCopy);
             _processSkillStats(key, flattenedSkillSearchPhrases, contactCopy);
         }
-        // Lets add addition filter keywords to assess
-        const filter = getFilter();
-        for (let key in filter.bonusKeywords) {
-            _processSkillStats(key, key, contactCopy);
-        }
+
         return processedSkillStatistics;
     }
 
@@ -560,40 +647,6 @@
         result.jobStatistics = _calculateJobStatistics(contact);
 
         return result;
-    }
-
-    const _doesCandidateMatch = (contact, matchData) => {
-        /* matchData: { requiredKeywords [array],
-                        bonusKeywords [array],
-                        ignoreManagers,
-                        ignoreInternships,
-                        ignoreStudents,
-                        technicalRelevanceWithinMonths (0 = currently),
-                        totalTechnicalRelevanceMonths
-                    }
-                    {"isJobSeeker":true,
-                    ignoreManagers,
-                    ignoreInternships,
-                    ignoreStudents,
-                    bonusKeywords: {
-                        "EMR": {
-                            "monthsUsing": 12,
-                            "required": true
-                        }
-                    },
-                    "skills":{"React Native":
-                            {"monthsUsing":24,
-                            "withinMonths":6,"
-                            required":true}
-                        },
-                        "minMonthsUsingGpa":4,"
-                        minWithinMonthsGpa":4
-
-                    }
-
-                      */
-
-
     }
 
     const _resetProcessedSkills = () => {
@@ -617,6 +670,7 @@
         calculateSkillsStatistics = _calculateSkillsStatistics;
         cleanContactPositions = _cleanContactPositions;
         createDateFromMonthAndYear = _createDateFromMonthAndYear;
+        doesCandidateMatchForClipboard = _doesCandidateMatchForClipboard;
         getPositionsWithSkill = _getPositionsWithSkill;
         getProcessedSkillStatistics = _getProcessedSkillStatistics;
         findSkillInSelfAssessedSkills = _findSkillInSelfAssessedSkills;

@@ -61,8 +61,35 @@
         },
     ];
 
+    const _getNumberOfMonthsSinceTecnicalSkillsLastUsed = (candidate, includeInternships) => {
+        let mostRecentTechnicalPosition;
+
+        try {
+            if (includeInternships){
+                mostRecentTechnicalPosition = candidate.positions.filter(p => p.isTechnicallyRelevant)[0];
+            }
+            else {
+                mostRecentTechnicalPosition = candidate.positions.filter(p => p.isTechnicallyRelevant && p.isInternship !== true)[0];
+            }
+        } catch {
+            mostRecentTechnicalPosition = null;
+        }
+
+        if (mostRecentTechnicalPosition){
+           return statistician.calculateMonthsSinceWorkedAtPosition(mostRecentTechnicalPosition);
+        }
+
+        return null;
+    }
+
     const _analyzeCurrentlyWorkingPositions = (candidate) => {
-        const currentPositions = candidate.positions.filter(p => !p.endDateMonth);
+        let currentPositions = candidate.positions.filter(p => !p.endDateMonth);
+
+        if (currentPositions.length === 0){
+            // They aren't currently working, get their positions within the last year
+            const backYear = (new Date()).getFullYear() - 1;
+            currentPositions = candidate.positions.filter(p => p.endDateYear >= backYear);
+        }
 
         candidate.isTechnicallyRelevant = currentPositions.filter(p => _checkIfTechnicallyRelevant(p)).length > 0;
         candidate.isManagement = currentPositions.filter(p => _checkIfManagement(p)).length > 0;
@@ -110,6 +137,9 @@
         });
 
         _analyzeCurrentlyWorkingPositions(candidate);
+
+        candidate.numberOfMonthsSinceTechnicalSkillsUsed = _getNumberOfMonthsSinceTecnicalSkillsLastUsed(candidate, true);
+        candidate.numberOfMonthsSinceTechnicalSkillsUsedProfessionally = _getNumberOfMonthsSinceTecnicalSkillsLastUsed(candidate, false);
 
         // eg '18, 5, 17, 120' (the months they've spent on each technical job)
         candidate.technicalYearString = _buildCandidateTechnicalYearsString(candidate);
