@@ -135,11 +135,7 @@
             candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
 
             // Calculate Skill Statistics Grades
-            const skillsStatisticsList = [candidate.statistics];
-            const skillsFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
-            if (skillsFilter) {
-                statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter, false);
-            }
+            statistician.calculateSkillsStatistics([candidate.statistics], false);
 
             _displayStatisticGrades(candidate);
             try {

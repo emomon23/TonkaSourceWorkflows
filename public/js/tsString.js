@@ -208,6 +208,7 @@
             return '';
         }
     }
+
     class TSString {
         findDelimitedStrings = _findDelimitedStrings;
         findPrecedenceWithinString = _findPrecedenceWithinString;
@@ -215,7 +216,7 @@
         containsAny = _containsAny;
         containsAll = _containsAll;
         extractEmailAddresses = _extractEmailAddresses;
-        extractPhoneNumbers = _extractPhoneNumbers
+        extractPhoneNumbers = _extractPhoneNumbers;
         toBoolean = _toBoolean;
         toStringify = _toStringify;
         getClosestMatch = _getClosestMatch;

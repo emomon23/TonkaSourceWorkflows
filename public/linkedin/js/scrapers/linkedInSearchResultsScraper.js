@@ -99,7 +99,7 @@
         */
     }
 
-    const  _displayGrades = (candidate, skillsFilter) => {
+    const  _displayGrades = (candidate) => {
         if (candidate
             && candidate.grades
             && candidate.grades.jobJumper){
@@ -120,6 +120,7 @@
                 const wmContainer = linkedInCommon.displayGrade('Within Months', newDiv, candidate.statistics.grades.cumulativeWithinMonths);
 
                 // Lets add tooltips to Months Using / Within Months
+                const skillsFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
                 if (skillsFilter && skillsFilter.skills
                     && candidate.statistics && candidate.statistics.skillStatistics) {
                     const skillNames = skillsFilter ? Object.keys(skillsFilter.skills) : [];
@@ -370,29 +371,27 @@
         return null;
     }
 
-    const _walkTheSearchResultsPages = async (keywordMatchCriteria) => {
+    const _walkTheSearchResultsPages = async (keywordMatchCriteria, useSkillStatistics = false) => {
         for (let i = 0; i < 40; i++){
-            if (keywordMatchCriteria){
-                for (let k = 0; k < _pageCandidates.length; k++){
-                    const candidate = _pageCandidates[k];
-                    const match = statistician.doesCandidateMatchForClipboard(candidate, keywordMatchCriteria);
+            for (let k = 0; k < _pageCandidates.length; k++){
+                const candidate = _pageCandidates[k];
+                const match = statistician.doesCandidateMatchForClipboard(candidate, keywordMatchCriteria, useSkillStatistics);
 
-                    if (match) {
-                        const checkBox = $(`#search-result-${candidate.memberId} input[type*="checkbox"]`)[0];
-                        if (checkBox){
-                            $(checkBox).prop('checked', true);
-                        }
+                if (match) {
+                    const checkBox = $(`#search-result-${candidate.memberId} input[type*="checkbox"]`)[0];
+                    if (checkBox){
+                        $(checkBox).prop('checked', true);
                     }
                 }
-
-                $('#top-bar').addClass('profile-selected');
-                // eslint-disable-next-line no-await-in-loop
-                await tsCommon.sleep(400);
-                $('button[data-action*="clipboard-add"] li-icon').click();
-
-                // eslint-disable-next-line no-await-in-loop
-                await tsCommon.sleep(3000);
             }
+
+            $('#top-bar').addClass('profile-selected');
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(400);
+            $('button[data-action*="clipboard-add"] li-icon').click();
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(3000);
 
             if (!linkedInCommon.advanceToNextLinkedInResultPage()){
                 break;
@@ -527,13 +526,9 @@
                 candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
 
                 // Calculate Skill Statistics Grades
-                const skillsStatisticsList = [candidate.statistics];
-                const skillsFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
-                if (skillsFilter) {
-                    statistician.calculateSkillsStatistics(skillsStatisticsList, skillsFilter, false);
-                }
+                statistician.calculateSkillsStatistics([candidate.statistics], false);
 
-                _displayGrades(candidate, skillsFilter);
+                _displayGrades(candidate);
 
                 console.log({candidate});
 

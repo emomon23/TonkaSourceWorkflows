@@ -297,8 +297,12 @@
         return null;
     }
 
-    const _calculateSkillsStatistics = (contactStatisticsList, filter, spliceIfMinNotMet = true) => {
+    const _calculateSkillsStatistics = (contactStatisticsList, spliceIfMinNotMet = true) => {
         if (contactStatisticsList && contactStatisticsList.length) {
+            const filter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
+            if (!filter) {
+                return;
+            }
             for (let i = contactStatisticsList.length - 1; i >= 0; i--) {
                 const allMonthsUsingGpas = [];
                 const allWithinMonthsGpas = [];
@@ -421,6 +425,85 @@
         }
     }
 
+    const _doesCandidateContainAnyKeyword = (contact, searchWords) => {
+
+        if (!Array.isArray(searchWords)){
+            return false;
+        }
+
+        const keywords = searchWords.map(w => w.toLowerCase());
+
+        let result = false;
+        for (let i = 0; i < keywords.length; i++){
+            const skillMatch = _findSkillStatistic(contact, keywords[i]);
+            if (skillMatch){
+                // Can't just be 'isInLinkedInSkills'
+                const {isInHeadline, isInSelfAssessedSkills, isInSummary, isInTags, isInJobHistory} = skillMatch;
+                if (isInHeadline || isInSelfAssessedSkills || isInSummary || isInTags || isInJobHistory){
+                    result = true;
+                    break;
+                }
+            }
+            else {
+                // Is this keyword something like 'EMR', or 'Remote Monitoring' or some that is not a 'Known skill'?
+                result = _isKeywordFoundInAnySpecifiedFields(contact, ['headline', 'summary'], keywords[i]);
+                if (result === false && Array.isArray(contact.positions)) {
+                   for (let p = 0; p < contact.positions.length; p++){
+                        const position = contact.positions[p];
+                        result = result || _isKeywordFoundInAnySpecifiedFields(position, ['title', 'description', 'displayText'], keywords[i]);
+                   }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    const _doesCandidateMatchForClipboard = (contact, matchData, useSkillStatistics = false) => {
+        /*
+            matchData: {
+                ignoreStudents: true,
+                ignoreManagers: true,
+                ignoreInternships: true,
+                technicalRelevanceWithinMonths: 6,
+                keywords: ['React Native']
+            }
+         */
+        if (matchData) {
+
+            if ((contact.isManagement && matchData.ignoreManagers)
+                || (matchData.ignoreStudents && (contact.isIntern || contact.isStudent))) {
+                    return false;
+            }
+
+            if (matchData && matchData.keywords) {
+                const keywordsFound = _doesCandidateContainAnyKeyword(contact, matchData.keywords);
+                if (!keywordsFound){
+                    return false;
+                }
+            }
+
+            if (!isNaN(matchData.technicalRelevanceWithinMonths) && matchData.technicalRelevanceWithinMonths !== null) {
+                const contactTechnicalLastUsed = matchData.ignoreInternships ? contact.numberOfMonthsSinceTechnicalSkillsUsedProfessionally : contact.numberOfMonthsSinceTechnicalSkillsUsed;
+                if (contactTechnicalLastUsed > matchData.technicalRelevanceWithinMonths){
+                    return false;
+                }
+            }
+        }
+
+        if (useSkillStatistics) {
+            _calculateSkillsStatistics([contact.statistics], false);
+            if (contact.statistics && contact.statistics.grades && contact.statistics.grades.cumulativeMonthsUsing && contact.statistics.grades.cumulativeWithinMonths) {
+                if (contact.statistics.grades.cumulativeMonthsUsing.grade === 'A' && contact.statistics.grades.cumulativeWithinMonths.grade === 'A') {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return true;
+    }
+
     const _doesPositionHaveSkill = (skillSearchPhrases, pos) => {
         if (skillSearchPhrases && skillSearchPhrases.length > 0) {
             if (tsString.containsAny(pos.description, skillSearchPhrases)
@@ -441,6 +524,18 @@
             }
         }
         return false;
+    }
+
+    const _findSkillStatistic = (contact, skillName) => {
+        if (! (contact && contact.statistics && contact.statistics.skillStatistics)){
+            return null;
+        }
+
+        let result = null;
+        const lSkillName = skillName.toLowerCase();
+        const keyFound = Object.keys(contact.statistics.skillStatistics).find((k) => k.toLowerCase() === lSkillName);
+
+        return keyFound ? contact.statistics.skillStatistics[keyFound] : null;
     }
 
     const _flattenSkillSearchPhrases = (skillObj, contact) => {
@@ -484,18 +579,6 @@
         return processedSkillStatistics;
     }
 
-    const _findSkillStatistic = (contact, skillName) => {
-        if (! (contact && contact.statistics && contact.statistics.skillStatistics)){
-            return null;
-        }
-
-        let result = null;
-        const lSkillName = skillName.toLowerCase();
-        const keyFound = Object.keys(contact.statistics.skillStatistics).find((k) => k.toLowerCase() === lSkillName);
-
-        return keyFound ? contact.statistics.skillStatistics[keyFound] : null;
-     }
-
     const _isKeywordFoundInAnySpecifiedFields = (obj, properties, lookFor) => {
         let result = false;
 
@@ -508,70 +591,6 @@
         });
 
         return result;
-    }
-
-    const _doesCandidateContainAnyKeyword = (contact, searchWords) => {
-
-        if (!Array.isArray(searchWords)){
-            return false;
-        }
-
-        const keywords = searchWords.map(w => w.toLowerCase());
-
-        let result = false;
-        for (let i = 0; i < keywords.length; i++){
-            const skillMatch = _findSkillStatistic(contact, keywords[i]);
-            if (skillMatch){
-                // Can't just be 'isInLinkedInSkills'
-                const {isInHeadline, isInSelfAssessedSkills, isInSummary, isInTags, isInJobHistory} = skillMatch;
-                if (isInHeadline || isInSelfAssessedSkills || isInSummary || isInTags || isInJobHistory){
-                    result = true;
-                    break;
-                }
-            }
-            else {
-                // Is this keyword something like 'EMR', or 'Remote Monitoring' or some that is not a 'Known skill'?
-                result = _isKeywordFoundInAnySpecifiedFields(contact, ['headline', 'summary'], keywords[i]);
-                if (result === false && Array.isArray(contact.positions)) {
-                   for (let p = 0; p < contact.positions.length; p++){
-                        const position = contact.positions[p];
-                        result = result || _isKeywordFoundInAnySpecifiedFields(position, ['title', 'description', 'displayText'], keywords[i]);
-                   }
-                }
-            }
-        }
-
-        return result;
-    }
-
-    const _doesCandidateMatchForClipboard = (contact, matchData) => {
-        /*
-            matchData: {
-                ignoreStudents: true,
-                ignoreManagers: true,
-                ignoreInternships: true,
-                technicalRelevanceWithinMonths: 6,
-                keywords: ['React Native']
-            }
-        */
-        if ((contact.isManagement && matchData.ignoreManagers)
-            || (matchData.ignoreStudents && (contact.isIntern || contact.isStudent))) {
-                return false;
-        }
-
-        const keywordsFound = _doesCandidateContainAnyKeyword(contact, matchData.keywords);
-        if (!keywordsFound){
-            return false;
-        }
-
-        if (!isNaN(matchData.technicalRelevanceWithinMonths) && matchData.technicalRelevanceWithinMonths !== null) {
-            const contactTechnicalLastUsed = matchData.ignoreInternships ? contact.numberOfMonthsSinceTechnicalSkillsUsedProfessionally : contact.numberOfMonthsSinceTechnicalSkillsUsed;
-            if (contactTechnicalLastUsed > matchData.technicalRelevanceWithinMonths){
-                return false;
-            }
-        }
-
-        return true;
     }
 
     const _processSkillStats = (skill, skillSearchPhrases, contact) => {
