@@ -38,6 +38,7 @@
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/services/positionAnalyzer.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/services/tsTemplateProcessor.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/services/tsConfirmedSkills.js
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/configurationRepository.js
@@ -100,6 +101,7 @@
 
 // @ignore      http://localhost:5001/linkedin/js/services/positionAnalyzer.js
 // @ignore      http://localhost:5001/linkedin/js/services/tsTemplateProcessor.js
+// @ignore      http://localhost:5001/linkedin/js/services/tsConfirmedSkills.js
 
 // @ignore      http://localhost:5001/linkedin/js/repositories/baseIndexDb.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/configurationRepository.js

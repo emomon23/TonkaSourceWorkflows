@@ -1,4 +1,5 @@
 (() => {
+    let liElements = [];
     const _activelySeekingFilterString = `("seeking new opportunit" OR "seeking an opportun" OR "seeking opportunit" OR "seeking a opportunit" OR "seeking employment" OR "seeking entry" OR "currently seeking " OR "actively seeking" OR "actively looking" OR "currently looking" OR "opentowork" OR "open to work" OR "looking for new" OR "looking for a") `;
 
     const _addActivelySeekingTextButtonToUI = () => {
@@ -43,9 +44,26 @@
         }
     }
 
+    const _displayTSConfirmedSkillsForSearchResultList = async () => {
+        const liElements = $('li[id*="search-result-"]').toArray();
+        const memberIds = liElements.map((li) => {
+            const memberId = $(li).attr('id').replace('search-result-', '');
+            return !isNaN(memberId) ? Number.parseInt(memberId) : memberId;
+        });
+
+        const candidates = await candidateRepository.getSubset(memberIds);
+
+        for (let i = 0; i < liElements.length; i++){
+            const candidate = candidates.find(c => c.memberId === memberIds[i]);
+            tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(liElements[i], candidate);
+        }
+    }
+
     const _bindToElements = async () => {
+        liElements = $('li[id*="search-result-"]');
         await _bindToRecruiterProfileLinks();
         _addActivelySeekingTextButtonToUI();
+        _displayTSConfirmedSkillsForSearchResultList();
 
         linkedInApp.showTsReady();
     }
