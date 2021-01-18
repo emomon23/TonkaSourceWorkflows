@@ -139,6 +139,8 @@
     // that the alisonHook UI (or user) can call.
     const _getAlisonLoggedInUser = async () => {
         let scrapedUser =  window.linkedInApp.alisonUserName;
+        let initials = '';
+
         if (scrapedUser === null || scrapedUser === undefined){
             await tsCommon.sleep(2000);
             let loggedInUserFirstAndLastName = null;
@@ -155,17 +157,21 @@
                 switch(loggedInUserFirstAndLastName){
                     case 'Mike R. Emo' :
                         scrapedUser = "Mike";
+                        initials = "ME";
                         break;
                     case 'Joe Harstad' :
                         scrapedUser = "Joe";
+                        initials = "JH";
                         break;
                     default:
                         scrapedUser = null;
+                        initials = '';
                         break;
                 }
             }
             window.linkedInApp.loggedInUserFirstAndLastName = loggedInUserFirstAndLastName;
             window.linkedInApp.alisonUserName = scrapedUser;
+            window.linkedInApp.alisonUserInitials = initials;
         }
 
         return scrapedUser;

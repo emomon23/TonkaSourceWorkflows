@@ -46,6 +46,7 @@
 
     const _displayTSConfirmedSkillsForSearchResultList = async () => {
         const liElements = $('li[id*="search-result-"]').toArray();
+
         const memberIds = liElements.map((li) => {
             const memberId = $(li).attr('id').replace('search-result-', '');
             return !isNaN(memberId) ? Number.parseInt(memberId) : memberId;
@@ -55,7 +56,10 @@
 
         for (let i = 0; i < liElements.length; i++){
             const candidate = candidates.find(c => c.memberId === memberIds[i]);
+
+            tsConfirmCandidateSkillService.displayPhoneAndEmail(liElements[i], candidate);
             tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(liElements[i], candidate);
+            tsConfirmCandidateSkillService.displayTSNote(liElements[i], candidate);
         }
     }
 

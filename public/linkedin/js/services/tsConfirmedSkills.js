@@ -14,9 +14,13 @@
         {key: 'busAnalyst', display: 'BA' },
     ]
 
-    const _updateCandidateTsConfirmedSkill = async (strMemberId, skillNameKey, strValue) => {
+    const _getCandidate = async (strMemberId) => {
         const memberId = !isNaN(strMemberId) ? Number.parseInt(strMemberId) : memberId;
-        const candidate = await candidateRepository.get(memberId);
+        return await candidateRepository.get(memberId);
+    }
+
+    const _updateCandidateTsConfirmedSkill = async (strMemberId, skillNameKey, strValue) => {
+        const candidate = await _getCandidate(strMemberId);
 
         if (!candidate){
             return;
@@ -32,22 +36,53 @@
         await candidateRepository.update(candidate);
     }
 
-    const _appendTSSkillInputToCandidateResult = (container, confirmedSkillProperty, displayValue, candidate) => {
-        const span = $(document.createElement('span')).text(displayValue);
-        const input = $(document.createElement('input')).attr('style', 'width:20px; margin-left:5px; margin-right:10px')
-                                                        .attr('memberId', candidate.memberId)
-                                                        .attr('skill', confirmedSkillProperty);
+    const _updateCandidateTsNotes = async (strMemberId, note) => {
+        const candidate = await _getCandidate(strMemberId);
 
+        if (!candidate){
+            return;
+        }
+
+        if (!Array.isArray(candidate.tsNotes)){
+            candidate.tsNotes = [];
+        }
+
+        const newNote = `${linkedInApp.alisonUserInitials}: ${new Date().toLocaleDateString()} - ${note}`
+        candidate.tsNotes.push(newNote);
+        await candidateRepository.update(candidate);
+    }
+
+    const _appendTextInput = (container, memberId, labelText, width, value, rows = 1) => {
+        const span = $(document.createElement('span')).text(labelText).attr('memberId', memberId);
+
+        const input = rows === 1 ? document.createElement('input') : document.createElement('textarea');
+
+        $(input).attr('style', `width:${width}px; margin-left:5px; margin-right:10px`)
+                .attr('memberId', memberId);
+
+        if (rows > 1){
+            $(input).attr('rows', rows);
+        }
+
+        if (value || value === 0){
+            $(input).val(value);
+        }
+
+        $(container).append(span)
+                    .append(input);
+
+        return {input, span};
+    }
+
+    const _appendTSSkillInputToCandidateResult = (container, confirmedSkillProperty, displayValue, candidate) => {
         let value = '';
         if (candidate && candidate.tsConfirmedSkills && candidate.tsConfirmedSkills[confirmedSkillProperty]){
             value = candidate.tsConfirmedSkills[confirmedSkillProperty];
         }
 
-        $(input).val(value);
-
-        $(container).append(span)
-                    .append(input);
-
+        const nodes = _appendTextInput(container, candidate.memberId, displayValue, 15, value);
+        $(nodes.input).attr('skill', confirmedSkillProperty);
+        const input = nodes.input
 
         $(input).change((e) => {
             const txtBox = e.target;
@@ -59,9 +94,37 @@
         });
     }
 
+    const _displayTsNotes = (container, candidate) => {
+        const div = document.createElement('div');
+        $(div).attr('style', 'margin-top:5px');
+
+        $(container).append(div);
+
+        const value = candidate && Array.isArray(candidate.tsNotes) ? candidate.tsNotes.join('\n\n') : '';
+        const nodes = _appendTextInput(div, candidate.memberId, 'Note', 400, value, 7);
+
+        $(nodes.input).keypress((e) => {
+            return false
+        });
+
+
+        $(nodes.span).attr('style', 'color:blue')
+                     .click((e) => {
+
+            const memberId = $(e.target).attr('memberId');
+
+            // eslint-disable-next-line no-alert
+            const note = window.prompt("Add a note?");
+            if (note && note.length > 0){
+                _updateCandidateTsNotes(memberId, note);
+            }
+        })
+
+    }
+
     const _displayTSConfirmedSkillsForCandidate = (container, candidate, display = 'inline') => {
         const div = document.createElement('div');
-        $(div).attr('style', `display:${display}`).text("Rank: ");
+        $(div).attr('style', `display:${display}; margin-top:5px; margin-bottom:25px`).text("Rank: ");
 
         $(container).append(div);
 
@@ -70,8 +133,39 @@
         });
     }
 
+    const _updateContactInfo = async (inputElement, key) => {
+        const memberId = $(inputElement).attr('memberId');
+        const candidate = await _getCandidate(memberId);
+
+        if (!candidate){
+            return;
+        }
+
+        candidate[key] = $(inputElement).val();
+        await candidateRepository.update(candidate);
+    }
+
+    const _displayPhoneAndEmail = (container, candidate) => {
+        const div = document.createElement('div');
+        $(div).attr('style', 'margin-bottom: 25px');
+        container.append(div);
+
+        const emailNodes = _appendTextInput(div, candidate.memberId, "Email:", 225, candidate.email);
+
+        $(emailNodes.input).change((e) => {
+            _updateContactInfo(e.target, "email");
+        });
+
+        const phoneNumberNodes = _appendTextInput(div, candidate.memberId, "Phone:", 125, candidate.phone);
+        $(phoneNumberNodes.input).change((e) => {
+            _updateContactInfo(e.target, "phone");
+        });
+    }
+
     class TSConfirmCandidateSkillService {
-        displayTSConfirmedSkillsForCandidate = _displayTSConfirmedSkillsForCandidate
+        displayTSConfirmedSkillsForCandidate = _displayTSConfirmedSkillsForCandidate;
+        displayTSNote = _displayTsNotes;
+        displayPhoneAndEmail = _displayPhoneAndEmail;
     }
 
     window.tsConfirmCandidateSkillService = new TSConfirmCandidateSkillService();
