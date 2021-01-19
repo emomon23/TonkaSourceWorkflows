@@ -566,7 +566,13 @@
         }
     }
 
-    const _touchSearchResultsPages = async (numberOfPages = 100, addJobSeekersToProject = false) => {
+    const _getContactInfoForEachCandidateInResult = async () => {
+        const profileLinks = $('a[href*="recruiter/profile/"]');
+
+        // TBD, not sure if hitting all these profiles is a good idea
+    }
+
+    const _touchSearchResultsPages = async (numberOfPages = 100, addJobSeekersToProject = false, getContactInfo = false) => {
         if (addJobSeekersToProject) {
            await  _addCurrentPageOfJobSeekersToProject();
         }
@@ -574,8 +580,16 @@
         let currentPage = 0;
 
         while (advancedToNextPage && currentPage < numberOfPages && _keepWalkingResultsPages){
-            // eslint-disable-next-line no-await-in-loop
-            await  _addCurrentPageOfJobSeekersToProject();
+            if (addJobSeekersToProject){
+                // eslint-disable-next-line no-await-in-loop
+                await  _addCurrentPageOfJobSeekersToProject();
+            }
+
+            if (getContactInfo) {
+                // eslint-disable-next-line no-await-in-loop
+                await _getContactInfoForEachCandidateInResult();
+            }
+
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.randomSleep(15000, 5000);
             advancedToNextPage = linkedInCommon.advanceToNextLinkedInResultPage();

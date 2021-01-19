@@ -285,6 +285,7 @@
     class LinkedInRecruiterProfileScraper {
         getMemberId = _getMemberId;
         scrapeProfile = _scrapeProfile;
+        scrapeAndSaveContactInfo = _scrapeAndSaveContactInfo;
     }
 
     window.linkedInRecruiterProfileScraper = new LinkedInRecruiterProfileScraper();
