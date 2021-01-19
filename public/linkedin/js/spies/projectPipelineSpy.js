@@ -1,12 +1,39 @@
 (() => {
+    let _candidates = [];
+
+    const _findCandidate = (strMemberId) => {
+        const memberId = !isNaN(strMemberId) ? Number.parseInt(strMemberId) : memberId;
+
+        return _candidates.find(c => c.memberId === memberId);
+    }
     const _initializeAsyncCalls = async () => {
-        await _initializeKeywordMatchVisualIndicators();
+        await tsCommon.sleep(1000);
+        await _getCandidatesFromDb();
         await _rebindToPresentationTabs();
+        await _displayTSConfirmedSkills();
+
+        $('a[class*="page-link"]').click(() => {
+            _initializeAsyncCalls();
+        });
     }
 
-    const _initializeKeywordMatchVisualIndicators = async () => {
-        await tsCommon.sleep(2000);
+    const _displayTSConfirmedSkills = async () => {
+        const rows = $('div[class*="row"] div[class*="row-inner"]').toArray();
 
+        for (let i = 0; i < rows.length; i++){
+            const div = $(rows[i]);
+            const memberId = $(div).find('input[class*="prospect-checkbox"]').attr('data-member-id');
+            const candidate = _findCandidate(memberId);
+
+            if (candidate){
+                tsConfirmCandidateSkillService.displayPhoneAndEmail(div, candidate);
+                tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(div, candidate);
+                tsConfirmCandidateSkillService.displayTSNote(div, candidate);
+            }
+        }
+    }
+
+    const _getCandidatesFromDb = async () => {
         let memberIdCheckboxes = $(linkedInSelectors.projectPipeLinePage.memberIdCheckbox);
         let candidateNames = $(linkedInSelectors.projectPipeLinePage.candidateName);
 
@@ -19,27 +46,16 @@
 
         for (let i = 0; i < memberIdCheckboxes.length; i++){
             const memberId = $(memberIdCheckboxes[i]).attr('data-member-id');
-            const candidateLink = candidateNames[i];
+            // eslint-disable-next-line no-await-in-loop
+            const candidate = await candidateController.getCandidate(memberId);
 
-            const match = candidateKeywordMatchRepository.getCandidateKeywordMatch(memberId);
-            if (match){
-                const candidate = candidateController.getCandidate(memberId);
-                const city = candidate ? (candidate.city || '') + '\n' : '';
-                const technicalYearString = candidate && candidate.technicalYearString ? `${candidate.technicalYearString}\n` : '';
-
-                const toolTip = match.theyHave.map((h) => {
-                    return `${technicalYearString}${city}${h.title}:${h.foundInJobHistory ? ' Job history. ' : ''}${h.foundInSummary ? ' In summary. ' : ''}${h.lastUsed ? ' LastUsed: ' + h.lastUsed : ''}`;
-                }).join('\n');
-
-                $(candidateLink)
-                    .attr('title', toolTip)
-                    .attr('style', 'color:green');
+            if (candidate){
+                _candidates.push(candidate);
             }
         }
     }
 
     const tabClicked = () => {
-        _initializeKeywordMatchVisualIndicators();
         _rebindToPresentationTabs();
     }
 
