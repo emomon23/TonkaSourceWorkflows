@@ -12,6 +12,10 @@
         {key: 'qaAutomation', display: 'QA-Auto' },
         {key: 'devOps', display: 'DevOps' },
         {key: 'busAnalyst', display: 'BA' },
+        {key: 'aws', display: 'AWS'},
+        {key: 'azure', display: 'Azure'},
+        {key: 'googleAPI', display: 'GoogAPI'},
+        {key: 'firebase', display: 'GoogFireBs'}
     ]
 
     const _getCandidate = async (strMemberId) => {
@@ -50,11 +54,15 @@
         const newNote = `${linkedInApp.alisonUserInitials}: ${new Date().toLocaleDateString()} - ${note}`
         candidate.tsNotes.push(newNote);
         await candidateRepository.update(candidate);
+
+        const textArea = $(`textarea[class*="tsNote"][memberId*="${strMemberId}"]`)[0];
+        let text = $(textArea).val();
+        text = `${newNote}\n\n${text}`;
+        $(textArea).val(text);
     }
 
-    const _appendTextInput = (container, memberId, labelText, width, value, rows = 1) => {
+    const _appendTextInput = (container, memberId, labelText, width, value, strClass = '', rows = 1) => {
         const span = $(document.createElement('span')).text(labelText).attr('memberId', memberId);
-
         const input = rows === 1 ? document.createElement('input') : document.createElement('textarea');
 
         $(input).attr('style', `width:${width}px; margin-left:5px; margin-right:10px`)
@@ -66,6 +74,11 @@
 
         if (value || value === 0){
             $(input).val(value);
+        }
+
+        if (strClass && strClass.length){
+            $(input).attr('class', strClass);
+            $(span).attr('class', strClass);
         }
 
         $(container).append(span)
@@ -80,7 +93,7 @@
             value = candidate.tsConfirmedSkills[confirmedSkillProperty];
         }
 
-        const nodes = _appendTextInput(container, candidate.memberId, displayValue, 15, value);
+        const nodes = _appendTextInput(container, candidate.memberId, displayValue, 15, value, 'skillRank');
         $(nodes.input).attr('skill', confirmedSkillProperty);
         const input = nodes.input
 
@@ -101,7 +114,7 @@
         $(container).append(div);
 
         const value = candidate && Array.isArray(candidate.tsNotes) ? candidate.tsNotes.join('\n\n') : '';
-        const nodes = _appendTextInput(div, candidate.memberId, 'Note', 400, value, 7);
+        const nodes = _appendTextInput(div, candidate.memberId, 'Note', 400, value, 'tsNote', 7);
 
         $(nodes.input).keypress((e) => {
             return false
@@ -123,6 +136,10 @@
     }
 
     const _displayTSConfirmedSkillsForCandidate = (container, candidate, display = 'inline') => {
+        if (!(container && candidate && candidate.memberId)){
+            return;
+        }
+
         const div = document.createElement('div');
         $(div).attr('style', `display:${display}; margin-top:5px; margin-bottom:25px`).text("Rank: ");
 
@@ -150,13 +167,20 @@
         $(div).attr('style', 'margin-bottom: 25px');
         container.append(div);
 
-        const emailNodes = _appendTextInput(div, candidate.memberId, "Email:", 225, candidate.email);
+        const emailNodes = _appendTextInput(div, candidate.memberId, "Email:", 225, candidate.email, 'tsContactInfo tsEmail');
 
         $(emailNodes.input).change((e) => {
             _updateContactInfo(e.target, "email");
         });
 
-        const phoneNumberNodes = _appendTextInput(div, candidate.memberId, "Phone:", 125, candidate.phone);
+        $(emailNodes.input).dblclick((e) => {
+            const input = e.target;
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+        });
+
+        const phoneNumberNodes = _appendTextInput(div, candidate.memberId, "Phone:", 125, candidate.phone, 'tsContactInfo tsPhone');
         $(phoneNumberNodes.input).change((e) => {
             _updateContactInfo(e.target, "phone");
         });

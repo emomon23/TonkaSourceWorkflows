@@ -53,13 +53,17 @@
         });
 
         const candidates = await candidateRepository.getSubset(memberIds);
+        if (!candidates && candidates.length){
+            return;
+        }
 
         for (let i = 0; i < liElements.length; i++){
             const candidate = candidates.find(c => c.memberId === memberIds[i]);
-
-            tsConfirmCandidateSkillService.displayPhoneAndEmail(liElements[i], candidate);
-            tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(liElements[i], candidate);
-            tsConfirmCandidateSkillService.displayTSNote(liElements[i], candidate);
+            if (candidate) {
+                tsConfirmCandidateSkillService.displayPhoneAndEmail(liElements[i], candidate);
+                tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(liElements[i], candidate);
+                tsConfirmCandidateSkillService.displayTSNote(liElements[i], candidate);
+            }
         }
     }
 
@@ -105,7 +109,7 @@
     window.linkedInRecruiterProfileSpy = new LinkedInSearchResultsSpy();
 
     const _delayReady = async () => {
-        await tsCommon.sleep(500);
+        await tsCommon.sleep(1500);
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS) {
             _bindToElements();
         }
