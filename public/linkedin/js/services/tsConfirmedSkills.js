@@ -4,6 +4,7 @@
         {key: 'java', display: 'Java' },
         {key: 'angular', display: 'NG' },
         {key: 'react', display: 'React' },
+        {key: 'node', display: 'Node'},
         {key: 'reactNative', display: 'ReactNv' },
         {key: 'ios', display: 'IOS' },
         {key: 'android', display: 'Android' },
@@ -190,6 +191,7 @@
         displayTSConfirmedSkillsForCandidate = _displayTSConfirmedSkillsForCandidate;
         displayTSNote = _displayTsNotes;
         displayPhoneAndEmail = _displayPhoneAndEmail;
+        getTSConfirmedSkillsList = () => { JSON.parse(JSON.stringify(confirmedSkills));  }
     }
 
     window.tsConfirmCandidateSkillService = new TSConfirmCandidateSkillService();
