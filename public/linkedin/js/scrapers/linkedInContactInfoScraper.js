@@ -68,13 +68,13 @@
     }
 
     const _getRecruiterProfileContactInfoDialog = async (windowRef) => {
-        return $(windowRef).find('#dialog')[0];
+        return $(windowRef['document']).find('#dialog')[0];
     }
 
     const _scrapeContactInfoFromRecruiterProfile = async (windowRef) => {
-        let dialog = _getRecruiterProfileContactInfoDialog(windowRef);
+        let dialog = await _getRecruiterProfileContactInfoDialog(windowRef);
         if (!dialog){
-            const contactInfoBtn = $(windowRef).find('button[data-lira-action*="edit-contact-info"]')[0];
+            const contactInfoBtn = $(windowRef['document']).find('button[data-lira-action*="edit-contact-info"]')[0];
             if (!contactInfoBtn){
                 return null;
             }

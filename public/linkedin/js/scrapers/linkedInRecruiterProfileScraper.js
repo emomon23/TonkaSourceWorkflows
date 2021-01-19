@@ -260,6 +260,28 @@
         return skills;
     }
 
+    const _scrapeAndSaveContactInfo = async () => {
+        let isDirty = false;
+        await tsCommon.sleep(2000);
+        const candidate = linkedInRecruiterProfileScraper.lastProfileScraped;
+        if (!(candidate.phone && candidate.email)){
+            const contactInfo = await linkedInContactInfoScraper.scrapeContactInfoFromRecruiterProfile(window);
+            if ((!contactInfo.phone) && contactInfo.phoneNumbers && contactInfo.phoneNumbers.length && contactInfo.phoneNumbers[0]){
+                candidate.phone = contactInfo.phoneNumbers[0];
+                isDirty = true;
+            }
+
+            if ((!contactInfo.email) && contactInfo.emails && contactInfo.emails.length && contactInfo.emails[0]){
+                candidate.email = contactInfo.emails[0];
+                isDirty = true;
+            }
+
+            if (isDirty){
+                candidateRepository.update(candidate);
+            }
+        }
+    }
+
     class LinkedInRecruiterProfileScraper {
         getMemberId = _getMemberId;
         scrapeProfile = _scrapeProfile;
@@ -268,11 +290,17 @@
     window.linkedInRecruiterProfileScraper = new LinkedInRecruiterProfileScraper();
 
     const _delayReady = async () => {
-        await tsCommon.sleep(500);
+        await tsCommon.sleep(1000);
 
         _currentPage = linkedInCommon.whatPageAmIOn()
         if (_currentPage === linkedInConstants.pages.RECRUITER_PROFILE) {
             linkedInRecruiterProfileScraper.lastProfileScraped = await _scrapeProfile();
+
+            if (linkedInRecruiterProfileScraper.lastProfileScraped) {
+                $('li[class*="contact-info"] button').click(() => {
+                    _scrapeAndSaveContactInfo();
+                });
+            }
         }
 
         // Profile pages won't pop up a new window
