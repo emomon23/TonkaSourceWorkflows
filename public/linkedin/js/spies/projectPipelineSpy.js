@@ -6,14 +6,14 @@
 
         return _candidates.find(c => c.memberId === memberId);
     }
-    const _initializeAsyncCalls = async () => {
+    const _projectPipelineSpy_InitializeAsyncCalls = async () => {
         await tsCommon.sleep(1000);
         await _getCandidatesFromDb();
         await _rebindToPresentationTabs();
         await _displayTSConfirmedSkills();
 
         $('a[class*="page-link"]').click(() => {
-            _initializeAsyncCalls();
+            _projectPipelineSpy_InitializeAsyncCalls();
         });
     }
 
@@ -68,7 +68,7 @@
 
     $(document).ready(() => {
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PROJECT_PIPELINE) {
-            _initializeAsyncCalls();
+            _projectPipelineSpy_InitializeAsyncCalls();
         }
     });
 })();
