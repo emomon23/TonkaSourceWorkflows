@@ -33,7 +33,8 @@
                     "AWS IoT",
                     "AWS Lambda"
                 ],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'aws'
             },
             "Amazon API Gateway": {
                 searchPhrases: ["Amazon API Gateway", "AWS API Gateway", "API Gateway"]
@@ -112,7 +113,8 @@
                     "Azure Storage",
                     "Azure CI/CD"
                 ],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'azure'
             },
             "Azure Storage": {
                 childSkills: [
@@ -152,7 +154,8 @@
                     "Spring",
                     "SpringBoot",
                 ],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'java'
             },
             "JavaScript": {
                 childSkills: [
@@ -169,7 +172,8 @@
                     "VueJS",
                     "Web Components"
                 ],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'js'
             },
             "Message Queues": {
                 childSkills: [
@@ -191,7 +195,8 @@
             },
             "Mobile": {
                 childSkills: ["Xamarin Native", "Xamarin Forms", "Xamarin", "iOS", "Android", "Swift", "React Native", "Unity", "Flutter"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmIgnore: true
             },
             ".NET": {
                 searchPhrases: [".NET"],
@@ -211,7 +216,8 @@
                     "UWP",
                     "Windows Forms"
                 ],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'dotnet'
             },
             "NoSQL": {
                 childSkills: ["Cassandra", "CouchDB", "CosmosDB", "DynamoDB", "Elasticsearch", "MongoDB", "Redis"]
@@ -225,7 +231,8 @@
             },
             "Xamarin": {
                 childSkills: ["Xamarin Forms", "Xamarin Native"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'xamarin'
             },
 
             // Individual Skills
@@ -234,7 +241,8 @@
             },
             "Android": {
                 searchPhrases: ["Android"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'android'
             },
             "Angular": {
                 searchPhrases: [
@@ -253,7 +261,8 @@
                     "Angular ",
                     "Angular,"
                 ],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'angular'
             },
             "Apache ActiveMQ": {
                 searchPhrases: ["Apache ActiveMQ", "Apache Active MQ", "ActiveMQ", "Active MQ"]
@@ -314,7 +323,8 @@
             },
             "iOS": {
                 searchPhrases: ["iOS"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'ios'
             },
             "KubeMQ": {
                 searchPhrases: ["KubeMQ", "Kube MQ"]
@@ -324,7 +334,8 @@
             },
             "Microservice": {
                 searchPhrases: ["Microservice", "Micro-service", "Micro Service"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmIgnore: true
             },
             "MongoDB": {
                 searchPhrases: ["MongoDB", "Mongo"]
@@ -343,14 +354,16 @@
             },
             "PHP": {
                 searchPhrases: ["PHP"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmIgnore: true
             },
             "PostgreSQL": {
                 searchPhrases: ["PostgreSQL", "Postgres"]
             },
             "Python": {
                 searchPhrases: ["Python"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmIgnore: true
             },
             "QA Automation": {
                 searchPhrases: ["Test Automation", "QA Automation", "Quality Assurance Automation",
@@ -358,7 +371,8 @@
                     "automation framework"
                 ],
                 childSkills: ["Selenium", "JMeter", "TestNG", "Cucumber", "Maven", "SoapUI", "Protractor", "Cypress"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'qaAutomation'
             },
             "QA Manual": {
                 searchPhrases: ["QA Analyst", "Manual QA", "Quality Assurance Analyst", "Test Script", "Test Suite", "Test Case"],
@@ -369,15 +383,18 @@
             },
             "React": {
                 searchPhrases: ["React"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'react'
             },
             "React Native": {
                 searchPhrases: ["React Native", "React.Native", "ReactNative", "React-Native"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'reactNative'
             },
             "Ruby": {
                 searchPhrases: ["Ruby"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'ruby'
             },
             "Scala": {
                 searchPhrases: ["Scala"]
@@ -388,7 +405,8 @@
             },
             "SQL Server": {
                 searchPhrases: ["Microsoft SQL Server", "SQL Server", "MS SQL"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmIgnore: true
             },
             "SVN": {
                 searchPhrases: ["Subversion", "SVN"]
@@ -406,14 +424,16 @@
             "UI/UX": {
                 searchPhrases: ["UI/UX", "Visual Communication", "Interaction Design", "Interactive Design", "Web Design"],
                 childSkills: ["HTML", "CSS", "SASS", "LESS", "JavaScript", "jQuery", "Bootstrap", "UX Research", "UX Design", "UX Writing", "Wireframing", "UI Prototyping", "Analytics"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'uiux'
             },
             "Visual Basic": {
                 searchPhrases: ["Visual Basic", "VB5", "VB6"]
             },
             "VueJS": {
                 searchPhrases: ["VueJS", "Vue.js", "Vue"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'vueJS'
             },
             "Windows Forms": {
                 searchPhrases: ["Windows Forms", "WinForms", "Win Forms"]
@@ -424,13 +444,31 @@
             },
             "Xamarin Forms": {
                 searchPhrases: ["Xamarin.Forms", "XamarinForms", "Xamarin Forms"],
-                isCoreSkill: true
+                isCoreSkill: true,
+                tsConfirmKey: 'xamarinForms'
             },
             "Xamarin Native": {
                 searchPhrases: ["Xamarin.iOS", "XamarinIos", "Xamarin iOS", "Xamarin.Android", "XamarinAndroid", "Xamarin Android"],
-                isCoreSkills: true
+                isCoreSkill: true,
+                tsConfirmKey: 'xamarinNative'
             }
         }
+
+        getTSConfirmationSkills = () => {
+           // key / display
+            const result = [];
+
+            for (let k in this.skillStatsList){
+                const skill = this.skillStatsList[k];
+                if (skill.isCoreSkill === true && !skill.tsConfirmIgnore){
+                    const key = skill.tsConfirmKey || k;
+                    result.push({key, display: k});
+                }
+            }
+
+            return result;
+        }
     }
+
     window.skillStats = new skillStats();
 })();

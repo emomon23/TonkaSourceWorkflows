@@ -387,6 +387,49 @@
         return null;
     }
 
+    const _getConfirmedTSSkillKeys = () => {
+        const definition = tsConfirmCandidateSkillService.getTSConfirmedSkillsList();
+        const keys = definition.map(d => d.key);
+
+        console.log(keys);
+        return keys;
+    }
+
+    const _findCandidatesOnConfirmedSkills = async (confirmedSkillsFilter, writeToConsole = true) => {
+        if ((!confirmedSkillsFilter) || Object.keys(confirmedSkillsFilter).length === 0){
+            throw new Error("you need to provide a confirmedSkillsFilter");
+        }
+
+        const filterKeys = Object.keys(confirmedSkillsFilter);
+        const allCandidates = await candidateRepository.getAll();
+        const result = [];
+
+        allCandidates.forEach((c) => {
+            if (c.tsConfirmedSkills){
+                let match = 0;
+
+                for (let k = 0; k < filterKeys.length; k++){
+                    const key = filterKeys[k];
+                    if (c.tsConfirmedSkills[key] >= confirmedSkillsFilter[key]){
+                        match += 1;
+                    }
+                }
+
+                if (match === filterKeys.length){
+                    result.push(c);
+                }
+            }
+        });
+
+        if (writeToConsole){
+            result.forEach((c) => {
+                const href = `https://www.linkedin.com${c.linkedInRecruiterUrl}`;
+                let str = `${c.firstName} ${c.lastName} ${c.email || ''} ${c.phone || ''}.  ${href}`;
+                console.log(str);
+            });
+        }
+
+    }
     class CandidateController {
         saveContactInfo = _saveContactInfo;
         saveCandidate = _saveCandidate;
@@ -397,7 +440,8 @@
         getJobSeekers = _getJobSeekers;
         getContractors = _getContractors;
         searchOnSkills = _searchOnSkills;
-
+        getConfirmedTSSkillKeys = _getConfirmedTSSkillKeys;
+        findCandidatesOnConfirmedSkills = _findCandidatesOnConfirmedSkills;
         // loadLotsOfData = _loadLotsOfData;
     }
 

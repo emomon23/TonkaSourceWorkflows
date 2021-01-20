@@ -1,23 +1,5 @@
 (() => {
-    const confirmedSkills = [
-        {key: 'dotnet', display: '.NET' },
-        {key: 'java', display: 'Java' },
-        {key: 'angular', display: 'NG' },
-        {key: 'react', display: 'React' },
-        {key: 'node', display: 'Node'},
-        {key: 'reactNative', display: 'ReactNv' },
-        {key: 'ios', display: 'IOS' },
-        {key: 'android', display: 'Android' },
-        {key: 'xamarin', display: 'Xamarin' },
-        {key: 'qaManual', display: 'QA-Man' },
-        {key: 'qaAutomation', display: 'QA-Auto' },
-        {key: 'devOps', display: 'DevOps' },
-        {key: 'busAnalyst', display: 'BA' },
-        {key: 'aws', display: 'AWS'},
-        {key: 'azure', display: 'Azure'},
-        {key: 'googleAPI', display: 'GoogAPI'},
-        {key: 'firebase', display: 'GoogFireBs'}
-    ]
+    let confirmedSkillsList = skillStats.getTSConfirmationSkills();
 
     const _getCandidate = async (strMemberId) => {
         const memberId = !isNaN(strMemberId) ? Number.parseInt(strMemberId) : memberId;
@@ -146,7 +128,7 @@
 
         $(container).append(div);
 
-        confirmedSkills.forEach((skillDefinition) => {
+        confirmedSkillsList.forEach((skillDefinition) => {
             _appendTSSkillInputToCandidateResult(div, skillDefinition.key, skillDefinition.display, candidate);
         });
     }
@@ -191,7 +173,7 @@
         displayTSConfirmedSkillsForCandidate = _displayTSConfirmedSkillsForCandidate;
         displayTSNote = _displayTsNotes;
         displayPhoneAndEmail = _displayPhoneAndEmail;
-        getTSConfirmedSkillsList = () => { JSON.parse(JSON.stringify(confirmedSkills));  }
+        getTSConfirmedSkillsList = () => { JSON.parse(JSON.stringify(confirmedSkillsList));  }
     }
 
     window.tsConfirmCandidateSkillService = new TSConfirmCandidateSkillService();
