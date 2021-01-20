@@ -266,18 +266,28 @@
         const candidate = linkedInRecruiterProfileScraper.lastProfileScraped;
         if (!(candidate.phone && candidate.email)){
             const contactInfo = await linkedInContactInfoScraper.scrapeContactInfoFromRecruiterProfile(window);
-            if ((!contactInfo.phone) && contactInfo.phoneNumbers && contactInfo.phoneNumbers.length && contactInfo.phoneNumbers[0]){
-                candidate.phone = contactInfo.phoneNumbers[0];
-                isDirty = true;
+            if (!contactInfo){
+                return;
             }
 
-            if ((!contactInfo.email) && contactInfo.emails && contactInfo.emails.length && contactInfo.emails[0]){
-                candidate.email = contactInfo.emails[0];
-                isDirty = true;
+            if (!(contactInfo.emails && contactInfo.phone)){
+                // this contact has NO phone or Email specified
+                candidate.phone = "unknown"
             }
+            else {
+                if ((!contactInfo.phone) && contactInfo.phoneNumbers && contactInfo.phoneNumbers.length && contactInfo.phoneNumbers[0]){
+                    candidate.phone = contactInfo.phoneNumbers[0];
+                    isDirty = true;
+                }
 
-            if (isDirty){
-                candidateRepository.update(candidate);
+                if ((!contactInfo.email) && contactInfo.emails && contactInfo.emails.length && contactInfo.emails[0]){
+                    candidate.email = contactInfo.emails[0];
+                    isDirty = true;
+                }
+
+                if (isDirty){
+                    candidateRepository.update(candidate);
+                }
             }
         }
     }

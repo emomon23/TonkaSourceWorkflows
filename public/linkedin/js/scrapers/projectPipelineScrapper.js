@@ -47,13 +47,13 @@
                        const winRef = window.open(href);
 
                        // eslint-disable-next-line no-await-in-loop
-                       await tsCommon.sleep(3000);
+                       await tsCommon.sleep(4000);
 
                        $(winRef['document']).find('li[class*="contact-info"] button').click();
                        captureCount += 1;
 
                        // eslint-disable-next-line no-await-in-loop
-                       await tsCommon.sleep(3500);
+                       await tsCommon.sleep(3000);
 
                        winRef.close();
 
