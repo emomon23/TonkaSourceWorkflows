@@ -108,6 +108,29 @@
        return tsConfig.get(key);
     }
 
+    const _clickCompanies = async () => {
+        const links = $('div[class*="table-cell"] a[target*="blank"][href*="recruiter/company/"]');
+        const coLinks = {};
+
+        for (let i = 0; i < links.length; i++){
+            const lnk = links[i];
+            const text = $(lnk).text();
+
+            if (!isNaN(text)){
+                const href = $(lnk).attr('href');
+                const win = window.open(href);
+
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(5000);
+                win.close();
+
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(6000);
+
+            }
+        }
+    }
+
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
@@ -116,6 +139,7 @@
         runDailyJobSeekerReport = _runDailyJobSeekerReport;
 
         launchDashboard = _launchDashboard;
+        clickCompanies = _clickCompanies;
     }
 
     window.tsCommand = new TSCommand();

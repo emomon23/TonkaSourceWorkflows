@@ -305,12 +305,22 @@
 
         _currentPage = linkedInCommon.whatPageAmIOn()
         if (_currentPage === linkedInConstants.pages.RECRUITER_PROFILE) {
-            linkedInRecruiterProfileScraper.lastProfileScraped = await _scrapeProfile();
+            const candidate = await _scrapeProfile();
+            linkedInRecruiterProfileScraper.lastProfileScraped = candidate
 
-            if (linkedInRecruiterProfileScraper.lastProfileScraped) {
+
+            if (candidate) {
                 $('li[class*="contact-info"] button').click(() => {
                     _scrapeAndSaveContactInfo();
                 });
+
+
+                const container = $('#topcard')[0];
+
+                tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(container, candidate)
+                tsConfirmCandidateSkillService.displayTSNote(container, candidate);
+                tsConfirmCandidateSkillService.displayPhoneAndEmail(container, candidate);
+
             }
         }
 

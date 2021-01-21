@@ -165,6 +165,9 @@
             wholeName = wholeName.split(remove).join('');
         })
 
+        if (wholeName.length === 0){
+            wholeName = $('ul[class*="pv-top-card"] li[class*="inline"]')[0].textContent.trim();
+        }
         wholeName = wholeName.split(',')[0].trim(); // This will handle "Alan Haggerty, MCEE"
         if (wholeName.indexOf('(') === 0){
             wholeName = wholeName.substr(wholeName.indexOf(' ')); // This will handle "(75) Alan Haggerty"
@@ -409,6 +412,16 @@
         tsCommon.sleep(1000);
         const currentProfile = await _scrapeProfile(false);
         linkedInPublicProfileScraper.currentProfileLite = currentProfile;
+
+        const candidate = await candidateController.searchForCandidate(currentProfile);
+        if (candidate){
+            const container = $('main section')[0];
+
+            tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(container, candidate)
+            tsConfirmCandidateSkillService.displayTSNote(container, candidate);
+            tsConfirmCandidateSkillService.displayPhoneAndEmail(container, candidate);
+        }
+
     }
 
     $(document).ready(() => {
