@@ -422,6 +422,10 @@
             tsConfirmCandidateSkillService.displayPhoneAndEmail(container, candidate);
         }
 
+        $('input[class*="search-global-typeahead"]').keydown(() => {
+            linkedInPublicProfileScraper.currentProfileLite = null;
+            tsConfirmCandidateSkillService.clearUI();
+        })
     }
 
     $(document).ready(() => {

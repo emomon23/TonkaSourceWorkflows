@@ -270,7 +270,7 @@
                 return;
             }
 
-            if (!(contactInfo.emails && contactInfo.phone)){
+            if (!(contactInfo.emails || contactInfo.phone)){
                 // this contact has NO phone or Email specified
                 candidate.phone = "unknown"
             }

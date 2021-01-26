@@ -92,7 +92,8 @@
 
     const _displayTsNotes = (container, candidate) => {
         const div = document.createElement('div');
-        $(div).attr('style', 'margin-top:5px');
+        $(div).attr('id', 'tsNotesDiv')
+              .attr('style', 'margin-top:5px');
 
         $(container).append(div);
 
@@ -118,13 +119,21 @@
 
     }
 
+    const _clearUI = () => {
+        $('#tsNotesDiv').remove();
+        $('#tsSkillsDiv').remove()
+        $('#tsPhoneEmailDiv').remove();
+    }
+
     const _displayTSConfirmedSkillsForCandidate = (container, candidate, display = 'inline') => {
         if (!(container && candidate && candidate.memberId)){
             return;
         }
 
         const div = document.createElement('div');
-        $(div).attr('style', `display:${display}; margin-top:5px; margin-bottom:25px`).text("Rank: ");
+        $(div).attr('id', 'tsSkillsDiv')
+              .attr('style', `display:${display}; margin-top:5px; margin-bottom:25px`)
+        .text("Rank: ");
 
         $(container).append(div);
 
@@ -147,7 +156,8 @@
 
     const _displayPhoneAndEmail = (container, candidate) => {
         const div = document.createElement('div');
-        $(div).attr('style', 'margin-bottom: 25px');
+        $(div).attr('id', 'tsPhoneEmailDiv')
+              .attr('style', 'margin-bottom: 25px');
         container.append(div);
 
         const emailNodes = _appendTextInput(div, candidate.memberId, "Email:", 225, candidate.email, 'tsContactInfo tsEmail');
@@ -174,6 +184,7 @@
         displayTSNote = _displayTsNotes;
         displayPhoneAndEmail = _displayPhoneAndEmail;
         getTSConfirmedSkillsList = () => { JSON.parse(JSON.stringify(confirmedSkillsList));  }
+        clearUI = _clearUI;
     }
 
     window.tsConfirmCandidateSkillService = new TSConfirmCandidateSkillService();
