@@ -131,13 +131,27 @@
         }
     }
 
+    const _withdrawConnectionInvitesFromCurrentPage = async () => {
+        const wdList =$('button[data-control-name*="withdraw_single"]').toArray()
+
+        for (let i = 0; i < wdList.length; i++) {
+            $(wdList[i]).click();
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(1000);
+            $('div[role="alertdialog"] button:contains("Withdraw")')[0].click()
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(200);
+        }
+    }
+
     class TSCommand {
         runJobHistoryScraperJob = _runJobHistoryScraperJob;
         launchSkillsGPASearch = _launchSkillsGPASearch;
         launchInMailBlaster = _launchInMailBlaster;
         launchConnectionRequestBlaster = _launchConnectionRequestBlaster;
         runDailyJobSeekerReport = _runDailyJobSeekerReport;
-
+        withdrawConnectionInvitesFromCurrentPage = _withdrawConnectionInvitesFromCurrentPage;
         launchDashboard = _launchDashboard;
         clickCompanies = _clickCompanies;
     }

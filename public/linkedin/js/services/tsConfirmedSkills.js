@@ -44,8 +44,10 @@
         $(textArea).val(text);
     }
 
-    const _appendTextInput = (container, memberId, labelText, width, value, strClass = '', rows = 1) => {
+    const _appendTextInput = (container, memberId, labelText, width, value, strClass = '', rows = 1, spanHref = null) => {
         const span = $(document.createElement('span')).text(labelText).attr('memberId', memberId);
+
+
         const input = rows === 1 ? document.createElement('input') : document.createElement('textarea');
 
         $(input).attr('style', `width:${width}px; margin-left:5px; margin-right:10px`)
@@ -64,7 +66,14 @@
             $(span).attr('class', strClass);
         }
 
-        $(container).append(span)
+        let label = span;
+        if (spanHref && spanHref.length){
+            label = document.createElement('a');
+            $(label).append(span)
+                    .attr('href', spanHref);
+        }
+
+        $(container).append(label)
                     .append(input);
 
         return {input, span};
@@ -160,7 +169,10 @@
               .attr('style', 'margin-bottom: 25px');
         container.append(div);
 
-        const emailNodes = _appendTextInput(div, candidate.memberId, "Email:", 225, candidate.email, 'tsContactInfo tsEmail');
+        const mailToHref = candidate.email ? `mailTo:${candidate.email}` : null;
+        const emailNodes = _appendTextInput(div, candidate.memberId, "Email:", 225, candidate.email, 'tsContactInfo tsEmail', 1, mailToHref);
+
+
 
         $(emailNodes.input).change((e) => {
             _updateContactInfo(e.target, "email");
