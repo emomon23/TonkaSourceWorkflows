@@ -132,7 +132,7 @@
     }
 
     const _withdrawConnectionInvitesFromCurrentPage = async () => {
-        const wdList =$('button[data-control-name*="withdraw_single"]').toArray()
+        const wdList = $('button[data-control-name*="withdraw_single"]').toArray()
 
         for (let i = 0; i < wdList.length; i++) {
             $(wdList[i]).click();

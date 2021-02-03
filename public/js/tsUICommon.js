@@ -111,8 +111,12 @@
 
         // Loop through configs and create headers
         const headerRow = $(document.createElement('div')).attr('class', 'table-header');
+
         configs.forEach((c) => {
             const header = $(document.createElement('div')).attr('class', 'table-header-cell').text(c.name);
+            if (c.headerStyle) {
+                header.attr('style', c.headerStyle);
+            }
             $(headerRow).append(header);
         });
 
@@ -131,7 +135,7 @@
                 } else if (typeof propData === 'string' || propData instanceof String) {
                     // If our data begins with http, let's create a link and label it with the header title
                     if (propData.match(new RegExp('^http'))) {
-                        propData = $(document.createElement('a')).attr('target', '_blank').attr('href', propData).text(c.name);
+                        propData = $(document.createElement('a')).attr('target', '_blank').attr('href', propData).text(c.linkName || c.name);
                     }
                 }
 

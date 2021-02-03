@@ -76,9 +76,19 @@
     display: table-row;
 }
 
+.table-row:nth-of-type(even) {
+    background-color: #C0C0C0;
+}
+
 .table-cell {
     display: table-cell;
     padding: 3px 10px;
+}
+
+.table-cell a, .table-cell a:visited {
+    text-decoration: none;
+    color: rgb(0, 0, 238);
+    font-weight: bold;
 }
 
 .table-footer {
