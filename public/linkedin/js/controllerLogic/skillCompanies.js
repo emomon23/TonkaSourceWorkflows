@@ -1,6 +1,13 @@
 (() => {
     const SAVE_COMPANY_DATA_CONFIG = 'tsCompanyLogic.saveCompanyData';
 
+    const _filterBySize = (companies, size) => {
+        if (companies.length && size) {
+            return companies.filter(c => c.size === size);
+        }
+        return companies;
+    }
+
     const _save = async (skills, companiesWithSkills) => {
         if (!linkedInCommon.checkIfCompanyAnalyticsIsTurnedOn()){
             return;
@@ -36,7 +43,7 @@
         console.log("SkillCompaniesController.save - COMPLETE");
     }
 
-    const _search = async (skills) => {
+    const _search = async (skills, size) => {
         if (skills.trim()) {
             const listOfSkills = skills.split(",").map((s) => s.trim());
 
@@ -50,11 +57,15 @@
 
                 // If we still have companies, lets go get their summary
                 if (matchingCompanies.length) {
+                    matchingCompanies = _filterBySize(matchingCompanies, size);
                     return await companySummaryRepository.getSubset(matchingCompanies);
                 }
             }
         }
-        return null;
+        // If we're not filtering by skills, lets just filter by other search options
+        let companySummaryDocs = await companySummaryRepository.getAll();
+        companySummaryDocs = _filterBySize(companySummaryDocs, size);
+        return companySummaryDocs;
     }
 
     class SkillCompaniesController {

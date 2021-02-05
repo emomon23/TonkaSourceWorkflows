@@ -65,7 +65,7 @@
 
     const _scrapeName = (company) => {
         const name = $(linkedInSelectors.recruiterCompanyPage.COMPANY_NAME).text();
-        company.nam = name;
+        company.name = name;
     }
 
     class LinkedInRecruiterCompanyScraper {

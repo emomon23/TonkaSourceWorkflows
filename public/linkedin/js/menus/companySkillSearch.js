@@ -8,18 +8,80 @@
 
         // Create the Skill Search elements
         const skillSearchContainer = $(document.createElement('div'));
+
         const skillSearchInput = $(document.createElement('input'))
             .attr('id', 'tsSkillSearch')
             .attr('name', 'skillSearch');
+
+        const sizeOptions = [
+            {
+                value: "",
+                text: "--Choose--"
+            },
+            {
+                value: "1",
+                text: "1"
+            },
+            {
+                value: "2-10",
+                text: "2-10"
+            },
+            {
+                value: "11-50",
+                text: "11-50"
+            },
+            {
+                value: "51-200",
+                text: "51-200"
+            },
+            {
+                value: "201-500",
+                text: "201-500"
+            },
+            {
+                value: "501-1000",
+                text: "501-1000"
+            },
+            {
+                value: "1001-5000",
+                text: "1001-5000"
+            },
+            {
+                value: "5001-10000",
+                text: "5001-10000"
+            },
+            {
+                value: "10000+",
+                text: "10000+"
+            }
+        ];
+        const sizeSearchSelect = $(document.createElement('select'))
+            .attr('id', 'tsSizeSearch')
+            .attr('name', 'sizeSearch')
+            .attr('style', 'width: auto');
+
+        sizeOptions.forEach((size) => {
+            const sizeOption = $(document.createElement('option'))
+                .attr('value', size.value)
+                .text(size.text);
+            $(sizeSearchSelect).append(sizeOption)
+        })
+
         const skillSearchButton = $(document.createElement('button'))
             .attr('id', 'skillSearchButton')
             .attr('class', 'ts-button-li')
+            .attr('style', 'margin-left: 5px;')
             .text('Search');
 
         // Set Search Action
         $(skillSearchButton).click(_getResults);
 
-        $(skillSearchContainer).append('<span>Skill(s): <span>').append(skillSearchInput).append(skillSearchButton);
+        $(skillSearchContainer)
+            .append('<span style="font-weight: bold">Skill(s): <span>')
+            .append(skillSearchInput)
+            .append('<span style="font-weight: bold"> Size: </span')
+            .append(sizeSearchSelect)
+            .append(skillSearchButton);
 
         // Create the results container
         const resultsContainer = $(document.createElement('div'))
@@ -35,8 +97,14 @@
     const _getResults = async () => {
         $('#companySkillSearchResultsContainer').html("");
         const skillSearch = $("#tsSkillSearch").val();
+        const sizeSearch = $("#tsSizeSearch").val();
 
-        let matchingSkillCompanies = await skillCompaniesController.search(skillSearch);
+        // Defaulting the sort to name
+        const sortBy = 'name';
+
+        let matchingSkillCompanies = await skillCompaniesController.search(skillSearch, sizeSearch);
+        // Sort results
+        tsArray.sortByObjectProperty(matchingSkillCompanies, sortBy);
 
         const resultsContainer = $('div[class*="company-skill-search-results"');
 
@@ -52,7 +120,6 @@
         ];
 
         // Massage the data for display
-
         matchingSkillCompanies = matchingSkillCompanies.map((sc) => {
             // First set links to raw text, as some companies are not keyed properly to an existing LinkedIN company
             // Won't display ID if it's the same text as company name
