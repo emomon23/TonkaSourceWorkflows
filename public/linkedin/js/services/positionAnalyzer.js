@@ -331,11 +331,11 @@
                     const mergedCandidatePositions = _mergeCandidateSameCompanyPositions(candidate.positions);
 
                     mergedCandidatePositions.forEach((p) => {
-                        if (p.endDateMonth && p.endDateYear){
-                            const companyAnalyticsDoc = _getOrCreateCompanyAnalyticsDoc(companyAnalytics, p);
-                            if (companyAnalyticsDoc) {
+                        const companyAnalyticsDoc = _getOrCreateCompanyAnalyticsDoc(companyAnalytics, p);
+                        if (companyAnalyticsDoc) {
+                            if (p.endDateMonth && p.endDateYear){
                                 const positionSummary = _createPositionSummary(candidate, p);
-                                companyAnalyticsDoc.employmentHistory.push(positionSummary)
+                                companyAnalyticsDoc.employmentHistory.push(positionSummary);
                             }
                         }
                     });

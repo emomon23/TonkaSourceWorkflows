@@ -8,9 +8,16 @@
         return companies;
     }
 
-    const _filterByName = (companies, name) => {
-        if (companies.length && name) {
-            return companies.filter(c => c.name.toLowerCase().includes(name.toLowerCase()));
+    const _filterByName = (companies, namesList) => {
+        if (companies.length && namesList && namesList.length) {
+            return companies.filter((company) => {
+                return namesList.some((name) => {
+                    if (company.name.toLowerCase().includes(name.toLowerCase())) {
+                        return true;
+                    }
+                    return false;
+                });
+            });
         }
         return companies;
     }
@@ -50,32 +57,34 @@
         console.log("SkillCompaniesController.save - COMPLETE");
     }
 
-    const _search = async (skills, size, name) => {
-        if (name.trim()) {
+    const _search = async (skills, size, names) => {
+        let companySummaryDocs = [];
+        let listOfNames = [];
+        if (names.trim()) {
             // If we're searching by name, we just want matching companies
-            let companySummaryDocs = await companySummaryRepository.getAll();
-            companySummaryDocs = _filterByName(companySummaryDocs, name);
-            return companySummaryDocs;
-        } else if (skills.trim()) {
+            listOfNames = names.split(",").map((n) => n.trim());
+        }
+
+        if (skills.trim()) {
             const listOfSkills = skills.split(",").map((s) => s.trim());
 
             const skillCompaniesDocs = await skillCompaniesRepository.getSubset(listOfSkills);
             if (skillCompaniesDocs) {
                 // First we need to find the companies that are contained within all the skill elements
-                let matchingCompanies = []
                 skillCompaniesDocs.forEach((skillCompaniesDoc) => {
-                    matchingCompanies = tsArray.intersection(matchingCompanies, skillCompaniesDoc.companies);
+                    matchingCompanies = tsArray.intersection(companySummaryDocs, skillCompaniesDoc.companies);
                 });
 
                 // If we still have companies, lets go get their summary
                 if (matchingCompanies.length) {
-                    matchingCompanies = _filterBySize(matchingCompanies, size);
-                    return await companySummaryRepository.getSubset(matchingCompanies);
+                    companySummaryDocs = await companySummaryRepository.getSubset(matchingCompanies);
                 }
             }
+        } else {
+            companySummaryDocs = await companySummaryRepository.getAll();
         }
-        // If we're not filtering by skills, lets just filter by other search options
-        let companySummaryDocs = await companySummaryRepository.getAll();
+
+        companySummaryDocs = _filterByName(companySummaryDocs, listOfNames);
         companySummaryDocs = _filterBySize(companySummaryDocs, size);
         return companySummaryDocs;
     }
