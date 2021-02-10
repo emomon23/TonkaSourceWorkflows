@@ -47,7 +47,7 @@
         if (typeof prop === 'string') {
             array1.sort((a,b) => {
                 if (a[prop] && b[prop]) {
-                    return a[prop].localeCoßmpare(b[prop]);
+                    return a[prop].localeCompare(b[prop]);
                 }
                 console.log("WARNING: Object missing property to sort");
                 return 0;

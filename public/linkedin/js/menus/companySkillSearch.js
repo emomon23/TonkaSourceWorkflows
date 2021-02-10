@@ -13,6 +13,10 @@
             .attr('id', 'tsSkillSearch')
             .attr('name', 'skillSearch');
 
+        const companyNameSearch = $(document.createElement('input'))
+            .attr('id', 'tsCompanyNameSearch')
+            .attr('name', 'companyNameSearch');
+
         const sizeOptions = [
             {
                 value: "",
@@ -55,6 +59,7 @@
                 text: "10000+"
             }
         ];
+
         const sizeSearchSelect = $(document.createElement('select'))
             .attr('id', 'tsSizeSearch')
             .attr('name', 'sizeSearch')
@@ -79,6 +84,8 @@
         $(skillSearchContainer)
             .append('<span style="font-weight: bold">Skill(s): <span>')
             .append(skillSearchInput)
+            .append('<span style="font-weight: bold"> Company: </span')
+            .append(companyNameSearch)
             .append('<span style="font-weight: bold"> Size: </span')
             .append(sizeSearchSelect)
             .append(skillSearchButton);
@@ -98,11 +105,12 @@
         $('#companySkillSearchResultsContainer').html("");
         const skillSearch = $("#tsSkillSearch").val();
         const sizeSearch = $("#tsSizeSearch").val();
+        const companyNameSearch = $("#tsCompanyNameSearch").val();
 
         // Defaulting the sort to name
         const sortBy = 'name';
 
-        let matchingSkillCompanies = await skillCompaniesController.search(skillSearch, sizeSearch);
+        let matchingSkillCompanies = await skillCompaniesController.search(skillSearch, sizeSearch, companyNameSearch);
         // Sort results
         tsArray.sortByObjectProperty(matchingSkillCompanies, sortBy);
 

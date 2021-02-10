@@ -8,6 +8,13 @@
         return companies;
     }
 
+    const _filterByName = (companies, name) => {
+        if (companies.length && name) {
+            return companies.filter(c => c.name.toLowerCase().includes(name.toLowerCase()));
+        }
+        return companies;
+    }
+
     const _save = async (skills, companiesWithSkills) => {
         if (!linkedInCommon.checkIfCompanyAnalyticsIsTurnedOn()){
             return;
@@ -43,8 +50,13 @@
         console.log("SkillCompaniesController.save - COMPLETE");
     }
 
-    const _search = async (skills, size) => {
-        if (skills.trim()) {
+    const _search = async (skills, size, name) => {
+        if (name.trim()) {
+            // If we're searching by name, we just want matching companies
+            let companySummaryDocs = await companySummaryRepository.getAll();
+            companySummaryDocs = _filterByName(companySummaryDocs, name);
+            return companySummaryDocs;
+        } else if (skills.trim()) {
             const listOfSkills = skills.split(",").map((s) => s.trim());
 
             const skillCompaniesDocs = await skillCompaniesRepository.getSubset(listOfSkills);
