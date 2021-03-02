@@ -352,6 +352,8 @@
                             calculatedBy: monthsSinceLastUseHowCalculated
                         }
                     } else {
+                        allMonthsUsingGpas.push(0);
+                        allWithinMonthsGpas.push(0);
                         contactSkillsStatistics[skill] = {
                             grades: {
                                 monthsUsing: {

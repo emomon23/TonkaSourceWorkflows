@@ -2,7 +2,7 @@
     let _currentPage = '';
     let _candidateFound = null;
 
-    const  _displayStatisticGrades = (candidate) => {
+    const  _displayGrades = (candidate) => {
         if (candidate
             && candidate.statistics
             && candidate.statistics.grades){
@@ -137,7 +137,7 @@
             // Calculate Skill Statistics Grades
             statistician.calculateSkillsStatistics([candidate.statistics], false);
 
-            _displayStatisticGrades(candidate);
+            _displayGrades(candidate);
             try {
                 candidateController.saveCandidate(candidate);
             } catch (e) {

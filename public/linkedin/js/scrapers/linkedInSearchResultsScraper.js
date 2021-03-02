@@ -100,48 +100,46 @@
     }
 
     const  _displayGrades = (candidate) => {
-        if (candidate
-            && candidate.grades
-            && candidate.grades.jobJumper){
+        let searchResult = $(`#search-result-${candidate.memberId}`);
+        searchResult = searchResult[0];
+        const newDiv = document.createElement("div");
+        $(newDiv).attr('class', "profile-grade-container");
 
-                let searchResult = $(`#search-result-${candidate.memberId}`);
+        if (candidate && candidate.grades && candidate.grades.jobJumper) {
 
-                searchResult = searchResult[0];
+            const jjContainer = linkedInCommon.displayGrade('Job Jumper', newDiv, candidate.grades.jobJumper, [ { name: 'name', value: "JobJumper" }, { name: 'memberId', value: candidate.memberId } ]);
+            if (jjContainer) {
+                tsUICommon.createTooltip(jjContainer, (candidate.technicalYearString) ? candidate.technicalYearString : 'none');
+            }
+        }
 
-                const newDiv = document.createElement("div");
-                $(newDiv).attr('class', "profile-grade-container");
+        if (candidate && candidate.statistics && candidate.statistics.grades) {
+            const muContainer = linkedInCommon.displayGrade('Months Using', newDiv, candidate.statistics.grades.cumulativeMonthsUsing);
+            const wmContainer = linkedInCommon.displayGrade('Within Months', newDiv, candidate.statistics.grades.cumulativeWithinMonths);
 
-                const jjContainer = linkedInCommon.displayGrade('Job Jumper', newDiv, candidate.grades.jobJumper, [ { name: 'name', value: "JobJumper" }, { name: 'memberId', value: candidate.memberId } ]);
-                if (jjContainer) {
-                    tsUICommon.createTooltip(jjContainer, (candidate.technicalYearString) ? candidate.technicalYearString : 'none');
-                }
+            // Lets add tooltips to Months Using / Within Months
+            const skillsFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
+            if (skillsFilter && skillsFilter.skills
+                && candidate.statistics && candidate.statistics.skillStatistics) {
+                const skillNames = skillsFilter ? Object.keys(skillsFilter.skills) : [];
 
-                const muContainer = linkedInCommon.displayGrade('Months Using', newDiv, candidate.statistics.grades.cumulativeMonthsUsing);
-                const wmContainer = linkedInCommon.displayGrade('Within Months', newDiv, candidate.statistics.grades.cumulativeWithinMonths);
-
-                // Lets add tooltips to Months Using / Within Months
-                const skillsFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
-                if (skillsFilter && skillsFilter.skills
-                    && candidate.statistics && candidate.statistics.skillStatistics) {
-                    const skillNames = skillsFilter ? Object.keys(skillsFilter.skills) : [];
-
-                    const howMonthsUsingWasCalculated = [];
-                    const howWithinMonthsWasCalculated = [];
-                    skillNames.forEach((skill) => {
-                        const skillStats = candidate.statistics.skillStatistics[skill];
-                        if (skillStats && skillStats.grades) {
-                            howMonthsUsingWasCalculated.push(`${skill}: ${skillStats.grades.monthsUsing.calculatedBy}`);
-                            howWithinMonthsWasCalculated.push(`${skill}: ${skillStats.grades.withinMonths.calculatedBy}`);
-                        }
-                    })
-                    // Add the tooltips
-                    if (muContainer && howMonthsUsingWasCalculated.length) {
-                        tsUICommon.createTooltip(muContainer, howMonthsUsingWasCalculated.join("<br/><br/>"));
+                const howMonthsUsingWasCalculated = [];
+                const howWithinMonthsWasCalculated = [];
+                skillNames.forEach((skill) => {
+                    const skillStats = candidate.statistics.skillStatistics[skill];
+                    if (skillStats && skillStats.grades) {
+                        howMonthsUsingWasCalculated.push(`${skill}: ${skillStats.grades.monthsUsing.calculatedBy}`);
+                        howWithinMonthsWasCalculated.push(`${skill}: ${skillStats.grades.withinMonths.calculatedBy}`);
                     }
-                    if (wmContainer && howWithinMonthsWasCalculated.length) {
-                        tsUICommon.createTooltip(wmContainer, howWithinMonthsWasCalculated.join("<br/><br/>"));
-                    }
+                })
+                // Add the tooltips
+                if (muContainer && howMonthsUsingWasCalculated.length) {
+                    tsUICommon.createTooltip(muContainer, howMonthsUsingWasCalculated.join("<br/><br/>"));
                 }
+                if (wmContainer && howWithinMonthsWasCalculated.length) {
+                    tsUICommon.createTooltip(wmContainer, howWithinMonthsWasCalculated.join("<br/><br/>"));
+                }
+            }
 
                 $(searchResult).prepend(newDiv);
         }

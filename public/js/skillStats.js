@@ -145,6 +145,25 @@
             "Diagrams.net": {
                 searchPhrases: ["Draw.io", "Drawio", "Draw io", "Diagrams.net"]
             },
+            "eCommerce": {
+                searchPhrases: ["eCommerce", "E-Commerce"],
+                childSkills: [
+                    "Shopify",
+                    "Squarespace",
+                    "Ecwid",
+                    "BigCommerce",
+                    "WooCommerce",
+                    "Wix",
+                    "Magento",
+                    "Zyro",
+                    "Square Online",
+                    "3DCart",
+                    "OpenCart",
+                    "Volusion",
+                    "J2Store"
+                ],
+                isCoreSkill: true
+            },
             "Java": {
                 searchPhrases: ["Java ", "Java,"],
                 childSkills: [
@@ -328,6 +347,14 @@
             },
             "KubeMQ": {
                 searchPhrases: ["KubeMQ", "Kube MQ"]
+            },
+            "Magento": {
+                searchPhrases: ["Magento"],
+                isCoreSkill: true
+            },
+            "Magento 2": {
+                searchPhrases: ["Magento 2"],
+                isCoreSkill: true
             },
             "MariaDB": {
                 searchPhrases: ["MariaDB", "Maria"]
