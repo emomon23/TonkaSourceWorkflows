@@ -1,4 +1,11 @@
 (() => {
+    const _getCompaniesByNameContains = async (namePart) => {
+        const companies = await companySummaryRepository.getAll();
+        const lookFor = namePart.toLowerCase();
+        return companies.filter(c => c.name && c.name.indexOf(lookFor) >= 0);
+    }
+
+
     const TONKA_SOURCE_DATABASE = "TSCompanyData";
     const VERSION = 2;
     const SCHEMAS = [
@@ -36,4 +43,6 @@
     window.companySummaryRepository = _storeFactory.createStore('companySummary');
     window.companyTitlesRepository = _storeFactory.createStore('companyTitles');
     window.skillCompaniesRepository = _storeFactory.createStore('skillCompanies');
+
+    window.companySummaryRepository.getCompaniesByNameContains = _getCompaniesByNameContains;
 })();

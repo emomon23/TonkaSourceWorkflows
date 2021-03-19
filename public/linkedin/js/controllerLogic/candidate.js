@@ -395,6 +395,97 @@
         return keys;
     }
 
+    const _searchForEmployees = async (companyIdOrName) => {
+        const lookFor = companyIdOrName.toLowerCase();
+        const allCandidates =  await candidateRepository.getAll();
+
+        const results = allCandidates.filter((c) => {
+            if (c.positions && c.positions.length > 0){
+                const currentPositions = c.positions.filter((p) => {return p.current === true || !p.endDateMonth});
+
+                const found = currentPositions.find((p) => { return p.companyId === companyIdOrName || p.companyName.toLowerCase().indexOf(lookFor) >= 0; });
+                return found ? true : false;
+            }
+
+            return false;
+        });
+
+        return results;
+    }
+
+    const _findRoles = (arrayOfCandidates, currentCompanyIdOrName, arrayOfThisAndThisOrThisAndThisArray, notArray) => {
+        const coName = currentCompanyIdOrName.toLowerCase();
+
+        return arrayOfCandidates.filter((c) => {
+            let currentPositions = c.positions.filter((p) => {
+                return p.endDateMonth === undefined
+                &&
+                (p.companyId === currentCompanyIdOrName || (p.companyName && p.companyName.toLowerCase().indexOf(coName) >= 0));
+            });
+
+            const currentTitle = currentPositions.map((p) => { return p.title ? p.title.toLowerCase() : ''}).join(' ');
+
+            let result = false;
+            for (let i = 0; i < arrayOfThisAndThisOrThisAndThisArray.length; i++){
+                let thisCheck = true;
+                const thisAndThis = arrayOfThisAndThisOrThisAndThisArray[i];
+
+                for (let j = 0; j < thisAndThis.length; j++){
+                   if (currentTitle.indexOf(thisAndThis[j]) === -1){
+                       thisCheck = false;
+                       break;
+                   }
+                }
+
+                if (thisCheck === true){
+                    if (notArray){
+                        for (let n = 0; n < notArray.length; n++){
+                            if (currentTitle.indexOf(notArray[n]) >= 0){
+                                thisCheck = false;
+                            }
+                        }
+                    }
+                }
+
+                if (thisCheck === true) {
+                    result = true;
+                    console.log(`${c.firstName} matched on: '${arrayOfThisAndThisOrThisAndThisArray[i].join(';')} '`)
+                    break;
+                }
+            }
+
+            return result;
+        });
+    }
+
+    const _findBizDevelopmentContacts = async (companyIdOrName) => {
+        const result = [];
+        const companyCandidates = await _searchForEmployees(companyIdOrName);
+
+        const ceo = _findRoles(companyCandidates, companyIdOrName, [['ceo'], ['chief', 'executive', 'officer'], ['owner'], ['founder']], ['product owner', 'project owner']);
+        const cto = _findRoles(companyCandidates, companyIdOrName, [['cto'], ['cio'], ['vp', ' it'], ['vp', 'technology'], ['vp', 'software'],['vice pr', ' it'], ['vice pr', 'technology'], ['vice pr', 'software']], ['director', 'operations']);
+
+        const allHr = _findRoles(companyCandidates, companyIdOrName, [['hr'], ['human'], ['people']]);
+        let hr = allHr.filter((h) => { return h.roleGuess === "Executive" || h.isManagement === true});
+
+        if (hr.length === 0){
+            hr = allHr
+        }
+
+
+
+        let devManagers = _findRoles(companyCandidates, companyIdOrName, [['director'], ['manager']] );
+        devManagers = _findRoles(devManagers, companyIdOrName, [['software'], ['application'], ['technology']])
+
+        return {
+            ceo,
+            cto,
+            hr,
+            devManagers
+        };
+
+    }
+
     const _findCandidatesOnConfirmedSkills = async (confirmedSkillsFilter, writeToConsole = true) => {
         if ((!confirmedSkillsFilter) || Object.keys(confirmedSkillsFilter).length === 0){
             throw new Error("you need to provide a confirmedSkillsFilter");
@@ -437,6 +528,8 @@
         getCandidateList = _getCandidateList;
         getCandidate = _searchForCandidate;
         searchForCandidate = _searchForCandidate;
+        searchForEmployees = _searchForEmployees;
+        findBizDevelopmentContacts = _findBizDevelopmentContacts;
         getJobSeekers = _getJobSeekers;
         getContractors = _getContractors;
         searchOnSkills = _searchOnSkills;
