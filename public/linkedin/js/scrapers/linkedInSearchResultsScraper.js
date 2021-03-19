@@ -564,10 +564,28 @@
         }
     }
 
-    const _getContactInfoForEachCandidateInResult = async () => {
+    const _getContactInfoForEachCandidateInResultPage = async () => {
         const profileLinks = $('a[href*="recruiter/profile/"]');
 
-        // TBD, not sure if hitting all these profiles is a good idea
+        for (let i = 0; i < profileLinks.length; i++){
+            const href = `https://www.linkedin.com${$(profileLinks[i]).attr('href')}`;
+            const tempWindow = window.open(href);
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(3000);
+
+            const contactInfoLink = $(tempWindow['document']).find('button[data-lira-action*="edit-contact-info"]')[0];
+            if (contactInfoLink){
+                contactInfoLink.click();
+
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(3000);
+            }
+
+            tempWindow.close();
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(1000);
+        }
     }
 
     const _touchSearchResultsPages = async (numberOfPages = 100, addJobSeekersToProject = false, getContactInfo = false) => {
@@ -585,7 +603,7 @@
 
             if (getContactInfo) {
                 // eslint-disable-next-line no-await-in-loop
-                await _getContactInfoForEachCandidateInResult();
+                await _getContactInfoForEachCandidateInResultPage();
             }
 
             // eslint-disable-next-line no-await-in-loop
@@ -617,6 +635,8 @@
 
         getCurrentSearchResultsPageListOfMemberIds = _getCurrentSearchResultsPageListOfMemberIds;
         interceptSearchResults = _interceptSearchResults;
+
+        gatherContactInfoFromSearchResults = async () => { await _touchSearchResultsPages(100, false, true );  }
     }
 
     window.linkedInSearchResultsScraper = new LinkedInSearchResultsScraper();

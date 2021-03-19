@@ -165,9 +165,12 @@
         let results = [];
         const technicalPositions = candidate.positions ? candidate.positions.filter(p => p.isTechnicallyRelevant) : [];
 
+        let totalMonths = 0;
+
         for (let i = 0; i < technicalPositions.length; i++){
             const p = technicalPositions[i];
             const months = _calculatePositionDurationInMonths(p);
+            totalMonths += months;
             const years = Number.parseInt(months / 12);
             const monthsRemaining = months % 12;
 
@@ -175,6 +178,7 @@
             results.push(result);
         }
 
+        candidate.technicalTotalMonths = totalMonths;
         return (results.length > 0) ? results.join("<br/>") : 'None';
     }
 

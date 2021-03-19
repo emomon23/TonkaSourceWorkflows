@@ -442,6 +442,7 @@
         searchOnSkills = _searchOnSkills;
         getConfirmedTSSkillKeys = _getConfirmedTSSkillKeys;
         findCandidatesOnConfirmedSkills = _findCandidatesOnConfirmedSkills;
+
         // loadLotsOfData = _loadLotsOfData;
     }
 

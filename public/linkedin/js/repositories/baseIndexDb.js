@@ -432,11 +432,17 @@
             return await _deleteObject(this.__dbRef, this.objectStore, key)
         }
 
-
         deleteOldData  = async (keyProperty, daysStale) => {
             this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
             return _deleteOldData(this.__dbRef, this.objectStore, keyProperty, daysStale)
-        } ;
+        };
+
+        filter = async (filterArrowFunction) => {
+            this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
+            const entireCollection = await this.getAll();
+
+            return filterArrowFunction(entireCollection);
+        };
     }
 
     class IndexDbStoreFactory {
@@ -513,8 +519,6 @@
             }
         }
     }
-
-
 
     window.baseIndexDbFactory = new BaseIndexDbFactory();
 })();
