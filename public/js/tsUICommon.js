@@ -106,7 +106,7 @@
         return result;
     }
 
-    const _createDataGrid = (configs, data) => {
+    const _createDataGrid = async (configs, data) => {
         const grid = $(document.createElement('div')).attr('class', 'table');
 
         // Loop through configs and create headers
@@ -122,9 +122,11 @@
 
         const tableBody = $(document.createElement('div')).attr('class', 'table-body');
         // Loop through Data and apply attributes to columns
-        data.forEach((d) => {
+        for (let i = 0; i < data.length; i++) {
+            const d = data[i];
             const dataRow = $(document.createElement('div')).attr('class', 'table-row');
-            configs.forEach((c) => {
+            for (let j = 0; j < configs.length; j++) {
+                const c = configs[j];
                 const dataCell = $(document.createElement('div')).attr('class', 'table-cell')
 
                 let propData = d[c.property];
@@ -139,11 +141,20 @@
                     }
                 }
 
+                // Do we have a Load Handler to call?
+                if (c.onLoadAsync) {
+                    // eslint-disable-next-line no-await-in-loop
+                    propData = await c.onLoadAsync(d);
+                }
+                if (c.onLoad) {
+                    propData = c.onLoad(d);
+                }
+
                 $(dataCell).html(propData);
                 $(dataRow).append(dataCell);
-            })
+            }
             $(tableBody).append(dataRow);
-        });
+        }
 
         return $(grid).append(headerRow).append(tableBody);
     }

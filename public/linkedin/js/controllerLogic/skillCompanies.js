@@ -70,6 +70,7 @@
 
             const skillCompaniesDocs = await skillCompaniesRepository.getSubset(listOfSkills);
             if (skillCompaniesDocs) {
+                let matchingCompanies = [];
                 // First we need to find the companies that are contained within all the skill elements
                 skillCompaniesDocs.forEach((skillCompaniesDoc) => {
                     matchingCompanies = tsArray.intersection(companySummaryDocs, skillCompaniesDoc.companies);
@@ -86,6 +87,7 @@
 
         companySummaryDocs = _filterByName(companySummaryDocs, listOfNames);
         companySummaryDocs = _filterBySize(companySummaryDocs, size);
+
         return companySummaryDocs;
     }
 

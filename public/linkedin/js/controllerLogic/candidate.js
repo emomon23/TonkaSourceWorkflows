@@ -3,6 +3,7 @@
     // need to talk about migrations.
     let _entireCandidateList = null;
 
+
     const _mergePositions = (existingPositions, incomingPositions) => {
         const result = existingPositions ? existingPositions : [];
         if (!incomingPositions){
@@ -397,7 +398,8 @@
 
     const _searchForEmployees = async (companyIdOrName) => {
         const lookFor = companyIdOrName.toLowerCase();
-        const allCandidates =  await candidateRepository.getAll();
+        const allCandidates = await _getEntireCandidateList();
+
 
         const results = allCandidates.filter((c) => {
             if (c.positions && c.positions.length > 0){
@@ -418,7 +420,7 @@
 
         return arrayOfCandidates.filter((c) => {
             let currentPositions = c.positions.filter((p) => {
-                return p.endDateMonth === undefined
+                return p.endDateYear === undefined
                 &&
                 (p.companyId === currentCompanyIdOrName || (p.companyName && p.companyName.toLowerCase().indexOf(coName) >= 0));
             });
@@ -462,20 +464,18 @@
         const result = [];
         const companyCandidates = await _searchForEmployees(companyIdOrName);
 
-        const ceo = _findRoles(companyCandidates, companyIdOrName, [['ceo'], ['chief', 'executive', 'officer'], ['owner'], ['founder']], ['product owner', 'project owner']);
-        const cto = _findRoles(companyCandidates, companyIdOrName, [['cto'], ['cio'], ['vp', ' it'], ['vp', 'technology'], ['vp', 'software'],['vice pr', ' it'], ['vice pr', 'technology'], ['vice pr', 'software']], ['director', 'operations']);
+        const ceo = _findRoles(companyCandidates, companyIdOrName, [['ceo'], ['chief', 'executive', 'officer'], ['owner'], ['founder'], ['president']], ['product owner', 'project owner']);
+        const cto = _findRoles(companyCandidates, companyIdOrName, [['cto'], ['cio'], ['chief information officer'], ['coo'], ['chief operating officer'], ['vp', ' it'], ['vp', 'technology'], ['vp', 'software'], ['vp', 'development'], ['vice pr', ' it'], ['vice pr', 'technology'], ['vice pr', 'software'], ['vice pr', 'development']], ['contractor', 'coordinator', 'director', 'operations', 'account manage', ' qa']);
 
-        const allHr = _findRoles(companyCandidates, companyIdOrName, [['hr'], ['human'], ['people']]);
+        const allHr = _findRoles(companyCandidates, companyIdOrName, [['hr'], ['human'], ['people']], ['account manage', ' qa']);
         let hr = allHr.filter((h) => { return h.roleGuess === "Executive" || h.isManagement === true});
 
         if (hr.length === 0){
             hr = allHr
         }
 
-
-
         let devManagers = _findRoles(companyCandidates, companyIdOrName, [['director'], ['manager']] );
-        devManagers = _findRoles(devManagers, companyIdOrName, [['software'], ['application'], ['technology']])
+        devManagers = _findRoles(devManagers, companyIdOrName, [['software'], ['development'], ['application'], ['technology'], ['quality'], ['qa']])
 
         return {
             ceo,
