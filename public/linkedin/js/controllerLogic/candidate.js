@@ -464,8 +464,8 @@
         const result = [];
         const companyCandidates = await _searchForEmployees(companyIdOrName);
 
-        const ceo = _findRoles(companyCandidates, companyIdOrName, [['ceo'], ['chief', 'executive', 'officer'], ['owner'], ['founder'], ['president']], ['product owner', 'project owner']);
-        const cto = _findRoles(companyCandidates, companyIdOrName, [['cto'], ['cio'], ['chief information officer'], ['coo'], ['chief operating officer'], ['vp', ' it'], ['vp', 'technology'], ['vp', 'software'], ['vp', 'development'], ['vice pr', ' it'], ['vice pr', 'technology'], ['vice pr', 'software'], ['vice pr', 'development']], ['contractor', 'coordinator', 'director', 'operations', 'account manage', ' qa']);
+        const ceo = _findRoles(companyCandidates, companyIdOrName, [['ceo'], ['chief', 'executive', 'officer'], ['owner'], ['founder'], ['president']], ['product owner', 'project owner', 'vice president']);
+        const cLevel = _findRoles(companyCandidates, companyIdOrName, [['cto'], ['cio'], ['chief information officer'], ['coo'], ['chief operating officer'], ['vp', ' it'], ['vp', 'technology'], ['vp', 'software'], ['vp', 'development'], ['vice pr', ' it'], ['vice pr', 'technology'], ['vice pr', 'software'], ['vice pr', 'development']], ['sales', 'business development', 'contractor', 'coordinator', 'director', 'operations', 'account manage', ' qa']);
 
         const allHr = _findRoles(companyCandidates, companyIdOrName, [['hr'], ['human'], ['people']], ['account manage', ' qa']);
         let hr = allHr.filter((h) => { return h.roleGuess === "Executive" || h.isManagement === true});
@@ -474,14 +474,18 @@
             hr = allHr
         }
 
-        let devManagers = _findRoles(companyCandidates, companyIdOrName, [['director'], ['manager']] );
-        devManagers = _findRoles(devManagers, companyIdOrName, [['software'], ['development'], ['application'], ['technology'], ['quality'], ['qa']])
+        const managers = _findRoles(companyCandidates, companyIdOrName, [['director'], ['manager']] );
+        const devManagers = _findRoles(managers, companyIdOrName, [['software'], ['development'], ['application'], ['technology'], ['director of IT'], ['manager of it'], ['it director'], ['it manager']], ['business development']);
+        const qaManagers = _findRoles(managers, companyIdOrName, [['quality'], ['qa']]);
+        const dev = _findRoles(companyCandidates, companyIdOrName, [['software'], ['development'], ['application'], ['technology'], ['engineer']], ['director', 'manager', 'president', 'vp of']);
 
         return {
             ceo,
-            cto,
+            cLevel,
             hr,
-            devManagers
+            devManagers,
+            qaManagers,
+            dev
         };
 
     }
