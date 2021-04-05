@@ -142,14 +142,18 @@
             { name: "CEO", property: "ceo"},
             { name: "C-Level", property: "cLevel"},
             { name: "HR", property: "hr"},
-            { name: "Managers", property: "managers"}
+            { name: "DEV Mgrs", property: "devManagers"},
+            { name: "QA Mgrs", property: "qaManagers"},
+            { name: "DEV", property: "dev"}
         ];
 
         const data = [{
             ceo: _displayPersonnelDetails(personnel.ceo),
-            cLevel: _displayPersonnelDetails(personnel.cto),
+            cLevel: _displayPersonnelDetails(personnel.cLevel),
             hr: _displayPersonnelDetails(personnel.hr),
-            managers: _displayPersonnelDetails(personnel.devManagers)
+            devManagers: _displayPersonnelDetails(personnel.devManagers),
+            qaManagers: _displayPersonnelDetails(personnel.qaManagers),
+            dev: _displayPersonnelDetails(personnel.dev)
         }];
 
         const grid = await tsUICommon.createDataGrid(headers, data);
@@ -162,7 +166,7 @@
 
         console.log(personnel);
         const personnelSummaryEl = $(document.createElement('div'))
-            .text(`CEO(${personnel.ceo.length}) C(${personnel.cto.length}) HR(${personnel.hr.length}) DEV(${personnel.devManagers.length})`)
+            .text(`CEO(${personnel.ceo.length}) C(${personnel.cLevel.length}) HR(${personnel.hr.length}) DEV(${personnel.devManagers.length})`)
             .click(async () => {
                 await _displayCompanyPersonnel(personnel);
             });
