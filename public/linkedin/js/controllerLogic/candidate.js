@@ -419,13 +419,15 @@
         const coName = currentCompanyIdOrName.toLowerCase();
 
         return arrayOfCandidates.filter((c) => {
+
             let currentPositions = c.positions.filter((p) => {
-                return p.endDateYear === undefined
+                return (p.current === true || (!p.endDateYear))
                 &&
                 (p.companyId === currentCompanyIdOrName || (p.companyName && p.companyName.toLowerCase().indexOf(coName) >= 0));
             });
 
-            const currentTitle = currentPositions.map((p) => { return p.title ? p.title.toLowerCase() : ''}).join(' ');
+            const headline = ''; // c.headline && c.headline.toLowerCase ? c.headline.toLowerCase() : '';
+            const currentTitle = headline.indexOf(currentCompanyIdOrName) >= 0 ? headline : currentPositions.map((p) => { return p.title ? p.title.toLowerCase() : ''}).join(' ');
 
             let result = false;
             for (let i = 0; i < arrayOfThisAndThisOrThisAndThisArray.length; i++){
@@ -464,8 +466,8 @@
         const result = [];
         const companyCandidates = await _searchForEmployees(companyIdOrName);
 
-        const ceo = _findRoles(companyCandidates, companyIdOrName, [['ceo'], ['chief', 'executive', 'officer'], ['owner'], ['founder'], ['president']], ['product owner', 'project owner']);
-        const cto = _findRoles(companyCandidates, companyIdOrName, [['cto'], ['cio'], ['chief information officer'], ['coo'], ['chief operating officer'], ['vp', ' it'], ['vp', 'technology'], ['vp', 'software'], ['vp', 'development'], ['vice pr', ' it'], ['vice pr', 'technology'], ['vice pr', 'software'], ['vice pr', 'development']], ['contractor', 'coordinator', 'director', 'operations', 'account manage', ' qa']);
+        const ceo = _findRoles(companyCandidates, companyIdOrName, [['ceo'], ['chief', 'executive', 'officer'], ['owner'], ['founder'], ['president']], ['product owner', 'project owner', 'vice pres', 'content owner']);
+        const cto = _findRoles(companyCandidates, companyIdOrName, [['cto'], ['cio'], ['chief information officer'], ['coo'], ['chief operating officer'], ['vp', ' it'], ['vp', 'technology'], ['vp', 'software'], ['vp', 'development'], ['vice pr', ' it'], ['vice pr', 'technology'], ['vice pr', 'software'], ['vice pr', 'development']], ['contractor', 'coordinator', 'director', 'operations', 'account manage', ' qa', 'instructor', 'cohort']);
 
         const allHr = _findRoles(companyCandidates, companyIdOrName, [['hr'], ['human'], ['people']], ['account manage', ' qa']);
         let hr = allHr.filter((h) => { return h.roleGuess === "Executive" || h.isManagement === true});

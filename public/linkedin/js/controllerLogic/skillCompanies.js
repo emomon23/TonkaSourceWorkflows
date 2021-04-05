@@ -12,7 +12,10 @@
         if (companies.length && namesList && namesList.length) {
             return companies.filter((company) => {
                 return namesList.some((name) => {
-                    if (company.name.toLowerCase().includes(name.toLowerCase())) {
+                    const lCaseName = name && name.toLowerCase ? name.toLowerCase() : "No Match No Match"
+                    const companyName = company.name && company.name.toLowerCase ? company.name.toLowerCase() : '';
+
+                    if (companyName.includes(lCaseName)) {
                         return true;
                     }
                     return false;

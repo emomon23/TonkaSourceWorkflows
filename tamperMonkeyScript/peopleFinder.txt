@@ -1,0 +1,52 @@
+// ==UserScript==
+// @name         People Finder
+// @namespace    http://tampermonkey.net/
+// @version      0.02
+// @description  try to take over the world!
+// @author       You
+// @domain       www.peoplefinders.com
+// @include      https://www.peoplefinders.com/people/*
+// @require      http://code.jquery.com/jquery-latest.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+     let _records = null;
+
+     const _sleep = (ms) => {
+         return new Promise(resolve => setTimeout(resolve, ms));
+     }
+
+     const _addRemoveButton = (recordHeader, index) => {
+         const btn = document.createElement('button');
+         $(btn).attr('style', '')
+               .attr('index', index)
+               .text('Remove')
+               .click(() => {
+                   const recordIndex = $(btn).attr('index');
+                   $(_records[recordIndex]).remove();
+               });
+
+         recordHeader.appendChild(btn);
+     }
+
+     const peopleFinderAsyncStart = async () => {
+         await _sleep(1500);
+
+         _records = $('.record');
+         if (_records && _records.length) {
+             _records = _records.toArray();
+             const recordHeaders = $('.record__header').toArray();
+
+             for (let i=0; i<recordHeaders.length; i++){
+                 _addRemoveButton(recordHeaders[i], i);
+             }
+         }
+     }
+
+     $(document).ready(() => {
+         peopleFinderAsyncStart();
+     });
+})();
