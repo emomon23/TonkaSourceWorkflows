@@ -12,6 +12,7 @@
                 await jobsRepository.update(existingJob);
             }
             else {
+                scrapedJob.lastVerified = (new Date()).getTime();
                 // eslint-disable-next-line no-await-in-loop
                 await jobsRepository.insert(scrapedJob);
             }
