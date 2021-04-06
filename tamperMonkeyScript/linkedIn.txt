@@ -48,11 +48,13 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/candidateKeywordMatchRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/connectionLifeCycleRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/tsClipboardRepository.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/jobRepository.js
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/company.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/candidate.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/skillCompanies.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/jobsController.js
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/companySkillSearch.js
 
@@ -113,11 +115,13 @@
 // @ignore      http://localhost:5001/linkedin/js/repositories/candidateKeywordMatchRepository.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/connectionLifeCycleRepository.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/tsClipboardRepository.js
+// @ignore      http://localhost:5001/linkedin/js/repositories/jobsRepository.js
 
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/company.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/candidate.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/skillCompanies.js
+// @ignore      http://localhost:5001/linkedin/js/controllerLogic/jobsController.js
 
 // @ignore      http://localhost:5001/linkedin/js/menus/companySkillSearch.js
 

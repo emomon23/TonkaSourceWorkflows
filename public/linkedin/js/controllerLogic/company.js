@@ -421,25 +421,6 @@
         searchJobs = _searchJobs;
         searchSummary = _searchSummary;
     }
-
-    const _saveBatchJobs = async (jobs) => {
-        for (let i = 0; i < jobs.length; i++) {
-            const scrapedJob = jobs[i];
-            // eslint-disable-next-line no-await-in-loop
-            const existingJob = await companyJobsRepository.get(scrapedJob.key);
-
-            if (existingJob){
-                existingJob.lastVerified = (new Date()).getTime();
-                // eslint-disable-next-line no-await-in-loop
-                await companyJobsRepository.update(existingJob);
-            }
-            else {
-                // eslint-disable-next-line no-await-in-loop
-                await companyJobsRepository.insert(scrapedJob);
-            }
-        }
-    }
-
     class CompaniesControllerConfiguration {
         isOn = _isOn;
         getWhiteList = _getWhiteList;
@@ -454,7 +435,6 @@
         saveBatchJobs = _saveBatchJobs;
     }
 
-    window.companyJobsController = new CompanyJobsController();
     window.companiesController = new CompaniesController();
     window.companiesControllerConfig = new CompaniesControllerConfiguration;
 })();

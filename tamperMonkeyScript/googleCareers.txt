@@ -1,13 +1,18 @@
 // ==UserScript==
 // @name         Google Careers
 // @namespace    http://tampermonkey.net/
-// @version      0.10
+// @version      0.15
 // @description  try to take over the world!
 // @author       You
+
+// @run-at document-idle
+
 // @domain       www.google.com
 // @include      https://www.google.com/search?*
 // @require      http://code.jquery.com/jquery-latest.js
-// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js
+// @require      http://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
+
+// @grant       none
 // ==/UserScript==
 
 (function() {
@@ -35,17 +40,14 @@
             }
         }
 
-        return result;
+        return result;a
     }
 
     const _postMessage = async (action, data) => {
         const jsonData = JSON.stringify(data);
 
-        if (!_linkedInWindow){
-            _linkedInWindow = window.open('https://www.linkedin.com');
-            await _sleep(4000);
-        }
-
+        _linkedInWindow = window.open('https://www.linkedin.com');
+        await _sleep(4000);
         _linkedInWindow.postMessage({action, parameter: jsonData}, "*");
     }
 
@@ -141,7 +143,7 @@
                 const grandParent = headings[0].parentElement.parentElement;
                 const deetsContainer = grandParent.children[2].children[0]
                 result.company = deetsContainer.children[0].textContent;
-                result.isRecruiterCompany = _checkIfJobIsFromCompetitor(result);
+                // result.isRecruiterCompany = _checkIfJobIsFromCompetitor(result);
                 result.location = deetsContainer.children[1].textContent;
                 result.via = deetsContainer.children[2].textContent;
 

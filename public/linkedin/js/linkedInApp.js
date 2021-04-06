@@ -251,7 +251,7 @@
     }
 
     const _saveGoogleCareerJobs = async (jobs) => {
-        companyJobsController.saveBatchJobs(jobs);
+        jobsController.saveBatchJobs(jobs);
     }
 
     const _getNextJobSeekerResult = async (seeker) => {
