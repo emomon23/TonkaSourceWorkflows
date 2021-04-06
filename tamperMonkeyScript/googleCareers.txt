@@ -1,0 +1,197 @@
+// ==UserScript==
+// @name         Google Careers
+// @namespace    http://tampermonkey.net/
+// @version      0.10
+// @description  try to take over the world!
+// @author       You
+// @domain       www.google.com
+// @include      https://www.google.com/search?*
+// @require      http://code.jquery.com/jquery-latest.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+    const UNABLE = "Unable to scrape";
+
+    const _theCompetition = ['horizontal talent', 'robert half', 'volt', 'apex systems', 'dahl consulting', 'accenture', 'randstad'];
+    const _titleMatch = ['software', 'engineer', 'data scien', 'c#', 'java', 'react', 'vuejs', 'angular', 'developer', 'python', 'architect', 'azure', 'devops', 'dev ops', 'business analyst', 'quality ass', 'qa ass', 'qa anal', 'quality anal'];
+    const _titleIgnore = ['sales', 'intern'];
+    const _jobIndex = {};
+
+    let _linkedInWindow = null;
+
+    const _sleep = (ms) => {
+         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    const _checkIfJobIsFromCompetitor = (job) => {
+        let result = false;
+        const company = job && job.company && job.company.toLowerCase ? job.company.toLowerCase() : '';
+        for (let i = 0; i < _theCompetition.length; i++){
+            if (company.indexOf(_theCompetition[i]) >= 0){
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    const _postMessage = async (action, data) => {
+        const jsonData = JSON.stringify(data);
+
+        if (!_linkedInWindow){
+            _linkedInWindow = window.open('https://www.linkedin.com');
+            await _sleep(4000);
+        }
+
+        _linkedInWindow.postMessage({action, parameter: jsonData}, "*");
+    }
+
+    const _findSpanContains = (spans, lookFor) => {
+        let lookForOr = Array.isArray(lookFor) ? lookFor : [lookFor];
+        let result = null;
+
+        for (let i = 0; i < spans.length; i++) {
+            const spanText = spans[i].textContent.toLowerCase();
+            for (let j = 0; j < lookForOr.length; j++){
+                if (spanText.indexOf(lookForOr[j]) >= 0) {
+                    result = spans[i];
+                    break;
+                }
+            }
+
+            if (result) {
+                break;
+            }
+        }
+
+        return result
+    }
+
+    const _findAgeOfJobPosting = (spans) => {
+        const ageSpan = _findSpanContains(spans, ' ago');
+        return ageSpan ? ageSpan.textContent : UNABLE;
+    }
+
+    const _calculateDaysAge = (result) => {
+        let number = null;
+
+        if (result && result.ageText && result.ageText !== UNABLE){
+            const ageText = result.ageText.toLowerCase();
+
+            if (ageText.indexOf("month") >= 0) {
+                number = 31;
+            }
+            else {
+               const ageParts = result.ageText.split(' ');
+               number = ageParts[0];
+
+               if (ageParts[1].toLowerCase().startsWith('hour')) {
+                  number = 0;
+               }
+            }
+        }
+
+        return number ? isNaN(number) ? null : Number.parseInt(number) : null;
+    }
+
+    const _validateJob = (job) => {
+        if (job.key){
+            if (_jobIndex[job.key] === true){
+                return false; // This is a duplicate job, listed more than once on the careers page, don't keep it a 2nd time
+            }
+        }
+
+        const title = job && job.title && job.title.toLowerCase ? job.title.toLowerCase() : '';
+        let isValid = true;
+
+        for (let t = 0; t < _titleIgnore.length; t++){
+           if (title.indexOf(_titleIgnore[t]) >= 0){
+               isValid = false; // eg. Title contains "intern" or "sales" ->. It's not valid
+               break;
+           }
+        }
+
+        if (isValid){
+            isValid = false;
+            for (let i = 0; i < _titleMatch.length; i++){
+                if (title.indexOf(_titleMatch[i]) >= 0){
+                    isValid = true;
+                    break;
+                }
+            }
+        }
+
+        return isValid;
+    }
+
+    const _determineJobType = (spans) => {
+        const span = _findSpanContains(spans, ['full time', 'full-time', 'fulltime', 'contractor']);
+        return span ? span.textContent : "Unknown";
+    }
+
+    const _scrapeASingleJob = (li) => {
+        try {
+            let result = null;
+            let headings = li.querySelectorAll("div[role*='heading']");
+            if (headings.length === 1){
+                result = { title: headings[0].textContent };
+                const grandParent = headings[0].parentElement.parentElement;
+                const deetsContainer = grandParent.children[2].children[0]
+                result.company = deetsContainer.children[0].textContent;
+                result.isRecruiterCompany = _checkIfJobIsFromCompetitor(result);
+                result.location = deetsContainer.children[1].textContent;
+                result.via = deetsContainer.children[2].textContent;
+
+                const supplimentalData = deetsContainer.children[3];
+
+                // 3 days ago | 19 hours ago | Over 1 month ago |, work from home, full-time, contractor, no degree mentioned, $80k-100k a year,
+                const spans = supplimentalData.querySelectorAll('span');
+                result.ageText = _findAgeOfJobPosting(spans);
+                result.daysOld = _calculateDaysAge(result);
+                result.jobType = _determineJobType(spans);
+                result.key = `${result.title}-${result.company}`;
+            }
+
+            return result;
+        }
+        catch (e) {
+            console.log(`unable to scrape job`);
+            return null;
+        }
+    }
+
+    const scrapeJobs = () => {
+        const jobs = [];
+        const listItems = document.querySelectorAll('li[class*="horizon-jobs"]');
+
+        for (let i = 0; i < listItems.length; i++){
+            const job = _scrapeASingleJob(listItems[i]);
+            const isValid = _validateJob(job);
+            if (isValid){
+                _jobIndex[job.key] = true;
+               jobs.push(job);
+            }
+        }
+
+        _postMessage('saveGoogleCareerJobs', jobs);
+        console.log(jobs);
+        return jobs;
+    }
+
+    const createScrapeButton = () => {
+        const btn = document.createElement("button");
+        btn.textContent = "Scrape Jobs";
+        $('header').prepend(btn);
+
+        $(btn).click(() => {
+            console.log("scraping jobs");
+            scrapeJobs();
+        });
+    };
+
+    createScrapeButton();
+
+})();

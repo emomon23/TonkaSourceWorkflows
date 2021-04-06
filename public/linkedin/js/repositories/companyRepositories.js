@@ -21,8 +21,8 @@
         },
         {
             storeName: 'companyJobs',
-            idProperty: 'companyId',
-            indexes: ['name', 'isActiveString',]
+            idProperty: 'key',
+            indexes: ['title', 'company', 'isActiveString',]
         },
         {
             storeName: 'companyTitles',

@@ -250,7 +250,9 @@
         };
     }
 
-
+    const _saveGoogleCareerJobs = async (jobs) => {
+        companyJobsController.saveBatchJobs(jobs);
+    }
 
     const _getNextJobSeekerResult = async (seeker) => {
        await tsJobHistoryScrapeManager.scrapeThisJobSeeker(seeker);
@@ -294,6 +296,7 @@
         fireConnectionRequestBlast = _fireConnectionRequestBlast;
         upsertContact = _upsertContact;
         saveCompanyAnalytics = _saveCompanyAnalytics;
+        saveGoogleCareerJobs = _saveGoogleCareerJobs;
         getAlisonContact = _getAlisonContact;
         getAlisonContactResult = _getAlisonContactResult;
         getAlisonLoggedInUser = _getAlisonLoggedInUser;
