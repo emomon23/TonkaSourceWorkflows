@@ -26,11 +26,13 @@
             const company = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
             for (let i = 0; i < competitors.length; i++){
                 if (company.indexOf(competitors[i]) >= 0){
-                    company.isRecruiterCompany = true;
+                    j.isRecruiterCompany = true;
                     break;
                 }
             }
-        })
+        });
+
+        return allJobs;
     }
 
     class JobController {
