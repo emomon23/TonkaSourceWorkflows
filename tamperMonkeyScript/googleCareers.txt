@@ -77,8 +77,9 @@
         return ageSpan ? ageSpan.textContent : UNABLE;
     }
 
-    const _calculateDaysAge = (result) => {
+    const _calculatePostedDate = (result) => {
         let number = null;
+        const now = (new Date()).getTime();
 
         if (result && result.ageText && result.ageText !== UNABLE){
             const ageText = result.ageText.toLowerCase();
@@ -96,7 +97,13 @@
             }
         }
 
-        return number ? isNaN(number) ? null : Number.parseInt(number) : null;
+        number = number ? isNaN(number) ? null : Number.parseInt(number) : null;
+        if (number) {
+            const oneDay = 86400000;
+            return now - (number * oneDay);
+        }
+
+        return now;
     }
 
     const _validateJob = (job) => {
@@ -152,7 +159,7 @@
                 // 3 days ago | 19 hours ago | Over 1 month ago |, work from home, full-time, contractor, no degree mentioned, $80k-100k a year,
                 const spans = supplimentalData.querySelectorAll('span');
                 result.ageText = _findAgeOfJobPosting(spans);
-                result.daysOld = _calculateDaysAge(result);
+                result.postedDate = _calculatePostedDate(result);
                 result.jobType = _determineJobType(spans);
                 result.key = `${result.title}-${result.company}`;
             }

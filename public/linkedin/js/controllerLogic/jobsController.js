@@ -22,6 +22,7 @@
     const _getAllJobs = async () => {
         const competitors = await competitorRepository.getAllCompetitors();
         const allJobs = await jobsRepository.getAll();
+        const now = new Date();
 
         allJobs.forEach((j) => {
             const company = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
@@ -31,6 +32,11 @@
                     break;
                 }
             }
+
+            if (j.postedDate){
+                j.age = Number.parseInt(tsCommon.dayDifference(now, j.postedDate))
+            }
+
         });
 
         return allJobs;
