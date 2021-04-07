@@ -42,9 +42,34 @@
         return allJobs;
     }
 
+    const _deleteJobs = async (jobs) => {
+
+    }
+
+    const _hideJobs = async (jobs) => {
+
+    }
+
+    const _updateJobStatus = async (jobKey, status) => {
+
+    }
+
+    const _associateJobToLinkedInCompany = async (jobKey, linkedInCompanyKey) => {
+
+    }
+
+    const _setCompanyBusinessDevelopmentStatus = async (linkedInCompanyKey, status) => {
+
+    }
+
     class JobController {
         saveBatchJobs = _saveBatchJobs;
         getAllJobs = _getAllJobs;
+        deleteJobs = _deleteJobs;
+        hideJobs = _hideJobs;
+        updateJobStatus = _updateJobStatus;
+        associateJobToLinkedInCompany = _associateJobToLinkedInCompany;
+        setCompanyBusinessDevelopmentStatus = _setCompanyBusinessDevelopmentStatus;
     }
 
     window.jobsController = new JobController();
