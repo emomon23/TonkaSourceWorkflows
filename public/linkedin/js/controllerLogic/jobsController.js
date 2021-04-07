@@ -39,7 +39,11 @@
             }
 
             if (j.postedDate){
-                j.age = Number.parseInt(tsCommon.dayDifference(now, j.postedDate))
+                j.age = Number.parseInt(tsCommon.dayDifference(now, j.postedDate));
+            }
+
+            if (j.lastVerified){
+                j.lastVerifiedAge = Number.parseInt(tsCommon.dayDifference(now, j.lastVerified));
             }
 
             if (!j.linkedInCompany){
