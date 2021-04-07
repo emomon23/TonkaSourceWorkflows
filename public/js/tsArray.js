@@ -25,25 +25,30 @@
         return [...new Set(array1)];
     }
 
-    const _sortByNumericProperty = (array1, prop) => {
+    const _sortByNumericProperty = (array1, prop, desc = false) => {
         if (typeof prop === 'string') {
             array1.sort((a,b) => {
-                return (a > b) ? 1 : ((a < b) ? -1 : 0);
-            })
-        }
-    }
-
-    const _sortByObjectProperty = (array1, objProp) => {
-        if (array1 && array1.length) {
-            if (typeof array1[0][objProp] === 'string') {
-                _sortByStringProperty(array1, objProp);
-            } else if (!isNaN(array1[0][objProp])) {
-                _sortByNumericProperty(array1, objProp);
+                if (a[prop] && b[prop]) {
+                    return (a[prop] > b[prop]) ? 1 : ((a[prop] < b[prop]) ? -1 : 0);
+                }
+            });
+            if (desc) {
+                array1.reverse();
             }
         }
     }
 
-    const _sortByStringProperty = (array1, prop) => {
+    const _sortByObjectProperty = (array1, objProp, desc = false) => {
+        if (array1 && array1.length) {
+            if (typeof array1[0][objProp] === 'string') {
+                _sortByStringProperty(array1, objProp, desc);
+            } else if (!isNaN(array1[0][objProp])) {
+                _sortByNumericProperty(array1, objProp, desc);
+            }
+        }
+    }
+
+    const _sortByStringProperty = (array1, prop, desc = false) => {
         if (typeof prop === 'string') {
             array1.sort((a,b) => {
                 if (a[prop] && b[prop]) {
@@ -51,7 +56,10 @@
                 }
                 console.log("WARNING: Object missing property to sort");
                 return 0;
-            })
+            });
+            if (desc) {
+                array1.reverse();
+            }
         }
     }
 

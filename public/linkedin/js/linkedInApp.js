@@ -13,10 +13,7 @@
 
         const companySkillSearch = companySkillSearchMenu.menuOption();
 
-        const menuItem2 = $(document.createElement('div')).attr('class', 'ts-menu-item').click(() => {
-            const html = "REPORT 2";
-            $('#tsContent').html(html).show();
-        }).text("REPORT 2");
+        const jobSearch = jobSearchMenu.menuOption();
 
         const menuItem3 = $(document.createElement('div')).attr('class', 'ts-menu-item').click(() => {
             const html = "REPORT 3";
@@ -27,7 +24,7 @@
             $('#tsContent').toggle();
         }).text("Show/Hide").attr('class', 'ts-menu-button-toggle ts-button-li');
 
-        tsMenu.append(companySkillSearch).append(menuItem2).append(menuItem3).append(toggleButton);
+        tsMenu.append(companySkillSearch).append(jobSearch).append(menuItem3).append(toggleButton);
 
         return tsMenu;
     }

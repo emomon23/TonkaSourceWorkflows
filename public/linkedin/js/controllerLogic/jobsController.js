@@ -70,6 +70,23 @@
         jobsController.getAllJobs(true);
     }
 
+    const _filterByCompany = (jobs, namesList) => {
+        if (jobs.length && namesList && namesList.length) {
+            return jobs.filter((job) => {
+                return namesList.some((name) => {
+                    const lCaseName = name && name.toLowerCase ? name.toLowerCase() : "No Match No Match"
+                    const companyName = job.company && job.company.toLowerCase ? job.company.toLowerCase() : '';
+
+                    if (companyName.includes(lCaseName)) {
+                        return true;
+                    }
+                    return false;
+                });
+            });
+        }
+        return jobs;
+    }
+
     const _hideJobs = async (jobKeys) => {
         const jobsArray = Array.isArray(jobKeys) ? jobKeys : [jobKeys];
 
@@ -128,6 +145,21 @@
         jobsController.getAllJobs(true);
     }
 
+    const _search = async (companies) => {
+        let jobDocs = [];
+        let listOfCompanies = [];
+        if (companies.trim()) {
+            // If we're searching by name, we just want matching companies
+            listOfCompanies = companies.split(",").map((n) => n.trim());
+        }
+
+        jobDocs = await _getAllJobs();
+
+        jobDocs = _filterByCompany(jobDocs, listOfCompanies);
+
+        return jobDocs;
+    }
+
     const _setCompanyBusinessDevelopmentStatus = async (linkedInCompanyKey, status) => {
         const linkedInCompanySummary = await companySummaryRepository.get(linkedInCompanyKey);
         if (!linkedInCompanySummary){
@@ -145,6 +177,7 @@
         hideJobs = _hideJobs;
         updateJobStatus = _updateJobStatus;
         associateJobToLinkedInCompany = _associateJobToLinkedInCompany;
+        search = _search;
         setCompanyBusinessDevelopmentStatus = _setCompanyBusinessDevelopmentStatus;
 
     }

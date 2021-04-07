@@ -397,6 +397,9 @@
     }
 
     const _searchForEmployees = async (companyIdOrName) => {
+        if (!companyIdOrName) {
+            return null;
+        }
         const lookFor = companyIdOrName.toLowerCase();
         const allCandidates = await _getEntireCandidateList();
 
