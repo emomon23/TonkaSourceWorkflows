@@ -67,7 +67,7 @@
             await jobsRepository.delete(jobsArray[i]);
         }
 
-        getAllJobs(true);
+        jobsController.getAllJobs(true);
     }
 
     const _hideJobs = async (jobKeys) => {
@@ -86,7 +86,7 @@
             await jobsRepository.update(job);
         }
 
-        getAllJobs(true);
+        jobsController.getAllJobs(true);
     }
 
     const _updateJobStatus = async (jobKey, status) => {
@@ -98,7 +98,7 @@
         job.status = status;
         await jobsRepository.update(job);
 
-        getAllJobs(true);
+        jobsController.getAllJobs(true);
     }
 
     const _associateJobToLinkedInCompany = async (jobKey, linkedInCompanyKey) => {
@@ -125,7 +125,7 @@
             await companySummaryRepository.update(linkedInCompanySummary);
         }
 
-        getAllJobs(true);
+        jobsController.getAllJobs(true);
     }
 
     const _setCompanyBusinessDevelopmentStatus = async (linkedInCompanyKey, status) => {
