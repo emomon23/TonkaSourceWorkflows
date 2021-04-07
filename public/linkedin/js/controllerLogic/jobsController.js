@@ -47,9 +47,11 @@
             }
 
             if (!j.linkedInCompanyId){
-                const linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
+                let linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
+                linkedInCompanyPotentialMatches = linkedInCompanyPotentialMatches.filter((c) => { return !isNaN(c.companyId) });
+
                 if (linkedInCompanyPotentialMatches.length === 1){
-                    job.linkedInCompanyId =  linkedInCompanySummary.companyId;
+                    j.linkedInCompanyId =  linkedInCompanySummary.companyId;
                 }
             }
         });
