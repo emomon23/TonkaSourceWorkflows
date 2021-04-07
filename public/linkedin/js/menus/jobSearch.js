@@ -186,6 +186,7 @@
             { name: "Industry", property: "industry", headerStyle: "min-width: 220px" },
             { name: "Size", property: "size", headerStyle: "min-width: 75px"},
             { name: "Title", property: "title" },
+            { name: "Location", property: "location" },
             { name: "Age", property: "age" },
             { name: "Personnel", property: "personnel", headerStyle: "min-width: 250px", onLoadAsync: _displayCompanyPersonnelSummary },
             { name: "Last Verified", property: "lastVerifiedAge" },
