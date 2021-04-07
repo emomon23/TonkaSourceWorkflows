@@ -227,6 +227,20 @@
 
         return found;
     }
+
+    const _debounce = (func, wait) => {
+        let timeout;
+
+        return (...args) => {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      };
     class TsUICommon {
         constructor (){}
 
@@ -234,6 +248,7 @@
         createDataGrid = _createDataGrid;
         createListItem = _createListItem;
         createTooltip = _createTooltip;
+        debounce = _debounce;
         removeListItem = _removeListItem;
         addButton = _addButton;
         findDomElements = _findDomElements;

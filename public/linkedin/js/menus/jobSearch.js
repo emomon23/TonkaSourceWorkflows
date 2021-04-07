@@ -1,4 +1,6 @@
 (function () {
+    let _grid = null;
+
     const _display = () => {
         // Clear the content
         $('#tsContent').html("");
@@ -129,46 +131,6 @@
         return container;
     }
 
-    const _displayCompanyPersonnel = async (personnel) => {
-        $('#jobSearchResultsContainer').html("");
-
-        const config = {
-            keyProperty: key,
-            headers: [
-            { name: "CEO", property: "ceo"},
-            { name: "C-Level", property: "cLevel"},
-            { name: "HR", property: "hr"},
-            { name: "DEV Mgrs", property: "devManagers"},
-            { name: "QA Mgrs", property: "qaManagers"},
-            { name: "DEV", property: "dev"}
-        ]};
-
-        const data = [{
-            ceo: _displayPersonnelDetails(personnel.ceo),
-            cLevel: _displayPersonnelDetails(personnel.cLevel),
-            hr: _displayPersonnelDetails(personnel.hr),
-            devManagers: _displayPersonnelDetails(personnel.devManagers),
-            qaManagers: _displayPersonnelDetails(personnel.qaManagers),
-            dev: _displayPersonnelDetails(personnel.dev)
-        }];
-
-        const grid = await tsUICommon.createDataGrid(config, data);
-
-        $('#jobSearchResultsContainer').append(grid.gridElement);
-    }
-
-    const _displayCompanyPersonnelSummary = async (jobDoc) => {
-        const personnel = await candidateController.findBizDevelopmentContacts(jobDoc.company);
-
-        const personnelSummaryEl = $(document.createElement('div'))
-            .text(`CEO(${personnel.ceo.length}) C(${personnel.cLevel.length}) HR(${personnel.hr.length}) DEV(${personnel.devManagers.length})`)
-            .click(async () => {
-                await _displayCompanyPersonnel(personnel);
-            });
-
-        return personnelSummaryEl;
-    }
-
     const _getResults = async () => {
         $('#jobSearchResultsContainer').html("");
         const companyNameSearch = $("#tsCompanyNameSearch").val();
@@ -184,14 +146,12 @@
         const resultsContainer = $('div[class*="job-search-results"');
 
         const config = {
+            keyProperty: 'key',
             headers: [
-            { name: "Company", property: "nameLink", headerStyle: "min-width: 250px" },
-            { name: "Industry", property: "industry", headerStyle: "min-width: 220px" },
-            { name: "Size", property: "size", headerStyle: "min-width: 75px"},
+            { name: "Company", property: "nameLink", sortProp: "company", headerStyle: "min-width: 250px" },
             { name: "Title", property: "title" },
             { name: "Location", property: "location" },
             { name: "Age", property: "age", sort:'desc' },
-            { name: "Personnel", property: "personnel", headerStyle: "min-width: 250px", onLoadAsync: _displayCompanyPersonnelSummary },
             { name: "Last Verified", property: "lastVerifiedAge" },
         ]};
 
@@ -216,9 +176,9 @@
             return { ...j, ...dataUpdates }
         });
 
-        const grid = await tsUICommon.createDataGrid(config, matchingJobs);
+        _grid = await tsUICommon.createDataGrid(config, matchingJobs);
 
-        $('#jobSearchResultsContainer').append(grid.gridElement);
+        $('#jobSearchResultsContainer').append(_grid.gridElement);
     }
 
     const _menuOption = () => {
