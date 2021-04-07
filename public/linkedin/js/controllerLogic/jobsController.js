@@ -1,4 +1,5 @@
 (() => {
+    let _cachedJobs = null;
 
     const _saveBatchJobs = async (jobs) => {
         for (let i = 0; i < jobs.length; i++) {
@@ -19,15 +20,19 @@
         }
     }
 
-    const _getAllJobs = async () => {
+    const _getAllJobs = async (forceRefresh = false) => {
+        if (forceRefresh === false && _cachedJobs){
+            return _cachedJobs;
+        }
+
         const competitors = await competitorRepository.getAllCompetitors();
-        const allJobs = await jobsRepository.getAll();
+        _cachedJobs = await jobsRepository.getAll();
         const now = new Date();
 
-        allJobs.forEach((j) => {
-            const company = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
+        _cachedJobs.forEach((j) => {
+            const jobCompanyName = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
             for (let i = 0; i < competitors.length; i++){
-                if (company.indexOf(competitors[i]) >= 0){
+                if (jobCompanyName.indexOf(competitors[i]) >= 0){
                     j.isRecruiterCompany = true;
                     break;
                 }
@@ -37,29 +42,102 @@
                 j.age = Number.parseInt(tsCommon.dayDifference(now, j.postedDate))
             }
 
+            if (!j.linkedInCompany){
+                const linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
+                if (linkedInCompanyPotentialMatches.length === 1){
+                    const linkedInCompanySummary = linkedInCompanyPotentialMatches[0];
+                    job.linkedInCompany = {
+                        companyId: linkedInCompanySummary.companyId,
+                        companyName: linkedInCompanySummary.name
+                    }
+                }
+            }
         });
 
-        return allJobs;
+        return _cachedJobs;
     }
 
     const _deleteJobs = async (jobs) => {
+        const jobsArray = Array.isArray(jobKeys) ? jobKeys : [jobKeys];
 
+        for (let i = 0; i < jobsArray; i++){
+            // eslint-disable-next-line no-await-in-loop
+            await jobsRepository.delete(jobsArray[i]);
+        }
+
+        getAllJobs(true);
     }
 
-    const _hideJobs = async (jobs) => {
+    const _hideJobs = async (jobKeys) => {
+        const jobsArray = Array.isArray(jobKeys) ? jobKeys : [jobKeys];
 
+        for (let i = 0; i < jobsArray; i++){
+            // eslint-disable-next-line no-await-in-loop
+            const job = await jobsRepository.get(jobsArray[i]);
+
+            if (!job){
+                throw new Error(`Unable to find job ${jobsArray[i]}`);
+            }
+
+            job.isHidden = status;
+            // eslint-disable-next-line no-await-in-loop
+            await jobsRepository.update(job);
+        }
+
+        getAllJobs(true);
     }
 
     const _updateJobStatus = async (jobKey, status) => {
+        const job = await jobsRepository.get(jobKey);
+        if (!job){
+            throw new Error(`Unable to find job ${jobKey}`);
+        }
 
+        job.status = status;
+        await jobsRepository.update(job);
+
+        getAllJobs(true);
     }
 
     const _associateJobToLinkedInCompany = async (jobKey, linkedInCompanyKey) => {
+        const job = await jobsRepository.get(jobKey);
+        if (!job){
+            throw new Error(`Unable to find job ${jobKey}`);
+        }
 
+        const linkedInCompanySummary = await companySummaryRepository.get(linkedInCompanyKey);
+        if (!linkedInCompanySummary){
+            throw new Error(`Unable to find linked in companySummary for ${linkedInCompanyKey}`);
+        }
+
+        job.linkedInCompany = {
+            companyId: linkedInCompanySummary.companyId,
+            companyName: linkedInCompanySummary.name
+        }
+
+        await jobsRepository.update(job);
+
+        if (!linkedInCompanySummary.aliases){
+            linkedInCompanySummary.aliases = [];
+        }
+
+        const jobCompanyName = job.company.toLowerCase ? job.company.toLowerCase() : '';
+        if (linkedInCompanySummary.aliases.indexOf(jobCompanyName) === -1){
+            linkedInCompanySummary.aliases.push(jobCompanyName);
+            await companySummaryRepository.update(linkedInCompanySummary);
+        }
+
+        getAllJobs(true);
     }
 
     const _setCompanyBusinessDevelopmentStatus = async (linkedInCompanyKey, status) => {
+        const linkedInCompanySummary = await companySummaryRepository.get(linkedInCompanyKey);
+        if (!linkedInCompanySummary){
+            throw new Error(`Unable to find linked in companySummary for ${linkedInCompanyKey}`);
+        }
 
+        linkedInCompanySummary.businessDevelopmentStatus = status;
+        await companySummaryRepository.update(linkedInCompanySummary);
     }
 
     class JobController {
