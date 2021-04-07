@@ -46,14 +46,10 @@
                 j.lastVerifiedAge = Number.parseInt(tsCommon.dayDifference(now, j.lastVerified));
             }
 
-            if (!j.linkedInCompany){
+            if (!j.linkedInCompanyId){
                 const linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
                 if (linkedInCompanyPotentialMatches.length === 1){
-                    const linkedInCompanySummary = linkedInCompanyPotentialMatches[0];
-                    job.linkedInCompany = {
-                        companyId: linkedInCompanySummary.companyId,
-                        companyName: linkedInCompanySummary.name
-                    }
+                    job.linkedInCompanyId =  linkedInCompanySummary.companyId;
                 }
             }
         });
@@ -114,11 +110,7 @@
             throw new Error(`Unable to find linked in companySummary for ${linkedInCompanyKey}`);
         }
 
-        job.linkedInCompany = {
-            companyId: linkedInCompanySummary.companyId,
-            companyName: linkedInCompanySummary.name
-        }
-
+        job.linkedInCompanyId = linkedInCompanySummary.companyId;
         await jobsRepository.update(job);
 
         if (!linkedInCompanySummary.aliases){
