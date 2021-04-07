@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Google Careers
 // @namespace    http://tampermonkey.net/
-// @version      0.15
+// @version      0.16
 // @description  try to take over the world!
 // @author       You
 
@@ -79,7 +79,9 @@
 
     const _calculatePostedDate = (result) => {
         let number = null;
-        const now = (new Date()).getTime();
+        let now = new Date();
+        now.setHours(0,0,0,0);
+        now = now.getTime();
 
         if (result && result.ageText && result.ageText !== UNABLE){
             const ageText = result.ageText.toLowerCase();
@@ -161,7 +163,7 @@
                 result.ageText = _findAgeOfJobPosting(spans);
                 result.postedDate = _calculatePostedDate(result);
                 result.jobType = _determineJobType(spans);
-                result.key = `${result.title}-${result.company}`;
+                result.key = `${result.title}-${result.company}-${result.postedDate}`;
             }
 
             return result;
