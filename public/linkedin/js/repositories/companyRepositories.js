@@ -45,4 +45,34 @@
     window.skillCompaniesRepository = _storeFactory.createStore('skillCompanies');
 
     window.companySummaryRepository.getCompaniesByNameContains = _getCompaniesByNameContains;
+
+    window.companySummaryRepository.getAll().then(d => window.companySummaryRepository.cachedCompanies = d).catch(e => {});
+    window.companySummaryRepository.companyNameAndAliasTypeAheadSearch = (companyNameStartsWithSearch) => {
+        let lookFor = companyNameStartsWithSearch.toLowerCase ? companyNameStartsWithSearch.toLowerCase() : companyNameStartsWithSearch;
+
+        if (isNaN(lookFor)){
+            return window.companySummaryRepository.cachedCompanies.filter((c) => {
+                const name = c.name && c.name.toLowerCase ? c.name.toLowerCase() : '';
+                let result = name.startsWith(lookFor);
+
+                if (!result && c.aliases) {
+                    const aliasMatch = c.aliases.filter((a) => {
+                        const lowerCaseAlias = a.toLowerCase ? a.toLowerCase() : a;
+                        return lowerCaseAlias.startsWith(lookFor);
+                    });
+
+                    result = aliasMatch.length > 0;
+                }
+
+                return result;
+            });
+        }
+        else {
+            lookFor = lookFor.toString();
+            return window.companySummaryRepository.cachedCompanies.filter((c) => {
+                const id = c.companyId.toString();
+                return id.startsWith(lookFor);
+            });
+        }
+    }
 })();

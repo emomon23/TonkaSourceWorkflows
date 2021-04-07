@@ -70,6 +70,7 @@
         updateJobStatus = _updateJobStatus;
         associateJobToLinkedInCompany = _associateJobToLinkedInCompany;
         setCompanyBusinessDevelopmentStatus = _setCompanyBusinessDevelopmentStatus;
+
     }
 
     window.jobsController = new JobController();
