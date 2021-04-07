@@ -132,14 +132,16 @@
     const _displayCompanyPersonnel = async (personnel) => {
         $('#jobSearchResultsContainer').html("");
 
-        const headers = [
+        const config = {
+            keyProperty: key,
+            headers: [
             { name: "CEO", property: "ceo"},
             { name: "C-Level", property: "cLevel"},
             { name: "HR", property: "hr"},
             { name: "DEV Mgrs", property: "devManagers"},
             { name: "QA Mgrs", property: "qaManagers"},
             { name: "DEV", property: "dev"}
-        ];
+        ]};
 
         const data = [{
             ceo: _displayPersonnelDetails(personnel.ceo),
@@ -150,9 +152,9 @@
             dev: _displayPersonnelDetails(personnel.dev)
         }];
 
-        const grid = await tsUICommon.createDataGrid(headers, data);
+        const grid = await tsUICommon.createDataGrid(config, data);
 
-        $('#jobSearchResultsContainer').append(grid);
+        $('#jobSearchResultsContainer').append(grid.gridElement);
     }
 
     const _displayCompanyPersonnelSummary = async (jobDoc) => {
@@ -181,16 +183,17 @@
 
         const resultsContainer = $('div[class*="job-search-results"');
 
-        const headers = [
+        const config = {
+            headers: [
             { name: "Company", property: "nameLink", headerStyle: "min-width: 250px" },
             { name: "Industry", property: "industry", headerStyle: "min-width: 220px" },
             { name: "Size", property: "size", headerStyle: "min-width: 75px"},
             { name: "Title", property: "title" },
             { name: "Location", property: "location" },
-            { name: "Age", property: "age" },
+            { name: "Age", property: "age", sort:'desc' },
             { name: "Personnel", property: "personnel", headerStyle: "min-width: 250px", onLoadAsync: _displayCompanyPersonnelSummary },
             { name: "Last Verified", property: "lastVerifiedAge" },
-        ];
+        ]};
 
         // Massage the data for display
         matchingJobs = matchingJobs.map((j) => {
@@ -213,9 +216,9 @@
             return { ...j, ...dataUpdates }
         });
 
-        const grid = await tsUICommon.createDataGrid(headers, matchingJobs);
+        const grid = await tsUICommon.createDataGrid(config, matchingJobs);
 
-        $('#jobSearchResultsContainer').append(grid);
+        $('#jobSearchResultsContainer').append(grid.gridElement);
     }
 
     const _menuOption = () => {

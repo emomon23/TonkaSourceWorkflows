@@ -138,14 +138,15 @@
     const _displayCompanyPersonnel = async (personnel) => {
         $('#companySkillSearchResultsContainer').html("");
 
-        const headers = [
+        const config = {
+            headers: [
             { name: "CEO", property: "ceo"},
             { name: "C-Level", property: "cLevel"},
             { name: "HR", property: "hr"},
             { name: "DEV Mgrs", property: "devManagers"},
             { name: "QA Mgrs", property: "qaManagers"},
             { name: "DEV", property: "dev"}
-        ];
+        ]};
 
         const data = [{
             ceo: _displayPersonnelDetails(personnel.ceo),
@@ -156,9 +157,9 @@
             dev: _displayPersonnelDetails(personnel.dev)
         }];
 
-        const grid = await tsUICommon.createDataGrid(headers, data);
+        const grid = await tsUICommon.createDataGrid(config, data);
 
-        $('#companySkillSearchResultsContainer').append(grid);
+        $('#companySkillSearchResultsContainer').append(grid.gridElement);
     }
 
     const _displayCompanyPersonnelSummary = async (companySummaryDoc) => {
@@ -189,7 +190,8 @@
 
         const resultsContainer = $('div[class*="company-skill-search-results"');
 
-        const headers = [
+        const config = {
+            headers: [
             { name: "ID", property: "companyIdLink", headerStyle: "max-width: 50px" },
             { name: "Company", property: "nameLink", headerStyle: "min-width: 250px" },
             { name: "Industry", property: "industry", headerStyle: "min-width: 220px" },
@@ -199,7 +201,7 @@
             { name: "Jobs (MN)", linkName: "MN", property: "mnJobsUrl" },
             { name: "Jobs (US)", linkName: "US", property: "usaJobsUrl" },
             { name: "Skills", property: "skills" }
-        ];
+        ]};
 
         // Massage the data for display
         matchingSkillCompanies = matchingSkillCompanies.map((sc) => {
@@ -229,9 +231,9 @@
             return { ...sc, ...dataUpdates }
         });
 
-        const grid = await tsUICommon.createDataGrid(headers, matchingSkillCompanies);
+        const grid = await tsUICommon.createDataGrid(config, matchingSkillCompanies);
 
-        $('#companySkillSearchResultsContainer').append(grid);
+        $('#companySkillSearchResultsContainer').append(grid.gridElement);
     }
 
     const _menuOption = () => {

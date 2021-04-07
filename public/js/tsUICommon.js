@@ -107,56 +107,7 @@
     }
 
     const _createDataGrid = async (configs, data) => {
-        const grid = $(document.createElement('div')).attr('class', 'table');
-
-        // Loop through configs and create headers
-        const headerRow = $(document.createElement('div')).attr('class', 'table-header');
-
-        configs.forEach((c) => {
-            const header = $(document.createElement('div')).attr('class', 'table-header-cell').text(c.name);
-            if (c.headerStyle) {
-                header.attr('style', c.headerStyle);
-            }
-            $(headerRow).append(header);
-        });
-
-        const tableBody = $(document.createElement('div')).attr('class', 'table-body');
-        // Loop through Data and apply attributes to columns
-        for (let i = 0; i < data.length; i++) {
-            const d = data[i];
-            const dataRow = $(document.createElement('div')).attr('class', 'table-row');
-            for (let j = 0; j < configs.length; j++) {
-                const c = configs[j];
-                const dataCell = $(document.createElement('div')).attr('class', 'table-cell')
-
-                let propData = d[c.property];
-
-                // If our data is an array, sort and explode it to a string
-                if (Array.isArray(propData)) {
-                    propData = propData.sort().join(', ');
-                } else if (typeof propData === 'string' || propData instanceof String) {
-                    // If our data begins with http, let's create a link and label it with the header title
-                    if (propData.match(new RegExp('^http'))) {
-                        propData = $(document.createElement('a')).attr('target', '_blank').attr('href', propData).text(c.linkName || c.name);
-                    }
-                }
-
-                // Do we have a Load Handler to call?
-                if (c.onLoadAsync) {
-                    // eslint-disable-next-line no-await-in-loop
-                    propData = await c.onLoadAsync(d);
-                }
-                if (c.onLoad) {
-                    propData = c.onLoad(d);
-                }
-
-                $(dataCell).html(propData);
-                $(dataRow).append(dataCell);
-            }
-            $(tableBody).append(dataRow);
-        }
-
-        return $(grid).append(headerRow).append(tableBody);
+        return tsGridFactory.createGrid(configs, data);
     }
 
     const _createTooltip = (el, tooltipText) => {
