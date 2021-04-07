@@ -51,7 +51,7 @@
                 linkedInCompanyPotentialMatches = linkedInCompanyPotentialMatches.filter((c) => { return !isNaN(c.companyId) });
 
                 if (linkedInCompanyPotentialMatches.length === 1){
-                    j.linkedInCompanyId =  linkedInCompanySummary.companyId;
+                    j.linkedInCompanyId =  linkedInCompanyPotentialMatches[0].companyId;
                 }
             }
         });
