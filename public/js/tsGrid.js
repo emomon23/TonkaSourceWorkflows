@@ -57,6 +57,7 @@
             return [];
         }
 
+
         let startRow = null;
         let endRow = null;
 
@@ -115,13 +116,15 @@
                 // Do we have a Load Handler to call?
                 if (c.onLoadAsync) {
                     // eslint-disable-next-line no-await-in-loop
-                    propData = await c.onLoadAsync(d);
+                    propData = await c.onLoadAsync(d, dataCell);
                 }
-                if (c.onLoad) {
-                    propData = c.onLoad(d);
+                else if (c.onLoad) {
+                    propData = c.onLoad(d, dataCell);
+                }
+                else {
+                    $(dataCell).html(propData);
                 }
 
-                $(dataCell).html(propData);
                 $(dataRow).append(dataCell);
             }
             $(tableBody).append(dataRow);

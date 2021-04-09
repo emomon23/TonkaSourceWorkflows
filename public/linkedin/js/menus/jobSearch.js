@@ -6,6 +6,65 @@
         companies: null
     }
 
+    const _toggleCompany = (e) => {
+        const btn = e.target;
+        const linkedInCompanyId = $(btn).attr('linkedInCompanyId');
+
+        jobsController.toggleProspectStatus(linkedInCompanyId);
+        _renderGrid(true);
+    }
+
+    const _onCompanyIdCellLoad = (d, dataCell) => {
+        $(dataCell).append(d.linkedInCompanyLink);
+
+        if (!isNaN(d.linkedInCompanyId)){
+            const toggleButton = tsUICommon.addButton(dataCell, `toggle${d.key}`, 'T', 20, 20, _toggleCompany);
+            $(toggleButton).attr('linkedInCompanyId', d.linkedInCompanyId);
+        }
+    }
+
+    const _onTitleCellLoad = (d, dataCell) => {
+        const careers = d.company.split(' ').join('+');
+        const href = `http://www.google.com/search?q=${careers} careers`;
+        const link = document.createElement('a');
+        $(link).attr('href', href)
+                .attr('target', '_blank')
+                .text(d.title);
+
+        $(dataCell).append(link);
+    }
+
+    const _onCompanyLoad = (d, cell) => {
+
+        if (d.isProspect){
+            const link = document.createElement('a');
+            $(link).text(d.company)
+                    .attr('href', '#')
+                    .attr('companyId', d.linkedInCompanyId)
+                    .attr('style', 'color:green; font-weight:bold')
+                    .bind('click', (e) => {
+                        // eslint-disable-next-line no-alert
+                        alert($(e.target).attr('companyId'));
+                    })
+
+            $(cell).append(link);
+        }
+        else {
+            $(cell).text(d.company);
+        }
+    }
+
+    const _config = {
+        keyProperty: 'key',
+        headers: [
+        { name: "Company", property: 'company', onLoad: _onCompanyLoad, headerStyle: "min-width: 250px" },
+        { name: "LI Company", property: "linkedInCompanyLink", sortProp: "linkedInCompanyId", onLoad:_onCompanyIdCellLoad },
+        { name: "Title", property: "title", onLoad: _onTitleCellLoad },
+        { name: "Location", property: "location" },
+        { name: "Age", property: "age", sort:'desc' },
+        { name: "Last Verified", property: "lastVerifiedAge" },
+    ]};
+
     const _display = () => {
         // Clear the content
         $('#tsContent').html("");
@@ -82,7 +141,7 @@
             .text('Search');
 
         // Set Search Action
-        $(searchButton).click(_renderGrid);
+        $(searchButton).click(() => { _renderGrid(true)});
 
         const actionsButtonBar = _createButtonBarElement();
 
@@ -105,52 +164,43 @@
         $('#tsContent').append(container).show();
     }
 
-    const _renderGrid = async () => {
+    const _renderGrid = async (forceRefresh) => {
         $('#jobSearchResultsContainer').html("");
         _jobsFilter.companies = $("#tsCompanyNameSearch").val();
 
         // Defaulting the sort to name
-        const sortBy = 'age';
-        const desc = true;
+        const sortHeader = _config.headers.find(h => h.sort);
+        const sortBy = sortHeader ? sortHeader.sortProp || sortHeader.property : 'age';
+        const desc = sortHeader && sortHeader.sort === "desc";
 
-        let matchingJobs = await jobsController.search(_jobsFilter);
+        let matchingJobs = await jobsController.search(_jobsFilter, forceRefresh);
         // Sort results
         tsArray.sortByObjectProperty(matchingJobs, sortBy, desc);
 
         const resultsContainer = $('div[class*="job-search-results"');
 
-        const config = {
-            keyProperty: 'key',
-            headers: [
-            { name: "Company", property: "nameLink", sortProp: "company", headerStyle: "min-width: 250px" },
-            { name: "Title", property: "title" },
-            { name: "Location", property: "location" },
-            { name: "Age", property: "age", sort:'desc' },
-            { name: "Last Verified", property: "lastVerifiedAge" },
-        ]};
-
         // Massage the data for display
         matchingJobs = matchingJobs.map((j) => {
             // First set links to raw text, as some companies are not keyed properly to an existing LinkedIN company
             // Won't display ID if it's the same text as company name
-            let nameLink = j.company;
+            let linkedInCompanyLink = j.company;
 
             // If the ID is a number, we can create a linked to the LinkedIN company page.
             if (!isNaN(j.linkedInCompanyId)) {
-                nameLink = $(document.createElement('a'))
+                linkedInCompanyLink = $(document.createElement('a'))
                     .attr('target', '_blank')
                     .attr('href', `https://www.linkedin.com/recruiter/company/${j.linkedInCompanyId}`)
-                    .text(j.company);
+                    .text(j.linkedInCompanyId);
             }
 
             const dataUpdates = {
-                nameLink: nameLink
+                linkedInCompanyLink
             };
 
             return { ...j, ...dataUpdates }
         });
 
-        _grid = await tsUICommon.createDataGrid(config, matchingJobs);
+        _grid = await tsUICommon.createDataGrid(_config, matchingJobs);
 
         $('#jobSearchResultsContainer').append(_grid.gridElement);
     }
@@ -205,6 +255,10 @@
             await jobsController.flagCompaniesAsRecruiters(jobsSelected);
             _renderGrid();
         }
+    }
+
+    const _companyIdColumnLoad = (job) => {
+        return 'Mike Emo';
     }
 
     const _deleteJobsActionClick = async () => {

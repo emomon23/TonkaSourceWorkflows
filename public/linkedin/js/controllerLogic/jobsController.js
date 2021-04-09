@@ -25,18 +25,42 @@
             return _cachedJobs;
         }
 
-        const competitors = await competitorRepository.getAllCompetitors();
+        const competitors = await competitorRepository.getByType('recruiter');
+        const prospects = await competitorRepository.getByType('prospect');
+
         _cachedJobs = await jobsRepository.getAll();
         const now = new Date();
 
         _cachedJobs.forEach((j) => {
             const jobCompanyName = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
+            if (!j.linkedInCompanyId){
+                let linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
+                linkedInCompanyPotentialMatches = linkedInCompanyPotentialMatches.filter((c) => { return !isNaN(c.companyId) });
+
+                if (linkedInCompanyPotentialMatches.length > 1){
+                    linkedInCompanyPotentialMatches = linkedInCompanyPotentialMatches.filter((c) => {
+                                                            return c.aliases && c.aliases.indexOf(jobCompanyName) >= 0;
+                                                        });
+                }
+
+                if (linkedInCompanyPotentialMatches.length === 1){
+                    j.linkedInCompanyId =  linkedInCompanyPotentialMatches[0].companyId;
+                }
+            }
+
             for (let i = 0; i < competitors.length; i++){
-                if (jobCompanyName.indexOf(competitors[i]) >= 0){
+                if (jobCompanyName === competitors[i].name){
                     j.isRecruiterCompany = true;
                     break;
                 }
             }
+
+            prospects.forEach((p) => {
+                linkedInCompanyId = (j.linkedInCompanyId || 0);
+                if (linkedInCompanyId === p.id && p.status === 'PROSPECT'){
+                    j.isProspect = true;
+                }
+            });
 
             if (j.postedDate){
                 j.age = Number.parseInt(tsCommon.dayDifference(now, j.postedDate));
@@ -45,26 +69,15 @@
             if (j.lastVerified){
                 j.lastVerifiedAge = Number.parseInt(tsCommon.dayDifference(now, j.lastVerified));
             }
-
-            if (!j.linkedInCompanyId){
-                let linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
-                linkedInCompanyPotentialMatches = linkedInCompanyPotentialMatches.filter((c) => { return !isNaN(c.companyId) });
-
-                if (linkedInCompanyPotentialMatches.length === 1){
-                    j.linkedInCompanyId =  linkedInCompanyPotentialMatches[0].companyId;
-                }
-            }
         });
 
         return _cachedJobs;
     }
 
-    const _deleteJobs = async (jobs) => {
-        const jobsArray = Array.isArray(jobKeys) ? jobKeys : [jobKeys];
-
-        for (let i = 0; i < jobsArray; i++){
+    const _deleteJobs = async (jobsArray) => {
+        for (let i = 0; i < jobsArray.length; i++){
             // eslint-disable-next-line no-await-in-loop
-            await jobsRepository.delete(jobsArray[i]);
+            await jobsRepository.delete(jobsArray[i].key);
         }
 
         await _getAllJobs(true);
@@ -125,11 +138,13 @@
         }
 
         for (let i = 0; i < jobsArray.length; i++){
-            jobsArray[i].linkedInCompanyId = linkedInCompanySummary.companyId;
             // eslint-disable-next-line no-await-in-loop
-            await jobsRepository.update(jobsArray[i]);
+            const job = await jobsRepository.get(jobsArray[i].key);
+            job.linkedInCompanyId = linkedInCompanySummary.companyId;
+            // eslint-disable-next-line no-await-in-loop
+            await jobsRepository.update(job);
 
-            jobCompanyName[jobsArray[i].company.toLowerCase()] = true;
+            jobCompanyNames[job.company.toLowerCase()] = true;
         }
 
 
@@ -147,7 +162,7 @@
         await _getAllJobs(true);
     }
 
-    const _search = async (searchFilter) => {
+    const _search = async (searchFilter, forceRefresh = false) => {
         let jobDocs = [];
         let listOfCompanies = [];
         if (searchFilter.companies.trim()) {
@@ -155,7 +170,7 @@
             listOfCompanies = searchFilter.companies.split(",").map((n) => n.trim());
         }
 
-        jobDocs = await _getAllJobs();
+        jobDocs = await _getAllJobs(forceRefresh);
 
         jobDocs = _filterByCompany(jobDocs, listOfCompanies);
 
@@ -171,25 +186,30 @@
         return jobDocs;
     }
 
-    const _setCompanyBusinessDevelopmentStatus = async (linkedInCompanyKey, status) => {
-        const linkedInCompanySummary = await companySummaryRepository.get(linkedInCompanyKey);
-        if (!linkedInCompanySummary){
-            throw new Error(`Unable to find linked in companySummary for ${linkedInCompanyKey}`);
+    const _toggleProspectStatus = async (linkedInCompanyIdString) => {
+        const linkedInCompanyId = Number.parseInt(linkedInCompanyIdString);
+        const prospect = await competitorRepository.get(linkedInCompanyId);
+
+        if (prospect){
+            prospect.status = prospect.status === "PROSPECT" ? "NO PROSPECT" : "PROSPECT";
+            await competitorRepository.update(prospect);
+        }
+        else {
+            await competitorRepository.insert({id: linkedInCompanyId, status: 'PROSPECT', type: 'prospect'})
         }
 
-        linkedInCompanySummary.businessDevelopmentStatus = status;
-        await companySummaryRepository.update(linkedInCompanySummary);
+        await _getAllJobs(true);
     }
 
     const _flagCompaniesAsRecruiters = async (jobs) => {
         let companyNames = {};
         jobs.forEach((j) => {
-            companyName[j.company.toLowerCase] = true;
+            companyNames[j.company.toLowerCase()] = true;
         });
 
-        for(let k in companyName){
+        for(let k in companyNames){
             // eslint-disable-next-line no-await-in-loop
-            await competitorRepository.save({id: k, name: k});
+            await competitorRepository.save({id: k, name: k, type: 'recruiter'});
         }
 
         await _getAllJobs(true);
@@ -204,7 +224,7 @@
         updateJobStatus = _updateJobStatus;
         associateJobsToLinkedInCompany = _associateJobsToLinkedInCompany;
         search = _search;
-        setCompanyBusinessDevelopmentStatus = _setCompanyBusinessDevelopmentStatus;
+        toggleProspectStatus = _toggleProspectStatus;
 
     }
 

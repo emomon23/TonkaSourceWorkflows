@@ -16,9 +16,7 @@ const _storeFactory = baseIndexDbFactory.createStoreFactory(TONKA_SOURCE_DATABAS
 window.jobsRepository = _storeFactory.createStore('jobs');
 window.competitorRepository = _storeFactory.createStore('recruitingFirms');
 
-window.competitorRepository.getAllCompetitors = async () => {
-    const _theCompetition = ['horizontal', 'robert half', 'volt', 'apex systems', 'dahl consulting', 'accenture', 'randstad'];
+window.competitorRepository.getByType = async (type) => {
     const _inDb = await window.competitorRepository.getAll();
-
-    return _theCompetition.concat(_inDb.map(r => r.name));
+    return _inDb.filter(c => c.type === type)
 }
