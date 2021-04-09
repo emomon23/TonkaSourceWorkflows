@@ -67,7 +67,7 @@
             await jobsRepository.delete(jobsArray[i]);
         }
 
-        jobsController.getAllJobs(true);
+        await _getAllJobs(true);
     }
 
     const _filterByCompany = (jobs, namesList) => {
@@ -87,23 +87,21 @@
         return jobs;
     }
 
-    const _hideJobs = async (jobKeys) => {
-        const jobsArray = Array.isArray(jobKeys) ? jobKeys : [jobKeys];
-
-        for (let i = 0; i < jobsArray; i++){
+    const _hideJobs = async (jobsArray) => {
+        for (let i = 0; i < jobsArray.length; i++){
             // eslint-disable-next-line no-await-in-loop
-            const job = await jobsRepository.get(jobsArray[i]);
+            const job = await jobsRepository.get(jobsArray[i].key);
 
             if (!job){
                 throw new Error(`Unable to find job ${jobsArray[i]}`);
             }
 
-            job.isHidden = status;
+            job.isHidden = true;
             // eslint-disable-next-line no-await-in-loop
             await jobsRepository.update(job);
         }
 
-        jobsController.getAllJobs(true);
+        await _getAllJobs(true);
     }
 
     const _updateJobStatus = async (jobKey, status) => {
@@ -118,44 +116,57 @@
         jobsController.getAllJobs(true);
     }
 
-    const _associateJobToLinkedInCompany = async (jobKey, linkedInCompanyKey) => {
-        const job = await jobsRepository.get(jobKey);
-        if (!job){
-            throw new Error(`Unable to find job ${jobKey}`);
-        }
-
+    const _associateJobsToLinkedInCompany = async (jobsArray, linkedInCompanyKey) => {
         const linkedInCompanySummary = await companySummaryRepository.get(linkedInCompanyKey);
+        const jobCompanyNames = {};
+
         if (!linkedInCompanySummary){
             throw new Error(`Unable to find linked in companySummary for ${linkedInCompanyKey}`);
         }
 
-        job.linkedInCompanyId = linkedInCompanySummary.companyId;
-        await jobsRepository.update(job);
+        for (let i = 0; i < jobsArray.length; i++){
+            jobsArray[i].linkedInCompanyId = linkedInCompanySummary.companyId;
+            // eslint-disable-next-line no-await-in-loop
+            await jobsRepository.update(jobsArray[i]);
+
+            jobCompanyName[jobsArray[i].company.toLowerCase()] = true;
+        }
+
 
         if (!linkedInCompanySummary.aliases){
             linkedInCompanySummary.aliases = [];
         }
 
-        const jobCompanyName = job.company.toLowerCase ? job.company.toLowerCase() : '';
-        if (linkedInCompanySummary.aliases.indexOf(jobCompanyName) === -1){
-            linkedInCompanySummary.aliases.push(jobCompanyName);
-            await companySummaryRepository.update(linkedInCompanySummary);
+        for (k in jobCompanyNames){
+            if (linkedInCompanySummary.aliases.indexOf(k) === -1){
+                linkedInCompanySummary.aliases.push(k);
+            }
         }
 
-        jobsController.getAllJobs(true);
+        await companySummaryRepository.update(linkedInCompanySummary);
+        await _getAllJobs(true);
     }
 
-    const _search = async (companies) => {
+    const _search = async (searchFilter) => {
         let jobDocs = [];
         let listOfCompanies = [];
-        if (companies.trim()) {
+        if (searchFilter.companies.trim()) {
             // If we're searching by name, we just want matching companies
-            listOfCompanies = companies.split(",").map((n) => n.trim());
+            listOfCompanies = searchFilter.companies.split(",").map((n) => n.trim());
         }
 
         jobDocs = await _getAllJobs();
 
         jobDocs = _filterByCompany(jobDocs, listOfCompanies);
+
+        if (!searchFilter.includeRecruiters || !searchFilter.includeHidden){
+            jobDocs = jobDocs.filter((jd) => {
+                const recruiterCheck = searchFilter.includeRecruiters || jd.isRecruiterCompany !== true;
+                const hiddenCheck = searchFilter.includeRecruiters || jd.isHidden !== true;
+
+                return recruiterCheck && hiddenCheck;
+            })
+        }
 
         return jobDocs;
     }
@@ -170,13 +181,28 @@
         await companySummaryRepository.update(linkedInCompanySummary);
     }
 
+    const _flagCompaniesAsRecruiters = async (jobs) => {
+        let companyNames = {};
+        jobs.forEach((j) => {
+            companyName[j.company.toLowerCase] = true;
+        });
+
+        for(let k in companyName){
+            // eslint-disable-next-line no-await-in-loop
+            await competitorRepository.save({id: k, name: k});
+        }
+
+        await _getAllJobs(true);
+    }
+
     class JobController {
         saveBatchJobs = _saveBatchJobs;
         getAllJobs = _getAllJobs;
         deleteJobs = _deleteJobs;
         hideJobs = _hideJobs;
+        flagCompaniesAsRecruiters = _flagCompaniesAsRecruiters;
         updateJobStatus = _updateJobStatus;
-        associateJobToLinkedInCompany = _associateJobToLinkedInCompany;
+        associateJobsToLinkedInCompany = _associateJobsToLinkedInCompany;
         search = _search;
         setCompanyBusinessDevelopmentStatus = _setCompanyBusinessDevelopmentStatus;
 

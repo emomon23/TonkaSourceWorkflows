@@ -1,5 +1,10 @@
 (function () {
     let _grid = null;
+    const _jobsFilter = {
+        includeHidden: false,
+        includeRecruiters: false,
+        companies: null
+    }
 
     const _display = () => {
         // Clear the content
@@ -77,14 +82,17 @@
             .text('Search');
 
         // Set Search Action
-        $(searchButton).click(_getResults);
+        $(searchButton).click(_renderGrid);
+
+        const actionsButtonBar = _createButtonBarElement();
 
         $(searchContainer)
             .append('<span style="font-weight: bold"> Company: </span')
             .append(companyNameSearch)
             .append('<span style="font-weight: bold"> Size: </span')
             .append(sizeSearchSelect)
-            .append(searchButton);
+            .append(searchButton)
+            .append(actionsButtonBar);
 
         // Create the results container
         const resultsContainer = $(document.createElement('div'))
@@ -97,49 +105,15 @@
         $('#tsContent').append(container).show();
     }
 
-    const _displayPersonnelDetails = (contacts) => {
-        if (!contacts || contacts.length === 0) {
-            return "";
-        }
-
-        const container = $(document.createElement('div'));
-        for (let i = 0; i < contacts.length; i++) {
-            const c = contacts[i];
-
-            const linkedToProfile = $(document.createElement('a'))
-                .attr('target', '_blank')
-                .attr('href', 'https://www.linkedin.com' + c.linkedInRecruiterUrl)
-                .text(c.firstName + ' ' + c.lastName);
-            const recruiterProfileLink = $(document.createElement('div')).append(linkedToProfile);
-
-            const headline = $(document.createElement('div')).text(c.headline);
-
-            $(container)
-                .append(recruiterProfileLink)
-                .append(headline);
-
-            if (c.phone) {
-                $(container).append($(document.createElement('div')).text(c.phone));
-            }
-            if (c.email) {
-                $(container).append($(document.createElement('div')).text(c.email));
-            }
-
-            $(container).append('<br/>');
-        }
-
-        return container;
-    }
-
-    const _getResults = async () => {
+    const _renderGrid = async () => {
         $('#jobSearchResultsContainer').html("");
-        const companyNameSearch = $("#tsCompanyNameSearch").val();
+        _jobsFilter.companies = $("#tsCompanyNameSearch").val();
 
         // Defaulting the sort to name
         const sortBy = 'age';
         const desc = true;
 
-        let matchingJobs = await jobsController.search(companyNameSearch);
+        let matchingJobs = await jobsController.search(_jobsFilter);
         // Sort results
         tsArray.sortByObjectProperty(matchingJobs, sortBy, desc);
 
@@ -186,6 +160,74 @@
             .attr('class', 'ts-menu-item')
             .click(_display)
             .text("Job Search");
+    }
+
+    const _getSelectedJobsFromGrid = () => {
+        let selectedData = [];
+
+        if (_grid){
+            selectedData = _grid.getSelectedData();
+        }
+
+        if (selectedData.length === 0){
+            // eslint-disable-next-line no-alert
+            alert("No jobs selected");
+        }
+
+        return selectedData;
+    }
+
+    const _createButtonBarElement = () => {
+        const buttonBar = document.createElement('span');
+
+        // (containerId, buttonId, buttonText, height, width, clickFunction)
+        tsUICommon.addButton(buttonBar, 'hideJobsBtn', 'H', 20, 20, _hideJobsActionClick);
+        tsUICommon.addButton(buttonBar, 'flagCompaniesBtn', 'F', 20, 20, _flagJobsActionClick);
+        tsUICommon.addButton(buttonBar, 'deleteJobsBtn', 'D', 20, 20, _deleteJobsActionClick);
+        tsUICommon.addButton(buttonBar, 'assignCompanyNamesBtn', 'A', 20, 20, _associateCompanyNamesActionClick);
+
+        return buttonBar;
+    }
+
+    const _hideJobsActionClick = async () => {
+        const jobsSelected = _getSelectedJobsFromGrid();
+
+        if (jobsSelected.length){
+            await jobsController.hideJobs(jobsSelected);
+            _renderGrid();
+        }
+    }
+
+    const _flagJobsActionClick = async () => {
+        const jobsSelected = _getSelectedJobsFromGrid();
+
+        if (jobsSelected.length){
+            await jobsController.flagCompaniesAsRecruiters(jobsSelected);
+            _renderGrid();
+        }
+    }
+
+    const _deleteJobsActionClick = async () => {
+        const jobsSelected = _getSelectedJobsFromGrid();
+
+        if (jobsSelected.length){
+            await jobsController.deleteJobs(jobsSelected);
+            _renderGrid();
+        }
+    }
+
+    const _associateCompanyNamesActionClick = async () => {
+        const jobsSelected = _getSelectedJobsFromGrid();
+
+        if (jobsSelected.length){
+            // eslint-disable-next-line no-alert
+            const companyId = prompt("Enter a NUMERIC company Id");
+
+            if (companyId && !isNaN(companyId)){
+                await jobsController.associateJobsToLinkedInCompany(jobsSelected, companyId);
+                _renderGrid();
+            }
+        }
     }
 
     class JobSearchMenu {

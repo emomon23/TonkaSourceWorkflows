@@ -48,12 +48,13 @@
 
     const _addButton = (containerId, buttonId, buttonText, height, width, clickFunction) => {
         const button = document.createElement("button");
+        const container = typeof containerId === "object" ? $(containerId) : $(`#${containerId}`);
         button.id = `${buttonId}_button`;
         $(button).text(buttonText);
         button.setAttribute('style', `margin-left: 10px; height: ${height}px; width:${width}px`)
 
-        $(`#${containerId}`).append(button);
-        $(`#${buttonId}_button`).click(clickFunction);
+        $(container).append(button);
+        $(button).click(clickFunction);
 
         return $(button);
     }

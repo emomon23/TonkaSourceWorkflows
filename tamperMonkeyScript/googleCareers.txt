@@ -163,7 +163,7 @@
                 result.ageText = _findAgeOfJobPosting(spans);
                 result.postedDate = _calculatePostedDate(result);
                 result.jobType = _determineJobType(spans);
-                result.key = `${result.title}-${result.company}-${result.postedDate}`;
+                result.key = `${result.title}-${result.company}`;
             }
 
             return result;
