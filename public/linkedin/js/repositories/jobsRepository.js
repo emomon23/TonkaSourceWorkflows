@@ -20,3 +20,20 @@ window.competitorRepository.getByType = async (type) => {
     const _inDb = await window.competitorRepository.getAll();
     return _inDb.filter(c => c.type === type)
 }
+
+window.competitorRepository.getDistinctProspectGroups = async () => {
+     const inDb = await competitorRepository.getAll();
+     const prospects = inDb.filter(c => c.type === 'prospect');
+     const index = {};
+
+     prospects.forEach((p) => {
+         index[p.group] = true;
+     });
+
+     const result = [];
+     for (let k in index){
+         result.push(k);
+     }
+
+     return result;
+}

@@ -3,14 +3,19 @@
     const _jobsFilter = {
         includeHidden: false,
         includeRecruiters: false,
-        companies: null
+        companies: null,
+        type: null,
+        group: null
     }
 
     const _toggleCompany = (e) => {
         const btn = e.target;
         const linkedInCompanyId = $(btn).attr('linkedInCompanyId');
 
-        jobsController.toggleProspectStatus(linkedInCompanyId);
+        // eslint-disable-next-line no-alert
+        const group = prompt("Which group do you want this company in (eg 'A', 'B')?");
+
+        jobsController.toggleProspectStatus(linkedInCompanyId, group);
         _renderGrid(true);
     }
 
@@ -65,7 +70,7 @@
         { name: "Last Verified", property: "lastVerifiedAge" },
     ]};
 
-    const _display = () => {
+    const _display = async () => {
         // Clear the content
         $('#tsContent').html("");
         const container = $(document.createElement('div'))
@@ -144,6 +149,7 @@
         $(searchButton).click(() => { _renderGrid(true)});
 
         const actionsButtonBar = _createButtonBarElement();
+        const groupFilter = await _createGroupFilterDropdown();
 
         $(searchContainer)
             .append('<span style="font-weight: bold"> Company: </span')
@@ -151,7 +157,8 @@
             .append('<span style="font-weight: bold"> Size: </span')
             .append(sizeSearchSelect)
             .append(searchButton)
-            .append(actionsButtonBar);
+            .append(actionsButtonBar)
+            .append(groupFilter);
 
         // Create the results container
         const resultsContainer = $(document.createElement('div'))
@@ -237,6 +244,56 @@
         tsUICommon.addButton(buttonBar, 'assignCompanyNamesBtn', 'A', 20, 20, _associateCompanyNamesActionClick);
 
         return buttonBar;
+    }
+
+    const _onFilterGroupClick = (e) => {
+        const filter = $(e.target).val();
+        _jobsFilter.group = null;
+
+        if (filter === 'ALL'){
+            _jobsFilter.type = null;
+        }
+        else {
+            _jobsFilter.type = 'prospect';
+            if (filter !== 'ALL-GROUPS'){
+                _jobsFilter.group = filter;
+            }
+        }
+
+        _renderGrid(true);
+    }
+
+    const _createGroupFilterDropdown = async () => {
+        const dropdownContainer = document.createElement('span');
+        const dropdown = document.createElement('select');
+        $(dropdown).attr('id', 'groupFilter')
+                   .attr('name', 'groupFilter')
+                   .attr('style', 'width: auto; margin-left:15px')
+                   .change(_onFilterGroupClick);
+
+        $(dropdownContainer).append(dropdown);
+
+        let option = $(document.createElement('option'))
+                    .attr('value', 'ALL')
+                    .text('All Jobs');
+        $(dropdown).append(option);
+
+        option = $(document.createElement('option'))
+                    .attr('value', 'ALL-GROUPS')
+                    .text('All Groups');
+        $(dropdown).append(option);
+
+
+        const groups = await competitorRepository.getDistinctProspectGroups();
+        groups.forEach((g) => {
+            option = $(document.createElement('option'))
+                    .attr('value', g)
+                    .text(g);
+
+            $(dropdown).append(option);
+        });
+
+        return dropdownContainer
     }
 
     const _hideJobsActionClick = async () => {

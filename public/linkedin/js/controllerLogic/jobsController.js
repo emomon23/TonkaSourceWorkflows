@@ -57,8 +57,9 @@
 
             prospects.forEach((p) => {
                 linkedInCompanyId = (j.linkedInCompanyId || 0);
-                if (linkedInCompanyId === p.id && p.status === 'PROSPECT'){
+                if (linkedInCompanyId === p.id && p.type === 'prospect'){
                     j.isProspect = true;
+                    j.group = p.group;
                 }
             });
 
@@ -183,19 +184,37 @@
             })
         }
 
+        if (searchFilter.group){
+            jobDocs = jobDocs.filter((jd) => {
+                return jd.group === searchFilter.group;
+            })
+        }
+        else if (searchFilter.type){
+            jobDocs = jobDocs.filter((jd) => {
+                return jd.isProspect;
+            })
+        }
+
         return jobDocs;
     }
 
-    const _toggleProspectStatus = async (linkedInCompanyIdString) => {
+    const _toggleProspectStatus = async (linkedInCompanyIdString, group) => {
         const linkedInCompanyId = Number.parseInt(linkedInCompanyIdString);
         const prospect = await competitorRepository.get(linkedInCompanyId);
 
         if (prospect){
-            prospect.status = prospect.status === "PROSPECT" ? "NO PROSPECT" : "PROSPECT";
-            await competitorRepository.update(prospect);
+            if (group && group.length) {
+                prospect.group = group.toUpperCase();
+                await competitorRepository.update(prospect);
+            }
+            else {
+                await competitorRepository.delete(prospect.id)
+            }
         }
         else {
-            await competitorRepository.insert({id: linkedInCompanyId, status: 'PROSPECT', type: 'prospect'})
+            if (group && group.length){
+                await competitorRepository.insert({id: linkedInCompanyId, group: group.toUpperCase(), type: 'prospect'})
+            }
         }
 
         await _getAllJobs(true);
