@@ -162,7 +162,7 @@
         $('#companySkillSearchResultsContainer').append(grid.gridElement);
     }
 
-    const _displayCompanyPersonnelSummary = async (companySummaryDoc) => {
+    const _displayCompanyPersonnelSummary = async (companySummaryDoc, dataCell) => {
         const personnel = await candidateController.findBizDevelopmentContacts(companySummaryDoc.name);
 
         console.log(personnel);
@@ -172,7 +172,7 @@
                 await _displayCompanyPersonnel(personnel);
             });
 
-        return personnelSummaryEl;
+        $(dataCell).append(personnelSummaryEl);
     }
 
     const _getResults = async () => {
@@ -196,7 +196,7 @@
             { name: "Company", property: "nameLink", headerStyle: "min-width: 250px" },
             { name: "Industry", property: "industry", headerStyle: "min-width: 220px" },
             { name: "Size", property: "size", headerStyle: "min-width: 75px"},
-            { name: "Personnel", property: "personnel", headerStyle: "min-width: 250px", onLoadAsync: _displayCompanyPersonnelSummary },
+            { name: "Personnel", property: "personnel", headerStyle: "min-width: 250px", onLoad: _displayCompanyPersonnelSummary },
             { name: "Website", property: "website" },
             { name: "Jobs (MN)", linkName: "MN", property: "mnJobsUrl" },
             { name: "Jobs (US)", linkName: "US", property: "usaJobsUrl" },

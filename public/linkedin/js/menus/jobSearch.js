@@ -19,6 +19,12 @@
         _renderGrid(true);
     }
 
+    const _companyNameClick = (e) => {
+        const companyName = $(e.target).attr('companyName');
+        $('#tsCompanyNameSearch').val(companyName);
+        _renderGrid(true);
+    }
+
     const _onCompanyIdCellLoad = (d, dataCell) => {
         $(dataCell).append(d.linkedInCompanyLink);
 
@@ -46,11 +52,9 @@
             $(link).text(d.company)
                     .attr('href', '#')
                     .attr('companyId', d.linkedInCompanyId)
+                    .attr('companyName', d.company)
                     .attr('style', 'color:green; font-weight:bold')
-                    .bind('click', (e) => {
-                        // eslint-disable-next-line no-alert
-                        alert($(e.target).attr('companyId'));
-                    })
+                    .bind('click', _companyNameClick)
 
             $(cell).append(link);
         }
