@@ -45,6 +45,13 @@
         $(dataCell).append(link);
     }
 
+    const _clearCompanyFilter = () => {
+        if ($('#tsCompanyNameSearch').val().length){
+            $('#tsCompanyNameSearch').val('');
+            _renderGrid(true);
+        }
+    }
+
     const _onCompanyLoad = (d, cell) => {
 
         if (d.isProspect){
@@ -156,9 +163,9 @@
         const groupFilter = await _createGroupFilterDropdown();
 
         $(searchContainer)
-            .append('<span style="font-weight: bold"> Company: </span')
+            .append('<span id="companyLabel" style="font-weight: bold"> Company: </span>')
             .append(companyNameSearch)
-            .append('<span style="font-weight: bold"> Size: </span')
+            .append('<span style="font-weight: bold"> Size: </span>')
             .append(sizeSearchSelect)
             .append(searchButton)
             .append(actionsButtonBar)
@@ -173,11 +180,14 @@
         $(container).append(resultsContainer);
 
         $('#tsContent').append(container).show();
+
+        await tsCommon.sleep(50);
+        $('#companyLabel').click(_clearCompanyFilter);
     }
 
     const _renderGrid = async (forceRefresh) => {
         $('#jobSearchResultsContainer').html("");
-        _jobsFilter.companies = $("#tsCompanyNameSearch").val();
+        _jobsFilter.companies = $("#tsCompanyNameSearch").val().replace(', Inc.', '').replace(', Inc', '');
 
         // Defaulting the sort to name
         const sortHeader = _config.headers.find(h => h.sort);
