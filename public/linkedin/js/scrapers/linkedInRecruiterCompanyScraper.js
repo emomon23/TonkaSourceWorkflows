@@ -1,6 +1,14 @@
 (() => {
+    let _companySummary = null;
+    let _companyId = null;
     let _currentPage = '';
     let _candidateFound = null;
+    let _keyStatsPart = null;
+    let _companyProfilePart = null;
+    let _employeesPart = null;
+    let _notesPart = null;
+    let _jobsPart = null;
+    let _flattenedPersonal = null;
 
     const _getCompanyId = () => {
         const href = window.location.href;
@@ -12,13 +20,44 @@
         return null;
     }
 
+    const _noteClick = (e) => {
+        let memberId = $(e.target).attr('memberId');
+        // eslint-disable-next-line no-alert
+        let noteText = prompt('Enter your note');
+
+        if (!noteText || noteText.length === 0){
+            return;
+        }
+
+        noteText = `${linkedInApp.alisonUserInitials || 'ME'}: ${(new Date()).toLocaleDateString()} - ${noteText}`;
+
+        if (memberId) {
+            memberId = Number.parseInt(memberId);
+            const candidate = _flattenedPersonal.find((c) => c.memberId === memberId);
+            if (!candidate.tsNotes){
+                candidate.tsNotes = [];
+            }
+
+            candidate.tsNotes.push(noteText);
+            candidateController.saveCandidate(candidate);
+        }
+        else {
+            if (!_companySummary.tsNotes){
+                _companySummary.tsNotes = [];
+            }
+
+            _companySummary.tsNotes.push(noteText);
+            companiesController.saveCompanySummary(_companySummary);
+        }
+
+        _displayNotesHistory();
+    }
+
     const _scrapeCompany = async () => {
         const companyId = _getCompanyId();
 
         if (companyId) {
-
-            const companySummary = await companiesController.getSummary(companyId) || { companyId };
-
+            const companySummary = _companySummary;
 
             _scrapeName(companySummary);
 
@@ -40,6 +79,7 @@
             }
             return companySummary;
         }
+
         return null;
     }
 
@@ -68,6 +108,158 @@
         company.name = name;
     }
 
+    const _createContactDiv = (contact) => {
+        if (contact.firstName === 'undefined'){
+            return null;
+        }
+
+        const div = $(document.createElement('div'))
+                    .attr('style', 'margin-bottom:15px; padding-left: 10px');
+
+        const href = `https://www.linkedin.com${contact.linkedInRecruiterUrl}`;
+
+        tsUICommon.createLink(div, href, `${contact.firstName} ${contact.lastName}`, '_blank');
+        const headline = $(document.createElement('div'))
+                    .text(contact.headline)
+
+        $(div).append(headline);
+
+        if (contact.phone || contact.email){
+            const contactInfo = `${contact.phone || ''}  ${contact.email || ''}`;
+            const contactDiv = $(document.createElement('div'))
+                                    .text(contactInfo);
+
+            $(div).append(contactDiv);
+        }
+
+        const noteLink = tsUICommon.createLink(div, '#', 'Note', null, _noteClick);
+        $(noteLink).attr('memberId', contact.memberId);
+
+        return div;
+    }
+
+    const _createContactsDiv = (divRoleTitle, contactsArray) => {
+        if (!contactsArray || contactsArray.length === 0){
+            return;
+        }
+
+        const roleTitle = $(document.createElement('div'))
+                                .attr('style', 'font-weight:bold; margin-bottom:10px; color:orange')
+                                .text(divRoleTitle);
+
+        const container = $(document.createElement('div'))
+                            .append(roleTitle);
+
+
+        contactsArray.forEach((c) => {
+            const contactDiv = _createContactDiv(c);
+            if (contactDiv){
+               $(container).append(contactDiv);
+            }
+        });
+
+        $(_employeesPart).append(container);
+    }
+
+    const _parseNote = (strNote, type, candidate) => {
+        // ME: 4/3/2021 Some wordy text
+        const result = {type};
+        const parts = strNote ? strNote.split(' ') : '';
+
+        if (parts.length > 2){
+            result.when = new Date(parts[1]);
+
+            const who = parts[0];
+            const note = strNote.replace(parts[0], '').replace(parts[1], '').trim();
+            const regarding = candidate ? `${candidate.firstName} ${candidate.lastName}` : 'Company';
+
+            result.displayText = `${who} ${parts[1]} (regarding ${regarding}) ${note}`;
+        }
+
+        return result;
+    }
+
+    const _displayNotesHistory = async () => {
+        $('.tsNoteHistory').remove();
+
+        let notes = [];
+
+        _flattenedPersonal.forEach((c) => {
+            if (c.tsNotes){
+                const parsedNotes = c.tsNotes.map((n) => {
+                    return _parseNote(n, 'candidate', c);
+                });
+
+                notes = notes.concat(parsedNotes);
+            }
+        });
+
+        if (_companySummary.tsNotes){
+            notes = notes.concat(_companySummary.tsNotes.map((n) => {return _parseNote(n, 'company')}));
+        }
+
+        tsArray.sortByObjectProperty(notes, 'when', true);
+
+        notes.forEach((note) => {
+            const noteDiv = $(document.createElement('div'))
+                                    .text(note.displayText)
+                                    .attr('class', 'tsNoteHistory')
+                                    .attr('style', 'margin-bottom:15px; padding-left:5px');
+
+            $(_notesPart).append(noteDiv);
+        })
+
+    }
+
+    const _displayJobs = async () => {
+        $(_jobsPart).html(`<div><div style='margin-bottom:15px; font-weight: bold'>Title | Age | Last Verified</div></div>`);
+        const jobs = await jobsController.getCompanyJobs(_companyId);
+
+        tsArray.sortByObjectProperty(jobs, 'lastVerified');
+        for (let i = 0; i < jobs.length && i < 6; i++){
+            const j = jobs[i];
+            const text = `${j.title} | ${j.age} | ${(new Date(j.lastVerified)).toLocaleDateString()}`
+            const jobDiv = $(document.createElement('div'))
+                            .text(text)
+                            .attr('style', 'margin-bottom:5px');
+
+            $(_jobsPart).append(jobDiv);
+        }
+    }
+
+    const _redrawCompanyData = async () => {
+        $(_employeesPart).html('');
+        $(_notesPart).html(`<div>
+            <div style="margin-bottom:15px;" >
+                <span style="font-weight:bold">HISTORY</span>
+                <span><a href='#' style='margin-left: 15px' id='companyNoteLink'>Note</a></span>
+            </div>
+        </div>`);
+
+        await tsCommon.sleep(50);
+        $('#companyNoteLink').click(_noteClick);
+
+        const personnel = await candidateController.findBizDevelopmentContacts(_companyId);
+
+        _createContactsDiv('Dev Mgrs', personnel.devManagers);
+        _createContactsDiv('QA Mgrs', personnel.qaManagers);
+        _createContactsDiv('HR', personnel.hr);
+        _createContactsDiv('CEO', personnel.ceo);
+        _createContactsDiv('C-Level', personnel.cLevel);
+        _createContactsDiv('Developers', personnel.dev);
+
+        _flattenedPersonal = [].concat(personnel.ceo)
+                                    .concat(personnel.cLevel)
+                                    .concat(personnel.hr)
+                                    .concat(personnel.devManagers)
+                                    .concat(personnel.qaManagers)
+                                    .concat(personnel.dev);
+
+        _displayNotesHistory();
+
+        _displayJobs();
+    }
+
     class LinkedInRecruiterCompanyScraper {
         getCompanyId = _getCompanyId;
         scrapeCompany = _scrapeCompany;
@@ -76,11 +268,28 @@
     window.linkedInRecruiterCompanyScraper = new LinkedInRecruiterCompanyScraper();
 
     const _delayReady = async () => {
-        await tsCommon.sleep(500);
+        await tsCommon.sleep(700);
 
         _currentPage = linkedInCommon.whatPageAmIOn()
+        _keyStatsPart = $('#company-key-statistics')[0];
+        _jobsPart = $('#company-jobs')[0];
+        _notesPart = $('#company-employees')[0];
+        _companyProfilePart = $('#topcard')[0];
+        _employeesPart = $(document.createElement('div'))
+                    .attr('class', 'module primary-module employees');
+
+        $($('#primary-content')[0]).append(_employeesPart);
+
         if (_currentPage === linkedInConstants.pages.RECRUITER_COMPANY) {
-            await _scrapeCompany();
+            _companyId = _getCompanyId();
+            _companySummary = await companiesController.getSummary(_companyId) || { _companyId };
+
+            if (!isNaN(_companyId)){
+                _companyId = Number.parseInt(_companyId);
+            }
+
+            _scrapeCompany();
+            _redrawCompanyData();
         }
     }
 

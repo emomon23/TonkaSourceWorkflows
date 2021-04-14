@@ -229,6 +229,26 @@
         return found;
     }
 
+    const _createLink = (container, href, text, target, onclick) => {
+        const link = document.createElement('a');
+        $(link).attr('href', href)
+                .text(text);
+
+        if (target){
+            $(link).attr('target', target);
+        }
+
+        if (onclick){
+            $(link).click(onclick);
+        }
+
+        if (container) {
+            $(container).append(link);
+        }
+
+        return link;
+    }
+
     const _debounce = (func, wait) => {
         let timeout;
 
@@ -249,6 +269,7 @@
         createDataGrid = _createDataGrid;
         createListItem = _createListItem;
         createTooltip = _createTooltip;
+        createLink = _createLink;
         debounce = _debounce;
         removeListItem = _removeListItem;
         addButton = _addButton;

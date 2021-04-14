@@ -20,6 +20,18 @@
         }
     }
 
+    const _getCompanyJobs = async (companyIdOrName) => {
+        const jobs = await _getAllJobs();
+
+        if (isNaN(companyIdOrName)){
+            return jobs.filter((j) => {return j.company === companyIdOrName})
+        }
+        else {
+            const intCompanyId = Number.parseInt(companyIdOrName);
+            return jobs.filter((j) => { return j.linkedInCompanyId === intCompanyId})
+        }
+    }
+
     const _getAllJobs = async (forceRefresh = false) => {
         if (forceRefresh === false && _cachedJobs){
             return _cachedJobs;
@@ -237,6 +249,7 @@
     class JobController {
         saveBatchJobs = _saveBatchJobs;
         getAllJobs = _getAllJobs;
+        getCompanyJobs = _getCompanyJobs;
         deleteJobs = _deleteJobs;
         hideJobs = _hideJobs;
         flagCompaniesAsRecruiters = _flagCompaniesAsRecruiters;

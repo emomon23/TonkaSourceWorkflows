@@ -101,6 +101,19 @@
     const _getEntireCandidateList = async () => {
         if (_entireCandidateList === null){
             _entireCandidateList = await candidateRepository.getAll();
+
+            _entireCandidateList.forEach((c) => {
+                if (c.positions){
+                    const currentPositions = c.positions.filter((p) => {
+                        const endDateYearMissing = !p.endDateYear;
+                        const endDateMonthMissing = !p.endDateMonth;
+
+                        return p.current === true || endDateYearMissing;
+                    });
+
+                    c.currentPositions = currentPositions;
+                }
+            })
         }
 
         return _entireCandidateList;
@@ -400,15 +413,13 @@
         if (!companyIdOrName) {
             return null;
         }
-        const lookFor = companyIdOrName.toLowerCase();
+        const lookFor = companyIdOrName.toLowerCase ? companyIdOrName.toLowerCase() : companyIdOrName;
         const allCandidates = await _getEntireCandidateList();
 
 
         const results = allCandidates.filter((c) => {
-            if (c.positions && c.positions.length > 0){
-                const currentPositions = c.positions.filter((p) => {return p.current === true || !p.endDateMonth});
-
-                const found = currentPositions.find((p) => { return p.companyId === companyIdOrName || p.companyName.toLowerCase().indexOf(lookFor) >= 0; });
+            if (c.currentPositions && c.currentPositions.length > 0){
+                const found = c.currentPositions.find((p) => { return p.companyId === companyIdOrName || p.companyName.toLowerCase().indexOf(lookFor) >= 0; });
                 return found ? true : false;
             }
 
@@ -419,18 +430,20 @@
     }
 
     const _findRoles = (arrayOfCandidates, currentCompanyIdOrName, arrayOfThisAndThisOrThisAndThisArray, notArray) => {
-        const coName = currentCompanyIdOrName.toLowerCase();
+        const coNameOrId = currentCompanyIdOrName.toLowerCase ? currentCompanyIdOrName.toLowerCase() : currentCompanyIdOrName;
 
         return arrayOfCandidates.filter((c) => {
+            // get the candidates current positions AT the company specified (should be only 1??)
+            const currentPositions = c.currentPositions.filter((p) => {
+                const positionTitle = (p.title || '').toLowerCase();
+                const positionCompanyName = (p.companyName || '').toLowerCase();
 
-            let currentPositions = c.positions.filter((p) => {
-                return (p.current === true || (!p.endDateYear))
-                &&
-                (p.companyId === currentCompanyIdOrName || (p.companyName && p.companyName.toLowerCase().indexOf(coName) >= 0));
+                return (positionTitle.indexOf(coNameOrId) >= 0)
+                        || (positionCompanyName.indexOf(coNameOrId) >= 0)
+                        || (p.companyId === coNameOrId)
             });
 
-            const headline = ''; // c.headline && c.headline.toLowerCase ? c.headline.toLowerCase() : '';
-            const currentTitle = headline.indexOf(currentCompanyIdOrName) >= 0 ? headline : currentPositions.map((p) => { return p.title ? p.title.toLowerCase() : ''}).join(' ');
+            const currentTitle = currentPositions.map((p) => { return p.title ? p.title.toLowerCase() : ''}).join(' ');
 
             let result = false;
             for (let i = 0; i < arrayOfThisAndThisOrThisAndThisArray.length; i++){
@@ -465,8 +478,9 @@
         });
     }
 
-    const _findBizDevelopmentContacts = async (companyIdOrName) => {
-        const result = [];
+    const _findBizDevelopmentContacts = async (strCompanyIdOrName) => {
+        const companyIdOrName = isNaN(strCompanyIdOrName) ? strCompanyIdOrName.toLowerCase() : Number.parseInt(strCompanyIdOrName);
+
         const companyCandidates = await _searchForEmployees(companyIdOrName);
         const ceo = _findRoles(companyCandidates, companyIdOrName, [['ceo'], ['chief', 'executive', 'officer'], ['owner'], ['founder'], ['president']], ['product owner', 'project owner', 'vice president', 'content owner']);
         const cLevel = _findRoles(companyCandidates, companyIdOrName, [['cto'], ['cio'], ['chief information officer'], ['coo'], ['chief operating officer'], ['vp', ' it'], ['vp', 'technology'], ['vp', 'software'], ['vp', 'development'], ['vice pr', ' it'], ['vice pr', 'technology'], ['vice pr', 'software'], ['vice pr', 'development']], ['sales', 'business development', 'contractor', 'coordinator', 'director', 'operations', 'account manage', ' qa', 'instructor', 'cohort']);
