@@ -120,7 +120,7 @@
 
         tsUICommon.createLink(div, href, `${contact.firstName} ${contact.lastName}`, '_blank');
         const headline = $(document.createElement('div'))
-                    .text(contact.headline)
+                    .text(`${contact.headline} - ${contact.location.replace(', United States', '')}`)
 
         $(div).append(headline);
 
@@ -212,13 +212,13 @@
     }
 
     const _displayJobs = async () => {
-        $(_jobsPart).html(`<div><div style='margin-bottom:15px; font-weight: bold'>Title | Age | Last Verified</div></div>`);
+        $(_jobsPart).html(`<div><div style='margin-bottom:15px; font-weight: bold'>Title  | Location | Age | Last Verified</div></div>`);
         const jobs = await jobsController.getCompanyJobs(_companyId);
 
         tsArray.sortByObjectProperty(jobs, 'lastVerified');
         for (let i = 0; i < jobs.length && i < 6; i++){
             const j = jobs[i];
-            const text = `${j.title} | ${j.age} | ${(new Date(j.lastVerified)).toLocaleDateString()}`
+            const text = `${j.title} | ${j.location} | ${j.age} | ${(new Date(j.lastVerified)).toLocaleDateString()}`
             const jobDiv = $(document.createElement('div'))
                             .text(text)
                             .attr('style', 'margin-bottom:5px');

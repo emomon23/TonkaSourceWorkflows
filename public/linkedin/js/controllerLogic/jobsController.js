@@ -32,6 +32,19 @@
         }
     }
 
+    const _getLastContactDateFromNotes = (company) => {
+        if (Array.isArray(company.tsNotes) && company.tsNotes.length > 0){
+            try {
+                return company.tsNotes[0].split(' ')[1];
+            }
+            catch(e){
+                return e.message || e;
+            }
+        }
+
+        return "";
+    }
+
     const _getAllJobs = async (forceRefresh = false) => {
         if (forceRefresh === false && _cachedJobs){
             return _cachedJobs;
@@ -45,6 +58,7 @@
 
         _cachedJobs.forEach((j) => {
             const jobCompanyName = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
+
             if (!j.linkedInCompanyId){
                 let linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
                 linkedInCompanyPotentialMatches = linkedInCompanyPotentialMatches.filter((c) => { return !isNaN(c.companyId) });
@@ -56,7 +70,15 @@
                 }
 
                 if (linkedInCompanyPotentialMatches.length === 1){
-                    j.linkedInCompanyId =  linkedInCompanyPotentialMatches[0].companyId;
+                    const jobCompany = linkedInCompanyPotentialMatches[0];
+                    j.linkedInCompanyId =  jobCompany.companyId;
+                    j.lastContacted = _getLastContactDateFromNotes(jobCompany);
+                }
+            }
+            else {
+                const foundCompanies =  companySummaryRepository.syncGet(j.linkedInCompanyId);
+                if (foundCompanies && foundCompanies.length === 1){
+                    j.lastContacted = _getLastContactDateFromNotes(foundCompanies[0]);
                 }
             }
 

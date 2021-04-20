@@ -1,4 +1,7 @@
 (function () {
+    const F_KEY = 70;
+    let fKeyDown = false;
+
     let _grid = null;
     const _jobsFilter = {
         includeHidden: false,
@@ -54,9 +57,14 @@
 
     const _onCompanyLoad = (d, cell) => {
 
+        let text = d.company;
+        if (d.group && d.group.length){
+            text += ` - (${d.group})`;
+        }
+
         if (d.isProspect){
             const link = document.createElement('a');
-            $(link).text(d.company)
+            $(link).text(text)
                     .attr('href', '#')
                     .attr('companyId', d.linkedInCompanyId)
                     .attr('companyName', d.company)
@@ -66,7 +74,14 @@
             $(cell).append(link);
         }
         else {
-            $(cell).text(d.company);
+            $(cell)
+                .text(d.company)
+                .attr('companyName', d.company)
+                .bind('dblclick', (e) => {
+                    if (fKeyDown){
+                        _flagJobsActionClick();
+                    }
+                });
         }
     }
 
@@ -79,7 +94,31 @@
         { name: "Location", property: "location" },
         { name: "Age", property: "age", sort:'desc' },
         { name: "Last Verified", property: "lastVerifiedAge" },
+        { name: "Last Contact", property: "lastContacted"}
     ]};
+
+    const _getCompanyCount = (arrayOfJobs) => {
+        const coIndex = {};
+        const unknownCompanyId = arrayOfJobs.find(j => !j.linkedInCompanyId || isNaN(j.linkedInCompanyId))
+        let result = 0;
+
+        if (unknownCompanyId){
+            arrayOfJobs.forEach((j) => {
+                const cleanedCompanyName = j.company.replace(', Inc.', '').replace(', Inc', '').replace(' Inc', '').replace(', LLC', '').replace(' LLC', '').replace('-', '').toLowerCase();
+                coIndex[cleanedCompanyName.split(' ')[0]] = true;
+            });
+        }
+        else {
+            arrayOfJobs.forEach((j) => {
+                coIndex[j.linkedInCompanyId] = true;
+            });
+        }
+
+        for(let k in coIndex){
+            result += 1;
+        }
+        return result;
+    }
 
     const _display = async () => {
         // Clear the content
@@ -161,6 +200,7 @@
 
         const actionsButtonBar = _createButtonBarElement();
         const groupFilter = await _createGroupFilterDropdown();
+        const countLabel = _createCountLabel();
 
         $(searchContainer)
             .append('<span id="companyLabel" style="font-weight: bold"> Company: </span>')
@@ -169,7 +209,8 @@
             .append(sizeSearchSelect)
             .append(searchButton)
             .append(actionsButtonBar)
-            .append(groupFilter);
+            .append(groupFilter)
+            .append(countLabel);
 
         // Create the results container
         const resultsContainer = $(document.createElement('div'))
@@ -183,6 +224,19 @@
 
         await tsCommon.sleep(50);
         $('#companyLabel').click(_clearCompanyFilter);
+
+
+        $(document)
+            .bind('keydown', (e) => {
+                if (e.keyCode === F_KEY){
+                    fKeyDown = true;
+                }
+            })
+            .bind('keyup', (e) => {
+                if (e.keyCode === F_KEY){
+                    fKeyDown = false;
+                }
+            });
     }
 
     const _renderGrid = async (forceRefresh) => {
@@ -222,8 +276,10 @@
         });
 
         _grid = await tsUICommon.createDataGrid(_config, matchingJobs);
+        const uniqueCompanyCount = _getCompanyCount(matchingJobs);
 
         $('#jobSearchResultsContainer').append(_grid.gridElement);
+        $('#countLabel').text(`Unique Company Count: @${uniqueCompanyCount}.   Total Rows: ${matchingJobs.length}`);
     }
 
     const _menuOption = () => {
@@ -258,6 +314,14 @@
         tsUICommon.addButton(buttonBar, 'assignCompanyNamesBtn', 'A', 20, 20, _associateCompanyNamesActionClick);
 
         return buttonBar;
+    }
+
+    const _createCountLabel = () => {
+        const span = $(document.createElement('span'))
+                        .attr('style', 'margin-left:300px; font-weight:bold')
+                        .attr('id', 'countLabel');
+
+        return span;
     }
 
     const _onFilterGroupClick = (e) => {

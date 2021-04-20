@@ -47,6 +47,15 @@
     window.companySummaryRepository.getCompaniesByNameContains = _getCompaniesByNameContains;
 
     window.companySummaryRepository.getAll().then(d => window.companySummaryRepository.cachedCompanies = d).catch(e => {});
+
+    window.companySummaryRepository.syncGet = (idOrName) => {
+        let lookFor = isNaN(idOrName) ? idOrName.toLowerCase() : Number.parseInt(idOrName);
+        return companySummaryRepository.cachedCompanies.filter((c) => {
+            const companyId = isNaN(c.companyId) ? c.companyId.toLowerCase() : c.companyId;
+            return (companyId === lookFor);
+        });
+    }
+
     window.companySummaryRepository.companyNameAndAliasTypeAheadSearch = (companyNameStartsWithSearch) => {
         let lookFor = companyNameStartsWithSearch.toLowerCase ? companyNameStartsWithSearch.toLowerCase() : companyNameStartsWithSearch;
 
