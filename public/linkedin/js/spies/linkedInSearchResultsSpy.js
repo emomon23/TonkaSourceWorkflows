@@ -45,7 +45,23 @@
     }
 
     const _displayTSConfirmedSkillsForSearchResultList = async () => {
-        const liElements = $('li[id*="search-result-"]').toArray();
+        let liElements = null;
+
+        for (let i = 0; i < 8; i++){
+            liElements = $('li[id*="search-result-"]');
+            if (liElements && liElements.length > 0){
+                liElements = liElements.toArray();
+                break;
+            }
+
+            liElements = null;
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(500);
+        }
+
+        if (!liElements){
+            return;
+        }
 
         const memberIds = liElements.map((li) => {
             const memberId = $(li).attr('id').replace('search-result-', '');

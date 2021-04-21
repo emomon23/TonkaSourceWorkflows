@@ -59,6 +59,10 @@
         _cachedJobs.forEach((j) => {
             const jobCompanyName = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
 
+            if (jobCompanyName.indexOf("granicus") >= 0){
+                const breakHere = true;
+            }
+
             if (!j.linkedInCompanyId){
                 let linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
                 linkedInCompanyPotentialMatches = linkedInCompanyPotentialMatches.filter((c) => { return !isNaN(c.companyId) });
