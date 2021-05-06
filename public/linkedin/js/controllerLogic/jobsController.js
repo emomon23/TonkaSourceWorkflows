@@ -59,7 +59,7 @@
         _cachedJobs.forEach((j) => {
             const jobCompanyName = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
 
-            if (jobCompanyName.indexOf("granicus") >= 0){
+            if (jobCompanyName.indexOf("code42") >= 0){
                 const breakHere = true;
             }
 

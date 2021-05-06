@@ -29,6 +29,11 @@
         }
     }
 
+    const _getRawKeywordsString = () => {
+        const textArea = $('#facet-keywords textarea')[0];
+        return textArea ? $(textArea).val() : '';
+    }
+
     const _appendToKeywordsFilter = async (appendText) => {
         const textArea = $('#facet-keywords textarea')[0];
         if (textArea){
@@ -96,8 +101,13 @@
         try {
             const profileLinks = await tsUICommon.jQueryWait('a[href*="/recruiter/profile/"]');
 
+            for (let i = 0; i < profileLinks.length; i++){
+                const l = profileLinks[i];
+                $(l).attr('target', '_blank');
+            }
+
             $(profileLinks)
-                .on('click', (e) => {
+                .on('click', async (e) => {
                     let parent = e.target.parentElement;
                     while (parent && parent.tagName !== 'LI'){
                         parent = parent.parentElement;
@@ -107,8 +117,6 @@
                         const memberId = $(parent).attr('id').replace('search-result-', '');
                         linkedInSearchResultsScraper.persistLastRecruiterProfile(memberId);
                     }
-
-                    $(e.target).attr('target', '_blank');
                 });
         }
         catch (e) {
@@ -119,6 +127,7 @@
     class LinkedInSearchResultsSpy {
         bindToRecruiterProfileLinks = _bindToRecruiterProfileLinks;
         appendToKeywordsFilter = _appendToKeywordsFilter;
+        getRawKeywordsString = _getRawKeywordsString;
         getActivelySeekingString = () => {return _activelySeekingFilterString};
     }
 

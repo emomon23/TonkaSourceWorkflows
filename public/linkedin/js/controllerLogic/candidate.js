@@ -25,6 +25,9 @@
                 match.title = ip.title;
                 match.displayText = ip.displayText;
                 match.skills = ip.skills;
+                match.endDateMonth = ip.endDateMonth;
+                match.endDateYear = ip.endDateYear;
+                match.current = ip.current;
 
                 if (ip.description && ip.description.length){
                     // eg. This will happend when a 'lite candidate' has their profile scraped
@@ -52,7 +55,7 @@
             throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
         }
 
-        const fieldsNotToBeOverridden = ['positions', 'lastName', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
+        const fieldsNotToBeOverridden = ['positions', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
         let existingCandidate = await _getCandidateByMemberId(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
@@ -101,19 +104,7 @@
     const _getEntireCandidateList = async () => {
         if (_entireCandidateList === null){
             _entireCandidateList = await candidateRepository.getAll();
-
-            _entireCandidateList.forEach((c) => {
-                if (c.positions){
-                    const currentPositions = c.positions.filter((p) => {
-                        const endDateYearMissing = !p.endDateYear;
-                        const endDateMonthMissing = !p.endDateMonth;
-
-                        return p.current === true || endDateYearMissing;
-                    });
-
-                    c.currentPositions = currentPositions;
-                }
-            })
+            candidateRepository.stringifyProfiles(_entireCandidateList);
         }
 
         return _entireCandidateList;
@@ -146,8 +137,24 @@
         }
     }
 
+    const _reduceTotalFound = (candidatesFound) => {
+        const index = {};
+
+        candidatesFound.forEach((c) => {
+            index[c.memberId] = c;
+        });
+
+        const result = [];
+        for (let k in index) {
+            result.push(index[k]);
+        }
+
+        return result;
+    }
+
     const _lastNamesSearch = async (lNamesArray, searchObject) => {
         let totalFound = [];
+
         for (let i = 0; i < lNamesArray.length; i++){
             // eslint-disable-next-line no-await-in-loop
             const search = await candidateRepository.getByIndex('lastName', lNamesArray[i]);
@@ -159,6 +166,13 @@
 
         if (totalFound && totalFound.length){
             totalFound = totalFound.filter(f => f.firstName === searchObject.firstName);
+        }
+
+        totalFound = _reduceTotalFound(totalFound);
+
+        if (totalFound && totalFound.length > 1 && searchObject.city){
+            const city = searchObject.city.toLowerCase();
+            totalFound = totalFound.filter(f => (!f.location) || (f.location.toLowerCase().indexOf(city) >= 0))
         }
 
         if (totalFound && totalFound.length > 1 && searchObject.headline){
@@ -227,7 +241,8 @@
             }
         }
 
-        const lNames = searchObject.lastName ? [searchObject.lastName, searchObject.lastName.substr(0, 1), `${searchObject.lastName.substr(0, 1)}.`] : [];
+        const lName = searchObject.lastName ? searchObject.lastName.replace('&#39;', "'") : null;
+        const lNames = lName ? [lName, lName.substr(0, 1), `${lName.substr(0, 1)}.`] : [];
 
         if (searchObject.headline){
             result = await candidateRepository.getByIndex('headline', searchObject.headline);
@@ -542,6 +557,148 @@
         }
 
     }
+
+    const _findOrHaveCandidate = async (candidateOrMemberId, recursive = 0) => {
+        let candidate = null;
+
+        if (typeof(candidateOrMemberId) === "object" && candidateOrMemberId.memberId){
+            candidate = candidateOrMemberId;
+        }
+        else if (candidateOrMemberId && !isNaN(candidateOrMemberId)){
+            await _getEntireCandidateList();
+            let intMemberId = Number.parseInt(candidateOrMemberId);
+            candidate = _entireCandidateList.find(c => c.memberId === intMemberId)
+        }
+
+        return candidate;
+    }
+
+    const _matchOrFilters = (candidateString, orFiltersIndex) => {
+        let result = null;
+
+        if (!orFiltersIndex){
+            return result;
+        }
+
+        for (let i = 0; i < 100; i++){
+            const key = `orFilter${i}`;
+            if (!orFiltersIndex[key]){
+                break;
+            }
+
+            const orKeyWords = orFiltersIndex[key];
+            if (!tsString.containsAny(candidateString.toLowerCase(), orKeyWords)){
+                result = orKeyWords.join(',');
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    const _matchCandidateAboutSummaryCurrentPositions = (candidate, matchCriteria) => {
+        if (! (matchCriteria && matchCriteria.aboutSummaryCurrentJobKeywordsFilter)){
+            return null;
+        }
+
+        let candidateString = `${candidate.headline} ${candidate.summary}`;
+        if (candidate.currentPositions){
+            candidateString += candidate.currentPositions.map(p => `${p.companyName} ${p.displayText} ${p.description} ${p.title}`).join(' ');
+        }
+
+        return _matchOrFilters(candidateString, matchCriteria.aboutSummaryCurrentJobKeywordsFilter)
+    }
+
+    const _matchCandidateWholeProfile = (candidate, matchCriteria) => {
+        if (! (matchCriteria && matchCriteria.profileContainsKeywordsFilter)){
+            return null;
+        }
+
+        const profileString = candidate.stringifiedProfile ? candidate.stringifiedProfile : candidateRepository.stringifyProfile(candidate);
+        return _matchOrFilters(profileString, matchCriteria.profileContainsKeywordsFilter)
+    }
+
+    const _checkIfCandidateProfileBeenScraped = (candidate) => {
+        if (candidate.detailsLastScrapedDate){
+            const scrapedDate = new Date(candidate.detailsLastScrapedDate);
+            const age = tsCommon.dayDifference(new Date(), scrapedDate);
+
+            return age < 120;
+        }
+
+        return false;
+    }
+
+    const _scrapeCandidateProfile = async (candidate) => {
+        await linkedInRecruiterProfileScraper.waitForOkToScrapedAgain(15);
+
+        const url = candidate.linkedInRecruiterUrl;
+        const profileWindow = window.open(url);
+
+        await tsCommon.sleep(15000);
+        let scrapedCandidate = await profileWindow.linkedInRecruiterProfileScraper.scrapeProfile(null, candidate.memberId);
+        candidateRepository.stringifyProfile(scrapedCandidate);
+
+        linkedInRecruiterProfileScraper.profileLastScrapedDate = (new Date()).getTime();
+        profileWindow.close();
+
+        return scrapedCandidate;
+    }
+
+    const _getCandidateMismatchReason = async (candidateOrMemberId, matchCriteria) => {
+        let candidate = await _findOrHaveCandidate(candidateOrMemberId);
+
+        if (!candidate){
+            return { matched:false, reason: "Can't find candidate in db"}
+        }
+
+
+        if (matchCriteria.isManagement && candidate.isManagement !== matchCriteria.isManagement){
+            return { candidate, matched:false, reason: "isManagement" };
+        }
+
+        if (matchCriteria.isTechnicallyRelevant && candidate.isTechnicallyRelevant !== matchCriteria.isTechnicallyRelevant){
+            return {candidate, matched:false, reason: "not tech relevant" };
+        }
+
+        const candidateTechnicalTotalMonths = candidate.technicalTotalMonths && !isNaN(candidate.technicalTotalMonths) ? Number.parseInt(candidate.technicalTotalMonths) : 0;
+        const technicalTotalMonthsFilter = matchCriteria.technicalTotalMonths && !isNaN(matchCriteria.technicalTotalMonths) ? Number.parseInt(matchCriteria.technicalTotalMonths) : null;
+
+        if (technicalTotalMonthsFilter && candidateTechnicalTotalMonths < technicalTotalMonthsFilter){
+            return { candidate, matched:false, reason : `totTech: ${candidateTechnicalTotalMonths}` };
+        }
+
+        if (matchCriteria.ignoreJustStarted && candidate.currentPositions){
+            const justStarted = candidate.currentPositions.filter(p => p.durationInMonths < 9);
+            if (justStarted.length){
+                return { candidate, matched:false, reason: "just started a gig" };
+            }
+        }
+
+
+        let profileMissing = _matchCandidateWholeProfile(candidate, matchCriteria);
+        let aboutSummaryMissing = _matchCandidateAboutSummaryCurrentPositions(candidate, matchCriteria);
+
+        // check if we should scrape the profile details
+        if (profileMissing || aboutSummaryMissing && matchCriteria.addToCurrentProject){
+            const hasProfileBeenScraped = _checkIfCandidateProfileBeenScraped(candidate);
+            if (!hasProfileBeenScraped){
+                candidate = await _scrapeCandidateProfile(candidate);
+                profileMissing = _matchCandidateWholeProfile(candidate, matchCriteria);
+                aboutSummaryMissing = _matchCandidateAboutSummaryCurrentPositions(candidate, matchCriteria);
+            }
+        }
+
+        if (profileMissing){
+            return { candidate, matched:false, reason: `profile missing ${profileMissing}` };
+        }
+
+        if (aboutSummaryMissing){
+            return { candidate, matched:false, reason: `about summary missing ${aboutSummaryMissing}` };
+        }
+
+        return { candidate, matched: true }
+    }
     class CandidateController {
         saveContactInfo = _saveContactInfo;
         saveCandidate = _saveCandidate;
@@ -550,6 +707,7 @@
         getCandidate = _searchForCandidate;
         searchForCandidate = _searchForCandidate;
         searchForEmployees = _searchForEmployees;
+        getCandidateMismatchReason = _getCandidateMismatchReason;
         findBizDevelopmentContacts = _findBizDevelopmentContacts;
         getJobSeekers = _getJobSeekers;
         getContractors = _getContractors;

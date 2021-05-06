@@ -2,8 +2,81 @@
 let skillFilterTemplate = null;
 let feedBackInterval = null;
 
+const cleanEscapeCharacters = (str) => {
+    let copy = str.toString();
+
+    params = [
+        // eslint-disable-next-line no-useless-escape
+        {lookFor: '\\\"', replace: '"'},
+        {lookFor: '\\"', replace: '"'},
+        // eslint-disable-next-line no-useless-escape
+        {lookFor: '\"', replace: '"'}
+    ]
+
+
+    params.forEach((p) => {
+        let counter = 0;
+        // eslint-disable-next-line no-constant-condition
+        while (true){
+            counter += 1;
+            if (counter === 1000 || copy.indexOf(p.lookFor) === -1){
+                break;
+            }
+
+            copy = copy.replace(p.lookFor, p.replace);
+        }
+    })
+
+    copy = copy.replace('"(', '(').replace(')"', ')');
+
+    return copy;
+}
+
 const highlightError = (element) => {
     $(element).attr('style', 'border:1px solid red');
+}
+
+const createAndOrArrays = (elementId) => {
+    const data = {};
+
+    const rawText = $(`#${elementId}`).val().toLowerCase();
+    const andFilters = rawText.split(' and ');
+
+    for (let i = 0; i < andFilters.length; i++){
+        const key = `orFilter${i}`;
+        const cleaned = andFilters[i].replace(/\(/g, '').replace(/\)/g, '').replace(/"/g, '');
+        const orArray = cleaned.split(' or ');
+        data[key] = orArray;
+    }
+
+    return data;
+}
+
+const getRawProfileContainsData = () => {
+    const data = {
+        decorateResults: $($('#decorateResults')[0]).prop('checked'),
+        addToCurrentProject: $($('#addToCurrentProject')[0]).prop('checked'),
+        isManagement: !$($('#ignoreManagement')[0]).prop('checked'),
+        isTechnicallyRelevant: $($('#isTechnicallyRelevant')[0]).prop('checked'),
+        ignoreJustStarted: $($('#ignoreJustStarted')[0]).prop('checked'),
+        ignoreJobJumpers: $($('#ignoreJobJumpers')[0]).prop('checked')
+    }
+
+    let technicalTotalMonths = $('#minTechnicalMonths').val();
+    if (technicalTotalMonths === ""){
+        technicalTotalMonths = 0;
+    }
+
+    if (isNaN(technicalTotalMonths)){
+        showMessage("Min Technical Months must be numeric or empty");
+        return null;
+    }
+
+    data.technicalTotalMonths = Number.parseInt(technicalTotalMonths);
+    data.aboutSummaryCurrentJobKeywordsFilter = createAndOrArrays('aboutSummaryCurrentJobContainsText');
+    data.profileContainsKeywordsFilter = createAndOrArrays('profileContainsText');
+
+    return data;
 }
 
 const getSkillsFilters = () => {
@@ -49,23 +122,6 @@ const getSkillsFilters = () => {
     }
 
     return isValid ? result : null;
-}
-
-const getContactContainsFilters = () => {
-    const search = {};
-
-    let containsFilters = $('.contactContainsFilter');
-    if (containsFilters.length > 0){
-        containsFilters = containsFilters.toArray();
-        containsFilters.forEach((contains) => {
-            if(contains.value && contains.value.length > 0){
-                const key = $(contains).attr('id');
-                search[key] = contains.value.split(',');
-            }
-        })
-    }
-
-    return search;
 }
 
 const appendSkillFilterRow = () => {
@@ -203,7 +259,7 @@ removeSkillFilter_click = (removeButton) => {
 
 searchForCandidates_click = async (e) => {
     try {
-        const search = getContactContainsFilters();
+        const search = {};
         search.isJobSeeker = $('#onlyJobSeekers')[0].checked;
         search.skills = getSkillsFilters();
         appendGPAFilters(search);
@@ -220,14 +276,31 @@ searchForCandidates_click = async (e) => {
     }
 }
 
+rawKeywordFilter_click = async (e) => {
+    const data = getRawProfileContainsData();
+
+    if (data) {
+        window.linkedInConsoleReference.postMessage({action: "searchProfilesForKeywords", parameter: data}, "*");
+    }
+}
+
 $(document).ready(() => {
     skillFilterTemplate = $('#skillFilterRowTemplate')[0];
 
     const hasFilter = tsUICommon.getItemLocally(tsConstants.localStorageKeys.CANDIDATE_FILTERS);
 
     window.addEventListener('message', (e) => {
+        var d = e.data;
+
+        const action = d.action;
+        const data = d.parameter;
+
+        if (data) {
+            const keyWords = cleanEscapeCharacters(data);
+            $('#profileContainsText').val(keyWords);
+        }
+
         window.linkedInConsoleReference = e.source;
-        const action = e.data.action;
         console.log(`post message received from parent.  action: ${action}`);
     });
 });

@@ -290,6 +290,7 @@
         clickAHyperLink = _clickAHyperLink;
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
+        jsonParse = _jsonParse;
         waitTilTrue = _waitTilTrue;
         now = () => { return new Now(); };
         dayDifference = _dayDifference;

@@ -173,18 +173,7 @@
             wholeName = wholeName.substr(wholeName.indexOf(' ')); // This will handle "(75) Alan Haggerty"
         }
 
-        const firstAndLast = wholeName.split(' ');
-        let result = {}
-
-        if (firstAndLast.length > 1){
-            result.firstName =  firstAndLast[0];
-            firstAndLast.splice(0, 1);
-            result.lastName = firstAndLast.join(' ');
-        }
-
-        result.firstName = tsUICommon.cleanseTextOfHtml(result.firstName);
-        result.lastName = tsUICommon.cleanseTextOfHtml(result.lastName);
-
+        const result = tsString.parseOutFirstAndLastNameFromString(wholeName);
         return result;
     }
 

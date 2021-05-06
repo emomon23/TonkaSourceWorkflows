@@ -273,7 +273,7 @@
 
     const _fireConnectionRequestBlast = async (bodyObj) => {
         const body = bodyObj.body;
-        const currentMemberIdsArray = linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+        const currentMemberIdsArray = await linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
 
         for(let i = 0; i < currentMemberIdsArray.length; i++){
             // eslint-disable-next-line no-await-in-loop
@@ -286,11 +286,16 @@
         console.log(`fireConnectionRequestBlast DONE.  attempted ${currentMemberIdsArray.length} connection requests`);
     }
 
+    const _searchProfilesForKeywords = (data) => {
+        linkedInSearchResultsScraper.searchProfilesForKeywords(data);
+    }
+
     class LinkedInApp {
         alisonContactSyncCallback = _alisonContactSyncCallback;
         changeBadgeColor = _changeBadgeColor;
         fireInMailBlast = _fireInMailBlast;
         fireConnectionRequestBlast = _fireConnectionRequestBlast;
+        searchProfilesForKeywords = _searchProfilesForKeywords;
         upsertContact = _upsertContact;
         saveCompanyAnalytics = _saveCompanyAnalytics;
         saveGoogleCareerJobs = _saveGoogleCareerJobs;

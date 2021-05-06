@@ -41,14 +41,7 @@
         const fullName = $(span).text().replace("Delete recipient", '').split('\n')[0].trim();
         const memberId = await _getMemberId(fullName);
         const headline = _getHeadline(fullName);
-        const nameParts = fullName.split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
-
-        const result = {
-            lastName,
-            firstName
-        };
+        const result = tsString.parseOutFirstAndLastNameFromString(fullName);
 
         if (memberId){
             result.memberId = memberId

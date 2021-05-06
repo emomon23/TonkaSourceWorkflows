@@ -3,20 +3,7 @@
         constructor () {}
 
         newLinkedInContact = (wholeName) => {
-            var split = wholeName.split(' ');
-
-            const firstName = split[0];
-            var lastName = "";
-
-            if (split.length > 0){
-                lastName = split[1];
-            }
-
-            const result = {
-                firstName: firstName,
-                lastName: lastName
-            }
-
+            const result = tsString.parseOutFirstAndLastNameFromString(wholeName);
             result.confirm = () => {
                 const bodyText = "firstName: " + result.firstName + "\n" + "lastName: " + result.lastName + "\n" + "network circle: " + result.networkConnection + "\n" + "city: " + result.city + "\n" + "state: " + result.state + "\n" + "title: " + result.title + "\n" + "company: " + result.company + "\n" + "since: " + result.currentPositionDates + "\n" + "\nimageUrl: " + result.imageUrl + "\n\n" + "\nlinkInUrul:" + result.linkedInRecruiterUrl + "\n\n"
                 // eslint-disable-next-line no-alert

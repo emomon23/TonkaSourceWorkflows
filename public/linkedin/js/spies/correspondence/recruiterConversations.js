@@ -23,18 +23,13 @@
             return null;
         }
 
-        const nameParts = $(nameElement).text().trim().split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
-        const headline = headlineElement ? $(headlineElement).text().trim() : '';
-        const imageUrl = imageElement ? $(imageElement).attr('src') : '';
+        const wholeName = $(nameElement).text().trim();
 
-        return {
-            firstName,
-            lastName,
-            headline,
-            imageUrl
-        }
+        const result = tsString.parseOutFirstAndLastNameFromString(wholeName);
+        result.headline = headlineElement ? $(headlineElement).text().trim() : '';
+        result.imageUrl = imageElement ? $(imageElement).attr('src') : '';
+
+        return result;
     }
 
     const _scrapeActiveInmailContactFromUi = async () => {

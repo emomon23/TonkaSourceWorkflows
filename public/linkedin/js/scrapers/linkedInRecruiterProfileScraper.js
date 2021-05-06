@@ -19,15 +19,17 @@
         }
     }
 
-    const _findCandidateInDatabase = async () => {
+    const _findCandidateInDatabase = async (memberId = null) => {
         const nameElement = $(linkedInSelectors.recruiterProfilePage.fullName)[0];
         const headlineElement = $(linkedInSelectors.recruiterProfilePage.headline)[0];
         const imageElement = $(linkedInSelectors.recruiterProfilePage.imageUrl)[0];
         let candidateSearch = {};
 
         if (nameElement && (headlineElement || imageElement)){
-            const fullName = tsString.cleanText(nameElement);
-            candidateSearch = tsString.convertFullNameToObject(fullName);
+            const fullName = $(nameElement).text();
+            console.log({fullName});
+
+            candidateSearch = tsString.parseOutFirstAndLastNameFromString(fullName);
 
             if (headlineElement){
                 candidateSearch.headline = tsString.cleanText(headlineElement);
@@ -39,6 +41,17 @@
         }
 
         candidateSearch.linkedIn = _scrapePublicProfileLink();
+        console.log({memberId, candidateSearch});
+
+        if (memberId) {
+            const specifiedCandidate = await candidateRepository.get(memberId);
+            console.log({specifiedCandidate});
+
+            if (specifiedCandidate){
+                _candidateFound = specifiedCandidate;
+                return _candidateFound;
+            }
+        }
 
         if (_candidateFound
             && _candidateFound.firstName === candidateSearch.firstName
@@ -70,8 +83,11 @@
         return candidate ? candidate.memberId : null;
     }
 
-    const _scrapeProfile = async (tagString = null) => {
-        const candidate = await _findCandidateInDatabase();
+    const _scrapeProfile = async (tagString = null, memberId = null) => {
+        console.log({method: 'scrapeProfile', tagString, memberId});
+        const candidate = await _findCandidateInDatabase(memberId);
+
+        console.log({candidateFoundInDb: candidate});
 
         // If we've scraped this candidate, proceed
         if (candidate) {
@@ -148,7 +164,24 @@
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
         }
 
+        linkedInRecruiterProfileScraper.profileLastScrapedDate = (new Date()).getTime();
         return candidate;
+    }
+
+    const _waitForOkToScrapedAgain = async (desiredWaitInSeconds) => {
+        if (!linkedInRecruiterProfileScraper.profileLastScrapedDate){
+            return;
+        }
+
+        for (let i = 0; i < 12000; i++){
+            let diff = (new Date()).getTime - linkedInRecruiterProfileScraper.profileLastScrapedDate;
+            if (diff >= desiredWaitInSeconds * 1000){
+                break;
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(1000);
+        }
     }
 
     const _scrapeOutDurationFromHtmlElement = (element) => {
@@ -292,10 +325,39 @@
         }
     }
 
+    const _decorateName = (color, text) => {
+        const container = $('div[class*="info-container"]')[0];
+        const textContainer = $(document.createElement('div'))
+                                .attr('style', `color:${color}`)
+                                .text(text);
+
+        $(container).append(textContainer);
+    }
+
+    const _decorateProfile = async (matchFilter) => {
+        await tsCommon.sleep(10000);
+
+        if (matchFilter){
+            const candidate = await _scrapeProfile();
+            candidate.memberId = await _getMemberId();
+            candidateRepository.stringifyProfile(candidate);
+
+            const mismatchReason = await candidateController.getCandidateMismatchReason(candidate, matchFilter);
+            if (mismatchReason.reason){
+                _decorateName('red', mismatchReason.reason);
+            }
+            else {
+                const color = mismatchReason.matchCount > 0 ? 'green' : 'blue';
+                _decorateName(color, `match count: ${mismatchReason.matchCount}`);
+            }
+        }
+    }
+
     class LinkedInRecruiterProfileScraper {
         getMemberId = _getMemberId;
         scrapeProfile = _scrapeProfile;
         scrapeAndSaveContactInfo = _scrapeAndSaveContactInfo;
+        waitForOkToScrapedAgain = _waitForOkToScrapedAgain;
     }
 
     window.linkedInRecruiterProfileScraper = new LinkedInRecruiterProfileScraper();
@@ -303,11 +365,10 @@
     const _delayReady = async () => {
         await tsCommon.sleep(1000);
 
-        _currentPage = linkedInCommon.whatPageAmIOn()
         if (_currentPage === linkedInConstants.pages.RECRUITER_PROFILE) {
+
             const candidate = await _scrapeProfile();
             linkedInRecruiterProfileScraper.lastProfileScraped = candidate
-
 
             if (candidate) {
                 $('li[class*="contact-info"] button').click(() => {
@@ -322,6 +383,7 @@
                 tsConfirmCandidateSkillService.displayPhoneAndEmail(container, candidate);
 
             }
+
         }
 
         // Profile pages won't pop up a new window
@@ -336,6 +398,22 @@
     }
 
     $(document).ready(() => {
+        _currentPage = linkedInCommon.whatPageAmIOn()
+
+        if (_currentPage === linkedInConstants.pages.RECRUITER_PROFILE) {
+            window.addEventListener('message', (e) => {
+                var d = e.data;
+
+                const action = d.action;
+                const data = tsCommon.jsonParse(d.parameter);
+
+
+                if (action === "decorateWindow") {
+                    _decorateProfile(data);
+                }
+            });
+        }
+
        _delayReady();
     })
 })();

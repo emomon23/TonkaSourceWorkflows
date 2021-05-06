@@ -209,12 +209,137 @@
         }
     }
 
+    const _checkIfStringContainsNonAsciiCharacters = (str) => {
+        const ascii = /^[ -~]+$/;
+        return !ascii.test(str)
+    }
+
+    const _cleanEscapeCharacters = (str) => {
+        let copy = str.toString();
+
+        params = [
+            // eslint-disable-next-line no-useless-escape
+            {lookFor: '\\\"', replace: '"'},
+            {lookFor: '\\"', replace: '"'},
+            // eslint-disable-next-line no-useless-escape
+            {lookFor: '\"', replace: '"'}
+        ]
+
+
+        params.forEach((p) => {
+            let counter = 0;
+            // eslint-disable-next-line no-constant-condition
+            while (true){
+                counter += 1;
+                if (counter === 1000 || copy.indexOf(p.lookFor) === -1){
+                    break;
+                }
+
+                copy = copy.replace(p.lookFor, p.replace);
+            }
+        })
+
+        return copy;
+    }
+
+    const _removeGenderIdentitiesFromString = (str) => {
+        const gIdentities = ["(he/him)", "(he/his)", "(he/him/his)", "(him/his)", "he/him", "he/his", "he/him/his", "him/his", "(she/her)", "(she/her/hers)", "she/her", "she/her/hers", "(He/Him)", "(He/His)", "(He/Him/His)", "(Him/His)", "He/Him", "He/His", "He/Him/His", "Him/His", "(She/Her)", "(She/Her/Hers)", "She/Her", "She/Her/Hers"]
+        let result = str.toString();
+
+        gIdentities.forEach((i) => {
+            if (result.indexOf(i) > 0 || result.indexOf(i.toUpperCase()) > 0){
+                result = result.replace(i, '').replace(i.toUpperCase(), '').trim();
+            }
+        });
+
+        return result;
+    }
+
+    const _extractFirstAndLastNameFromCandidate = (candidate) => {
+        if (!(candidate && candidate.firstName && candidate.lastName)){
+            console.error({method: '_extractFirstAndLastNameFromCandidate', msg: 'unable to execute method', candidate});
+            return null;
+        }
+
+        let firstName = tsUICommon.cleanseTextOfHtml(candidate.firstName);
+        firstName = _removeGenderIdentitiesFromString(firstName);
+        firstName = firstName.replace(/\./g, '');
+        const firstNameContainsOtherData = firstName.split(' ').length > 1;
+        const firstNameContainsNonAsciiCharacters = _checkIfStringContainsNonAsciiCharacters(firstName);
+
+        let lastName = tsUICommon.cleanseTextOfHtml(candidate.lastName);
+        lastName = _removeGenderIdentitiesFromString(lastName);
+        lastName = lastName.replace(/\./g, '');
+        const lastNameContainsOtherData = lastName.split(' ').length > 1;
+        const lastNameContainsNonAsciiCharacters = _checkIfStringContainsNonAsciiCharacters(lastName);
+
+
+        if (!(firstNameContainsNonAsciiCharacters || firstNameContainsOtherData || lastNameContainsOtherData || lastNameContainsNonAsciiCharacters)){
+            return {
+                firstName,
+                lastName
+            }
+        }
+
+        return _parseOutFirstAndLastNameFromString(candidate.fullName);
+    }
+
+
+
+    const _parseOutFirstAndLastNameFromString = (strFullName) => {
+        if (!(strFullName && strFullName.length)){
+            console.error(`_parseOutFirstAndLastNameFromString.  strFullName is undefined, null, or empty`);
+            return null;
+        }
+
+        let result = strFullName.replace(/\./g, '');
+        result = tsUICommon.cleanseTextOfHtml(result);
+        result = _removeGenderIdentitiesFromString(result);
+
+        let nameParts = result.split(' ');
+
+        nameParts = nameParts.filter((n) => {
+            const containsNonAsciiChars = _checkIfStringContainsNonAsciiCharacters(n);
+
+            return n.length > 0
+                    && !(n.startsWith("(") && n.endsWith(")")) // Remove a nickname: 'Joe (cool) Camel'
+                    && containsNonAsciiChars === false
+        });
+
+        if (nameParts.length === 0){
+            console.error(`parseOutFirstAndLastNameFromString had trouble with "${strFullName}"`);
+            return null;
+        }
+
+        if (nameParts.length === 1){
+            console.error(`parseOutFirstAndLastNameFromString had trouble with "${strFullName}"`);
+
+            return {
+                firstName: nameParts[0],
+                lastName: nameParts[0]
+            }
+        }
+
+        if (nameParts.length === 2){
+            // most common?
+            return {
+                firstName: nameParts[0],
+                lastName: nameParts[1]
+            }
+        }
+
+        return {
+            firstName: nameParts[0],
+            lastName: nameParts[nameParts.length - 1]
+        }
+    }
     class TSString {
         findDelimitedStrings = _findDelimitedStrings;
         findPrecedenceWithinString = _findPrecedenceWithinString;
         stripExcessSpacesFromString = _stripExcessSpacesFromString;
         containsAny = _containsAny;
         containsAll = _containsAll;
+        cleanEscapeCharacters = _cleanEscapeCharacters;
         extractEmailAddresses = _extractEmailAddresses;
         extractPhoneNumbers = _extractPhoneNumbers;
         toBoolean = _toBoolean;
@@ -222,6 +347,9 @@
         getClosestMatch = _getClosestMatch;
         convertFullNameToObject = _convertFullNameToObject;
         cleanText = _cleanText;
+        extractFirstAndLastNameFromCandidate = _extractFirstAndLastNameFromCandidate;
+        checkIfStringContainsNonAsciiCharacters = _checkIfStringContainsNonAsciiCharacters;
+        parseOutFirstAndLastNameFromString = _parseOutFirstAndLastNameFromString;
     }
 
     window.tsString = new TSString();

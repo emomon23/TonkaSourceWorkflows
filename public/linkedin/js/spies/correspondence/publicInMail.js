@@ -21,9 +21,11 @@
             return null;
         }
 
-        const namesArray = $(nameElement).text().trim().split(' ');
-        const firstName = namesArray[0];
-        const lastName = namesArray.length > 1 ? namesArray[namesArray.length - 1] : '';
+        const wholeName = $(nameElement).text().trim();
+        const nameObject = tsString.parseOutFirstAndLastNameFromString(wholeName);
+
+        const firstName = nameObject.firstName;
+        const lastName = nameObject.lastName;
         const headline = headlineElement ? $(headlineElement).text().trim() : '';
         const imageUrl = imageElement ? $(imageElement).text().trim() : '';
 

@@ -10,8 +10,11 @@
 
     const _cleanseCandidateData = (candidatesInResults) => {
        candidatesInResults.forEach((c) => {
-            c.firstName = tsUICommon.cleanseTextOfHtml(c.firstName);
-            c.lastName = tsUICommon.cleanseTextOfHtml(c.lastName);
+            const firstAndLastName = tsString.extractFirstAndLastNameFromCandidate(c);
+
+            c.firstName = firstAndLastName.firstName;
+            c.lastName = firstAndLastName.lastName;
+
             c.city = tsUICommon.cleanseTextOfHtml(c.city);
             c.industry = tsUICommon.cleanseTextOfHtml(c.industry);
             c.headline = tsUICommon.cleanseTextOfHtml(c.headline);
@@ -462,7 +465,7 @@
     }
 
     const _mergeScrapedCandidatesWithDbCandidates = async (scrapedCandidates) => {
-        const memberIds = scrapedCandidates.map(c => c.memberId);
+        const memberIds = await _getCurrentSearchResultsPageListOfMemberIds();
         const resultCandidates = [];
         const dbCandidates = await candidateRepository.getSubset(memberIds);
 
@@ -496,6 +499,8 @@
         const interceptedResults = JSON.parse(responseObj.responseText);
         let candidatesInResults = interceptedResults.result.searchResults;
 
+        window.lastInterceptedListOfCandidates = candidatesInResults
+
         _pageCandidates = [];
         _pageLiTags = {};
 
@@ -505,7 +510,7 @@
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
             _cleanseCandidateData(candidatesInResults);
 
-            // candidatesInResults = await _mergeScrapedCandidatesWithDbCandidates(candidatesInResults);
+           // candidatesInResults = await _mergeScrapedCandidatesWithDbCandidates(candidatesInResults);
 
             _highlightPendingConnectionRequests(candidatesInResults);
 
@@ -545,6 +550,10 @@
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
             const companyAnalytics = positionAnalyzer.processCompanyAnalytics(candidatesInResults);
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
+        }
+
+        if (window.decorateSearchResultsFilter) {
+            _decorateResultMatches();
         }
     }
 
@@ -617,8 +626,48 @@
         }
     }
 
-    const _getCurrentSearchResultsPageListOfMemberIds = () => {
+    const _getCurrentSearchResultsPageListOfMemberIds = async () => {
+        if (location.href.indexOf('/recruiter/projects/') >= 0){
+            const memberIds = await tsProjectPipelineScrapper.getMemberIdsFromPipelinePage();
+            return memberIds;
+        }
+
         return _pageCandidates && _pageCandidates.map ? _pageCandidates.map(c => c.memberId) : [];
+    }
+
+    const _decorateMember = (memberId, color, misMatchReason) => {
+        const label = $(`#search-result-${memberId} h3 a`)[0];
+        if (!label){
+            return;
+        }
+
+        $(label).attr('style', `color:${color}`)
+
+        if (misMatchReason){
+            const currentText = $(label).text();
+            $(label).text(`${currentText} - (${misMatchReason})`);
+        }
+    }
+
+    const _searchProfilesForKeywords = async (data) => {
+        const memberIds = await _getCurrentSearchResultsPageListOfMemberIds();
+        for (let m = 0; m < memberIds.length; m++){
+            const memberId = memberIds[m];
+            // eslint-disable-next-line no-await-in-loop
+            const mismatchReason = await candidateController.getCandidateMismatchReason(memberId, data);
+
+            if (mismatchReason.reason){
+                _decorateMember(memberId, 'red', mismatchReason.reason);
+            }
+            else {
+                const jj = mismatchReason.isJobJumper ? ' - *JJ ' : '';
+                const color = mismatchReason.matchCount > 0 ? 'green' : 'black';
+                _decorateMember(memberId, color, `match count: ${mismatchReason.matchCount}${jj}`);
+            }
+        }
+
+
+        window.decorateSearchResultsFilter = matchFilter;
     }
 
     class LinkedInSearchResultsScraper {
@@ -636,6 +685,7 @@
         getCurrentSearchResultsPageListOfMemberIds = _getCurrentSearchResultsPageListOfMemberIds;
         interceptSearchResults = _interceptSearchResults;
 
+        searchProfilesForKeywords = _searchProfilesForKeywords;
         gatherContactInfoFromSearchResults = async () => { await _touchSearchResultsPages(100, false, true );  }
     }
 

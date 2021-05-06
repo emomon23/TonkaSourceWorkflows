@@ -18,7 +18,7 @@
     const _launchConnectionRequestBlaster = async () => {
         const crStats = await connectionLifeCycleLogic.displayStatsConsoleLogMessage();
 
-        const memberIds = linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+        const memberIds = await linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
         if (!memberIds || memberIds.length === 0){
             console.log("No member ids available on current page, refresh the result pane");
             return;
@@ -39,9 +39,10 @@
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/jobseekers/jobseekers.html`;
         const dashboardWindow = window.open(url, "Dashboard", "scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,width=1000,height=1000,top=0,left=0");
 
-        await tsCommon.sleep(10000);
+        await tsCommon.sleep(4000);
 
-        tsCommon.postMessageToWindow(dashboardWindow, 'givingYouAReferenceBackToLinkedInWindow', {});
+        const keywords = linkedInRecruiterProfileSpy.getRawKeywordsString();
+        tsCommon.postMessageToWindow(dashboardWindow, 'givingYouAReferenceBackToLinkedInWindow', keywords);
 
         if (!dashboardWindow){
             tsCommon.log("Unable to open dashboard.  CHECK POP UP BLOCKER?", "WARN");
