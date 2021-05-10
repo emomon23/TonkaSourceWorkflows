@@ -49,6 +49,57 @@
         }
     }
 
+    const _toggleSearchResults = (e) => {
+        const buttonClicked  = $(e.target);
+        const candidateHideProperty = $(buttonClicked).attr('hide-candidate-property');
+        let buttonText = $(buttonClicked).text();
+        const needToHide = $(buttonClicked).attr('current-state') === 'show';
+        const changeState = needToHide ? 'hide' : 'show';
+        const color = needToHide ? "yellow" : 'orange';
+        const decorate = $(buttonClicked).attr('decorate') === "true"
+
+        if (decorate && !window.decorateSearchResultsFilter){
+            tsConstants.HOSTING_URL = `http://${'localhost:5001'}`
+            tsCommand.launchSkillsGPASearch();
+        }
+
+        if (!window.hideCandidates){
+            window.hideCandidates = {};
+        }
+
+        window.hideCandidates[candidateHideProperty] = needToHide;
+
+        if (needToHide){
+            buttonText = buttonText.replace('Hide', 'Show');
+        }
+        else {
+            buttonText = buttonText.replace('Show', 'Hide');
+        }
+
+        $(buttonClicked)
+            .text(buttonText)
+            .attr('current-state', changeState)
+            .attr('style', `color:${color}; padding-left: 15px`)
+
+        linkedInSearchResultsScraper.updateCandidateDisplayedInResultList();
+
+    }
+
+    const _renderTSFilterButtonsOnTopBar = () => {
+        const topBar = $('#top-bar')[0];
+        const hideCandidates = window.hideCandidates ? window.hideCandidates : {};
+
+        let props = hideCandidates.hideH1b ? { text: 'Show H1', color: 'yellow'} : { text: 'Hide H1', color: 'orange'}
+        tsUICommon.createButton({container: topBar, element: 'span', text:props.text, style: `color:${props.color}; padding-left:15px`, attr: {"current-state" : 'show', "hide-candidate-property" : "hideH1b"}, onclick: _toggleSearchResults});
+
+        props = hideCandidates.hideDisqualified ? { text: 'Show Disqualified', color: 'yellow'} : { text: 'Hide Disqualified', color: 'orange'}
+        tsUICommon.createButton({container: topBar, element: 'span', text:props.text, style: `color:${props.color}; padding-left:15px`,attr: {"current-state" : 'show', "decorate" : "true", "hide-candidate-property" : "hideDisqualified"}, onclick: _toggleSearchResults});
+
+        props = hideCandidates.hideNoKeyword ? { text: 'Show No KW Matches', color: 'yellow'} : { text: 'Hide No KW Matches', color: 'orange'}
+        tsUICommon.createButton({container: topBar, element: 'span', text:'Hide No KW Matches', style: `color:${props.color}; padding-left:15px`, attr: {"current-state" : 'show', "decorate" : "true", "hide-candidate-property" : "hideNoKeyword"}, onclick: _toggleSearchResults});
+
+    }
+
     const _displayTSConfirmedSkillsForSearchResultList = async () => {
         let liElements = null;
 
@@ -82,6 +133,7 @@
             const candidate = candidates.find(c => c.memberId === memberIds[i]);
             if (candidate) {
                 tsConfirmCandidateSkillService.displayPhoneAndEmail(liElements[i], candidate);
+                tsConfirmCandidateSkillService.displayFlagIndianName(liElements[i], candidate)
                 tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(liElements[i], candidate);
                 tsConfirmCandidateSkillService.displayTSNote(liElements[i], candidate);
             }
@@ -137,6 +189,7 @@
         await tsCommon.sleep(1500);
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS) {
             _bindToElements();
+            _renderTSFilterButtonsOnTopBar();
         }
 
         $('a[class*="page-link"]').click(() => {

@@ -1,5 +1,5 @@
 (() => {
-    const _technicalTitleWords = ['developer', 'programmer', 'engineer', 'engr ', ' edi ', ' (edi) ', 'software ', 'architect', 'qa ', 'ios ', 'android ', 'sdet', 'quality assurance', 'user experience', 'ui/ux', 'ui\\ux', 'ux/ui', 'ux\\ui', 'product designer' ]
+    const _technicalTitleWords = ['developer', 'programmer', 'engineer', 'engr ', ' edi ', ' (edi) ', 'software ', 'architect', 'qa ', 'ios ', 'android ', 'sdet', 'quality assurance', 'user experience', 'ui/ux', 'ui\\ux', 'ux/ui', 'ux\\ui', 'product designer', 'azure ', ' azure', 'java', 'angular', 'react js', 'reactjs', 'vue js', 'vuejs', 'aws ']
     const _eliminationWords = ['student', 'prime digital', 'recruit', 'sales', ' hr', 'hr '];
     const _managementWords = ['manager', 'director', 'vice pres', 'vp ', ' vp', 'exec.', 'executive', 'president', 'ceo', 'founder'];
     const _ownerEliminationWords = ['product owner', 'project owner', 'team owner']
@@ -83,7 +83,11 @@
     }
 
     const _analyzeCurrentlyWorkingPositions = (candidate) => {
-        let currentPositions = candidate.positions.filter(p => !p.endDateMonth);
+        if (!candidate.currentPositions){
+            candidateRepository.stringifyProfile(candidate);
+        }
+
+        let currentPositions = candidate.currentPositions || [];
 
         if (currentPositions.length === 0){
             // They aren't currently working, get their positions within the last year
@@ -91,7 +95,12 @@
             currentPositions = candidate.positions.filter(p => p.endDateYear >= backYear);
         }
 
-        candidate.isTechnicallyRelevant = currentPositions.filter(p => _checkIfTechnicallyRelevant(p)).length > 0;
+        candidate.isTechnicallyRelevant = _checkIfTechnicallyRelevant({title: candidate.headline});
+
+        if (!candidate.isTechnicallyRelevant){
+            candidate.isTechnicallyRelevant = currentPositions.filter(p => _checkIfTechnicallyRelevant(p)).length > 0;
+        }
+
         candidate.isManagement = currentPositions.filter(p => _checkIfManagement(p)).length > 0;
         candidate.isIntern = currentPositions.filter(p => _checkIfInternship(p)).length > 0;
 
@@ -161,11 +170,43 @@
         c.grades = (c.grades) ? { ...c.grades, jobJumper } : { jobJumper };
     }
 
+    const _checkIfJobJumper = (candidate, technicalPositions) => {
+        if ((!Array.isArray(technicalPositions)) || technicalPositions.length === 0){
+            return false;
+        }
+
+        const currentTechnicalPosition = technicalPositions.filter(c => c.current === true);
+        if (currentTechnicalPosition && currentTechnicalPosition.length > 0){
+            // Check if they've been on their current job for more than 19 months
+            const currentPositionsLongTime = currentTechnicalPosition.filter(p => p.durationInMonths > 19).length;
+            if (currentPositionsLongTime === currentTechnicalPosition.length){
+                return false;
+            }
+        }
+
+        const pastPositions = technicalPositions.filter(p => ((p.current === false) || (!p.endDateYear)));
+        if (pastPositions.length < 3){
+            return false;
+        }
+
+        const totalJobsJumped = candidate.jumpedJobCount || 0;
+        const maxJumpsAllowed = (technicalPositions.length / 2);
+        const isRatioHigh = totalJobsJumped >= maxJumpsAllowed;
+
+        if (isRatioHigh){
+            const breakHereForJobJumper = 0;
+        }
+
+        return isRatioHigh;
+    }
+
+
     const _buildCandidateTechnicalYearsString = (candidate) => {
         let results = [];
         const technicalPositions = candidate.positions ? candidate.positions.filter(p => p.isTechnicallyRelevant) : [];
 
         let totalMonths = 0;
+        let jumpedJobCount = 0;
 
         for (let i = 0; i < technicalPositions.length; i++){
             const p = technicalPositions[i];
@@ -174,9 +215,16 @@
             const years = Number.parseInt(months / 12);
             const monthsRemaining = months % 12;
 
+            if (totalMonths < 14){
+                jumpedJobCount += 1;
+            }
+
             const result = (p.current === true) ? `${years}y${monthsRemaining}m c --- "${p.title}"` : `${years}y${monthsRemaining}m --- "${p.title}"`;
             results.push(result);
         }
+
+        candidate.jumpedJobCount = jumpedJobCount;
+        candidate.isJobJumper = _checkIfJobJumper(candidate, technicalPositions);
 
         candidate.technicalTotalMonths = totalMonths;
         return (results.length > 0) ? results.join("<br/>") : 'None';
@@ -233,6 +281,7 @@
         }
 
         let searchText =  (`${position.title ? position.title : ''} ${position.description ? position.description : ''}`);
+        searchText = tsUICommon.cleanseTextOfHtml(searchText);
         searchText = searchText.toLowerCase();
 
         const eliminate = _eliminationWords.filter(w => searchText.indexOf(w) >= 0);
@@ -354,6 +403,10 @@
         analyzeCandidatePositions = _analyzeCandidatePositions;
         analyzeCandidatesPositions = _analyzeCandidatesPositions;
         processCompanyAnalytics = _processCompanyAnalytics;
+        calculateTotalTechnicalYears = (c) => {
+            _analyzeASingleCandidatesPositions(c);
+            _buildCandidateTechnicalYearsString(c);
+        }
     }
 
     window.positionAnalyzer = new PositionAnalyzer();

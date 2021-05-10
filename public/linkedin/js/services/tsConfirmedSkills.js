@@ -99,6 +99,51 @@
         });
     }
 
+    const _displayFlagIndianName = (container, candidate) => {
+        if (!candidate.origin) {
+            const div = document.createElement('div');
+            const firstName = $(document.createElement('span'))
+                                .attr('style', 'color:blue; padding-left:15px')
+                                .attr('memberId', candidate.memberId)
+                                .text(`${candidate.firstName}`)
+                                .click((e) => {
+                                    const memberId = $(e.target).attr('memberId');
+                                    candidateController.flagOrigin(memberId, 'India', ['firstName']);
+                                    $(e.target).attr('style', 'color:green; padding-left:15px');
+                                });
+
+            const lastName = $(document.createElement('span'))
+                                .attr('style', 'color:blue; padding-left:45px')
+                                .attr('memberId', candidate.memberId)
+                                .text(`${candidate.lastName}`)
+                                .click((e) => {
+                                    const memberId = $(e.target).attr('memberId');
+                                    candidateController.flagOrigin(memberId, 'India', ['lastName']);
+
+                                    $(e.target).attr('style', 'color:green; padding-left:45px');
+                                });
+
+            const both = $(document.createElement('span'))
+                                .attr('style', 'color:blue; padding-left:45px')
+                                .attr('memberId', candidate.memberId)
+                                .text('Both')
+                                .click((e) => {
+                                    const memberId = $(e.target).attr('memberId');
+                                    candidateController.flagOrigin(memberId, 'India', ['firstName', 'lastName']);
+
+                                    $(e.target).attr('style', 'color:green; padding-left:45px');
+                                });
+
+            $(div).text('sponsor indicator')
+                    .append(firstName)
+                    .append(lastName)
+                    .append(both);
+
+            $(container).append(div);
+        }
+
+    }
+
     const _displayTsNotes = (container, candidate) => {
         const div = document.createElement('div');
         $(div).attr('id', 'tsNotesDiv')
@@ -193,6 +238,7 @@
 
     class TSConfirmCandidateSkillService {
         displayTSConfirmedSkillsForCandidate = _displayTSConfirmedSkillsForCandidate;
+        displayFlagIndianName = _displayFlagIndianName;
         displayTSNote = _displayTsNotes;
         displayPhoneAndEmail = _displayPhoneAndEmail;
         getTSConfirmedSkillsList = () => { JSON.parse(JSON.stringify(confirmedSkillsList));  }

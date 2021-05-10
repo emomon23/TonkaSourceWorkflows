@@ -565,16 +565,22 @@
             candidate = candidateOrMemberId;
         }
         else if (candidateOrMemberId && !isNaN(candidateOrMemberId)){
-            await _getEntireCandidateList();
-            let intMemberId = Number.parseInt(candidateOrMemberId);
-            candidate = _entireCandidateList.find(c => c.memberId === intMemberId)
+            candidate = await candidateRepository.get(candidateOrMemberId);
+        }
+
+        if (candidate){
+            candidateRepository.stringifyProfile(candidate);
         }
 
         return candidate;
     }
 
     const _matchOrFilters = (candidateString, orFiltersIndex) => {
-        let result = null;
+        let result = {
+            totalGroups: 0,
+            groupMatch: 0,
+            missingGroups: []
+        };
 
         if (!orFiltersIndex){
             return result;
@@ -586,19 +592,28 @@
                 break;
             }
 
+            result.totalGroups += 1;
             const orKeyWords = orFiltersIndex[key];
-            if (!tsString.containsAny(candidateString.toLowerCase(), orKeyWords)){
-                result = orKeyWords.join(',');
-                break;
+            if (tsString.containsAny(candidateString.toLowerCase(), orKeyWords)){
+                result.groupMatch += 1;
+            }
+            else {
+                result.missingGroups = result.missingGroups.concat(orKeyWords);
             }
         }
 
+        result.allGroupsFound = result.groupMatch === result.totalGroups;
         return result;
     }
 
     const _matchCandidateAboutSummaryCurrentPositions = (candidate, matchCriteria) => {
         if (! (matchCriteria && matchCriteria.aboutSummaryCurrentJobKeywordsFilter)){
-            return null;
+            return  {
+                totalGroups: 0,
+                groupMatch: 0,
+                missingGroups: [],
+                allGroupsFound: true
+            };
         }
 
         let candidateString = `${candidate.headline} ${candidate.summary}`;
@@ -611,7 +626,12 @@
 
     const _matchCandidateWholeProfile = (candidate, matchCriteria) => {
         if (! (matchCriteria && matchCriteria.profileContainsKeywordsFilter)){
-            return null;
+            return  {
+                totalGroups: 0,
+                groupMatch: 0,
+                missingGroups: [],
+                allGroupsFound: true
+            };
         }
 
         const profileString = candidate.stringifiedProfile ? candidate.stringifiedProfile : candidateRepository.stringifyProfile(candidate);
@@ -652,52 +672,70 @@
             return { matched:false, reason: "Can't find candidate in db"}
         }
 
+        let profileKeywordMatch = _matchCandidateWholeProfile(candidate, matchCriteria);
+        let aboutSummaryMatch = _matchCandidateAboutSummaryCurrentPositions(candidate, matchCriteria);
 
-        if (matchCriteria.isManagement && candidate.isManagement !== matchCriteria.isManagement){
-            return { candidate, matched:false, reason: "isManagement" };
+
+        if (matchCriteria.ignoreManagement && candidate.isManagement === true){
+            return { profileKeywordMatch, aboutSummaryMatch, candidate, matched:false, reason: "Management" };
         }
 
         if (matchCriteria.isTechnicallyRelevant && candidate.isTechnicallyRelevant !== matchCriteria.isTechnicallyRelevant){
-            return {candidate, matched:false, reason: "not tech relevant" };
+            return {profileKeywordMatch, aboutSummaryMatch, candidate, matched:false, reason: "Not Tech Relevant" };
         }
 
         const candidateTechnicalTotalMonths = candidate.technicalTotalMonths && !isNaN(candidate.technicalTotalMonths) ? Number.parseInt(candidate.technicalTotalMonths) : 0;
         const technicalTotalMonthsFilter = matchCriteria.technicalTotalMonths && !isNaN(matchCriteria.technicalTotalMonths) ? Number.parseInt(matchCriteria.technicalTotalMonths) : null;
 
         if (technicalTotalMonthsFilter && candidateTechnicalTotalMonths < technicalTotalMonthsFilter){
-            return { candidate, matched:false, reason : `totTech: ${candidateTechnicalTotalMonths}` };
+            return { profileKeywordMatch, aboutSummaryMatch, candidate, matched:false, reason : `Total Tech Months: ${candidateTechnicalTotalMonths}` };
         }
 
         if (matchCriteria.ignoreJustStarted && candidate.currentPositions){
             const justStarted = candidate.currentPositions.filter(p => p.durationInMonths < 9);
             if (justStarted.length){
-                return { candidate, matched:false, reason: "just started a gig" };
+                return { profileKeywordMatch, aboutSummaryMatch, candidate, matched:false, reason: "Just Started Gig" };
             }
         }
 
-
-        let profileMissing = _matchCandidateWholeProfile(candidate, matchCriteria);
-        let aboutSummaryMissing = _matchCandidateAboutSummaryCurrentPositions(candidate, matchCriteria);
-
         // check if we should scrape the profile details
-        if (profileMissing || aboutSummaryMissing && matchCriteria.addToCurrentProject){
+        if (matchCriteria.addToCurrentProject && !(profileKeywordMatch.allGroupsFound && aboutSummaryMatch.allGroupsFound)){
             const hasProfileBeenScraped = _checkIfCandidateProfileBeenScraped(candidate);
             if (!hasProfileBeenScraped){
                 candidate = await _scrapeCandidateProfile(candidate);
-                profileMissing = _matchCandidateWholeProfile(candidate, matchCriteria);
-                aboutSummaryMissing = _matchCandidateAboutSummaryCurrentPositions(candidate, matchCriteria);
+                profileKeywordMatch = _matchCandidateWholeProfile(candidate, matchCriteria);
+                aboutSummaryMatch = _matchCandidateAboutSummaryCurrentPositions(candidate, matchCriteria);
             }
         }
 
-        if (profileMissing){
-            return { candidate, matched:false, reason: `profile missing ${profileMissing}` };
+
+        const result = { candidate, profileKeywordMatch, aboutSummaryMatch, matched: true };
+        result.allKeywordGroupsFound = profileKeywordMatch.allGroupsFound && aboutSummaryMatch.allGroupsFound;
+        result.sumGroupsFound = profileKeywordMatch.groupMatch + aboutSummaryMatch.groupMatch;
+
+        result.matchDescription = `Profile Keyword Match: ${profileKeywordMatch.groupMatch} of ${profileKeywordMatch.totalGroups}. `
+
+        if (aboutSummaryMatch.totalGroups) {
+            result.matchDescription += `About Keyword Match: ${aboutSummaryMatch.groupMatch} of ${aboutSummaryMatch.totalGroups}`
         }
 
-        if (aboutSummaryMissing){
-            return { candidate, matched:false, reason: `about summary missing ${aboutSummaryMissing}` };
-        }
+        return result;
+    }
 
-        return { candidate, matched: true }
+    const _flagOrigin = async (memberId, originString, candidatePropertiesFlagged) => {
+        const candidate = await candidateRepository.get(memberId);
+        if (candidate){
+            const namesToFlag = [];
+            candidatePropertiesFlagged.forEach((propKey) => {
+                if (candidate[propKey] && typeof(candidate[propKey]) === "string"){
+                    namesToFlag.push(candidate[propKey]);
+                }
+            });
+
+            candidate.origin = originString;
+            await candidateRepository.update(candidate);
+            await originRepository.flagPersonNames(originString, namesToFlag);
+        }
     }
     class CandidateController {
         saveContactInfo = _saveContactInfo;
@@ -714,6 +752,7 @@
         searchOnSkills = _searchOnSkills;
         getConfirmedTSSkillKeys = _getConfirmedTSSkillKeys;
         findCandidatesOnConfirmedSkills = _findCandidatesOnConfirmedSkills;
+        flagOrigin = _flagOrigin;
 
         // loadLotsOfData = _loadLotsOfData;
     }

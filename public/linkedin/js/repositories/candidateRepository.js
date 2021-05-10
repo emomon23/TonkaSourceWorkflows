@@ -49,61 +49,10 @@
         return filteredList;
     }
 
-    const _calculatePositionDurationInMonths = (p) => {
-        if (!p){
-            throw new Error("Unable to calculate duration on a null position");
-        }
-
-        const startDate = statistician.createDateFromMonthAndYear(p.startDateMonth, p.startDateYear)
-        const endDate = statistician.createDateFromMonthAndYear(p.endDateMonth, p.endDateYear);
-        return statistician.calculateMonthsBetweenDates(startDate, endDate);
-}
-
-    const _checkIfJobJumper = (candidate, technicalPositions) => {
-        if ((!Array.isArray(technicalPositions)) || technicalPositions.length === 0){
-            return false;
-        }
-
-        if (candidate.currentPositions && candidate.currentPositions.length > 0){
-            // Check if they've been on their current job for more than 19 months
-            const currentPositionsLongTime = candidate.currentPositions.filter(p => p.durationInMonths > 19).length;
-            if (currentPositionsLongTime === candidate.currentPositions.length){
-                return false;
-            }
-        }
-
-        const pastPositions = technicalPositions.filter(p => ((p.current === false) || (!p.endDateYear)));
-        if (pastPositions.length < 3){
-            return false;
-        }
-
-        const jobJumpCount = candidate.jobJumpCount || 0;
-
-        return jobJumpCount >= technicalPositions.length / 2;
-    }
-
     const _calculateCandidateTechnicalYearsNow = (candidate) => {
-        const technicalPositions = candidate.positions ? candidate.positions.filter(p => p.isTechnicallyRelevant && !p.isManagement) : [];
-
-        let totalMonths = 0;
-        let jumpedJobCount = 0;
-
-        for (let i = 0; i < technicalPositions.length; i++){
-            const p = technicalPositions[i];
-            const positionDuration = _calculatePositionDurationInMonths(p);
-            p.durationInMonths = positionDuration;
-
-            if (positionDuration < 14){
-                jumpedJobCount += 1;
-            }
-
-            totalMonths += positionDuration;
+        if (candidate.isJobJumper === undefined || candidate.isJobJumper === null){
+            positionAnalyzer.calculateTotalTechnicalYears(candidate);
         }
-
-        candidate.technicalTotalMonths = totalMonths;
-        candidate.jumpedJobCount = jumpedJobCount;
-        candidate.isJobJumper = _checkIfJobJumper(candidate, technicalPositions);
-
     }
 
     const _storeFactory = baseIndexDbFactory.createStoreFactory(TONKA_SOURCE_DATABASE, VERSION, SCHEMA);

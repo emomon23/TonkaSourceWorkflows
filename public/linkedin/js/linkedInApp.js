@@ -286,7 +286,10 @@
         console.log(`fireConnectionRequestBlast DONE.  attempted ${currentMemberIdsArray.length} connection requests`);
     }
 
-    const _searchProfilesForKeywords = (data) => {
+    const _searchProfilesForKeywords = async (data) => {
+        console.log("_searchProfilesForKeywords entered!");
+        await tsCommon.sleep(500);
+
         linkedInSearchResultsScraper.searchProfilesForKeywords(data);
     }
 

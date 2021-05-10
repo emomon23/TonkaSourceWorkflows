@@ -1,25 +1,42 @@
 (function () {
     const _localStorageItemName = 'tsSearchResults_ScrapedCandidates';
     const _localStorageLastCandidateProfile = 'tsLastCandidateProfile';
+
     let _pageCandidates = [];
     let _pageLiTags = {};
     let _keepGatheringJobSeekerExperience = true;
     let _keepWalkingResultsPages = true;
     let _jobsGathered = {};
     let _user = null;
+    let _indiaNames = null;
+
+    const _calculateOrigin = (candidate) => {
+        const firstNameKey = candidate.firstName.toLowerCase();
+        const lastNameKey = candidate.lastName.toLowerCase();
+
+        if (_indiaNames[firstNameKey] || _indiaNames[lastNameKey]){
+            return _indiaNames.originName
+        }
+
+        return null;
+    }
 
     const _cleanseCandidateData = (candidatesInResults) => {
        candidatesInResults.forEach((c) => {
             const firstAndLastName = tsString.extractFirstAndLastNameFromCandidate(c);
-
-            c.firstName = firstAndLastName.firstName;
-            c.lastName = firstAndLastName.lastName;
-
-            c.city = tsUICommon.cleanseTextOfHtml(c.city);
-            c.industry = tsUICommon.cleanseTextOfHtml(c.industry);
-            c.headline = tsUICommon.cleanseTextOfHtml(c.headline);
-            c.summary = tsUICommon.cleanseTextOfHtml(c.summary);
-            _cleanJobHistory(c);
+            if (!firstAndLastName){
+                c.skipThisAsshole = true;
+            }
+            else {
+                c.firstName = firstAndLastName.firstName;
+                c.lastName = firstAndLastName.lastName;
+                c.origin = _calculateOrigin(c);
+                c.city = tsUICommon.cleanseTextOfHtml(c.city);
+                c.industry = tsUICommon.cleanseTextOfHtml(c.industry);
+                c.headline = tsUICommon.cleanseTextOfHtml(c.headline);
+                c.summary = tsUICommon.cleanseTextOfHtml(c.summary);
+                _cleanJobHistory(c);
+            }
        })
     }
 
@@ -489,10 +506,25 @@
 
     const _trimScrapedCandidate = (scraped) => {
         const omitFields = ['APP_ID_KEY', 'CONFIG_SECRETE_KEY', 'authToken', 'authType', 'canSendMessage', 'companyConnectionsPath', 'currentPositions', 'degree', 'extendedLocationEnabled', 'facetSelections', 'findAuthInputModel', 'graceHopperCelebrationInterestedRoles', 'willingToSharePhoneNumberToRecruiters', 'vectorImage', 'isBlockedByUCF', 'isInClipboard', 'isOpenToPublic', 'isPremiumSubscriber', 'memberGHCIInformation', 'memberGHCInformation', 'memberGHCPassportInformation', 'pastPositions', 'niid', 'networkDistance', 'companyConnectionsPathNum', 'familiarName', 'fullName', 'isOpenProfile', 'memberInATSInfo', 'passedPrivacyCheck', 'projectStatuses', 'prospectId', 'views'];
-        const result = _.omit(scraped, omitFields);
+        let result = _.omit(scraped, omitFields);
+
+        if (result.origin === null){
+            result = _.omit(result, ['origin'])
+        }
 
         result.lastScrapedBy =  linkedInConstants.pages.RECRUITER_SEARCH_RESULTS;
         return result;
+    }
+
+    const _flagIndianListItems = (candidates) => {
+        const indiaCandidates = candidates.filter(c => c.origin === 'India');
+
+        indiaCandidates.forEach((c) => {
+            const li = $(`#search-result-${c.memberId}`)[0];
+            if (li){
+                $(li).attr('is-indian', true);
+            }
+        })
     }
 
     const _interceptSearchResults = async (responseObj) => {
@@ -505,6 +537,7 @@
         _pageLiTags = {};
 
         _user = await linkedInApp.getAlisonLoggedInUser();
+        _indiaNames = await originRepository.get('India');
 
         if (candidatesInResults && candidatesInResults.length > 0){
             await _waitForResultsHTMLToRender(candidatesInResults[candidatesInResults.length - 1]);
@@ -518,34 +551,37 @@
 
             for (let i = 0; i < candidatesInResults.length; i++) {
                 const candidate = candidatesInResults[i];
-                // eslint-disable-next-line no-await-in-loop
-                await _scrapeCandidateHtml(candidate);
-
-                _pageCandidates.push(candidate);
-
-                // Process Statistics
-                // Put the skills on each position
-                positionAnalyzer.analyzeCandidatePositions(candidate);
-                candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
-
-                // Calculate Skill Statistics Grades
-                statistician.calculateSkillsStatistics([candidate.statistics], false);
-
-                _displayGrades(candidate);
-
-                console.log({candidate});
-
-                const trimmedCandidate = _trimScrapedCandidate(candidate);
-
-                try {
+                if (!candidate.skipThisAsshole){
                     // eslint-disable-next-line no-await-in-loop
-                    await candidateController.saveCandidate(trimmedCandidate);
-                } catch (e) {
-                    tsCommon.log(e.message, 'ERROR');
+                    await _scrapeCandidateHtml(candidate);
+
+                    _pageCandidates.push(candidate);
+
+                    // Process Statistics
+                    // Put the skills on each position
+                    positionAnalyzer.analyzeCandidatePositions(candidate);
+                    candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
+
+                    // Calculate Skill Statistics Grades
+                    statistician.calculateSkillsStatistics([candidate.statistics], false);
+
+                    _displayGrades(candidate);
+
+                    console.log({candidate});
+
+                    const trimmedCandidate = _trimScrapedCandidate(candidate);
+
+                    try {
+                        // eslint-disable-next-line no-await-in-loop
+                        await candidateController.saveCandidate(trimmedCandidate);
+                    } catch (e) {
+                        tsCommon.log(e.message, 'ERROR');
+                    }
                 }
             }
 
             _displaySkillMatchAnalysis(candidatesInResults);
+            _flagIndianListItems(candidatesInResults);
 
             linkedInRecruiterFilter.scrapeLinkedSearchFilters();
             const companyAnalytics = positionAnalyzer.processCompanyAnalytics(candidatesInResults);
@@ -553,8 +589,10 @@
         }
 
         if (window.decorateSearchResultsFilter) {
-            _decorateResultMatches();
+            _searchProfilesForKeywords(decorateSearchResultsFilter);
         }
+
+        _updateCandidateDisplayedInResultList();
     }
 
     const _addCurrentPageOfJobSeekersToProject = async () => {
@@ -635,22 +673,52 @@
         return _pageCandidates && _pageCandidates.map ? _pageCandidates.map(c => c.memberId) : [];
     }
 
-    const _decorateMember = (memberId, color, misMatchReason) => {
-        const label = $(`#search-result-${memberId} h3 a`)[0];
-        if (!label){
+    const _decorateMember = (memberId, color, text) => {
+        const container = $(`#search-result-${memberId} div[class*="profile-grade-container"]`)[0];
+        if (!container){
             return;
         }
 
-        $(label).attr('style', `color:${color}`)
+        if (text){
+            const label = document.createElement('div');
+            $(label).attr('style', `color:${color}; margin-top:3px`)
+                    .attr('class', 'ts-decorated-profile')
+                    .text(text);
 
-        if (misMatchReason){
-            const currentText = $(label).text();
-            $(label).text(`${currentText} - (${misMatchReason})`);
+            $(container).append(label);
+        }
+    }
+
+    const _flagJobJumper = (memberId) => {
+        const label = $(`#search-result-${memberId} h3 a`)[0];
+        if (label){
+            $(label).attr('is-job-jumper', 'true')
+            const text = $(label).text() + ' - * JJ';
+            $(label).text(text)
+        }
+    }
+
+    const _disqualifyCandidateHtml = (memberId) => {
+        const label = $(`#search-result-${memberId}`)[0];
+        if (label){
+            $(label).attr('ts-disqualified', 'true');
+        }
+    }
+
+    const _flagCandidateHTMLNoKeywordsFound = (memberId) => {
+        const label = $(`#search-result-${memberId}`)[0];
+        if (label){
+            $(label).attr('ts-zero-keyword-match', 'true');
         }
     }
 
     const _searchProfilesForKeywords = async (data) => {
+        $('li').removeAttr('ts-disqualified')
+                .removeAttr('ts-zero-keyword-match');
+
+        $('.ts-decorated-profile').remove();
         const memberIds = await _getCurrentSearchResultsPageListOfMemberIds();
+
         for (let m = 0; m < memberIds.length; m++){
             const memberId = memberIds[m];
             // eslint-disable-next-line no-await-in-loop
@@ -658,16 +726,76 @@
 
             if (mismatchReason.reason){
                 _decorateMember(memberId, 'red', mismatchReason.reason);
+                _disqualifyCandidateHtml(memberId);
             }
             else {
-                const jj = mismatchReason.isJobJumper ? ' - *JJ ' : '';
-                const color = mismatchReason.matchCount > 0 ? 'green' : 'black';
-                _decorateMember(memberId, color, `match count: ${mismatchReason.matchCount}${jj}`);
+                if (mismatchReason.sumGroupsFound === 0){
+                    _flagCandidateHTMLNoKeywordsFound(memberId);
+                }
+                const color = mismatchReason.sumGroupsFound > 0 ? 'green' : 'orange';
+                _decorateMember(memberId, color, mismatchReason.matchDescription);
+            }
+
+
+            if (mismatchReason && mismatchReason.candidate && mismatchReason.candidate.isJobJumper){
+                _flagJobJumper(memberId);
             }
         }
 
 
-        window.decorateSearchResultsFilter = matchFilter;
+        window.decorateSearchResultsFilter = data;
+        _updateCandidateDisplayedInResultList();
+    }
+
+
+    const _shouldThisListItemBeHidden = (listItem, whatNeedsHiding) => {
+        let result = false;
+
+        result = whatNeedsHiding.hideH1b && $(listItem).attr('is-indian') === "true";
+        result = result || (whatNeedsHiding.hideDisqualified && $(listItem).attr('ts-disqualified') === "true");
+        result = result || (whatNeedsHiding.hideNoKeyword && $(listItem).attr('ts-zero-keyword-match') === "true");
+
+        return result;
+    }
+
+    const getTsCounterSpan = () => {
+        const topBar = $('#top-bar')[0];
+        let result = $('#ts-search-result-count')[0];
+
+        if (!result){
+            result = $(document.createElement('span'))
+                        .attr('id', 'ts-search-result-count')
+                        .attr('style', `padding-left:15px; padding-right:10px; color:orange; font-weight:bold`);
+
+            $(topBar).append(result);
+        }
+
+        return result;
+    }
+
+    const _updateCandidateDisplayedInResultList = () => {
+        if (!window.hideCandidates){
+            return;
+        }
+
+        let counter = 0;
+        const listItems = $('li[id*="search-result"]');
+        let { hideH1b, hideDisqualified, hideNoKeyword} = window.hideCandidates;
+
+        for (let i = 0; i < listItems.length; i++){
+            const listItem = listItems[i];
+            const needToHide = _shouldThisListItemBeHidden(listItem, {hideH1b, hideDisqualified, hideNoKeyword});
+            if (needToHide){
+                $(listItem).hide();
+            }
+            else {
+                counter += 1;
+                $(listItem).show();
+            }
+        }
+
+        const tsCounter = getTsCounterSpan();
+        $(tsCounter).text(`TS Count: ${counter}`);
     }
 
     class LinkedInSearchResultsScraper {
@@ -685,6 +813,7 @@
         getCurrentSearchResultsPageListOfMemberIds = _getCurrentSearchResultsPageListOfMemberIds;
         interceptSearchResults = _interceptSearchResults;
 
+        updateCandidateDisplayedInResultList = _updateCandidateDisplayedInResultList;
         searchProfilesForKeywords = _searchProfilesForKeywords;
         gatherContactInfoFromSearchResults = async () => { await _touchSearchResultsPages(100, false, true );  }
     }

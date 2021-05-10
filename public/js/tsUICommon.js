@@ -59,6 +59,26 @@
         return $(button);
     }
 
+    const _createButton = (desiredButton) => {
+        // container: topBar, element: 'span', text:'Only Keyword Matches', attr: {currentState: 'show'}, style: 'color:orange; padding-left:15px', onclick: _toggleNoKeywordMatches
+        const button = document.createElement(desiredButton.element || 'button');
+        const style = desiredButton.style || '';
+
+        $(button).text(desiredButton.text)
+                .attr('style', style);
+
+        $(button).bind('click', desiredButton.onclick);
+
+        if (desiredButton.attr){
+            for (let key in desiredButton.attr){
+                const value = desiredButton.attr[key];
+                $(button).attr(key, value);
+            }
+        }
+
+        $(desiredButton.container).append(button);
+    }
+
     const _findDomElements = (selector) => {
         if ($(selector).length === 0){
             return null;
@@ -273,6 +293,7 @@
         debounce = _debounce;
         removeListItem = _removeListItem;
         addButton = _addButton;
+        createButton = _createButton;
         findDomElements = _findDomElements;
         findFirstDomElement = _findFirstDomElement;
         findPreviousElement = _findPreviousElement;

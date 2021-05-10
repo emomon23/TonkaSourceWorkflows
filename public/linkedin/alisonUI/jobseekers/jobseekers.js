@@ -40,7 +40,7 @@ const createAndOrArrays = (elementId) => {
     const data = {};
 
     const rawText = $(`#${elementId}`).val().toLowerCase();
-    const andFilters = rawText.split(' and ');
+    const andFilters = rawText.split(' and ').filter(r => r && r.length > 0);
 
     for (let i = 0; i < andFilters.length; i++){
         const key = `orFilter${i}`;
@@ -54,9 +54,8 @@ const createAndOrArrays = (elementId) => {
 
 const getRawProfileContainsData = () => {
     const data = {
-        decorateResults: $($('#decorateResults')[0]).prop('checked'),
         addToCurrentProject: $($('#addToCurrentProject')[0]).prop('checked'),
-        isManagement: !$($('#ignoreManagement')[0]).prop('checked'),
+        ignoreManagement: !$($('#ignoreManagement')[0]).prop('checked'),
         isTechnicallyRelevant: $($('#isTechnicallyRelevant')[0]).prop('checked'),
         ignoreJustStarted: $($('#ignoreJustStarted')[0]).prop('checked'),
         ignoreJobJumpers: $($('#ignoreJobJumpers')[0]).prop('checked')
@@ -281,6 +280,11 @@ rawKeywordFilter_click = async (e) => {
 
     if (data) {
         window.linkedInConsoleReference.postMessage({action: "searchProfilesForKeywords", parameter: data}, "*");
+
+        setTimeout(() => {
+            window.close();
+        }, 2000);
+
     }
 }
 
@@ -294,6 +298,8 @@ $(document).ready(() => {
 
         const action = d.action;
         const data = d.parameter;
+
+        $($('#decorateButton')[0]).removeAttr('disabled');
 
         if (data) {
             const keyWords = cleanEscapeCharacters(data);

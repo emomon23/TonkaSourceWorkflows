@@ -256,8 +256,15 @@
     }
 
     const _extractFirstAndLastNameFromCandidate = (candidate) => {
-        if (!(candidate && candidate.firstName && candidate.lastName)){
-            console.error({method: '_extractFirstAndLastNameFromCandidate', msg: 'unable to execute method', candidate});
+        if (!candidate){
+            return null;
+        }
+
+        if (!(candidate.firstName && candidate.lastName)){
+            if (!candidate.fullName === "LinkedIn Member"){
+                console.error({method: '_extractFirstAndLastNameFromCandidate', msg: 'unable to execute method', candidate});
+            }
+
             return null;
         }
 
