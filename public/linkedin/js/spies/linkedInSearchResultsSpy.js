@@ -85,8 +85,8 @@
 
     }
 
-    const _renderTSFilterButtonsOnTopBar = () => {
-        const topBar = $('#top-bar')[0];
+    const _renderTSFilterButtonsOnTopBar = async () => {
+        const topBar =  (await tsUICommon.waitForSelector('#top-bar'))[0];
         const hideCandidates = window.hideCandidates ? window.hideCandidates : {};
 
         let props = hideCandidates.hideH1b ? { text: 'Show H1', color: 'yellow'} : { text: 'Hide H1', color: 'orange'}

@@ -1,0 +1,93 @@
+// ==UserScript==
+// @name         Gmail Help[er Finder
+// @namespace    http://tampermonkey.net/
+// @version      0.02
+// @description  try to take over the world!
+// @author       You
+// @domain       https://mail.google.com
+// @include      https://mail.google.com/mail/*
+// @require      http://code.jquery.com/jquery-latest.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/js/tsCommon.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/baseIndexDb.js
+// @grant       none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+     let pollingInterval = null;
+
+     const emptyBodyIndicators = ['Mike EmoCofounder & CEO', 'Joe HarstadCofounder &'];
+
+     window.checkIfBodyIsEmpty = (bodyElement) => {
+         const existingText = bodyElement.textContent;
+
+         if (existingText.length === 0){
+             return true;
+         }
+
+         let result = false;
+         emptyBodyIndicators.forEach((i) => {
+            result = result || existingText.startsWith(i);
+         });
+
+         return result;
+     }
+
+     window.setSubjectBoxes = (subjectText = null) => {
+         const subject = subjectText ? subjectText : window.tsSubjectText;
+         if (!subject){
+             console.log("No subjectText provided and window.tsSubjectText undefined, unable to set subjects")
+             return;
+         }
+
+         document.getElementsByName("subjectbox").forEach((s) => {
+             if ((!s.value) || s.value.length === 0){
+                s.value = subject;
+             }
+         });
+     }
+
+     window.setEmailBodies = (emailBody = null) => {
+         const bodyText = emailBody ? emailBody : window.tsEmailBody;
+
+         if (!bodyText){
+             console.log("no emailBody provided and window.tsEmailBody is undefined, unable to set bodies");
+             return;
+         }
+
+         const bodies = document.querySelectorAll('div[aria-label*="Message Body"]');
+         bodies.forEach((body) => {
+            if (checkIfBodyIsEmpty(body)){
+                body.focus();
+                document.execCommand('insertText', true, bodyText);
+            }
+         });
+     }
+
+     window.setTemplateText = (subject, body) => {
+         window.tsSubjectText = subject;
+         window.tsEmailBody = body;
+     }
+
+     window.setEmailSubjectAndBody = (subject = null, body = null) => {
+         setSubjectBoxes(subject)
+         setEmailBodies(body);
+     }
+
+     window.activateAutoTemplateText = (onTrue_offFalse, subject = null, body = null) => {
+        if (onTrue_offFalse === true){
+            pollingInterval = setInterval(setEmailSubjectAndBody, 2000);
+        }
+        else if (onTrue_offFalse === false) {
+            clearInterval(pollingInterval);
+        }
+        else {
+            console.log(`true or false man, wth is '${onTrue_offFalse}'?`);
+            activateAutoTemplateText(false);
+        }
+     }
+
+     $(document).ready(() => {
+         console.log('gmail helper started');
+     });
+})();

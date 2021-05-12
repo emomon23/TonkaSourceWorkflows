@@ -269,6 +269,27 @@
         return link;
     }
 
+    const _waitForSelector = async (selectorString, maxWaitInSeconds = 8) => {
+        try {
+            let result = $(selectorString);
+
+            for (let i = 0; i < maxWaitInSeconds; i++){
+                if (result.length > 0){
+                    break;
+                }
+
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(1000);
+                result = $(selectorString);
+            }
+
+            return result;
+        }
+        catch (e) {
+            throw new Error(`_waitForSelector('${selectorString}').  ${e.message}`);
+        }
+    }
+
     const _debounce = (func, wait) => {
         let timeout;
 
@@ -291,6 +312,7 @@
         createTooltip = _createTooltip;
         createLink = _createLink;
         debounce = _debounce;
+        waitForSelector = _waitForSelector;
         removeListItem = _removeListItem;
         addButton = _addButton;
         createButton = _createButton;

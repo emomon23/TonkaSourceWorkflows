@@ -37,15 +37,22 @@
         }
     }
 
+    const onTitleCellClick = async (e) => {
+        const button = e.target;
+        const href = $(button).attr('href');
+
+        const jobsWindow = window.open(href);
+        await tsCommon.sleep(3000);
+
+        jobsWindow.postMessage({action: 'autoScrapeCareers'}, "*");
+        $(button).attr('style', "color:orange");
+    }
+
     const _onTitleCellLoad = (d, dataCell) => {
         const careers = d.company.split(' ').join('+');
         const href = `http://www.google.com/search?q=${careers} careers`;
-        const link = document.createElement('a');
-        $(link).attr('href', href)
-                .attr('target', '_blank')
-                .text(d.title);
+        tsUICommon.createButton({container: dataCell, element: 'span', text:d.title, style: `color:blue`, attr: {href}, onclick: onTitleCellClick});
 
-        $(dataCell).append(link);
     }
 
     const _clearCompanyFilter = () => {
