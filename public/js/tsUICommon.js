@@ -46,7 +46,7 @@
         }
     }
 
-    const _addButton = (containerId, buttonId, buttonText, height, width, clickFunction) => {
+    const _addButton = (containerId, buttonId, buttonText, height, width, clickFunction, toolTip = null) => {
         const button = document.createElement("button");
         const container = typeof containerId === "object" ? $(containerId) : $(`#${containerId}`);
         button.id = `${buttonId}_button`;
@@ -55,6 +55,10 @@
 
         $(container).append(button);
         $(button).click(clickFunction);
+
+        if (toolTip && typeof(toolTip) === "string"){
+            $(button).attr('title', toolTip);
+        }
 
         return $(button);
     }

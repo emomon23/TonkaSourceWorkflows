@@ -46,12 +46,17 @@
     }
 
     const _getAllJobs = async (forceRefresh = false) => {
+        const swName = "_getAll";
+        tsCommon.stopWatchStart(swName);
+
         if (forceRefresh === false && _cachedJobs){
             return _cachedJobs;
         }
 
-        const competitors = await competitorRepository.getByType('recruiter');
-        const prospects = await competitorRepository.getByType('prospect');
+         const competitors = await competitorRepository.getByType('recruiter');
+         const prospects = await competitorRepository.getByType('prospect');
+
+         let notCoIdCounter = 0;
 
         _cachedJobs = await jobsRepository.getAll();
         const now = new Date();
@@ -59,12 +64,9 @@
         _cachedJobs.forEach((j) => {
             const jobCompanyName = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
 
-            if (jobCompanyName.indexOf("code42") >= 0){
-                const breakHere = true;
-            }
-
             if (!j.linkedInCompanyId){
-                let linkedInCompanyPotentialMatches = companySummaryRepository.companyNameAndAliasTypeAheadSearch(jobCompanyName);
+                notCoIdCounter += 1;
+                let linkedInCompanyPotentialMatches = companySummaryRepository.aliasSearch(jobCompanyName);
                 linkedInCompanyPotentialMatches = linkedInCompanyPotentialMatches.filter((c) => { return !isNaN(c.companyId) });
 
                 if (linkedInCompanyPotentialMatches.length > 1){
@@ -80,18 +82,22 @@
                 }
             }
             else {
+
                 const foundCompanies =  companySummaryRepository.syncGet(j.linkedInCompanyId);
                 if (foundCompanies && foundCompanies.length === 1){
-                    j.lastContacted = _getLastContactDateFromNotes(foundCompanies[0]);
+                   j.lastContacted = _getLastContactDateFromNotes(foundCompanies[0]);
                 }
             }
 
-            for (let i = 0; i < competitors.length; i++){
-                if (jobCompanyName === competitors[i].name){
-                    j.isRecruiterCompany = true;
-                    break;
+            if (!j.isRecruiterCompany) {
+                for (let i = 0; i < competitors.length; i++){
+                    if (jobCompanyName === competitors[i].name){
+                        j.isRecruiterCompany = true;
+                        break;
+                    }
                 }
             }
+
 
             prospects.forEach((p) => {
                 linkedInCompanyId = (j.linkedInCompanyId || 0);
@@ -108,7 +114,11 @@
             if (j.lastVerified){
                 j.lastVerifiedAge = Number.parseInt(tsCommon.dayDifference(now, j.lastVerified));
             }
+
         });
+
+        const time = tsCommon.stopWatchStop(swName) / 1000;
+        console.log(`_getAllJobs time: ${time}.   NoLICompanyId Count: ${notCoIdCounter}`);
 
         return _cachedJobs;
     }

@@ -46,42 +46,64 @@
 
     window.companySummaryRepository.getCompaniesByNameContains = _getCompaniesByNameContains;
 
-    window.companySummaryRepository.getAll().then(d => window.companySummaryRepository.cachedCompanies = d).catch(e => {});
+    window.companySummaryRepository.getAll().then((companies) => {
+        tsCommon.stopWatchStart('cacheCompanies');
+        console.log('starting cache companies');
+
+        window.companySummaryRepository.cachedCompanyIndex = {tsCompanyGroups:{}};
+        companies.forEach((c) => {
+            if (c.companyId || c.name){
+                c.name = c.name && c.name.toLowerCase ? c.name.toLowerCase() : '';
+                let key = c.companyId ? c.companyId : (c.name);
+                window.companySummaryRepository.cachedCompanyIndex[key] = c;
+
+                if (c.name.length) {
+                    key = c.name.substr(0, 1);
+                    if (!window.companySummaryRepository.cachedCompanyIndex.tsCompanyGroups[key]){
+                        window.companySummaryRepository.cachedCompanyIndex.tsCompanyGroups[key] = [];
+                    }
+
+                    window.companySummaryRepository.cachedCompanyIndex.tsCompanyGroups[key].push(c);
+                }
+            }
+        });
+
+        const time = tsCommon.stopWatchStop('cacheCompanies') / 1000;
+        console.log(`cache Companies stop. time: ${time}`);
+
+        return;
+    }).catch((e) => {
+        console.log(e.message);
+    });
 
     window.companySummaryRepository.syncGet = (idOrName) => {
         let lookFor = isNaN(idOrName) ? idOrName.toLowerCase() : Number.parseInt(idOrName);
-        return companySummaryRepository.cachedCompanies.filter((c) => {
-            const companyId = isNaN(c.companyId) ? c.companyId.toLowerCase() : c.companyId;
-            return (companyId === lookFor);
-        });
+        return companySummaryRepository.cachedCompanyIndex[lookFor];
     }
 
-    window.companySummaryRepository.companyNameAndAliasTypeAheadSearch = (companyNameStartsWithSearch) => {
-        let lookFor = companyNameStartsWithSearch.toLowerCase ? companyNameStartsWithSearch.toLowerCase() : companyNameStartsWithSearch;
-
-        if (isNaN(lookFor)){
-            return window.companySummaryRepository.cachedCompanies.filter((c) => {
-                const name = c.name && c.name.toLowerCase ? c.name.toLowerCase() : '';
-                let result = name.startsWith(lookFor);
-
-                if (!result && c.aliases) {
-                    const aliasMatch = c.aliases.filter((a) => {
-                        const lowerCaseAlias = a.toLowerCase ? a.toLowerCase() : a;
-                        return lowerCaseAlias.startsWith(lookFor);
-                    });
-
-                    result = aliasMatch.length > 0;
-                }
-
-                return result;
-            });
+    window.companySummaryRepository.aliasSearch = (companyNameStartsWithSearch) => {
+        if ((!companyNameStartsWithSearch) || companyNameStartsWithSearch.length === 0){
+            return null;
         }
-        else {
-            lookFor = lookFor.toString();
-            return window.companySummaryRepository.cachedCompanies.filter((c) => {
-                const id = c.companyId.toString();
-                return id.startsWith(lookFor);
-            });
+
+        const lCase = companyNameStartsWithSearch.toLowerCase();
+        const key = lCase.substr(0, 1);
+        const subCompanies = window.companySummaryRepository.cachedCompanyIndex.tsCompanyGroups[key];
+
+        if (subCompanies && subCompanies.length){
+                let matches = subCompanies.filter((c) => {
+                    const nameMatch = c.name.startsWith(lCase);
+                    if (nameMatch){
+                        return true;
+                    }
+
+                    const aliasMatch = c.aliases && c.aliases.length ? c.aliases.find(a => a.startsWith(lCase)) : null;
+                    return aliasMatch ? true : false;
+                });
+
+                return matches;
         }
+
+       return [];
     }
 })();

@@ -1,4 +1,6 @@
 (function () {
+    const _stopWatches = {};
+
     const _log = (toLog, type = 'LOG') => {
         const message = toLog ? toLog.message || toLog : '(no message provided)';
 
@@ -175,6 +177,29 @@
          });
     }
 
+    const _stopWatchStart = (stopWatchName) => {
+        if (typeof(stopWatchName) !== "string" || stopWatchName.length === 0){
+            throw new Error("stopWatch requires a valid stop watch name");
+        }
+
+        _stopWatches[stopWatchName] = { name: stopWatchName, startTime: (new Date()).getTime()};
+    }
+
+    const _stopWatchStop = (stopWatchName) => {
+        if (typeof(stopWatchName) !== "string" || stopWatchName.length === 0){
+            throw new Error("stopWatch requires a valid stop watch name");
+        }
+
+        if (!_stopWatches[stopWatchName]){
+            throw new Error(`Unable to find stopwatch ${stopWatchName}, did you start this watch?`);
+        }
+
+        const now = (new Date()).getTime();
+        const result = now - _stopWatches[stopWatchName].startTime;
+
+        return result;
+    }
+
     const _httpGetTemplate = async (templateName) => {
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonHook/templates/${templateName}/${templateName}.html`;
         const html = await _httpGetText(url);
@@ -294,6 +319,8 @@
         waitTilTrue = _waitTilTrue;
         now = () => { return new Now(); };
         dayDifference = _dayDifference;
+        stopWatchStart = _stopWatchStart;
+        stopWatchStop = _stopWatchStop;
     }
 
     window.tsCommon = new TSCommon();

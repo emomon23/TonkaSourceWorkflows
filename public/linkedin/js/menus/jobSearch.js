@@ -11,7 +11,7 @@
         group: null
     }
 
-    const _toggleCompany = (e) => {
+    const _toggleCompany = async (e) => {
         const btn = e.target;
         const linkedInCompanyId = $(btn).attr('linkedInCompanyId');
 
@@ -19,7 +19,29 @@
         const group = prompt("Which group do you want this company in (eg 'A', 'B')?");
 
         jobsController.toggleProspectStatus(linkedInCompanyId, group);
-        _renderGrid(true);
+
+        const companyNameDiv = $(e.target).parent().parent().find('div')[0];
+        if (companyNameDiv){
+            const groups = await competitorRepository.getDistinctProspectGroups();
+            let text = $(companyNameDiv).text();
+
+            groups.forEach((g) => {
+                text = text.replace(` - (${g.toUpperCase()})`, '');
+            });
+
+            let style = 'font-weight:bold; color:green';
+
+            if (group && group.length){
+                text += ` - (${group.toUpperCase()})`;
+            }
+            else {
+                style = '';
+            }
+
+            $(companyNameDiv).text(text)
+                    .attr('style', style);
+        }
+
     }
 
     const _companyNameClick = (e) => {
@@ -32,7 +54,7 @@
         $(dataCell).append(d.linkedInCompanyLink);
 
         if (!isNaN(d.linkedInCompanyId)){
-            const toggleButton = tsUICommon.addButton(dataCell, `toggle${d.key}`, 'T', 20, 20, _toggleCompany);
+            const toggleButton = tsUICommon.addButton(dataCell, `toggle${d.key}`, 'T', 20, 20, _toggleCompany, 'Assign company id to a group');
             $(toggleButton).attr('linkedInCompanyId', d.linkedInCompanyId);
         }
     }
@@ -315,10 +337,10 @@
         const buttonBar = document.createElement('span');
 
         // (containerId, buttonId, buttonText, height, width, clickFunction)
-        tsUICommon.addButton(buttonBar, 'hideJobsBtn', 'H', 20, 20, _hideJobsActionClick);
-        tsUICommon.addButton(buttonBar, 'flagCompaniesBtn', 'F', 20, 20, _flagJobsActionClick);
-        tsUICommon.addButton(buttonBar, 'deleteJobsBtn', 'D', 20, 20, _deleteJobsActionClick);
-        tsUICommon.addButton(buttonBar, 'assignCompanyNamesBtn', 'A', 20, 20, _associateCompanyNamesActionClick);
+        tsUICommon.addButton(buttonBar, 'hideJobsBtn', 'H', 20, 20, _hideJobsActionClick, 'hide job');
+        tsUICommon.addButton(buttonBar, 'flagCompaniesBtn', 'F', 20, 20, _flagJobsActionClick, 'flag company as recruiter');
+        tsUICommon.addButton(buttonBar, 'deleteJobsBtn', 'D', 20, 20, _deleteJobsActionClick, 'delete job');
+        tsUICommon.addButton(buttonBar, 'assignCompanyNamesBtn', 'A', 20, 20, _associateCompanyNamesActionClick, 'Assign a numeric company id to the selected (highlighted) company rows');
 
         return buttonBar;
     }
