@@ -49,6 +49,8 @@
         const swName = "_getAll";
         tsCommon.stopWatchStart(swName);
 
+        let updateJob = false;
+
         if (forceRefresh === false && _cachedJobs){
             return _cachedJobs;
         }
@@ -62,6 +64,7 @@
         const now = new Date();
 
         _cachedJobs.forEach((j) => {
+            updateJob = false;
             const jobCompanyName = j.company && j.company.toLowerCase ? j.company.toLowerCase() : '';
 
             if (!j.linkedInCompanyId){
@@ -79,10 +82,10 @@
                     const jobCompany = linkedInCompanyPotentialMatches[0];
                     j.linkedInCompanyId =  jobCompany.companyId;
                     j.lastContacted = _getLastContactDateFromNotes(jobCompany);
+                    updateJob = true;
                 }
             }
             else {
-
                 const foundCompanies =  companySummaryRepository.syncGet(j.linkedInCompanyId);
                 if (foundCompanies && foundCompanies.length === 1){
                    j.lastContacted = _getLastContactDateFromNotes(foundCompanies[0]);
@@ -93,6 +96,7 @@
                 for (let i = 0; i < competitors.length; i++){
                     if (jobCompanyName === competitors[i].name){
                         j.isRecruiterCompany = true;
+                        updateJob = true;
                         break;
                     }
                 }
@@ -113,6 +117,10 @@
 
             if (j.lastVerified){
                 j.lastVerifiedAge = Number.parseInt(tsCommon.dayDifference(now, j.lastVerified));
+            }
+
+            if (updateJob){
+                jobsRepository.update(j);
             }
 
         });
