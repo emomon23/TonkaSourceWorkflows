@@ -511,7 +511,10 @@
         const qaManagers = _findRoles(managers, companyIdOrName, [['quality'], ['qa']]);
         const dev = _findRoles(companyCandidates, companyIdOrName, [['software'], ['development'], ['application'], ['technology'], ['engineer']], ['director', 'manager', 'president', 'vp of']);
 
+        const managementWasFound = (ceo && ceo.length) || (cLevel && cLevel.length) || (hr && hr.length) || (managers && managers.length) || (devManagers && devManagers.length) || (qaManagers && qaManagers.length);
+
         return {
+            managementWasFound,
             ceo,
             cLevel,
             hr,

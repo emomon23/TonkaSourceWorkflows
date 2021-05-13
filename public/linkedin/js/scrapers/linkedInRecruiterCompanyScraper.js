@@ -227,37 +227,68 @@
         }
     }
 
-    const _redrawCompanyData = async () => {
-        $(_employeesPart).html('');
-        $(_notesPart).html(`<div>
-            <div style="margin-bottom:15px;" >
-                <span style="font-weight:bold">HISTORY</span>
-                <span><a href='#' style='margin-left: 15px' id='companyNoteLink'>Note</a></span>
-            </div>
-        </div>`);
+    const _showMessage = async (message, color = 'green') => {
+        const tsMsgId = 'liCompanyTsTopCardTsMessage';
+        const getSelector = `#${tsMsgId}`;
+        let msgElement = $(getSelector)[0];
+
+        if (!msgElement){
+            const topCardHeader = $('#topcard div')[0];
+            if (topCardHeader){
+                msgElement = $(document.createElement('span'))
+                                .attr('id', tsMsgId);
+
+                $(topCardHeader).append(msgElement);
+            }
+        }
+
+        $(msgElement).attr('style', `color:${color}; padding-left:15px`)
+                    .text(message);
 
         await tsCommon.sleep(50);
-        $('#companyNoteLink').click(_noteClick);
+    }
 
+    const _redrawCompanyData = async () => {
+        _showMessage('finding business development contacts, stand by...');
         const personnel = await candidateController.findBizDevelopmentContacts(_companyId);
 
-        _createContactsDiv('Dev Mgrs', personnel.devManagers);
-        _createContactsDiv('QA Mgrs', personnel.qaManagers);
-        _createContactsDiv('HR', personnel.hr);
-        _createContactsDiv('CEO', personnel.ceo);
-        _createContactsDiv('C-Level', personnel.cLevel);
-        _createContactsDiv('Developers', personnel.dev);
+        if (personnel && personnel.managementWasFound){
+            _showMessage('');
 
-        _flattenedPersonal = [].concat(personnel.ceo)
-                                    .concat(personnel.cLevel)
-                                    .concat(personnel.hr)
-                                    .concat(personnel.devManagers)
-                                    .concat(personnel.qaManagers)
-                                    .concat(personnel.dev);
+            $(_employeesPart).html('');
+            $(_notesPart).html(`<div>
+                <div style="margin-bottom:15px;" >
+                    <span style="font-weight:bold">HISTORY</span>
+                    <span><a href='#' style='margin-left: 15px' id='companyNoteLink'>Note</a></span>
+                </div>
+            </div>`);
 
-        _displayNotesHistory();
+            await tsCommon.sleep(50);
+            $('#companyNoteLink').click(_noteClick);
 
-        _displayJobs();
+            _createContactsDiv('Dev Mgrs', personnel.devManagers);
+            _createContactsDiv('QA Mgrs', personnel.qaManagers);
+            _createContactsDiv('HR', personnel.hr);
+            _createContactsDiv('CEO', personnel.ceo);
+            _createContactsDiv('C-Level', personnel.cLevel);
+            _createContactsDiv('Developers', personnel.dev);
+
+            _flattenedPersonal = [].concat(personnel.ceo)
+                                        .concat(personnel.cLevel)
+                                        .concat(personnel.hr)
+                                        .concat(personnel.devManagers)
+                                        .concat(personnel.qaManagers)
+                                        .concat(personnel.dev);
+
+
+
+            _displayNotesHistory();
+            _displayJobs();
+        }
+        else {
+            _showMessage("No management for this company", 'red');
+        }
+
     }
 
     class LinkedInRecruiterCompanyScraper {
