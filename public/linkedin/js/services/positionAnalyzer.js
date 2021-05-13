@@ -399,10 +399,24 @@
         return companyAnalytics;
     }
 
+    const _getCurrentPositions = (candidate) => {
+        if (!(candidate && candidate.positions)){
+            return [];
+        }
+
+        return candidate.positions.filter((p) => {
+            const current = p.current === true || p.current === "true";
+            const endMonthExists = p.endDateMonth >= 0 ? true : false;
+            const endYearExists = p.endDateYear ? true : false;
+
+            return current === true || (endMonthExists === false && endYearExists === false)
+        });
+    }
     class PositionAnalyzer {
         analyzeCandidatePositions = _analyzeCandidatePositions;
         analyzeCandidatesPositions = _analyzeCandidatesPositions;
         processCompanyAnalytics = _processCompanyAnalytics;
+        getCurrentPositions = _getCurrentPositions;
         calculateTotalTechnicalYears = (c) => {
             _analyzeASingleCandidatesPositions(c);
             _buildCandidateTechnicalYearsString(c);

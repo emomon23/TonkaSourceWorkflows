@@ -433,6 +433,10 @@
 
 
         const results = allCandidates.filter((c) => {
+            if (!c.currentPositions){
+                c.currentPositions = positionAnalyzer.getCurrentPositions(c);
+            }
+
             if (c.currentPositions && c.currentPositions.length > 0){
                 const found = c.currentPositions.find((p) => { return p.companyId === companyIdOrName || p.companyName.toLowerCase().indexOf(lookFor) >= 0; });
                 return found ? true : false;
