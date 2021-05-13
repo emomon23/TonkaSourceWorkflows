@@ -8,7 +8,8 @@
     let _employeesPart = null;
     let _notesPart = null;
     let _jobsPart = null;
-    let _flattenedPersonal = null;
+    let _noteHistory = null;
+    let _flattenedPersonal = [];
 
     const _getCompanyId = () => {
         const href = window.location.href;
@@ -206,7 +207,7 @@
                                     .attr('class', 'tsNoteHistory')
                                     .attr('style', 'margin-bottom:15px; padding-left:5px');
 
-            $(_notesPart).append(noteDiv);
+            $(_noteHistory).append(noteDiv);
         })
 
     }
@@ -248,6 +249,30 @@
         await tsCommon.sleep(50);
     }
 
+    const _displayNotesLink = async (leaveExisting) => {
+        let html = leaveExisting ? $(_notesPart).html() : '';
+
+        html = `<div>
+                    <div style="margin-bottom:15px;" >
+                        <span style="font-weight:bold">HISTORY</span>
+                        <span><a href='#' style='margin-left: 15px' id='companyNoteLink'>Note</a></span>
+                    </div>
+
+                    <div id='tsNoteHistory'></div>
+                </div>
+
+                ${html}`;
+
+        $(_notesPart).html(html);
+
+        await tsCommon.sleep(50);
+        $('#companyNoteLink').click(_noteClick);
+
+        _noteHistory = $('#tsNoteHistory')[0];
+
+        _displayNotesHistory();
+    }
+
     const _redrawCompanyData = async () => {
         _showMessage('finding business development contacts, stand by...');
         const personnel = await candidateController.findBizDevelopmentContacts(_companyId);
@@ -256,15 +281,7 @@
             _showMessage('');
 
             $(_employeesPart).html('');
-            $(_notesPart).html(`<div>
-                <div style="margin-bottom:15px;" >
-                    <span style="font-weight:bold">HISTORY</span>
-                    <span><a href='#' style='margin-left: 15px' id='companyNoteLink'>Note</a></span>
-                </div>
-            </div>`);
-
-            await tsCommon.sleep(50);
-            $('#companyNoteLink').click(_noteClick);
+            _displayNotesLink(false);
 
             _createContactsDiv('Dev Mgrs', personnel.devManagers);
             _createContactsDiv('QA Mgrs', personnel.qaManagers);
@@ -282,11 +299,11 @@
 
 
 
-            _displayNotesHistory();
             _displayJobs();
         }
         else {
             _showMessage("No management for this company", 'red');
+            _displayNotesLink(true);
         }
 
     }
