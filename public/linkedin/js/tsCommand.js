@@ -136,13 +136,17 @@
         const wdList = $('button[data-control-name*="withdraw_single"]').toArray()
 
         for (let i = 0; i < wdList.length; i++) {
-            $(wdList[i]).click();
-            // eslint-disable-next-line no-await-in-loop
-            await tsCommon.sleep(1000);
-            $('div[role="alertdialog"] button:contains("Withdraw")')[0].click()
+            const t = $(wdList[i]).parent().parent().text();
+            if (t.indexOf('weeks ago') > 0 || t.indexOf('month ago') > 0 || t.indexOf('months ago') > 0) {
+                wdList[i].click();
 
-            // eslint-disable-next-line no-await-in-loop
-            await tsCommon.sleep(200);
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(500);
+                $('div[role="alertdialog"] button:contains("Withdraw")')[0].click()
+
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.sleep(500);
+            }
         }
     }
 
