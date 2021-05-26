@@ -146,6 +146,11 @@
 
                 // eslint-disable-next-line no-await-in-loop
                 await tsCommon.sleep(500);
+
+                const toastWindows = $('button[aria-label*=`Dismiss "Invitation withdrawn" notification 1 of`]');
+                if (toastWindows && toastWindows.length){
+                    $(toastWindows).click();
+                }
             }
         }
     }

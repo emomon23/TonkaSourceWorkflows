@@ -294,6 +294,39 @@
         }
     }
 
+    const _createInput = (container, labelAttributes, inputAttributes) => {
+        let label = null;
+
+        if (labelAttributes){
+            label = $(document.createElement('span'))
+                            .text(labelAttributes.text);
+
+            for (let k in labelAttributes){
+                if (k !== 'text'){
+                    $(label).attr(k, labelAttributes[k]);
+                }
+            }
+
+            $(container).append(label);
+        }
+
+        const input = document.createElement('input');
+        for (let ik in inputAttributes){
+            if (ik !== 'text' && ik !== 'value'){
+                $(input).attr(ik, inputAttributes[ik]);
+            }
+        }
+
+        const value = inputAttributes.value || inputAttributes.text;
+        if (value){
+            $(input).val(value);
+        }
+
+        $(container).append(input);
+
+        return {label, input};
+    }
+
     const _debounce = (func, wait) => {
         let timeout;
 
@@ -315,6 +348,7 @@
         createListItem = _createListItem;
         createTooltip = _createTooltip;
         createLink = _createLink;
+        createInput = _createInput;
         debounce = _debounce;
         waitForSelector = _waitForSelector;
         removeListItem = _removeListItem;

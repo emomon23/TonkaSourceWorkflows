@@ -109,6 +109,37 @@
         company.name = name;
     }
 
+    const _checkIfFirstConnection = (contact) => {
+        const key = linkedInApp && linkedInApp.alisonUserName ? linkedInApp.alisonUserName : 'Mike';
+
+        if (!(contact && contact.alisonConnections)){
+            return null;
+        }
+
+        if (contact.alisonConnections[key] === "1") {
+            return "** 1st";
+        }
+        else {
+            if (Array.isArray(contact.tsNotes)){
+                const lookFor = ['cr', 'conn request', 'connection request']
+                const found = contact.tsNotes.find((n) => {
+                    const lCase = n.toLowerCase();
+                    let result = false;
+                    for (let i = 0; i < lookFor.length; i++){
+                        result = lCase.indexOf(`sent ${lookFor[i]}`) >= 0 || lCase.indexOf(`${lookFor[i]} sent`) >= 0;
+                        if (result){
+                            break;
+                        }
+                    }
+
+                    return result;
+                });
+
+                return found ? 'pending' : null;
+            }
+        }
+    }
+
     const _createContactDiv = (contact) => {
         if (contact.firstName === 'undefined'){
             return null;
@@ -117,9 +148,20 @@
         const div = $(document.createElement('div'))
                     .attr('style', 'margin-bottom:15px; padding-left: 10px');
 
-        const href = `https://www.linkedin.com${contact.linkedInRecruiterUrl}`;
+
+        const href = contact.linkedInRecruiterUrl && contact.linkedInRecruiterUrl.indexOf('https://') >= 0 ?  contact.linkedInRecruiterUrl : `https://www.linkedin.com${contact.linkedInRecruiterUrl}`;
 
         tsUICommon.createLink(div, href, `${contact.firstName} ${contact.lastName}`, '_blank');
+
+        const connectionStatus = _checkIfFirstConnection(contact);
+        if (connectionStatus) {
+            const firstConnectionSpan = $(document.createElement('span'))
+                                            .attr('style', 'padding-left:15px; font-weight:bold; color:green')
+                                            .text(connectionStatus);
+
+            $(div).append(firstConnectionSpan);
+        }
+
         const headline = $(document.createElement('div'))
                     .text(`${contact.headline} - ${contact.location.replace(', United States', '')}`)
 
@@ -228,6 +270,36 @@
         }
     }
 
+    const _onCompanyPhoneNumberUpdated = (e) => {
+        const phoneNumberEntered = $(e.target).val();
+        if (phoneNumberEntered !== _companySummary.phoneNumber){
+            _companySummary.phoneNumber = phoneNumberEntered;
+            companiesController.saveCompanySummary(_companySummary);
+        }
+    }
+
+    const _displayCompanyPhoneNumberTextBox = () => {
+        const phoneNumber = _companySummary.phone || _companySummary.phoneNumber || null;
+
+        const topCardHeader = $('#topcard div')[0];
+        if (topCardHeader){
+            const labelConfig = {
+                text: 'Ph:',
+                style: 'padding-left: 10px'
+            }
+
+            const inputConfig = {
+                value: phoneNumber,
+                style: 'padding-left:5px'
+            }
+
+            const newElements = tsUICommon.createInput(topCardHeader, labelConfig, inputConfig);
+            if (newElements.input){
+                $(newElements.input).bind('blur', _onCompanyPhoneNumberUpdated)
+            }
+        }
+    }
+
     const _showMessage = async (message, color = 'green') => {
         const tsMsgId = 'liCompanyTsTopCardTsMessage';
         const getSelector = `#${tsMsgId}`;
@@ -274,6 +346,8 @@
     }
 
     const _redrawCompanyData = async () => {
+        _displayCompanyPhoneNumberTextBox();
+
         _showMessage('finding business development contacts, stand by...');
         const personnel = await candidateController.findBizDevelopmentContacts(_companyId);
 

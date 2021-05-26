@@ -101,10 +101,13 @@
         throw new Error(`${memberId} is not a valid memberId to search on`)
     }
 
-    const _getEntireCandidateList = async () => {
+    const _getEntireCandidateList = async (stringifyProfiles = true) => {
         if (_entireCandidateList === null){
             _entireCandidateList = await candidateRepository.getAll();
-            candidateRepository.stringifyProfiles(_entireCandidateList);
+            if (stringifyProfiles){
+                // This step REALLY slows down the retrieval
+                candidateRepository.stringifyProfiles(_entireCandidateList);
+            }
         }
 
         return _entireCandidateList;
@@ -429,7 +432,7 @@
             return null;
         }
         const lookFor = companyIdOrName.toLowerCase ? companyIdOrName.toLowerCase() : companyIdOrName;
-        const allCandidates = await _getEntireCandidateList();
+        const allCandidates = await _getEntireCandidateList(false);
 
 
         const results = allCandidates.filter((c) => {
