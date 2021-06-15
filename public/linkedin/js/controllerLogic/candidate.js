@@ -55,7 +55,7 @@
             throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
         }
 
-        const fieldsNotToBeOverridden = ['positions', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
+        const fieldsNotToBeOverridden = ['positions', 'isTsJobSeeker', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
         let existingCandidate = await _getCandidateByMemberId(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
@@ -664,15 +664,19 @@
 
         const url = candidate.linkedInRecruiterUrl;
         const profileWindow = window.open(url);
+        let scrapedCandidate = null;
 
-        await tsCommon.sleep(15000);
-        let scrapedCandidate = await profileWindow.linkedInRecruiterProfileScraper.scrapeProfile(null, candidate.memberId);
-        candidateRepository.stringifyProfile(scrapedCandidate);
+        await tsCommon.waitTilTrue(() => { return profileWindow.linkedInRecruiterProfileScraper ? true : false}, 10000);
+        if (profileWindow.linkedInRecruiterProfileScraper){
+            scrapedCandidate = await profileWindow.linkedInRecruiterProfileScraper.scrapeProfile(null, candidate.memberId);
+            candidateRepository.stringifyProfile(scrapedCandidate);
 
-        linkedInRecruiterProfileScraper.profileLastScrapedDate = (new Date()).getTime();
+            linkedInRecruiterProfileScraper.profileLastScrapedDate = (new Date()).getTime();
+        }
+
         profileWindow.close();
 
-        return scrapedCandidate;
+        return scrapedCandidate ? scrapedCandidate : candidate;
     }
 
     const _getCandidateMismatchReason = async (candidateOrMemberId, matchCriteria) => {
@@ -712,9 +716,9 @@
         if (matchCriteria.addToCurrentProject && !(profileKeywordMatch.allGroupsFound && aboutSummaryMatch.allGroupsFound)){
             const hasProfileBeenScraped = _checkIfCandidateProfileBeenScraped(candidate);
             if (!hasProfileBeenScraped){
-                candidate = await _scrapeCandidateProfile(candidate);
-                profileKeywordMatch = _matchCandidateWholeProfile(candidate, matchCriteria);
-                aboutSummaryMatch = _matchCandidateAboutSummaryCurrentPositions(candidate, matchCriteria);
+              //  candidate = await _scrapeCandidateProfile(candidate);
+              //  profileKeywordMatch = _matchCandidateWholeProfile(candidate, matchCriteria);
+              //  aboutSummaryMatch = _matchCandidateAboutSummaryCurrentPositions(candidate, matchCriteria);
             }
         }
 
@@ -747,6 +751,15 @@
             await originRepository.flagPersonNames(originString, namesToFlag);
         }
     }
+
+    const _toggleIsTsJobSeeker = async (memberId, desiredValue) => {
+        // eslint-disable-next-line no-alert
+        const candidate = await _searchForCandidate(memberId);
+        if (candidate){
+            candidate.isTsJobSeeker = desiredValue;
+            await candidateRepository.update(candidate);
+        }
+    }
     class CandidateController {
         saveContactInfo = _saveContactInfo;
         saveCandidate = _saveCandidate;
@@ -763,7 +776,7 @@
         getConfirmedTSSkillKeys = _getConfirmedTSSkillKeys;
         findCandidatesOnConfirmedSkills = _findCandidatesOnConfirmedSkills;
         flagOrigin = _flagOrigin;
-
+        toggleIsTsJobSeeker = _toggleIsTsJobSeeker;
         // loadLotsOfData = _loadLotsOfData;
     }
 

@@ -29,6 +29,7 @@
                 tsConfirmCandidateSkillService.displayPhoneAndEmail(div, candidate);
                 tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(div, candidate);
                 tsConfirmCandidateSkillService.displayTSNote(div, candidate);
+                tsConfirmCandidateSkillService.displayIsConfirmedJobSeeker(div, candidate);
             }
         }
     }

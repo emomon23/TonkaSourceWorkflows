@@ -274,6 +274,17 @@
         return daysOld < skipIfLessThan;
     }
 
+    const _addMemberToCurrentProject = async (memberId) => {
+        const selector = linkedInSelectors.searchResultsPage.addToProjectButton(memberId);
+        const saveToProjectProjectButton = tsUICommon.findFirstDomElement([selector]);
+
+        if (saveToProjectProjectButton) {
+            saveToProjectProjectButton.click();
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.randomSleep(2000, 4000);
+        }
+    }
+
     const _gatherCurrentPageOfJobSeekersExperienceData = async (addToProjectConfiguration) => {
         try {
             tsUICommon.saveItemLocally('tsAutoScrapingInProgress', true);
@@ -297,14 +308,8 @@
 
                     if (shouldWeSkipCandidate){
                         if (addToProject){
-                            const selector = linkedInSelectors.searchResultsPage.addToProjectButton(candidate.memberId);
-                            const saveToProjectProjectButton = tsUICommon.findFirstDomElement([selector]);
-
-                            if (saveToProjectProjectButton) {
-                                saveToProjectProjectButton.click();
-                                // eslint-disable-next-line no-await-in-loop
-                                await tsCommon.randomSleep(5000, 8000);
-                            }
+                            // eslint-disable-next-line no-await-in-loop
+                            await _addMemberToCurrentProject(candidate.memberId);
                         }
                     }
                     else {
@@ -588,10 +593,7 @@
             linkedInApp.saveCompanyAnalytics(companyAnalytics);
         }
 
-        if (window.decorateSearchResultsFilter) {
-            _searchProfilesForKeywords(decorateSearchResultsFilter);
-        }
-
+         _searchProfilesForKeywords();
         _updateCandidateDisplayedInResultList();
     }
 
@@ -674,7 +676,11 @@
     }
 
     const _decorateMember = (memberId, color, text) => {
-        const container = $(`#search-result-${memberId} div[class*="profile-grade-container"]`)[0];
+        let container = $(`#search-result-${memberId} div[class*="profile-grade-container"]`)[0];
+        if (!container){
+            container = $(`#search-result-${memberId} div[class*="top-card-info"]`)[0];
+        }
+
         if (!container){
             return;
         }
@@ -712,17 +718,25 @@
         }
     }
 
-    const _searchProfilesForKeywords = async (data) => {
+    const _searchProfilesForKeywords = async (data = null) => {
+        data = data ? data :  tsCommon.getCachedData('decorateSearchResultsFilter');
+
         $('li').removeAttr('ts-disqualified')
                 .removeAttr('ts-zero-keyword-match');
 
         $('.ts-decorated-profile').remove();
+
+        if (!data){
+            return;
+        }
+
         const memberIds = await _getCurrentSearchResultsPageListOfMemberIds();
 
         for (let m = 0; m < memberIds.length; m++){
             const memberId = memberIds[m];
             // eslint-disable-next-line no-await-in-loop
             const mismatchReason = await candidateController.getCandidateMismatchReason(memberId, data);
+            const isJobJumper = mismatchReason && mismatchReason.candidate && mismatchReason.candidate.isJobJumper;
 
             if (mismatchReason.reason){
                 _decorateMember(memberId, 'red', mismatchReason.reason);
@@ -732,18 +746,27 @@
                 if (mismatchReason.sumGroupsFound === 0){
                     _flagCandidateHTMLNoKeywordsFound(memberId);
                 }
+
                 const color = mismatchReason.sumGroupsFound > 0 ? 'green' : 'orange';
                 _decorateMember(memberId, color, mismatchReason.matchDescription);
+
+                if (isJobJumper === false && data.addToCurrentProject === true){
+                    const minMatchCount = isNaN(data.addToCurrentProjectMinMatch) ? 1 : Number.parseInt(data.addToCurrentProjectMinMatch);
+                    if (mismatchReason.profileKeywordMatch.groupMatch >= minMatchCount){
+                        // eslint-disable-next-line no-await-in-loop
+                        await _addMemberToCurrentProject(memberId);
+                    }
+                }
             }
 
 
-            if (mismatchReason && mismatchReason.candidate && mismatchReason.candidate.isJobJumper){
+            if (isJobJumper){
                 _flagJobJumper(memberId);
             }
         }
 
 
-        window.decorateSearchResultsFilter = data;
+        tsCommon.cacheData('decorateSearchResultsFilter', data);
         _updateCandidateDisplayedInResultList();
     }
 
@@ -765,7 +788,10 @@
         if (!result){
             result = $(document.createElement('span'))
                         .attr('id', 'ts-search-result-count')
-                        .attr('style', `padding-left:15px; padding-right:10px; color:orange; font-weight:bold`);
+                        .attr('style', `padding-left:15px; padding-right:10px; color:orange; font-weight:bold`)
+                        .bind('click', () => {
+                            tsCommand.launchSkillsGPASearch();
+                        });
 
             $(topBar).append(result);
         }
@@ -819,5 +845,11 @@
     }
 
     window.linkedInSearchResultsScraper = new LinkedInSearchResultsScraper();
+
+    $(document).ready(() => {
+        if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS) {
+           tsCommon.clearCachedData('decorateSearchResultsFilter');
+        }
+    });
 })();
 

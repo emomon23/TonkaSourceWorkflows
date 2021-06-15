@@ -58,7 +58,7 @@
         const color = needToHide ? "yellow" : 'orange';
         const decorate = $(buttonClicked).attr('decorate') === "true"
 
-        if (decorate && !window.decorateSearchResultsFilter){
+        if (decorate && !tsCommon.getCachedData('decorateSearchResultsFilter')){
             tsConstants.HOSTING_URL = `http://${'localhost:5001'}`
             tsCommand.launchSkillsGPASearch();
         }
@@ -136,6 +136,7 @@
                 tsConfirmCandidateSkillService.displayFlagIndianName(liElements[i], candidate)
                 tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(liElements[i], candidate);
                 tsConfirmCandidateSkillService.displayTSNote(liElements[i], candidate);
+                tsConfirmCandidateSkillService.displayIsConfirmedJobSeeker(liElements[i], candidate);
             }
         }
     }

@@ -409,6 +409,7 @@
             tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(container, candidate)
             tsConfirmCandidateSkillService.displayTSNote(container, candidate);
             tsConfirmCandidateSkillService.displayPhoneAndEmail(container, candidate);
+            tsConfirmCandidateSkillService.displayIsConfirmedJobSeeker(container, candidate);
         }
 
         $('input[class*="search-global-typeahead"]').keydown(() => {

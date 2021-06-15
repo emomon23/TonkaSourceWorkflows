@@ -1,6 +1,8 @@
 (() => {
     let _currentPage = '';
     let _candidateFound = null;
+    let _msgContainer = null;
+    let _msgContainerOriginalText = '';
 
     const  _displayGrades = (candidate) => {
         if (candidate
@@ -17,6 +19,16 @@
 
                 topCardElement.append(newDiv);
         }
+    }
+
+    const _displayMessage = (msg = _msgContainerOriginalText, color = 'white') => {
+        if (!_msgContainer){
+            _msgContainer = $('#primary-content div[class*="module-header"] h2[class*="title"]')[0];
+            _msgContainerOriginalText = $(_msgContainer).text();
+        }
+
+        $(_msgContainer).text(msg)
+            .attr('style', `color:${color}`);
     }
 
     const _findCandidateInDatabase = async (memberId = null) => {
@@ -85,87 +97,95 @@
 
     const _scrapeProfile = async (tagString = null, memberId = null) => {
         console.log({method: 'scrapeProfile', tagString, memberId});
-        const candidate = await _findCandidateInDatabase(memberId);
+        _displayMessage(`Scraping ${memberId || 'profile'}...`, 'red');
 
-        console.log({candidateFoundInDb: candidate});
+        try {
+            const candidate = await _findCandidateInDatabase(memberId);
 
-        // If we've scraped this candidate, proceed
-        if (candidate) {
-            candidate.lastScrapedBy = linkedInConstants.pages.RECRUITER_PROFILE;
+            console.log({candidateFoundInDb: candidate});
 
-            // If we're not in automation mode, let's track the fact we've viewed their recruiter profile as a human
-            const isAutoScrapingInProgress = tsUICommon.getItemLocally('tsAutoScrapingInProgress');
-            if (!isAutoScrapingInProgress) {
-                const currentUser = await linkedInApp.getAlisonLoggedInUser();
-                if (candidate.lastViewedBy) {
-                    candidate.lastViewedBy[currentUser] = new Date().getTime();
-                } else {
-                    candidate.lastViewedBy = {}
-                    candidate.lastViewedBy[currentUser] = new Date().getTime();
+            // If we've scraped this candidate, proceed
+            if (candidate) {
+                candidate.lastScrapedBy = linkedInConstants.pages.RECRUITER_PROFILE;
+
+                // If we're not in automation mode, let's track the fact we've viewed their recruiter profile as a human
+                const isAutoScrapingInProgress = tsUICommon.getItemLocally('tsAutoScrapingInProgress');
+                if (!isAutoScrapingInProgress) {
+                    const currentUser = await linkedInApp.getAlisonLoggedInUser();
+                    if (candidate.lastViewedBy) {
+                        candidate.lastViewedBy[currentUser] = new Date().getTime();
+                    } else {
+                        candidate.lastViewedBy = {}
+                        candidate.lastViewedBy[currentUser] = new Date().getTime();
+                    }
                 }
-            }
 
-            // Scrape Public Profile
-            candidate.linkedIn = _scrapePublicProfileLink();
-            candidate.rawExperienceText = $(linkedInSelectors.recruiterProfilePage.experienceSection).text().replace('Experience', '');
+                await tsUICommon.waitForSelector('#profile-language');
 
-            const positionElements = $(linkedInSelectors.recruiterProfilePage.experienceSectionPositions);
-            if (positionElements.length > 0){
-                $(positionElements).each((index) => {
-                    let companyId = '';
-                    const companyLinkElement = $(positionElements[index]).find(linkedInSelectors.recruiterProfilePage.positionCompanyLink);
-                    if (companyLinkElement) {
-                        const companyHref = $(companyLinkElement).attr('href');
-                        const matches = companyHref.match(new RegExp('/recruiter/company/(\\d+)'));
-                        companyId = (matches && matches.length >= 2) ? matches[1] : '';
-                    }
+                // Scrape Public Profile
+                candidate.linkedIn = _scrapePublicProfileLink();
+                candidate.rawExperienceText = $(linkedInSelectors.recruiterProfilePage.experienceSection).text().replace('Experience', '');
 
-                    if (companyId && !isNaN(parseInt(companyId))) {
-                        const existingPosition = candidate.positions.find(p => p.companyId === parseInt(companyId));
-                        if (existingPosition) {
-                            const description = $(linkedInSelectors.recruiterProfilePage.positionDescription).text();
-                            existingPosition.description = description;
+                const positionElements = $(linkedInSelectors.recruiterProfilePage.experienceSectionPositions);
+                if (positionElements.length > 0){
+                    $(positionElements).each((index) => {
+                        let companyId = '';
+                        const companyLinkElement = $(positionElements[index]).find(linkedInSelectors.recruiterProfilePage.positionCompanyLink);
+                        if (companyLinkElement) {
+                            const companyHref = $(companyLinkElement).attr('href');
+                            const matches = companyHref.match(new RegExp('/recruiter/company/(\\d+)'));
+                            companyId = (matches && matches.length >= 2) ? matches[1] : '';
                         }
-                    }
-                });
+
+                        if (companyId && !isNaN(parseInt(companyId))) {
+                            const existingPosition = candidate.positions.find(p => p.companyId === parseInt(companyId));
+                            if (existingPosition) {
+                                const description = $(linkedInSelectors.recruiterProfilePage.positionDescription).text();
+                                existingPosition.description = description;
+                            }
+                        }
+                    });
+                }
+
+
+                const summaryElement = $(linkedInSelectors.recruiterProfilePage.aboutSummary);
+                if (summaryElement && summaryElement.length > 0){
+                    candidate.summary = $(summaryElement).text().replace('Summary', '').trim();
+                }
+
+                // Scrape skills
+                candidate.linkedInSkills = _scrapeSkills();
+                _mergeCandidatePositionsWithScrapedJobExperience(candidate);
+
+                if (tagString && tagString.length > 0){
+                    candidate.tags += `,${tagString}`;
+                }
+
+                linkedInRecruiterFilter.analyzeCandidateProfile(candidate);
+                linkedInApp.upsertContact(candidate);
+
+                // Process Statistics
+                candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
+
+                // Calculate Skill Statistics Grades
+                statistician.calculateSkillsStatistics([candidate.statistics], false);
+
+                _displayGrades(candidate);
+                try {
+                    candidateController.saveCandidate(candidate);
+                } catch (e) {
+                    tsCommon.log(e.message, 'ERROR');
+                }
+                positionAnalyzer.analyzeCandidatePositions(candidate, 'ALL_SKILLS');
+                const companyAnalytics = positionAnalyzer.processCompanyAnalytics([candidate]);
+                linkedInApp.saveCompanyAnalytics(companyAnalytics);
             }
 
-
-            const summaryElement = $(linkedInSelectors.recruiterProfilePage.aboutSummary);
-            if (summaryElement && summaryElement.length > 0){
-                candidate.summary = $(summaryElement).text().replace('Summary', '').trim();
-            }
-
-            // Scrape skills
-            candidate.linkedInSkills = _scrapeSkills();
-            _mergeCandidatePositionsWithScrapedJobExperience(candidate);
-
-            if (tagString && tagString.length > 0){
-                candidate.tags += `,${tagString}`;
-            }
-
-            linkedInRecruiterFilter.analyzeCandidateProfile(candidate);
-            linkedInApp.upsertContact(candidate);
-
-            // Process Statistics
-            candidate.statistics = statistician.processStatistics(candidate, 'ALL_SKILLS');
-
-            // Calculate Skill Statistics Grades
-            statistician.calculateSkillsStatistics([candidate.statistics], false);
-
-            _displayGrades(candidate);
-            try {
-                candidateController.saveCandidate(candidate);
-            } catch (e) {
-                tsCommon.log(e.message, 'ERROR');
-            }
-            positionAnalyzer.analyzeCandidatePositions(candidate, 'ALL_SKILLS');
-            const companyAnalytics = positionAnalyzer.processCompanyAnalytics([candidate]);
-            linkedInApp.saveCompanyAnalytics(companyAnalytics);
+            linkedInRecruiterProfileScraper.profileLastScrapedDate = (new Date()).getTime();
+            return candidate;
+        } finally {
+            _displayMessage();
         }
-
-        linkedInRecruiterProfileScraper.profileLastScrapedDate = (new Date()).getTime();
-        return candidate;
     }
 
     const _waitForOkToScrapedAgain = async (desiredWaitInSeconds) => {
@@ -381,6 +401,7 @@
                 tsConfirmCandidateSkillService.displayTSConfirmedSkillsForCandidate(container, candidate)
                 tsConfirmCandidateSkillService.displayTSNote(container, candidate);
                 tsConfirmCandidateSkillService.displayPhoneAndEmail(container, candidate);
+                tsConfirmCandidateSkillService.displayIsConfirmedJobSeeker(container, candidate);
 
             }
 

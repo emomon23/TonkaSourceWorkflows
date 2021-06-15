@@ -327,6 +327,17 @@
         return {label, input};
     }
 
+    const _getHighlightedText = () => {
+        var text = "";
+        if (window.getSelection) {
+            text = window.getSelection().toString();
+        } else if (document.selection && document.selection.type !== "Control") {
+            text = document.selection.createRange().text;
+        }
+
+        return text;
+    }
+
     const _debounce = (func, wait) => {
         let timeout;
 
@@ -360,6 +371,7 @@
         cleanseTextOfHtml = _cleanseTextOfHtml;
         rebind = _rebind;
         getWordCount = _getWordCount;
+        getHighlightedText = _getHighlightedText;
         scrollToBottom = _scrollToBottom;
         scrollTilTrue = _scrollTilTrue;
         saveItemLocally = _saveItemLocally;

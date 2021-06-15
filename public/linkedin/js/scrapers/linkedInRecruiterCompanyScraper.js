@@ -278,6 +278,23 @@
         }
     }
 
+    const _callPhoneNumber = async () => {
+        const phoneInput = $('#companyPhoneNumber')[0];
+        let phoneNumber = tsUICommon.getHighlightedText();
+
+        if (!phoneNumber || phoneNumber.length === 0){
+            phoneNumber = $(phoneInput).val();
+        }
+
+        if (phoneNumber){
+            const url = 'https://voice.google.com/u/0/calls';
+            const googleVoice = window.open(url);
+
+            await tsCommon.sleep(5000);
+            googleVoice.postMessage({action: 'callPhoneNumber', parameter: {phoneNumber}}, "*");
+        }
+    }
+
     const _displayCompanyPhoneNumberTextBox = () => {
         const phoneNumber = _companySummary.phone || _companySummary.phoneNumber || null;
 
@@ -289,6 +306,7 @@
             }
 
             const inputConfig = {
+                id: 'companyPhoneNumber',
                 value: phoneNumber,
                 style: 'padding-left:5px'
             }
@@ -297,6 +315,12 @@
             if (newElements.input){
                 $(newElements.input).bind('blur', _onCompanyPhoneNumberUpdated)
             }
+
+            const btn = $(document.createElement('button'))
+                            .text('call')
+                            .bind('click', _callPhoneNumber);
+
+            $(topCardHeader).append(btn);
         }
     }
 

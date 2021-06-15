@@ -36,6 +36,8 @@
     }
 
     const _launchSkillsGPASearch = async () => {
+        tsCommon.clearCachedData('decorateSearchResultsFilter');
+
         const url = `${tsConstants.HOSTING_URL}/linkedin/alisonUI/jobseekers/jobseekers.html`;
         const dashboardWindow = window.open(url, "Dashboard", "scrollbars=yes,resizable=yes,toolbar=yes,menubar=yes,width=1000,height=1000,top=0,left=0");
 

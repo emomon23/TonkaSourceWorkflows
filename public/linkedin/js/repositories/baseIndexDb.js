@@ -470,7 +470,9 @@
             result.storeName = storeName;
             result.keyPropertyForStore = keyPropertyForStore;
 
+
             this.stores[storeName] = result;
+
             return result;
         }
     }

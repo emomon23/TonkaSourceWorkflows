@@ -144,6 +144,34 @@
 
     }
 
+    const _toggleIsJobSeeker = async (e) => {
+        const checkbox = e.target;
+        const memberId = $(checkbox).attr('memberId');
+
+        const isJobSeeker = $(checkbox).is(':checked');
+
+        candidateController.toggleIsTsJobSeeker(memberId, isJobSeeker);
+    }
+
+    const _displayIsConfirmedJobSeeker = (container, candidate) => {
+        // TS Job Seeker, Is Ts job seeker
+
+        let checkbox = {
+                        type:'checkbox',
+                        memberId: candidate.memberId,
+                        style: 'margin-left: 5px',
+                        isTsJobSeeker: candidate.isTsJobSeeker // just a debug attribute
+                    };
+
+        if (candidate && candidate.isTsJobSeeker){
+            checkbox.checked = true;
+        }
+
+        const formInput = tsUICommon.createInput(container,{text: 'TS Job Seeker'}, checkbox);
+        $(formInput.input).bind('change', _toggleIsJobSeeker);
+
+    }
+
     const _displayTsNotes = (container, candidate) => {
         const div = document.createElement('div');
         $(div).attr('id', 'tsNotesDiv')
@@ -240,6 +268,7 @@
         displayTSConfirmedSkillsForCandidate = _displayTSConfirmedSkillsForCandidate;
         displayFlagIndianName = _displayFlagIndianName;
         displayTSNote = _displayTsNotes;
+        displayIsConfirmedJobSeeker = _displayIsConfirmedJobSeeker;
         displayPhoneAndEmail = _displayPhoneAndEmail;
         getTSConfirmedSkillsList = () => { JSON.parse(JSON.stringify(confirmedSkillsList));  }
         clearUI = _clearUI;

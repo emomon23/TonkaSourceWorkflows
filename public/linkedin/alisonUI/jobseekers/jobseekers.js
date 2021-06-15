@@ -10,6 +10,8 @@ const cleanEscapeCharacters = (str) => {
         {lookFor: '\\\"', replace: '"'},
         {lookFor: '\\"', replace: '"'},
         // eslint-disable-next-line no-useless-escape
+        {lookFor: '\"\"', replace: '"'},
+        // eslint-disable-next-line no-useless-escape
         {lookFor: '\"', replace: '"'}
     ]
 
@@ -55,6 +57,7 @@ const createAndOrArrays = (elementId) => {
 const getRawProfileContainsData = () => {
     const data = {
         addToCurrentProject: $($('#addToCurrentProject')[0]).prop('checked'),
+        addToCurrentProjectMinMatch: $('#txtAddToProjectMinMatch').val(),
         ignoreManagement: !$($('#ignoreManagement')[0]).prop('checked'),
         isTechnicallyRelevant: $($('#isTechnicallyRelevant')[0]).prop('checked'),
         ignoreJustStarted: $($('#ignoreJustStarted')[0]).prop('checked'),

@@ -295,6 +295,49 @@
         }
     }
 
+    const _isDate = (ddd) => {
+        return ddd.getDate && ddd.getDay && ddd.getMonth && ddd.toDateString;
+    }
+
+    const _cacheData = (cacheName, obj) => {
+        if (typeof cacheName !== "string" || !obj){
+            throw new Error('You must provide a name for your cached item, and you must provide an item')
+        }
+
+        const cacheObject = {
+            type: typeof obj,
+            data: obj
+        };
+
+        if (_isDate(obj)){
+            cacheObject.type = 'date';
+            cacheObject.data = obj.toDateString()
+        }
+
+        const jsonString = JSON.stringify(cacheObject);
+        localStorage.setItem(cacheName, jsonString);
+    }
+
+    const _getCachedData = (name) => {
+        const jsonString = localStorage.getItem(name);
+        if (!jsonString){
+            return null;
+        }
+
+        const cacheObject = JSON.parse(jsonString);
+        if (cacheObject.type === 'date'){
+            return new Date(cacheObject.data);
+        }
+        else if (cacheObject.type === 'number') {
+            return Number.parseFloat(cacheObject.data);
+        }
+
+        return cacheObject.data;
+    }
+
+    const _clearCachedData = (name) => {
+        localStorage.removeItem(name);
+    }
     class TSCommon {
         constructor (){}
 
@@ -312,6 +355,9 @@
         extendWebElement = _extendWebElement;
         setUpPostMessageListener = _setUpPostMessageListener;
         postMessageToWindow = _postMessageToWindow;
+        cacheData = _cacheData;
+        clearCachedData = _clearCachedData;
+        getCachedData = _getCachedData;
         clickAHyperLink = _clickAHyperLink;
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
