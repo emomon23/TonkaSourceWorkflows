@@ -15,16 +15,16 @@
 
         const jobSearch = jobSearchMenu.menuOption();
 
-        const menuItem3 = $(document.createElement('div')).attr('class', 'ts-menu-item').click(() => {
-            const html = "REPORT 3";
-            $('#tsContent').html(html).show();
-        }).text("REPORT 3");
+        const indexDbCandidateSearch = indexDbCandidateSearchMenu.menuOption();
 
         const toggleButton = $(document.createElement('button')).click(() => {
             $('#tsContent').toggle();
         }).text("Show/Hide").attr('class', 'ts-menu-button-toggle ts-button-li');
 
-        tsMenu.append(companySkillSearch).append(jobSearch).append(menuItem3).append(toggleButton);
+        tsMenu.append(companySkillSearch)
+                .append(jobSearch)
+                .append(indexDbCandidateSearch)
+                .append(toggleButton);
 
         return tsMenu;
     }

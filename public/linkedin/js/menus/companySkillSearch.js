@@ -1,13 +1,8 @@
 (function () {
     const _display = () => {
-        // Clear the content
-        $('#tsContent').html("");
-        const container = $(document.createElement('div'))
-            .attr('id', 'companySkillSearchContainer')
-            .attr('class', 'company-skill-search-container');
-
-        // Create the Skill Search elements
-        const skillSearchContainer = $(document.createElement('div'));
+        const containers = baseMenu.createSearchContainer('companySkillSearchContainer', 'company-skill-search-container');
+        const container = containers.baseContainer;
+        const skillSearchContainer = containers.searchContainer;
 
         const skillSearchInput = $(document.createElement('input'))
             .attr('id', 'tsSkillSearch')
@@ -95,10 +90,7 @@
             .attr('id', 'companySkillSearchResultsContainer')
             .attr('class', 'company-skill-search-results');
 
-        $(container).append(skillSearchContainer);
         $(container).append(resultsContainer);
-
-        $('#tsContent').append(container).show();
     }
 
     const _displayPersonnelDetails = (contacts) => {

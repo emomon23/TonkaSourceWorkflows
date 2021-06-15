@@ -150,14 +150,9 @@
     }
 
     const _display = async () => {
-        // Clear the content
-        $('#tsContent').html("");
-        const container = $(document.createElement('div'))
-            .attr('id', 'jobSearchContainer')
-            .attr('class', 'job-search-container');
-
-        // Create the Search elements
-        const searchContainer = $(document.createElement('div'));
+        const containers = baseMenu.createSearchContainer('jobSearchContainer', 'job-search-container');
+        const container = containers.baseContainer;
+        const searchContainer = containers.searchContainer;
 
         const companyNameSearch = $(document.createElement('input'))
             .attr('id', 'tsCompanyNameSearch')
@@ -246,10 +241,7 @@
             .attr('id', 'jobSearchResultsContainer')
             .attr('class', 'job-search-results');
 
-        $(container).append(searchContainer);
         $(container).append(resultsContainer);
-
-        $('#tsContent').append(container).show();
 
         await tsCommon.sleep(50);
         $('#companyLabel').click(_clearCompanyFilter);
