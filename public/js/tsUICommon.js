@@ -294,6 +294,17 @@
         }
     }
 
+    const _createSpan = (container, text, defaultMarginLeft = '5px') => {
+        const span = $(document.createElement('span'))
+                    .text(text);
+
+        if (defaultMarginLeft && typeof defaultMarginLeft === "string"){
+            $(span).attr('style', `margin-left: ${defaultMarginLeft}`);
+        }
+
+        $(container).append(span);
+    }
+
     const _createInput = (container, labelAttributes, inputAttributes) => {
         let label = null;
 
@@ -360,6 +371,7 @@
         createTooltip = _createTooltip;
         createLink = _createLink;
         createInput = _createInput;
+        createSpan = _createSpan;
         debounce = _debounce;
         waitForSelector = _waitForSelector;
         removeListItem = _removeListItem;

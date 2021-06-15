@@ -757,6 +757,7 @@
         const candidate = await _searchForCandidate(memberId);
         if (candidate){
             candidate.isTsJobSeeker = desiredValue;
+            candidate.dateTsJobSeekerSet = desiredValue ? (new Date()).getTime() : null;
             await candidateRepository.update(candidate);
         }
     }
