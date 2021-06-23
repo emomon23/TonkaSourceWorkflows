@@ -8,13 +8,13 @@
     let _keepWalkingResultsPages = true;
     let _jobsGathered = {};
     let _user = null;
-    let _indiaNames = null;
+    let _indiaNames = {};
 
     const _calculateOrigin = (candidate) => {
         const firstNameKey = candidate.firstName.toLowerCase();
         const lastNameKey = candidate.lastName.toLowerCase();
 
-        if (_indiaNames[firstNameKey] || _indiaNames[lastNameKey]){
+        if (_indiaNames && (_indiaNames[firstNameKey] || _indiaNames[lastNameKey])){
             return _indiaNames.originName
         }
 
@@ -670,6 +670,11 @@
         if (location.href.indexOf('/recruiter/projects/') >= 0){
             const memberIds = await tsProjectPipelineScrapper.getMemberIdsFromPipelinePage();
             return memberIds;
+        }
+
+        const liArray = Array.from(document.querySelectorAll('li[id*="search-result-"]'));
+        if (liArray.length){
+            return liArray.map(li => $(li).attr('id').replace('search-result-', ''));
         }
 
         return _pageCandidates && _pageCandidates.map ? _pageCandidates.map(c => c.memberId) : [];

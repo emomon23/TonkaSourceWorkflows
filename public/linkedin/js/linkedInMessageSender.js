@@ -121,6 +121,8 @@
 
         } else if (whatPageAmIOn === linkedInConstants.pages.RECRUITER_SEARCH_RESULTS){
             queryResult = $(`#search-results-${memberId}`).find(linkedInSelectors.sendInMail);
+        } else if (whatPageAmIOn === linkedInConstants.pages.CLIP_BOARD){
+            queryResult = document.querySelectorAll(`li[id*="${memberId}"] button[data-action*="inmail"]`);
         }
 
         return  queryResult && queryResult.length ? queryResult[0] : null;
@@ -129,10 +131,11 @@
     const _clickSendInMail = (memberId) => {
         const sendInMailButton = _getSendInMailButton(memberId);
         if (sendInMailButton){
+            const amOnClipBoard = linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.CLIP_BOARD;
             const isVisible = $(sendInMailButton).is(':visible');
             const isEnabled = !$(sendInMailButton).is(':disabled');
 
-            if (isVisible && isEnabled){
+            if (isVisible && isEnabled || (isEnabled && amOnClipBoard)){
                 sendInMailButton.click();
                 return true;
             }
@@ -147,12 +150,36 @@
         const subject = $(linkedInSelectors.inMailDialog.subject)[0];
         const body = $(linkedInSelectors.inMailDialog.body)[0];
         const closeModal = $(linkedInSelectors.inMailDialog.sendInMailCloseModal)[0];
+        let salutation = document.getElementsByName('salutation');
 
         return {
             send,
             subject,
             body,
-            closeModal
+            closeModal,
+            salutation,
+
+            emptySalutationDropdown: async () => {
+                try {
+                    if (salutation && salutation.length){
+                        salutation = salutation[0];
+                        $(salutation).attr('data-artdeco-is-focused', true);
+                        $(salutation).val(0);
+
+                    }
+                    else {
+                        try {
+                            document.querySelectorAll('button[class*="inmail-salutations-trigger"]')[0].click();
+                            await tsCommon.sleep(100);
+                            document.querySelectorAll('li[data-salutation-id*="0"]')[0].click();
+                        }
+                        // eslint-disable-next-line no-empty
+                        catch {}
+                    }
+                }
+                // eslint-disable-next-line no-empty
+                catch {}
+           }
         };
     }
 
@@ -163,6 +190,8 @@
             await tsCommon.sleep(4000);
             const sendMessageDialog = await _getSendInmailModalControls();
             if (sendMessageDialog.subject){
+                await sendMessageDialog.emptySalutationDropdown();
+
                 $(sendMessageDialog.subject).val(subject);
                 $(sendMessageDialog.body).val(bodyString);
                 await tsCommon.sleep(2000);
@@ -247,7 +276,7 @@
         return null;
     }
 
-    const _blastCurrentProjectPipelinePage = async (subject, body) => {
+    const _blastCurrentProjectPipelinePage = async (sub, body) => {
         const whatPageAmIOn = linkedInCommon.whatPageAmIOn();
         if (whatPageAmIOn !== linkedInConstants.pages.PROJECT_PIPELINE){
             console.log("*** CAN'T Blast pipline from this page");
@@ -265,6 +294,8 @@
                 const name = memberIdsAndNames[i].name;
 
                 const msg = _replaceNameOnBody(body, name);
+                const subject = _replaceNameOnBody(sub, name);
+
                 // eslint-disable-next-line no-await-in-loop
                 if (await _sendInMail(memberId, subject, msg)){
                     console.log(`sent in mail to ${name}`);
@@ -293,12 +324,61 @@
         console.log(`DONE - Blasting Project Pipeline`);
     }
 
+    const _blastClipBoardPage = async (subject, body) => {
+        const memberIds = await linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+
+       for (let i = 0; i < memberIds.length; i++){
+            const memberId = memberIds[i];
+            // eslint-disable-next-line no-await-in-loop
+            const candidate = await candidateController.getCandidate(memberId);
+
+            if (candidate){
+                const msg = _replaceNameOnBody(body, candidate.firstName);
+
+                // eslint-disable-next-line no-await-in-loop
+                if (await _sendInMail(memberId, subject, msg)){
+                    console.log(`sent in mail to ${candidate.firstName}`);
+                }
+
+                // eslint-disable-next-line no-await-in-loop
+                await tsCommon.randomSleep(8000, 12000);
+            }
+        }
+    }
+
+    const  _blastClipBoard = async (subject, body) => {
+        let navigationSuccess = true;
+        while (navigationSuccess){
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(3000);
+            // eslint-disable-next-line no-await-in-loop
+            await _blastClipBoardPage(subject, body);
+            navigationSuccess = _navigateToNextPage();
+        }
+
+        console.log(`DONE - Blasting Clipboard`);
+    }
+
+    const _blastInMails = async (subject, body) => {
+        const pgs =  linkedInConstants.pages;
+
+        const whatPageAmIOn = linkedInCommon.whatPageAmIOn();
+        let queryResult = null;
+
+        if (whatPageAmIOn === pgs.PROJECT_PIPELINE || whatPageAmIOn === pgs.RECRUITER_SEARCH_RESULTS){
+            await _blastProjectPipeline(subject, body);
+        }
+        else if (whatPageAmIOn === pgs.CLIP_BOARD){
+            await _blastClipBoard(subject, body);
+        }
+    }
+
     class LinkedInMessageSender {
         constructor () {}
 
         sendInMail = _sendInMail;
         sendConnectionRequest = _sendConnectionRequest;
-        blastProjectPipeline = _blastProjectPipeline;
+        blastInMails = _blastInMails;
     }
 
     window.linkedInMessageSender = new LinkedInMessageSender();

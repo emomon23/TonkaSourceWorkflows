@@ -268,7 +268,7 @@
     const _fireInMailBlast = (subjectBody) => {
         console.log(`_fireInMailBlast called from another window via PostMessage`)
         const {subject, body} = subjectBody;
-        linkedInMessageSender.blastProjectPipeline(subject, body);
+        linkedInMessageSender.blastInMails(subject, body);
     }
 
     const _fireConnectionRequestBlast = async (bodyObj) => {

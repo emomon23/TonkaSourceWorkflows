@@ -75,43 +75,12 @@
     }
 
     const _getMemberIdsFromPipelinePage = async () => {
-        const headers = $('h3[class*="name"]');
-        const result = [];
-
-        for (let i = 0; i < headers.length; i++){
-            let lookFor = {};
-            const wholeName = $(headers[i]).attr('title');
-            const headlineNode = $(headers[i]).parent().find('p[class*="headline"]')[0];
-            const locationNode = $(headers[i]).parent().find('dl[class*="demographic"] dd')[0];
-
-            if (wholeName && wholeName.length > 0){
-                lookFor = tsString.parseOutFirstAndLastNameFromString(wholeName);
-
-                if (headlineNode){
-                    const headline = $(headlineNode).attr('title');
-                    if (headline && headline.length){
-                        lookFor.headline = headline;
-                    }
-                }
-
-                if (locationNode){
-                    const locationParts = $(locationNode).text().trim().split(',');
-                    lookFor.city = locationParts[0];
-                }
-
-                // eslint-disable-next-line no-await-in-loop
-                const candidate = await candidateController.searchForCandidate(lookFor);
-                if (candidate){
-                    result.push(candidate.memberId);
-                }
-                else {
-                    // eslint-disable-next-line no-await-in-loop
-                    const tryAgain = await candidateController.searchForCandidate(lookFor);
-                }
-            }
-        }
-
-        return result;
+        const checkBoxes = Array.from(document.querySelectorAll('input[class*="prospect-checkbox"]'));
+        return checkBoxes.filter(c => $(c).attr('data-member-id') ? true : false)
+                          .map((c) => {
+                                const memberId = $(c).attr('data-member-id');
+                                return isNaN(memberId) ? memberId : Number.parseInt(memberId);
+                            });
     }
     class TSProjectPipelineScrapper {
         collectionContactInformation = _collectContactInformation;

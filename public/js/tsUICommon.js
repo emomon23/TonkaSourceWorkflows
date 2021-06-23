@@ -349,6 +349,12 @@
         return text;
     }
 
+    const _fireEvents = (ctrl, eventsStringArray) => {
+        eventsStringArray.forEach((eName) => {
+            $(ctrl).trigger(eName);
+        })
+    }
+
     const _debounce = (func, wait) => {
         let timeout;
 
@@ -391,6 +397,7 @@
         getItemLocally = _getItemLocally;
         executeDelete = _executeDelete;
         jQueryWait = _jQueryWait;
+        fireEvents = _fireEvents;
     }
 
     window.tsUICommon = new TsUICommon();

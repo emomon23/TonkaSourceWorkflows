@@ -24,6 +24,7 @@
         };
 
         pages = {
+            CLIP_BOARD: "clipboard?",
             RECRUITER_COMPANY: "/recruiter/company",
             RECRUITER_SEARCH_RESULTS: "/recruiter/smartsearch",
             RECRUITER_PROFILE: "/recruiter/profile/",
