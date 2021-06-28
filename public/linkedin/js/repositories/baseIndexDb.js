@@ -388,6 +388,12 @@
             return await _getObjectById(this.__dbRef, this.objectStore, id);
         }
 
+        // Override this in your own db if you want
+        restore = async (obj) => {
+            this.__dbRef = await _openDb(this.dbName, this.versionNumber, this.schema, this.__dbRef);
+            return await _saveObject(this.__dbRef, this.objectStore, obj, this.idProperty);
+        }
+
         getByIndex = async (indexName, searchFor) => {
             let results = [];
 

@@ -351,6 +351,30 @@
         return text;
     }
 
+    const _saveFileContentLocally = (strFileName, strContent, strType = 'text/plain') => {
+        const blob = new Blob([strContent], {type: strType});
+        const anchor = document.createElement('a');
+        anchor.download = strFileName;
+        anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+        anchor.dataset.downloadurl = ['text/plain', anchor.download, anchor.href].join(':');
+        anchor.click();
+    }
+
+    const _readFileContentLocallyAsText = async () => {
+        [fileHandle] = await window.showOpenFilePicker();
+        const fileBlob = await fileHandle.getFile();
+
+        const fileReader = new FileReader();
+        fileReader.readAsText(fileBlob);
+
+        while (!fileReader.result){
+            // eslint-disable-next-line no-await-in-loop
+            await tsCommon.sleep(500);
+        }
+
+        return fileReader.result;
+    }
+
     const _fireEvents = (ctrl, eventsStringArray) => {
         eventsStringArray.forEach((eName) => {
             $(ctrl).trigger(eName);
@@ -395,6 +419,8 @@
         scrollToBottom = _scrollToBottom;
         scrollTilTrue = _scrollTilTrue;
         saveItemLocally = _saveItemLocally;
+        saveFileContentLocally = _saveFileContentLocally;
+        readFileContentLocallyAsText = _readFileContentLocallyAsText;
         notify = _notify;
         getItemLocally = _getItemLocally;
         executeDelete = _executeDelete;

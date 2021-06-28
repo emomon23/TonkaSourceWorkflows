@@ -5,8 +5,50 @@
         _registeredRepositories[name] = repositoryReference;
     }
 
-    const _backupAllIndexDbData = async () => {
+    const _getBackupOfAllIndexedDbDataString = async () => {
+        const copy = JSON.parse(JSON.stringify(_registeredRepositories));
 
+        for(let k in copy) {
+            // eslint-disable-next-line no-await-in-loop
+            const data = await _registeredRepositories[k].getAll();
+            copy[k].rawData = data;
+        }
+
+        return JSON.stringify(copy);
+    }
+
+    const _backupAllIndexDbDataToFile = async () => {
+        const jsonString = await _getBackupOfAllIndexedDbDataString();
+        tsUICommon.saveFileContentLocally("tsIndexDbRepositories.json", jsonString);
+
+        return jsonString;
+    }
+
+    const _restoreAllIndexDbDataFromFile = async () => {
+        try {
+            const jsonString = await tsUICommon.readFileContentLocallyAsText();
+            if (jsonString){
+                const restoreData = JSON.parse(jsonString);
+                for (let k in restoreData){
+                    const repo = _registeredRepositories[k];
+                    if (repo && repo.restore){
+                        const incomingData = restoreData[k].rawData;
+                        for (let i = 0; i < incomingData.length; i++){
+                            try {
+                                // eslint-disable-next-line no-await-in-loop
+                                await repo.restore(incomingData[i]);
+                            }
+                            catch (e) {
+                                console.log(`Unable to restore record: ${e.message}`);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (e) {
+            console.error(e.message);
+        }
     }
 
     const _whoseRegistered = () => {
@@ -90,8 +132,9 @@
     */
 
     class BackupRestoreAndSync {
-
-        backupAllIndexDbData = _backupAllIndexDbData;
+        backupAllIndexDbDataToFile = _backupAllIndexDbDataToFile;
+        restoreAllIndexDbDataFromFile = _restoreAllIndexDbDataFromFile;
+        getBackupOfAllIndexedDbDataString = _getBackupOfAllIndexedDbDataString;
         registerTsRepository = _registerTsRepository;
         whoseRegistered = _whoseRegistered;
     }
