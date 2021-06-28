@@ -7,6 +7,14 @@
     // In case a page is saving MANY contacts...we only want to alert message once.
     let roleAlert = false;
 
+    const _backupDbClick = () => {
+        backupRestoreAndSync.backupAllIndexDbDataToFile();
+    }
+
+    const _restoreDbClick = () => {
+        backupRestoreAndSync.restoreAllIndexDbDataFromFile();
+    }
+
     const _createTonkaSourceMenu = () => {
         const tsMenu = $(document.createElement('div')).attr('id', 'tsMenu').attr('class', 'ts-menu');
 
@@ -26,8 +34,13 @@
                 .append(indexDbCandidateSearch)
                 .append(toggleButton);
 
+        tsUICommon.createButton({text: 'Backup Db', onclick: _backupDbClick, container:tsMenu, attr: {class: 'ts-menu-button-toggle ts-button-li'}});
+        tsUICommon.createButton({text: 'Sync Db', onclick: _restoreDbClick, container:tsMenu, attr: {class: 'ts-menu-button-toggle ts-button-li'}});
+
         return tsMenu;
     }
+
+
 
     const _displayTonkaSourceMenu = (containerToAppendTo = 'body') => {
         const tsContainer = $(document.createElement('div')).attr('id', 'tsContainer').attr('class', 'ts-container');
