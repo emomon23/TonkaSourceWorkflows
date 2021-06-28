@@ -237,6 +237,7 @@
             // eslint-disable-next-line no-await-in-loop
             await tsCommon.sleep(100);
             liTag = $(lastCandidateId);
+            count += 1;
         }
     }
 
@@ -534,7 +535,7 @@
 
     const _interceptSearchResults = async (responseObj) => {
         const interceptedResults = JSON.parse(responseObj.responseText);
-        let candidatesInResults = interceptedResults.result.searchResults;
+        let candidatesInResults = interceptedResults.result.searchResults || interceptedResults.result.searchHits;
 
         window.lastInterceptedListOfCandidates = candidatesInResults
 

@@ -81,7 +81,7 @@
     class BackupRestoreAndSync {
         getBackup = _getBackup;
         syncFromBackup = _syncFromBackup;
-        get
+        backupAllIndexDbData = backupAllIndexDbData;
         registerTsRepository = _registerTsRepository;
 
     }

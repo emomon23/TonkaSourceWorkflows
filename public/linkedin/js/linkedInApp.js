@@ -321,6 +321,7 @@
     tsCommon.setUpPostMessageListener('linkedInApp');
 
     tsInterceptor.interceptResponse('get', '/api/smartsearch?', linkedInSearchResultsScraper.interceptSearchResults);
+    tsInterceptor.interceptResponse('get', '/api/projects', linkedInSearchResultsScraper.interceptSearchResults);
 
     // firefox was 'telling on tonkasource' to linked in, when it found tampermonkey script gets loaded.
     // try to suppress that method call.

@@ -74,7 +74,13 @@
             _candidateFound = null;
         }
 
-        const cachedCandidate = await linkedInSearchResultsScraper.getCurrentRecruiterProfileCandidate();
+        let cachedCandidate = null;
+
+        try {
+            cachedCandidate = await linkedInSearchResultsScraper.getCurrentRecruiterProfileCandidate();
+        // eslint-disable-next-line no-empty
+        } catch {}
+
         if (cachedCandidate
             && cachedCandidate.firstName === candidateSearch.firstName
             && cachedCandidate.lastName === candidateSearch.lastName){

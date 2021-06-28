@@ -263,6 +263,10 @@
     }
 
     const _searchForCandidate = async (searchFor) => {
+        if (!searchFor){
+            throw new Error("You didn't pass anything!");
+        }
+
         if (!isNaN(searchFor)){
             return await _getCandidateByMemberId(searchFor);
         }

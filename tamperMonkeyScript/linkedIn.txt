@@ -77,6 +77,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/projectPipelineSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/linkedInLoginSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/myPublicNetworkSpy.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/logout.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/correspondence/tsClipboardSpy.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/correspondence/connectionRequests.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/spies/correspondence/correspondenceCommon.js
@@ -148,6 +149,7 @@
 // @ignore      http://localhost:5001/linkedin/js/spies/linkedInSearchResultsSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/projectPipelineSpy.js
 // @ignore      http://localhost:5001/linkedin/js/spies/myPublicNetworkSpy.js
+// @ignore      http://localhost:5001/linkedin/js/spies/logout.js
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/connectionRequests.js
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/correspondenceCommon.js
 // @ignore      http://localhost:5001/linkedin/js/spies/correspondence/publicMessaging.js

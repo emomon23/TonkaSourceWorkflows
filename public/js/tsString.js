@@ -314,12 +314,12 @@
         });
 
         if (nameParts.length === 0){
-            console.error(`parseOutFirstAndLastNameFromString had trouble with "${strFullName}"`);
+            console.error(`(no error): parseOutFirstAndLastNameFromString had trouble with "${strFullName}"`);
             return null;
         }
 
         if (nameParts.length === 1){
-            console.error(`parseOutFirstAndLastNameFromString had trouble with "${strFullName}"`);
+            console.error(`(no error): parseOutFirstAndLastNameFromString had trouble with "${strFullName}"`);
 
             return {
                 firstName: nameParts[0],

@@ -111,6 +111,14 @@
         $('a[class*="page-link"]').click(() => {
             _delayedDocReady_ProjectPipelineScrapper();
         });
+
+        $('ul[class*="tablist"]').click(() => {
+            _delayedDocReady_ProjectPipelineScrapper();
+        });
+
+        $('a[href*="/recruiter/profile/').click(async () => {
+
+        });
     }
 
     $(document).ready(() => {

@@ -123,7 +123,9 @@
         return result;
      }
 
-    const _cleanseTextOfHtml = (text) => {
+    const _cleanseTextOfHtml = (rawText) => {
+        const text = rawText ? rawText.split("•").join("") : '';
+
         const tempHtml = `<div>${text}</div>`;
         let result = $(tempHtml).text();
         result = result.split("&amp;").join("&").split('&#x27;').join("'");
