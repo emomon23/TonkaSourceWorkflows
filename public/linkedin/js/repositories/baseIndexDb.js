@@ -472,6 +472,7 @@
 
 
             this.stores[storeName] = result;
+            backupRestoreAndSync.registerTsRepository(storeName, result);
 
             return result;
         }

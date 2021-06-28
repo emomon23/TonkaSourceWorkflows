@@ -5,6 +5,15 @@
         _registeredRepositories[name] = repositoryReference;
     }
 
+    const _backupAllIndexDbData = async () => {
+
+    }
+
+    const _whoseRegistered = () => {
+        return _registeredRepositories;
+    }
+
+    /*
     const _validateBackup = (rbo) => {
         if (!(rbo.dbName && rbo.versionNumber && rbo.idProperty && rbo.storeName && rbo.indexes)){
             throw new Error("_validateBackup. Invalid repositoryBackupObject")
@@ -78,11 +87,14 @@
         }
     }
 
-    class BackupRestoreAndSync {
-        getBackup = _getBackup;
-        syncFromBackup = _syncFromBackup;
-        backupAllIndexDbData = backupAllIndexDbData;
-        registerTsRepository = _registerTsRepository;
+    */
 
+    class BackupRestoreAndSync {
+
+        backupAllIndexDbData = _backupAllIndexDbData;
+        registerTsRepository = _registerTsRepository;
+        whoseRegistered = _whoseRegistered;
     }
+
+    window.backupRestoreAndSync = new BackupRestoreAndSync();
 })();
