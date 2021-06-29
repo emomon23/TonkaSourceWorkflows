@@ -193,6 +193,7 @@
             }
 
             return iEmail;
+        }
     }
 
     const _saveCandidate = async (candidate) => {
