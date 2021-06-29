@@ -49,6 +49,8 @@
         catch (e) {
             console.error(e.message);
         }
+
+        console.log('restoreAllIndexDbDataFromFile DONE');
     }
 
     const _whoseRegistered = () => {

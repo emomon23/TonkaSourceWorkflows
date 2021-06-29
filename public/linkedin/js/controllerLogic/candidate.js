@@ -46,8 +46,153 @@
             || candidate.lastScrapedBy === linkedInConstants.pages.PUBLIC_PROFILE
     }
 
+    const _checkIfExistingIsNewerThanIncoming = (existing, incoming) => {
+        const existingDate = existing && (existing.dateLastUpdated || existing.dateCreated) ? existing.dateLastUpdated || existing.dateCreated : null;
+        const incomingDate = incoming && (incoming.dateLastUpdated || incoming.dateCreated) ? incoming.dateLastUpdated || incoming.dateCreated : null;
+
+        return existingDate >= incoming;
+    }
+
     const _determineLastName = (input, existing) => {
         return input.lastName.lastName >= 3 ? input.lastName : existing ? existing.lastName : input.lastName;
+    }
+
+    const _mergeTsNotes = (existing, incoming) => {
+        const result = existing.tsNotes || [];
+
+        if (Array.isArray(incoming.tsNotes)){
+            incoming.tsNotes.forEach((note) => {
+                if (!result.find(n => n === note)){
+                    result.push(note);
+                }
+            })
+        }
+
+        return result;
+    }
+
+    const _mergeTsConfirmedSkills = (existing, incoming) => {
+        const result = existing.tsConfirmedSkills || {};
+
+        if (incoming && incoming.tsConfirmedSkills){
+            for (let k in incoming.tsConfirmedSkills){
+                result[k] = incoming.tsConfirmedSkills[k];
+            }
+        }
+
+        return result;
+    }
+
+    const _mergeTsStatistics = (existing, incoming) => {
+        const result = existing.skillStatistics || {};
+
+        if (incoming && incoming.skillStatistics){
+            for (let k in incoming.skillStatistics){
+                result[k] = incoming.skillStatistics[k];
+            }
+        }
+
+        return result;
+    }
+
+
+    const _mergeMessages = (existing, incoming) => {
+        const result = existing.messages || [];
+
+        if (incoming && Array.isArray(incoming.messages)){
+            incoming.messages.forEach((m) => {
+                const found = result.find(em => em.dateSent === m.dateSent && em.body === m.body);
+                if (!found){
+                    result.push(m);
+                }
+            })
+        }
+
+        return result;
+    }
+
+    const _mergeLinkedInSkills = (existing, incoming) => {
+        const result = existing.linkedInSkills || [];
+
+        if (incoming && incoming.linkedInSkills){
+            incoming.linkedInSkills.forEach((s) => {
+                if (!result.find(e => e === s)){
+                    result.push(s);
+                }
+            })
+        }
+
+        return result;
+    }
+
+    const _mergeGrades = (existing, incoming) => {
+        const result = existing.grades || {};
+
+        if (incoming && incoming.grades){
+            for (let k in incoming.grades){
+                result[k] = incoming.grades[k];
+            }
+        }
+
+        return result;
+    }
+
+    const _mergeAlisonConnections = (existing, incoming) => {
+        const result = existing.alisonConnections || {};
+
+        if (incoming && incoming.alisonConnections){
+            for (let k in incoming.alisonConnections){
+                const iVal = incoming.alisonConnections[k];
+                const eVal = result[k];
+
+                if ((!eVal) || eVal < iVal){
+                    result[k] = iVal;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    const _mergePhone = (existing, incoming) => {
+        const ePhone = existing && existing.phone ? existing.phone : '';
+        const iPhone = incoming && incoming.phone ? incoming.phone : '';
+
+        if (ePhone !== iPhone){
+            if (ePhone.length === 0){
+                return iPhone;
+            }
+
+            if (iPhone.length === 0){
+                if (existing.dateLastUpdated === incoming.dateLastUpdated){
+                    return iPhone;
+                }
+
+                return ePhone;
+            }
+
+            return iPhone;
+        }
+    }
+
+    const _mergeEmail = (existing, incoming) => {
+        const eEmail = existing && existing.email ? existing.email : '';
+        const iEmail = incoming && incoming.email ? incoming.email : '';
+
+        if (eEmail !== iEmail){
+            if (eEmail.length === 0){
+                return iEmail;
+            }
+
+            if (iEmail.length === 0){
+                if (existing.dateLastUpdated === incoming.dateLastUpdated){
+                    return iEmail;
+                }
+
+                return eEmail;
+            }
+
+            return iEmail;
     }
 
     const _saveCandidate = async (candidate) => {
@@ -55,7 +200,7 @@
             throw new Error('Invalid candidate in _saveCandidate.  undefined object or missing memberId');
         }
 
-        const fieldsNotToBeOverridden = ['positions', 'isTsJobSeeker', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate']
+        const fieldsNotToBeOverridden = ['positions', 'skillList', 'isTsJobSeeker', 'dateCreated', 'isJobSeeker', 'isActivelyLooking', 'jobSeekerScrapedDate', 'jobSeekerStartDate', 'jobSeekerEndDate', 'alisonConnections', 'grades', 'messages', 'linkedInSkills', 'lastViewBy', 'lastScrapedBy', 'phone', 'email', 'sharedNumConnections', 'statistics', 'tsConfirmedSkills', 'tsNotes']
         let existingCandidate = await _getCandidateByMemberId(candidate.memberId);
 
         _updateJobSeekerScrapedDateAccordingly(existingCandidate, candidate);
@@ -72,9 +217,18 @@
             }
 
             existingCandidate.lastName = _determineLastName(candidate, existingCandidate);
-
             existingCandidate.positions = _mergePositions(existingCandidate.positions, candidate.positions);
             existingCandidate.isJobSeekerString = existingCandidate.isJobSeeker ? 'true' : 'false';
+            existingCandidate.tsNotes = _mergeTsNotes(existingCandidate, candidate);
+            existingCandidate.phone = _mergePhone(existingCandidate, candidate);
+            existingCandidate.email = _mergeEmail(existingCandidate, candidate);
+            existingCandidate.tsConfirmedSkills = _mergeTsConfirmedSkills(existingCandidate, candidate);
+            existingCandidate.statistics = _mergeTsStatistics(existingCandidate, candidate);
+            existingCandidate.messages = _mergeMessages(existingCandidate, candidate);
+            existingCandidate.linkedInSkills = _mergeLinkedInSkills(existingCandidate, candidate);
+            existingCandidate.grades = _mergeGrades(existingCandidate, candidate);
+            existingCandidate.alisonConnections = _mergeAlisonConnections(existingCandidate, candidate);
+
             return await candidateRepository.update(existingCandidate);
         }
         else {

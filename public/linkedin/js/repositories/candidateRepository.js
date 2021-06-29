@@ -57,6 +57,9 @@
 
     const _storeFactory = baseIndexDbFactory.createStoreFactory(TONKA_SOURCE_DATABASE, VERSION, SCHEMA);
     window.candidateRepository = _storeFactory.createStore('candidate', 'memberId');
+    window.candidateRepository.restore = async (obj) => {
+        await candidateController.saveCandidate(obj);
+    }
 
     const _stringifyProfile = (c) => {
         if (!c){
