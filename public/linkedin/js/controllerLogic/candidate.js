@@ -229,6 +229,7 @@
             existingCandidate.linkedInSkills = _mergeLinkedInSkills(existingCandidate, candidate);
             existingCandidate.grades = _mergeGrades(existingCandidate, candidate);
             existingCandidate.alisonConnections = _mergeAlisonConnections(existingCandidate, candidate);
+            existingCandidate.isTsJobSeeker = existingCandidate.isTsJobSeeker || candidate.isTsJobSeeker || false;
 
             return await candidateRepository.update(existingCandidate);
         }

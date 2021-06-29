@@ -306,6 +306,10 @@
         linkedInSearchResultsScraper.searchProfilesForKeywords(data);
     }
 
+    const _importIndianNames = async (data) => {
+        let namesArray = Array.isArray(data) ? data : data.split(',');
+        await originRepository.flagPersonNames('India', namesArray);
+    }
     class LinkedInApp {
         alisonContactSyncCallback = _alisonContactSyncCallback;
         changeBadgeColor = _changeBadgeColor;
@@ -324,6 +328,7 @@
         getAlisonTags = _getAlisonTags;
         persistSkillsGPASearchFilter = _persistSkillsGPASearchFilter;
         showTsReady = _showTsReady;
+        importIndianNames = _importIndianNames;
     }
 
     window.linkedInApp = new LinkedInApp();

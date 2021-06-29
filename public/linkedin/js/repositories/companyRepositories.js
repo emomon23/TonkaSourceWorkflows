@@ -46,6 +46,24 @@
 
     window.companySummaryRepository.getCompaniesByNameContains = _getCompaniesByNameContains;
 
+    window.companySummaryRepository.restore = async (obj) => {
+        if (!(obj && obj.companyId)){
+            return;
+        }
+
+        const existing = await companySummaryRepository.get(obj.companyId);
+        if (!existing){
+            await companySummaryRepository.insert(obj);
+        }
+        else {
+            existing.aliases = tsCommon.mergeStringArrays(existing.aliases, obj.aliases);
+            existing.skills = tsCommon.mergeStringArrays(existing.skills, obj.skills);
+            existing.tsNotes = tsCommon.mergeStringArrays(existing.tsNotes, obj.tsNotes);
+
+            await companySummaryRepository.update(existing);
+        }
+    }
+
     window.companySummaryRepository.getAll().then((companies) => {
         tsCommon.stopWatchStart('cacheCompanies');
         console.log('starting cache companies');
@@ -72,9 +90,9 @@
         console.log(`cache Companies stop. time: ${time}`);
 
         return;
-    }).catch((e) => {
-        console.log(e.message);
-    });
+        }).catch((e) => {
+            console.log(e.message);
+        });
 
     window.companySummaryRepository.syncGet = (idOrName) => {
         let lookFor = isNaN(idOrName) ? idOrName.toLowerCase() : Number.parseInt(idOrName);

@@ -338,6 +338,20 @@
     const _clearCachedData = (name) => {
         localStorage.removeItem(name);
     }
+
+    const _mergeStringArrays = (a1, a2) => {
+        const result = Array.isArray(a1) ? a1 : [];
+
+        if (a2 && Array.isArray(a2)){
+            a2.forEach((aItem) => {
+                if (!result.find(aItem)){
+                    result.push(aItem);
+                }
+            })
+        }
+
+        return result;
+    }
     class TSCommon {
         constructor (){}
 
@@ -362,6 +376,7 @@
         navigateToHyperLink = _navigateToHyperLink;
         findAHyperLink = _findAHyperLink;
         jsonParse = _jsonParse;
+        mergeStringArrays = _mergeStringArrays;
         waitTilTrue = _waitTilTrue;
         now = () => { return new Now(); };
         dayDifference = _dayDifference;

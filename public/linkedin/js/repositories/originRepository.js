@@ -32,4 +32,22 @@
             originRepository.update(record);
         }
     }
+
+    window.originRepository.restore = async (obj) => {
+        if (!(obj && obj.originName)){
+            return;
+        }
+
+        let originObj = await originRepository.get(obj.originName);
+        if (!originObj){
+            await originRepository.insert(obj);
+        }
+        else {
+            for (let k in obj){
+                originObj[k] = true;
+            }
+
+            await originRepository.update(originObj);
+        }
+    }
 })();
