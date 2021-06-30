@@ -82,9 +82,38 @@
                                 return isNaN(memberId) ? memberId : Number.parseInt(memberId);
                             });
     }
+
+    const _parseOutStatusColumn = (colElement) => {
+        const result = {};
+        let whenText = $(colElement).find('[class*="when"]').text();
+
+        result.linkedInStatus = $(colElement).find('span[class*="status-text"]').text();
+        result.daysAgo = whenText.replace('days', '').replace('months', '').replace('years', '').replace('ago', '').trim();
+
+        if (result.linkedInStatus === 'Replied'){
+            result.accepted = $(colElement).find('div[class*="message-status"][class*="accepted"][style*="display"]').length > 0
+        }
+
+        return result;
+    }
+
+    const _scrapePipeline = async () => {
+        const candidatesIds = await linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+        const statusColumns = $('div[class*="status-col"]').toArray();
+        const result = [];
+
+        for (let i = 0; i < candidatesIds.length; i++){
+            const candidate = _parseOutStatusColumn(statusColumns[i]);
+            candidate.memberId = candidatesIds[i];
+            result.push(candidate);
+        }
+
+        return result;
+    }
     class TSProjectPipelineScrapper {
         collectionContactInformation = _collectContactInformation;
         getMemberIdsFromPipelinePage = _getMemberIdsFromPipelinePage;
+        scrapePipeline = _scrapePipeline;
     }
 
     window.tsProjectPipelineScrapper = new TSProjectPipelineScrapper();

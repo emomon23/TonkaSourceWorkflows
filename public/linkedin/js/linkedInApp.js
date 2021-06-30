@@ -25,6 +25,8 @@
 
         const indexDbCandidateSearch = indexDbCandidateSearchMenu.menuOption();
 
+        const projectStatusReportTab = projectStatusReportMenu.menuOption();
+
         const toggleButton = $(document.createElement('button')).click(() => {
             $('#tsContent').toggle();
         }).text("Show/Hide").attr('class', 'ts-menu-button-toggle ts-button-li');
@@ -32,6 +34,7 @@
         tsMenu.append(companySkillSearch)
                 .append(jobSearch)
                 .append(indexDbCandidateSearch)
+                .append(projectStatusReportTab)
                 .append(toggleButton);
 
         tsUICommon.createButton({text: 'Backup Db', onclick: _backupDbClick, container:tsMenu, attr: {class: 'ts-menu-button-toggle ts-button-li'}});

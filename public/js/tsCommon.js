@@ -352,6 +352,18 @@
 
         return result;
     }
+
+    const millieSecondsInDay = (1000 * 60 * 60 * 24);
+
+    const _minusDaysFromNow = (numberOfDays) => {
+        const diff = (Number.parseFloat(numberOfDays) * millieSecondsInDay);
+        return (new Date()).getTime() - diff;
+    }
+
+    const _addDaysToNow = (numberOfDays) => {
+        const diff = (Number.parseFloat(numberOfDays) * millieSecondsInDay);
+        return (new Date()).getTime() + diff;
+    }
     class TSCommon {
         constructor (){}
 
@@ -382,6 +394,8 @@
         dayDifference = _dayDifference;
         stopWatchStart = _stopWatchStart;
         stopWatchStop = _stopWatchStop;
+        addDaysToNow = _addDaysToNow;
+        minusDaysFromNow = _minusDaysFromNow;
     }
 
     window.tsCommon = new TSCommon();

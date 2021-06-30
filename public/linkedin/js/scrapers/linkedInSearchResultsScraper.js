@@ -830,10 +830,12 @@
         $(tsCounter).text(`TS Count: ${counter}`);
     }
 
+    const _getCurrentPageOfCandidates = () => { return _pageCandidates; }
     class LinkedInSearchResultsScraper {
         advanceToNextLinkedInResultPage = linkedInCommon.advanceToNextLinkedInResultPage;
         persistLastRecruiterProfile = _persistLastRecruiterProfile;
         walkTheSearchResultsPages = _walkTheSearchResultsPages;
+        getCurrentPagesOfCandidates = _getCurrentPageOfCandidates;
         getCurrentRecruiterProfileCandidate = getCurrentRecruiterProfileCandidate;
         gatherCurrentPageOfJobSeekersExperienceData = _gatherCurrentPageOfJobSeekersExperienceData;
         gatherAllJobSeekersExperienceData = _gatherAllJobSeekersExperienceData;

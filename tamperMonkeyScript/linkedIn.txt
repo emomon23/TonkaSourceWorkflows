@@ -52,7 +52,9 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/tsClipboardRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/jobRepository.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/originRepository.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/repositories/assignmentRepository.js
 
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/assignmentController.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/company.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/candidate.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
@@ -60,6 +62,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/controllerLogic/jobsController.js
 
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/baseMenu.js
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/projectStatusReportMenu.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/companySkillSearch.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/jobSearch.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/indexDbCandidateSearch.js
@@ -115,6 +118,7 @@
 // @ignore      http://localhost:5001/linkedin/js/services/tsTemplateProcessor.js
 // @ignore      http://localhost:5001/linkedin/js/services/tsConfirmedSkills.js
 
+// @ignore      http://localhost:5001/linkedin/js/repositories/assignmentRepository.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/backupRestoreAndSync.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/baseIndexDb.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/configurationRepository.js
@@ -127,6 +131,7 @@
 // @ignore      http://localhost:5001/linkedin/js/repositories/jobsRepository.js
 // @ignore      http://localhost:5001/linkedin/js/repositories/originRepository.js
 
+// @ignore      http://localhost:5001/linkedin/js/controllerLogic/assignmentController.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/company.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/candidate.js
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/connectionLifeCycleLogic.js
@@ -134,6 +139,7 @@
 // @ignore      http://localhost:5001/linkedin/js/controllerLogic/jobsController.js
 
 // @ignore      http://localhost:5001/linkedin/js/menus/baseMenu.js
+// @ignore      http://localhost:5001/linkedin/js/menus/projectStatusReportMenu.js
 // @ignore      http://localhost:5001/linkedin/js/menus/companySkillSearch.js
 // @ignore      http://localhost:5001/linkedin/js/menus/jobSearch.js
 // @ignore      http://localhost:5001/linkedin/js/menus/indexDbCandidateSearch.js

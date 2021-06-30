@@ -85,7 +85,7 @@
             value = candidate.tsConfirmedSkills[confirmedSkillProperty];
         }
 
-        const nodes = _appendTextInput(container, candidate.memberId, displayValue, 15, value, 'skillRank');
+        const nodes = _appendTextInput(container, candidate.memberId, displayValue, 15, value, 'skillRank tsCandidateControl');
         $(nodes.input).attr('skill', confirmedSkillProperty);
         const input = nodes.input
 
@@ -105,6 +105,7 @@
             const firstName = $(document.createElement('span'))
                                 .attr('style', 'color:blue; padding-left:15px')
                                 .attr('memberId', candidate.memberId)
+                                .attr('class', 'tsCandidateControl')
                                 .text(`${candidate.firstName}`)
                                 .click((e) => {
                                     const memberId = $(e.target).attr('memberId');
@@ -115,6 +116,7 @@
             const lastName = $(document.createElement('span'))
                                 .attr('style', 'color:blue; padding-left:45px')
                                 .attr('memberId', candidate.memberId)
+                                .attr('class', 'tsCandidateControl')
                                 .text(`${candidate.lastName}`)
                                 .click((e) => {
                                     const memberId = $(e.target).attr('memberId');
@@ -126,6 +128,7 @@
             const both = $(document.createElement('span'))
                                 .attr('style', 'color:blue; padding-left:45px')
                                 .attr('memberId', candidate.memberId)
+                                .attr('class', 'tsCandidateControl')
                                 .text('Both')
                                 .click((e) => {
                                     const memberId = $(e.target).attr('memberId');
@@ -160,6 +163,7 @@
                         type:'checkbox',
                         memberId: candidate.memberId,
                         style: 'margin-left: 5px',
+                        class: 'tsCandidateControl',
                         isTsJobSeeker: candidate.isTsJobSeeker // just a debug attribute
                     };
 
@@ -167,7 +171,7 @@
             checkbox.checked = true;
         }
 
-        const formInput = tsUICommon.createInput(container,{text: 'TS Job Seeker'}, checkbox);
+        const formInput = tsUICommon.createInput(container,{text: 'TS Job Seeker', class: 'tsCandidateControl'}, checkbox);
         $(formInput.input).bind('change', _toggleIsJobSeeker);
 
     }
@@ -175,12 +179,13 @@
     const _displayTsNotes = (container, candidate) => {
         const div = document.createElement('div');
         $(div).attr('id', 'tsNotesDiv')
+              .attr('class', 'tsCandidateControl')
               .attr('style', 'margin-top:5px');
 
         $(container).append(div);
 
         const value = candidate && Array.isArray(candidate.tsNotes) ? candidate.tsNotes.join('\n\n') : '';
-        const nodes = _appendTextInput(div, candidate.memberId, 'Note', 400, value, 'tsNote', 7);
+        const nodes = _appendTextInput(div, candidate.memberId, 'Note', 400, value, 'tsCandidateControl tsNote', 7);
 
         $(nodes.input).keypress((e) => {
             return false
@@ -202,9 +207,7 @@
     }
 
     const _clearUI = () => {
-        $('#tsNotesDiv').remove();
-        $('#tsSkillsDiv').remove()
-        $('#tsPhoneEmailDiv').remove();
+        $('.tsCandidateControl').remove();
     }
 
     const _displayTSConfirmedSkillsForCandidate = (container, candidate, display = 'inline') => {
@@ -215,6 +218,7 @@
         const div = document.createElement('div');
         $(div).attr('id', 'tsSkillsDiv')
               .attr('style', `display:${display}; margin-top:5px; margin-bottom:25px`)
+              .attr('class', 'tsCandidateControl')
         .text("Rank: ");
 
         $(container).append(div);
@@ -239,11 +243,12 @@
     const _displayPhoneAndEmail = (container, candidate) => {
         const div = document.createElement('div');
         $(div).attr('id', 'tsPhoneEmailDiv')
-              .attr('style', 'margin-bottom: 25px');
+              .attr('style', 'margin-bottom: 25px')
+              .attr('class', 'tsCandidateControl')
         container.append(div);
 
         const mailToHref = candidate.email ? `mailTo:${candidate.email}` : null;
-        const emailNodes = _appendTextInput(div, candidate.memberId, "Email:", 225, candidate.email, 'tsContactInfo tsEmail', 1, mailToHref);
+        const emailNodes = _appendTextInput(div, candidate.memberId, "Email:", 225, candidate.email, 'tsContactInfo tsEmail tsCandidateControl', 1, mailToHref);
 
 
 
@@ -258,18 +263,26 @@
             document.execCommand('copy');
         });
 
-        const phoneNumberNodes = _appendTextInput(div, candidate.memberId, "Phone:", 125, candidate.phone, 'tsContactInfo tsPhone');
+        const phoneNumberNodes = _appendTextInput(div, candidate.memberId, "Phone:", 125, candidate.phone, 'tsContactInfo tsPhone tsCandidateControl');
         $(phoneNumberNodes.input).change((e) => {
             _updateContactInfo(e.target, "phone");
         });
     }
 
+    const _displayAllTheTsControls = (container, candidate) => {
+        _displayPhoneAndEmail(container, candidate);
+        _displayFlagIndianName(container, candidate)
+        _displayTSConfirmedSkillsForCandidate(container, candidate);
+        _displayTsNotes(container, candidate);
+        _displayIsConfirmedJobSeeker(container, candidate);
+    }
     class TSConfirmCandidateSkillService {
         displayTSConfirmedSkillsForCandidate = _displayTSConfirmedSkillsForCandidate;
         displayFlagIndianName = _displayFlagIndianName;
         displayTSNote = _displayTsNotes;
         displayIsConfirmedJobSeeker = _displayIsConfirmedJobSeeker;
         displayPhoneAndEmail = _displayPhoneAndEmail;
+        displayAllTheTsControls = _displayAllTheTsControls;
         getTSConfirmedSkillsList = () => { JSON.parse(JSON.stringify(confirmedSkillsList));  }
         clearUI = _clearUI;
     }

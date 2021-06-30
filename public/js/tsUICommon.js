@@ -323,7 +323,21 @@
             $(container).append(label);
         }
 
-        const input = document.createElement('input');
+        let input = null;
+        if (inputAttributes.type === 'select' || inputAttributes.type === 'dropdown'){
+            input = document.createElement('select');
+            input.addItem = (id, text) => {
+                const option = $(document.createElement("option"))
+                    .val(id)
+                    .text(text);
+
+                    $(input).append(option);
+            }
+        }
+        else {
+            input = document.createElement('input');
+        }
+
         for (let ik in inputAttributes){
             if (ik !== 'text' && ik !== 'value'){
                 $(input).attr(ik, inputAttributes[ik]);

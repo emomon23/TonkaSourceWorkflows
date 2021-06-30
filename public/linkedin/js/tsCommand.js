@@ -43,7 +43,7 @@
 
         await tsCommon.sleep(4000);
 
-        const keywords = linkedInRecruiterProfileSpy.getRawKeywordsString();
+        const keywords = linkedInSearchResultsSpy.getRawKeywordsString();
         tsCommon.postMessageToWindow(dashboardWindow, 'givingYouAReferenceBackToLinkedInWindow', keywords);
 
         if (!dashboardWindow){

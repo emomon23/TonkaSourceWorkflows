@@ -182,9 +182,10 @@
         appendToKeywordsFilter = _appendToKeywordsFilter;
         getRawKeywordsString = _getRawKeywordsString;
         getActivelySeekingString = () => {return _activelySeekingFilterString};
+        bindToElements = _bindToElements;
     }
 
-    window.linkedInRecruiterProfileSpy = new LinkedInSearchResultsSpy();
+    window.linkedInSearchResultsSpy = new LinkedInSearchResultsSpy();
 
     const _delayReady = async () => {
         await tsCommon.sleep(1500);

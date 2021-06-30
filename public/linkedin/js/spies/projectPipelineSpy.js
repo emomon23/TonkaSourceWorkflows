@@ -1,5 +1,6 @@
 (() => {
     let _candidates = [];
+    let _tsAssignment = null;
 
     const _findCandidate = (strMemberId) => {
         const memberId = !isNaN(strMemberId) ? Number.parseInt(strMemberId) : memberId;
@@ -9,7 +10,7 @@
     const _projectPipelineSpy_InitializeAsyncCalls = async () => {
         await tsCommon.sleep(1000);
         await _getCandidatesFromDb();
-        await _rebindToPresentationTabs();
+        await _rebindProjectElements();
         await _displayTSConfirmedSkills();
 
         $('a[class*="page-link"]').click(() => {
@@ -56,20 +57,73 @@
         }
     }
 
-    const tabClicked = () => {
-        _rebindToPresentationTabs();
+    const _savePipelineToTsAssignment = async () => {
+        const candidatesIds = await linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+        const scrapedPipeLineCandidates = await tsProjectPipelineScrapper.scrapePipeline();
+
+        if (scrapedPipeLineCandidates.length === candidatesIds.length) {
+            for (let i = 0; i < candidatesIds.length; i++) {
+                const tsProjectCandidate = scrapedPipeLineCandidates[i];
+                assignmentController.addCandidateToProjectIsMissing(_tsAssignment, tsProjectCandidate);
+            }
+        }
     }
 
-    const _rebindToPresentationTabs = async () => {
+    const _displayTsControlsOnList = async () => {
+        await tsCommon.sleep(2000);
+
+        const pipelineRows = $('div[class*="table-container-project"] div[class*="row-inner"]').toArray();
+        const candidatesIds = await linkedInSearchResultsScraper.getCurrentSearchResultsPageListOfMemberIds();
+
+        if (pipelineRows.length === candidatesIds.length) {
+           for (let i = 0; i < pipelineRows.length; i++) {
+                // eslint-disable-next-line no-await-in-loop
+                const candidate = await candidateRepository.get(candidatesIds[i]);
+                tsConfirmCandidateSkillService.displayAllTheTsControls(pipelineRows[i], candidate);
+            }
+        }
+        else {
+            console.error('WTF!?  candidates and rows do not match')
+        }
+
+
+    }
+
+    const rerunDocReady = async (displayControlsMySelf) => {
         await tsCommon.sleep(1000);
-        $(linkedInSelectors.projectPipeLinePage.tab).click(() => {
-            tabClicked();
+        _rebindProjectElements();
+
+        if (displayControlsMySelf){
+            _displayTsControlsOnList();
+        }
+
+        _savePipelineToTsAssignment();
+    }
+
+    const _rebindProjectElements = async () => {
+        await tsCommon.sleep(1000);
+        $(linkedInSelectors.projectPipeLinePage.tab).click((e) => {
+            rerunDocReady(true);
         });
+
+        $('a[class*="page-link"]').click((e) => {
+            rerunDocReady(false);
+        });
+    }
+
+    const _fetchTsAssignmentFromProject = async () => {
+        await tsCommon.sleep(2000);
+
+        projectName = $('h2[class*="header-title"]').text();
+        _tsAssignment = await assignmentController.getOrCreateAssignment(projectName);
+
+        _savePipelineToTsAssignment();
     }
 
     $(document).ready(() => {
         if (linkedInCommon.whatPageAmIOn() === linkedInConstants.pages.PROJECT_PIPELINE) {
             _projectPipelineSpy_InitializeAsyncCalls();
+            _fetchTsAssignmentFromProject();
         }
     });
 })();
