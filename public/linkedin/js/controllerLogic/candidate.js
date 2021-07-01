@@ -912,6 +912,18 @@
         }
     }
 
+    const _updatePublicProfileUrl = async (memberId, publicProfileUrl) => {
+        const candidate = await _searchForCandidate(memberId);
+
+        if (candidate){
+            candidate.linkedIn = publicProfileUrl;
+            await candidateRepository.update(candidate);
+            return true;
+        }
+
+        return false;
+    }
+
     const _toggleIsTsJobSeeker = async (memberId, desiredValue) => {
         // eslint-disable-next-line no-alert
         const candidate = await _searchForCandidate(memberId);
@@ -937,6 +949,7 @@
         getConfirmedTSSkillKeys = _getConfirmedTSSkillKeys;
         findCandidatesOnConfirmedSkills = _findCandidatesOnConfirmedSkills;
         flagOrigin = _flagOrigin;
+        updatePublicProfileUrl = _updatePublicProfileUrl;
         toggleIsTsJobSeeker = _toggleIsTsJobSeeker;
         // loadLotsOfData = _loadLotsOfData;
     }
