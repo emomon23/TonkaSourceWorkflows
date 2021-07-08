@@ -64,7 +64,7 @@
         if (scrapedPipeLineCandidates.length === candidatesIds.length) {
             for (let i = 0; i < candidatesIds.length; i++) {
                 const tsProjectCandidate = scrapedPipeLineCandidates[i];
-                assignmentController.addCandidateToProjectIsMissing(_tsAssignment, tsProjectCandidate);
+                assignmentController.updateProjectCandidate(_tsAssignment, tsProjectCandidate);
             }
         }
     }

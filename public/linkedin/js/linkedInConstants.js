@@ -24,6 +24,7 @@
         };
 
         pages = {
+            INVITATIONS: "invitation-manager/sent/",
             CLIP_BOARD: "clipboard?",
             RECRUITER_COMPANY: "/recruiter/company",
             RECRUITER_SEARCH_RESULTS: "/recruiter/smartsearch",

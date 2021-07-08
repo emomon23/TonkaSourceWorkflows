@@ -67,6 +67,7 @@
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/jobSearch.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/menus/indexDbCandidateSearch.js
 
+// @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/connectionRequestInvitationScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @require      https://tonkasourceworkflows.firebaseapp.com/linkedin/js/scrapers/linkedInRecruiterCompanyScraper.js
@@ -144,6 +145,7 @@
 // @ignore      http://localhost:5001/linkedin/js/menus/jobSearch.js
 // @ignore      http://localhost:5001/linkedin/js/menus/indexDbCandidateSearch.js
 
+// @ignore      http://localhost:5001/linkedin/js/scrapers/connectionRequestInvitationScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInContactInfoScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInPublicProfileScraper.js
 // @ignore      http://localhost:5001/linkedin/js/scrapers/linkedInRecruiterCompanyScraper.js

@@ -357,12 +357,12 @@
 
     const _minusDaysFromNow = (numberOfDays) => {
         const diff = (Number.parseFloat(numberOfDays) * millieSecondsInDay);
-        return (new Date()).getTime() - diff;
+        return new Date((new Date()).getTime() - diff);
     }
 
     const _addDaysToNow = (numberOfDays) => {
         const diff = (Number.parseFloat(numberOfDays) * millieSecondsInDay);
-        return (new Date()).getTime() + diff;
+        return new Date((new Date()).getTime() + diff);
     }
     class TSCommon {
         constructor (){}

@@ -1,7 +1,250 @@
 (() => {
+    const _styles = `.table {
+        display: flex;
+        flex-flow: column nowrap;
+        font-size: 15px;
+        margin: 0.5rem;
+        line-height: 1.5;
+        border-bottom: 1px solid #d0d0d0;
+        flex: 1 1 auto;
+    }
+
+    .th {
+        display: none;
+        font-weight: 700;
+        background-color: #f2f2f2;
+    }
+
+    .tr {
+        width: 100%;
+        display: flex;
+        flex-flow: row nowrap;
+    }
+
+    .tr:nth-of-type(even) {
+        background-color: #f2f2f2;
+    }
+
+    .tr:nth-of-type(odd) {
+        background-color: #ffffff;
+    }
+
+    .td {
+        display: inline-grid;
+        flex-flow: row nowrap;
+        flex-grow: 1;
+        flex-basis: 0;
+        padding: 0.5em;
+        word-break: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0px;
+        white-space: nowrap;
+        border-bottom: 1px solid #d0d0d0;
+    }`
+
+    const _tableHtml = `<div class='tr th'>
+        <div class="td">
+            Candidate
+        </div>
+        <div class="td">
+           Week 1
+        </div>
+        <div class="td">
+            Week 2
+        </div>
+        <div class="td">
+            Week 3
+        </div>
+        <div class="td">
+            Week 4
+        </div>
+        <div class="td">
+            Week 5
+        </div>
+        <div class="td">
+            Week 6
+        </div>
+    </div>`
+
     let _assignments = [];
     let _contentContainer = null;
     let _baseContainer = null;
+    let _selectedAssignment = null;
+
+    const _candidateWeekStatusChanged = (e) => {
+        const cid = $(e.target).attr('cid');
+        const week = 'week' + $(e.target).attr('week');
+        const value = $(e.target).val();
+
+        // eslint-disable-next-line eqeqeq
+        const projectCandidate = _selectedAssignment.candidates.find(c => c.memberId == cid);
+
+        if (projectCandidate){
+            if (!projectCandidate[week]){
+                projectCandidate[week] = {};
+            }
+
+            projectCandidate[week].status = value;
+            assignmentController.saveAssignment(_selectedAssignment);
+        }
+        else {
+            // eslint-disable-next-line no-alert
+            alert(`Error: can't find ${cid} candidate in _selectedAssignment`);
+        }
+    }
+
+    const _reasonLinkClick = (e) => {
+        const cid = $(e.target).attr('cid');
+        const week = 'week' + $(e.target).attr('week');
+
+         // eslint-disable-next-line eqeqeq
+         const projectCandidate = _selectedAssignment.candidates.find(c => c.memberId == cid);
+
+         if (projectCandidate){
+            if (!projectCandidate[week]){
+                projectCandidate[week] = {};
+            }
+
+            const weekObject = projectCandidate[week];
+            let note = weekObject.reason || '';
+            // eslint-disable-next-line no-alert
+            note = prompt(`Reason for ${projectCandidate.candidateRecord.firstName} for ${week}`, note);
+            if (note === null){
+                return;
+            }
+
+            weekObject.reason = note;
+            assignmentController.saveAssignment(_selectedAssignment);
+            const text = weekObject.reason.length ? "Reason *" : "Reason";
+            $(e.target).text(text);
+         }
+         else {
+             // eslint-disable-next-line no-alert
+             alert(`Error: can't find ${cid} candidate in _selectedAssignment`);
+         }
+    }
+
+    const _renderTableAndHeader = () => {
+        const styleSheet = document.createElement('style');
+        styleSheet.type = "text/css"
+        styleSheet.innerText = _styles
+        document.head.appendChild(styleSheet)
+
+        const grid = $(document.createElement('div'))
+                            .attr('id', 'projectCandidatesGrid')
+                            .attr('class', 'table')
+                            .html(_tableHtml);
+
+        $(_contentContainer).append(grid);
+    }
+
+    const _renderStatusDropDowns = async () => {
+        const cells = $('.weekCell').toArray();
+
+        cells.forEach((c) => {
+            const cid = $(c).attr('cid');
+            const week = $(c).attr('week');
+
+            const html = `<div>
+                <select class='assignmentCandidateStatus' cid='${cid}' week='${week}'>
+                    <option value='Identified'>Please select</option>
+                    <option value='Contacted'>Contacted</option>
+                    <option value='Presented Position'>Presented Position</option>
+                    <option value='Candidate Not Interested'>Candidate Not Interested</option>
+                    <option value='Disqualified By Tonka Source'>Disqualified By Tonka Source</option>
+                    <option value='Waiting on Resume'>Waiting on Resume</option>
+                    <option value='Presented, waiting on Client'>Presented, waiting on client</option>
+                    <option value='Disqualified by Client'>Disqualified by Client</option>
+                    <option value='Interview Scheduled'>Interview Scheduled</option>
+                    <option value='Offer made'>Offer made</option>
+                    <option value='Offer rejected by Candidate'>Offer rejected by candidate</option>
+                </select>
+            </div>
+            <div>
+                <a href='#' class='reason' cid='${cid}' week='${week}'>Reason</a>
+            </div>`;
+
+            $(c).html(html);
+        });
+
+        await tsCommon.sleep(500);
+
+        _selectedAssignment.candidates.forEach((c) => {
+            for (let i = 1; i < 6; i++){
+                const key = `week${i}`;
+                const weekObject = c[key];
+                let selector = '';
+
+                if (weekObject) {
+                    if (weekObject.status){
+                        selector = `select[cid*="${c.memberId}"][week*="${i}"]`;
+                        const dropdown = $(selector)[0];
+
+                        selector = `option[value*="${weekObject.status}"]`;
+                        const option = $(dropdown).find(selector)[0];
+                        $(option).attr('selected', 'selected');
+                    }
+
+                    if (weekObject.reason && weekObject.reason.length){
+                        selector = `a[cid*="${c.memberId}"][week*="${i}"]`;
+                        const anchor = $(selector)[0];
+
+                        if (anchor){
+                            $(anchor).text('Reason *');
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    const _renderCandidateRow = (projectCandidate) => {
+        const candidate = projectCandidate.candidateRecord;
+        const cid = candidate.memberId;
+
+        const rowHtml = `
+        <div class="td" id='${cid}_name'>
+            <span id='${cid}_name'></span>
+        </div>
+        <div class="td weekCell" week='1' cid=${cid}'>
+
+        </div>
+        <div class="td weekCell" week='2' cid=${cid}'>
+
+        </div>
+        <div class="td weekCell" week='3' cid=${cid}>
+
+        </div>
+        <div class="td weekCell" week='4' cid=${cid}>
+
+        </div>
+        <div class="td weekCell" week='5' cid=${cid}>
+
+        </div>
+        <div class="td weekCell" week='6' cid=${cid}>
+
+        </div>
+    `
+
+    const div = $(document.createElement('div'))
+                    .attr('class', 'tr candidateRow');
+
+        $(div).html(rowHtml);
+        $('#projectCandidatesGrid').append(div);
+
+        let fullName = candidate.linkedIn ? `:)  ` : candidate.linkedInRecruiterUrl ? ':|  ' : ':(  ';
+        fullName += `${candidate.firstName} ${candidate.lastName}`;
+
+        const spanSelector = `#${cid}_name`;
+        const span = $(spanSelector);
+
+        $(tsUICommon.createLink(span, '#', fullName, null, _getPublicProfile))
+                .attr('memberId', candidate.memberId)
+                .attr('linkedInRecruiterUrl', candidate.linkedInRecruiterUrl || '')
+                .attr('linkedInUrl', candidate.linkedIn || '')
+
+    }
 
     const _getPublicProfile = async (e) => {
         const anchor = $(e.target)[0] || e;
@@ -46,6 +289,7 @@
 
                 profileWindow.close();
             }
+
             return false;
         }
         else {
@@ -53,44 +297,28 @@
         }
     }
 
-    const _renderAssignmentCandidateRow = (gridElement, c) => {
-        const candidate = c.candidateRecord;
-        const row = $(document.createElement('div'))
 
-        $(gridElement).append(row);
+    const _renderAssignment = async () => {
+        $('.candidateRow').remove();
+        await tsCommon.sleep(50);
 
-        let fullName = candidate.linkedIn ? `:)  ` : candidate.linkedInRecruiterUrl ? ':|  ' : ':(  ';
-        fullName += `${candidate.firstName} ${candidate.lastName}`;
+        if (_selectedAssignment){
+            const candidates = _selectedAssignment.candidates || [];
+             candidates.forEach((c) => {
+                 _renderCandidateRow(c);
+             });
 
-        $(tsUICommon.createLink(row, '#', fullName, null, _getPublicProfile))
-                .attr('memberId', candidate.memberId)
-                .attr('linkedInRecruiterUrl', candidate.linkedInRecruiterUrl || '')
-                .attr('linkedInUrl', candidate.linkedIn || '')
-    }
-
-    const _renderAssignmentCandidatesGrid = async (val) => {
-        $('.assignmentStatusReportGrid').remove();
-
-        await tsCommon.sleep(100);
-
-        if (val){
-            const gridContainer = $(document.createElement('div'))
-                                    .attr('class', 'assignmentStatusReportGrid');
-
-            $(_contentContainer).append(gridContainer);
-
-            const selectedAssignment = _assignments.find(a => a.name === val);
-            const candidates = selectedAssignment.candidates || [];
-
-            candidates.forEach((c) => {
-                _renderAssignmentCandidateRow(gridContainer, c);
-            });
-        }
+             _renderStatusDropDowns();
+             $('.assignmentCandidateStatus').bind('change', _candidateWeekStatusChanged);
+             $('.reason').bind('click', _reasonLinkClick);
+         }
     }
 
     const _assignmentSelected = (e) => {
         const val = $(e.target).val();
-        _renderAssignmentCandidatesGrid(val);
+        _selectedAssignment = _assignments.find(a => a.name === val);
+
+        _renderAssignment();
     }
 
     const _renderAssignmentsDropdownBox = () => {
@@ -115,6 +343,7 @@
         _baseContainer = containers.baseContainer;
 
         _renderAssignmentsDropdownBox();
+        _renderTableAndHeader();
     }
 
     const _menuOption = () => {

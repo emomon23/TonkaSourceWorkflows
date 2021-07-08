@@ -263,7 +263,7 @@
             document.execCommand('copy');
         });
 
-        const phoneNumberNodes = _appendTextInput(div, candidate.memberId, "Phone:", 125, candidate.phone, 'tsContactInfo tsPhone tsCandidateControl');
+        const phoneNumberNodes = _appendTextInput(div, candidate.memberId, "Phone:", 225, candidate.phone, 'tsContactInfo tsPhone tsCandidateControl');
         $(phoneNumberNodes.input).change((e) => {
             _updateContactInfo(e.target, "phone");
         });

@@ -84,14 +84,26 @@
     }
 
     const _parseOutStatusColumn = (colElement) => {
-        const result = {};
+        const result = { };
         let whenText = $(colElement).find('[class*="when"]').text();
 
-        result.linkedInStatus = $(colElement).find('span[class*="status-text"]').text();
+        const linkedInStatus = $(colElement).find('span[class*="status-text"]').text();
+        result.linkedInStatus = linkedInStatus;
         result.daysAgo = whenText.replace('days', '').replace('months', '').replace('years', '').replace('ago', '').trim();
+
+        const whenDate = tsCommon.minusDaysFromNow(result.daysAgo).toLocaleDateString();
+        if (linkedInStatus === "New" && !result.linkedInStatus.dateAddedToProject){
+            result.dateAddedToProject = whenDate;
+        }
+        else if (linkedInStatus === "Contacted" && !result.dateFirstContacted) {
+            result.dateFirstContacted === whenDate;
+        }
 
         if (result.linkedInStatus === 'Replied'){
             result.accepted = $(colElement).find('div[class*="message-status"][class*="accepted"][style*="display"]').length > 0
+            if (!result.dateReplied){
+                result.dateReplied = whenDate;
+            }
         }
 
         return result;
@@ -105,6 +117,7 @@
         for (let i = 0; i < candidatesIds.length; i++){
             const candidate = _parseOutStatusColumn(statusColumns[i]);
             candidate.memberId = candidatesIds[i];
+            candidate.linkedInRecruiterUrl = $($('a[class*="profile-image"]')[i]).attr('href');
             result.push(candidate);
         }
 

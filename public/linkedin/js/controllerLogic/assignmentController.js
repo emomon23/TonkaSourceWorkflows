@@ -4,12 +4,44 @@
         await assignmentRepository.save(assignmentObject);
     }
 
-    const _addCandidateToProjectIsMissing = async (tsAssignment, candidate) => {
+    const _mergePipelineCandidateWithProjectCandidate = (projectCandidate, pipelineCandidate) => {
+        if (!projectCandidate.dateAddedToProject && pipelineCandidate.dateAddedToProject){
+            projectCandidate.dateAddedToProject  =  pipelineCandidate.dateAddedToProject;
+        }
+
+        if (!projectCandidate.dateFirstContacted && pipelineCandidate.dateFirstContacted){
+            projectCandidate.dateFirstContacted  =  pipelineCandidate.dateFirstContacted;
+        }
+
+        if (!projectCandidate.dateReplied && pipelineCandidate.dateReplied){
+            projectCandidate.dateReplied  =  pipelineCandidate.dateReplied;
+        }
+
+        projectCandidate.linkedInStatus = pipelineCandidate.linkedInStatus;
+        projectCandidate.accepted = pipelineCandidate.accepted;
+    }
+
+    const _updateProjectCandidate = async (tsAssignment, pipelineCandidate) => {
         const candidates = tsAssignment.candidates || [];
-        if (!candidates.find(c => c.memberId === candidate.memberId)){
-            candidates.push(candidate);
+
+        const projectCandidate = candidates.find(c => c.memberId === pipelineCandidate.memberId);
+
+        if (projectCandidate){
+            _mergePipelineCandidateWithProjectCandidate(projectCandidate, pipelineCandidate);
+        }
+        else {
+            candidates.push(pipelineCandidate);
             tsAssignment.candidates = candidates;
-            await assignmentRepository.update(tsAssignment);
+
+        }
+
+        await assignmentRepository.update(tsAssignment);
+
+        // update recruiter profile url
+        if (pipelineCandidate.linkedInRecruiterUrl) {
+            const dbCandidate = await candidateRepository.get(pipelineCandidate.memberId);
+            dbCandidate.linkedInRecruiterUrl = pipelineCandidate.linkedInRecruiterUrl;
+            await candidateRepository.update(dbCandidate);
         }
     }
 
@@ -53,7 +85,7 @@
         saveAssignment = _saveAssignment;
         getOrCreateAssignment = _getOrCreateAssignment;
         getAssignments = _getAssignments;
-        addCandidateToProjectIsMissing = _addCandidateToProjectIsMissing;
+        updateProjectCandidate = _updateProjectCandidate;
     }
 
     window.assignmentController = new AssignmentController();
