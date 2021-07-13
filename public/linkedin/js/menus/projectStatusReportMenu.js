@@ -1,4 +1,6 @@
 (() => {
+    const _ip = {};
+
     const _styles = `.table {
         display: flex;
         flex-flow: column nowrap;
@@ -41,7 +43,20 @@
         min-width: 0px;
         white-space: nowrap;
         border-bottom: 1px solid #d0d0d0;
-    }`
+    }
+
+    .ts-ui-common-label {
+        margin-right:5px
+    }
+
+    .assignmentData {
+        margin-right:15px;
+    }
+
+    .assignmentInputsContainer {
+        margin-top:25px
+    }
+    `
 
     const _tableHtml = `<div class='tr th'>
         <div class="td">
@@ -199,6 +214,11 @@
         })
     }
 
+    const _generateStatusReport = async () => {
+        // eslint-disable-next-line no-alert
+        alert("Generate status report to be implemented");
+    }
+
     const _renderCandidateRow = (projectCandidate) => {
         const candidate = projectCandidate.candidateRecord;
         const cid = candidate.memberId;
@@ -303,6 +323,13 @@
         await tsCommon.sleep(50);
 
         if (_selectedAssignment){
+            $(_ip.title).val(_selectedAssignment.title);
+            $(_ip.startDate).val(_selectedAssignment.startDate || '');
+            $(_ip.salary).val(_selectedAssignment.salary || '');
+            $(_ip.searchParams).val(_selectedAssignment.searchParams || '');
+            $(_ip.factsForClient).val(_selectedAssignment.factsForClient || '');
+            $(_ip.neededByClient).val(_selectedAssignment.neededByClient || '');
+
             const candidates = _selectedAssignment.candidates || [];
              candidates.forEach((c) => {
                  _renderCandidateRow(c);
@@ -318,12 +345,16 @@
         const val = $(e.target).val();
         _selectedAssignment = _assignments.find(a => a.name === val);
 
+        if (!(_selectedAssignment.title && _selectedAssignment.title.length)){
+            _selectedAssignment.title = val;
+        }
+
         _renderAssignment();
     }
 
     const _renderAssignmentsDropdownBox = () => {
         // (container, labelAttributes, inputAttributes)
-        const dropdownFormItem = tsUICommon.createInput(_contentContainer, {text:'Assignments', class:'tsControl tsAssignments'}, {type:'select'});
+        const dropdownFormItem = tsUICommon.createInput(_contentContainer, {text:'Assignments', class:'tsControl tsAssignments'}, {type:'select', id:'ts_assignmentList'});
         const {label, input } = dropdownFormItem;
 
         input.addItem('0', 'Please Select');
@@ -335,6 +366,53 @@
         $(input).change(_assignmentSelected);
     }
 
+    const _renderAssignmentInputs = () => {
+        // createInput(container, labelAttributes, inputAttributes);
+        // title | start date | rate - salary | search params | facts to be aware of | needed from client
+
+        const div = $(document.createElement('div'))
+                        .attr('class', 'assignmentInputsContainer')
+                        .attr('id', 'assignmentInputsContainer')
+
+        $(_contentContainer).append(div);
+
+        const controls = [
+            {text: 'Title', id: 'title', class:'assignmentData', style:'width:600px'},
+            {text: 'Start Date', id: 'startDate', type:'date', class:'assignmentData', style:'width:120px'},
+            {text: 'Rate/Salary', id: 'salary', class:'assignmentData'},
+            {text: 'Search Params', block:'true', id: 'searchParams', type:'textarea', rows:5, cols:'15', class:'assignmentData'},
+            {text: 'Facts for Client', block:'true', id: 'factsForClient', class:'assignmentData', style:'width:900px; margin-top:5px'},
+            {text: 'Needed from Client', block:'true', id: 'neededFromClient', class:'assignmentData', style:'width:900px; margin-top:5px; margin-bottom:5px'}
+        ]
+
+
+        controls.forEach((ctrl) => {
+            const label = {text: ctrl.text};
+            const input = _.omit(ctrl, ['text']);
+
+            tsUICommon.createInput(div, label, input);
+        })
+
+        tsUICommon.createButton({container: div, text:'Gen Status Report', onclick:_generateStatusReport});
+
+        _ip.title = $('#title')[0];
+        _ip.startDate = $('#startDate')[0];
+        _ip.salary = $('#salary')[0];
+        _ip.searchParams = $('#searchParams')[0];
+        _ip.factsForClient = $('#factsForClient')[0];
+        _ip.neededByClient = $('#neededByClient')[0];
+
+        $('.assignmentData').blur((e) => {
+            const val = $(e.target).val();
+            const key = $(e.target).attr('id');
+
+            if (_selectedAssignment){
+                _selectedAssignment[key] = val;
+                assignmentController.saveAssignment(_selectedAssignment);
+            }
+        });
+     }
+
     const _display = async () => {
         _assignments = await assignmentController.getAssignments();
 
@@ -343,6 +421,7 @@
         _baseContainer = containers.baseContainer;
 
         _renderAssignmentsDropdownBox();
+        _renderAssignmentInputs();
         _renderTableAndHeader();
     }
 

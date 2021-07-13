@@ -309,6 +309,16 @@
 
     const _createInput = (container, labelAttributes, inputAttributes) => {
         let label = null;
+        let labelInputContainer = container;
+
+        if (inputAttributes.block === true || inputAttributes.block === 'true' || labelAttributes.block === true  || labelAttributes.block === 'true'){
+            labelInputContainer = $(document.createElement('div'))
+                                    .attr('class', 'ts-ui-common-block');
+
+            $(container).append(labelInputContainer);
+        }
+
+        labelAttributes.class = labelAttributes.class ? labelAttributes.class + ' ts-ui-common-label' : 'ts-ui-common-label';
 
         if (labelAttributes){
             label = $(document.createElement('span'))
@@ -320,7 +330,8 @@
                 }
             }
 
-            $(container).append(label);
+
+            $(labelInputContainer).append(label);
         }
 
         let input = null;
@@ -333,6 +344,9 @@
 
                     $(input).append(option);
             }
+        }
+        else if (inputAttributes.type === 'textarea') {
+            input = document.createElement('textarea');
         }
         else {
             input = document.createElement('input');
@@ -349,7 +363,7 @@
             $(input).val(value);
         }
 
-        $(container).append(input);
+        $(labelInputContainer).append(input);
 
         return {label, input};
     }
